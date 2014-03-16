@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/>
+
+    <title>Breeze Edmunds Vehicle API with AngularJs</title>
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="content/reset.css" />
+    <link rel="stylesheet" href="content/toastr.css" />
+    <link rel="stylesheet" href="content/app.css" />
+</head>
+<body data-ng-app="app">
+    <div id="applicationHost" data-ng-controller="EdmundsCtrl" class="ng-cloak">
+        <header>
+            <h2>Edmunds Vehicle API</h2>
+            <a href="http://developer.edmunds.com/docs" target="_blank">Edmunds API Documentation</a>
+        </header>
+
+        <div class="mainbody">
+            <div>
+              <input class="filter" data-ng-model="searchText" type="search" placeholder="Filter by Make ..." />
+            </div>
+            <div data-ng-show="!makes.length" class="make">... loading makes ...</div>
+            <div data-ng-repeat="make in makes | filter:makeFilter" class="make">
+                <input type="checkbox" data-ng-model="make.showModels" data-ng-click="getModels(make)" />
+                {{make.name}}
+                <span data-ng-show="make.isLoading"> ... (loading models)...</span>
+                <table data-ng-show="make.showModels" class="models">
+                    <tr data-ng-repeat="model in make.models | orderBy: 'name'">
+                        <td class="modelName">{{model.name}}</td>
+                        <td class="modelSize">{{model.vehicleSizes}}</td>
+                        <td class="modelStyle">{{model.vehicleStyles}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3rd party libraries -->
+    <script src="scripts/jquery-2.0.3.min.js"></script>
+    <script src="scripts/angular.js"></script>
+    <script src="scripts/breeze.debug.js"></script>
+    <script src="scripts/breeze.angular.js"></script>
+    <script src="scripts/toastr.js"></script>
+
+    <!-- App libraries -->
+    <script src="app/controller.js"></script>
+    <script src="app/datacontext.js"></script>
+    <script src="app/model.js"></script>
+    <script src="app/jsonResultsAdapter.js"></script>
+    <script src="app/logger.js"></script>
+
+</body>
+</html>

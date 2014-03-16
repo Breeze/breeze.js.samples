@@ -1,0 +1,73 @@
+﻿body {
+    background: rgb(232, 232, 232);
+    font-family: "Segoe UI",Arial,Helvetica,sans-serif;
+}
+
+.ng-cloak { display: none; }
+
+#applicationHost {
+    position: absolute;
+    left: 50%;
+    width: 700px;
+    margin-top: 20px;
+    margin-left: -350px;
+    background: white;
+    
+    -o-box-shadow: rgba(0, 0, 0, 0.3) 0px 7px 30px;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.3) 0px 7px 30px;
+    -moz-box-shadow: rgba(0, 0, 0, 0.3) 0px 7px 30px;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 7px 30px;
+    
+    -moz-border-radius: 0 0 6px 6px;
+    -webkit-border-radius: 0 0 6px 6px;
+    border-radius: 0 0 6px 6px;
+}
+
+header {
+    text-align: center;
+}
+
+    header h1, h2 {
+        font-size: 4em;
+        margin: 20px 0;
+        -webkit-text-shadow: rgba(0, 0, 0, .5) 2.5px 2.5px 2px;
+        text-shadow: rgba(0, 0, 0, .5) 2.5px 2.5px 2px;
+    }
+    header h2 { font-size: 2em;}
+    
+    header input {
+        font-size: 3em;
+        margin: 0.25em 0 0.5em 0;
+        padding: 8px;
+    }
+
+.mainbody { margin: 10px; }
+.filter { font-size: 1.5em; margin: 20px;}
+.make   { margin-top: 6px; }
+.models { width: 95%; margin-left: 1.5em; color: #5E5E5F }
+.modelName { width: 25%; padding-right: 4px}
+.modelSize { width: 20%; padding-right: 4px}
+.modelStyle {}
+
+
+@media screen and (max-width: 700px) {
+    #applicationHost {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        left: 0;
+        top: 4px;
+        position: fixed;
+    }
+    
+    header h1 {
+        font-size: 2.5em;
+    }
+    header h2 {
+        font-size: 1.5em;
+    }   
+    header input {
+        font-size: 1.5em;
+        padding: 4px;
+    }
+}
