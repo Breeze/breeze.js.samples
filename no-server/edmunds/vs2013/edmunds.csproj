@@ -43,6 +43,10 @@
   <ItemGroup>
     <Content Include="content\toastr.css.map" />
     <Content Include="scripts\angular.min.js.map" />
+    <Content Include="scripts\breeze.angular.js" />
+    <Content Include="scripts\breeze.debug.js" />
+    <None Include="scripts\breeze.intellisense.js" />
+    <Content Include="scripts\breeze.min.js" />
     <Content Include="scripts\jquery-2.0.3.min.map" />
     <Content Include="scripts\toastr.min.js.map" />
     <None Include="Web.Debug.config">
@@ -66,9 +70,6 @@
     <Content Include="Index.html" />
     <Content Include="scripts\angular.js" />
     <Content Include="scripts\angular.min.js" />
-    <Content Include="scripts\breeze.angular.js" />
-    <Content Include="scripts\breeze.debug.js" />
-    <Content Include="scripts\breeze.min.js" />
     <None Include="scripts\jquery-2.0.3.intellisense.js" />
     <Content Include="scripts\jquery-2.0.3.js" />
     <Content Include="scripts\jquery-2.0.3.min.js" />
@@ -91,7 +92,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>61156</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
@@ -105,6 +106,24 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <PropertyGroup>
+    <PreBuildEvent>
+        IF EXIST "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.debug.js" GOTO breezeSourceExists
+        echo Source breeze.debug.js was not found in '$(ProjectDir)..\..\..\..\breeze.js\build\' and was not copied
+        GOTO :done
+        :breezeSourceExists
+        echo Copying breeze.*.js from '$(ProjectDir)..\..\..\..\breeze.js\build\' to scripts\
+        COPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.min.js" "$(ProjectDir)scripts" /Y
+        COPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.debug.js" "$(ProjectDir)scripts" /Y
+        COPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.intellisense.js" "$(ProjectDir)scripts" /Y
+        COPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.angular.js" "$(ProjectDir)scripts" /Y
+
+        COPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.min.js" "$(ProjectDir)..\scripts" /Y
+        COPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.debug.js" "$(ProjectDir)..\scripts" /Y
+        COPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.intellisense.js" "$(ProjectDir)..\scripts" /Y
+        COPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.angular.js" "$(ProjectDir)..\scripts" /Y
+        :done</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
