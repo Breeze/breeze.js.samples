@@ -8,6 +8,10 @@
 *.old
 *.suo
 
+#In samples we don't commit breeze files; we build them again
+breeze*.js
+breeze*.css
+
 node_modules
 bin
 obj
