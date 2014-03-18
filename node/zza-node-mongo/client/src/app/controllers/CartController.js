@@ -1,0 +1,42 @@
+﻿(function() {
+    'use strict';
+
+    define( [ 'app/services/dataservice', 'app/services/pricing' ], function() {
+
+        function CartController( dataservice, pricing)
+        {
+            var vm = this;
+
+                vm.calc       = calc;
+                vm.cartOrder  = dataservice.cartOrder;
+                vm.removeItem = removeItem;
+
+            // Calculate right away...
+            calc();
+
+            // *********************************************************
+            // Private methods
+            // *********************************************************
+
+            function calc()
+            {
+                var haveItems = $scope.haveItems = cartOrder.orderItems.length;
+                if (haveItems) {
+                    pricing.calcOrderItemsTotal(cartOrder);
+                    vm.someCostMore = pricing.orderHasExtraCostOptions(cartOrder);
+                }
+            }
+
+            function removeItem(orderItem)
+            {
+                //don't need to remove if item is an entity (e.g, SQL version)
+                dataservice.cartOrder.removeItem(orderItem);
+                dataservice.draftOrder.addItem(orderItem);
+                calc();
+            }
+        }
+
+        return [ 'dataservice', 'pricing', CartController];
+    });
+
+})();
