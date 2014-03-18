@@ -7,6 +7,9 @@
 *.testsettings
 *.old
 *.suo
+*.zip
+
+[Tt]humbs.db
 
 #In samples we don't commit breeze files; we build them again
 breeze*.js
@@ -16,9 +19,10 @@ node_modules
 bin
 obj
 packages
-_temp
 Unused
 TestResults
+[V|v]endor
+_temp
 _ReSharper*
 
 GetFtpCredential.ps1
