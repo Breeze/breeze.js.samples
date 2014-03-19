@@ -1,7 +1,7 @@
 ﻿(function() {
     'use strict';
 
-    define( [ 'app/services/dataservice', 'app/services/pricing' ], function() {
+    define( [ ], function() {
 
         function CartController( dataservice, pricing)
         {

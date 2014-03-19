@@ -1,7 +1,7 @@
 ﻿(function( define ) {
     "use strict";
 
-    define( [ 'app/services/routes' ], function() {
+    define( [ ], function() {
 
         function RouteController( $scope, $route, routes )
         {

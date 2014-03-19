@@ -1,7 +1,7 @@
 ﻿(function( define ) {
     "use strict";
 
-    define( [ 'app/services/dataservice', 'app/services/logger' ], function() {
+    define( [ ], function() {
 
             function TestController( $routeParams, dataservice, logger )
             {

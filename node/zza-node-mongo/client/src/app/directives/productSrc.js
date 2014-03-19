@@ -5,7 +5,7 @@
     //  Usage:
     //  <img class="img-polaroid" data-product-src="{{product.image}}" title="{{product.name}}"/>
 
-    define( [ 'app/config' ], function( ) {
+    define( [ ], function( ) {
 
         function productSrc ( config )
         {

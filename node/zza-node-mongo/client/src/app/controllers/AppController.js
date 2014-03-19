@@ -1,18 +1,18 @@
 ﻿(function(define) {
     'use strict';
 
-    define([ 'app/services/logger' ], function() {
+    define([ ], function() {
 
-        function AppController( $scope, logger )
+        function AppController( $rootScope, logger )
         {
             var vm = this;
 
-                vm.name = "app";
+            vm.name = "app";
 
-                $scope.$on('$routeChangeStart',   onStart_RouteChange);
-                $scope.$on('$routeChangeSuccess', onSuccess_RouteChange);
-                $scope.$on('$routeChangeError',   onError_RouteChange);
-                $scope.$on('$routeUpdate',        onUpdate_RouteChange );
+            $rootScope.$on('$routeChangeStart',   onStart_RouteChange);
+            $rootScope.$on('$routeChangeSuccess', onSuccess_RouteChange);
+            $rootScope.$on('$routeChangeError',   onError_RouteChange);
+            $rootScope.$on('$routeUpdate',        onUpdate_RouteChange );
 
 
             // *********************************************************

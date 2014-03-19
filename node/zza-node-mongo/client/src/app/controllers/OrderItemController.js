@@ -1,7 +1,7 @@
 ﻿(function( define ) {
     "use strict";
 
-    define( [ 'app/services/util', 'app/services/dataservice' ], function() {
+    define( [ ], function() {
 
             function OrderItemController( $routeParams, $location, dataservice, util )
             {

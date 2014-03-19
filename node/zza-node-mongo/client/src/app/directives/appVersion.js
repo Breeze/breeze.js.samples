@@ -1,7 +1,7 @@
 (function( define ) {
     "use strict";
 
-    define( [ 'app/config' ], function( ) {
+    define( [  ], function( ) {
 
         function appVersion ( config )
         {
