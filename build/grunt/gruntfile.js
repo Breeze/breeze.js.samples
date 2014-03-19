@@ -45,18 +45,6 @@ module.exports = function(grunt) {
   var sampleSolutionFileNames = grunt.file.expand('../../**/*.sln');
   
   var sampleDirs = grunt.file.expand(['../../net/*/', '../../no-server/*/', '../../node/*/']);
-  grunt.log.writeln('SampleDirs ');
-  grunt.log.writeln('---------- ');
-  sampleDirs.forEach(function(fn) {
-     grunt.log.writeln( '    ' + fn);
-  });
-  
-  sampleDirs.forEach(function(dir) {
-     grunt.log.writeln('Dir: ' + dir);
-     grunt.log.writeln('Relative: ' + path.relative('../../', dir));
-  });
-  
-  
  
   var versionNum = getBreezeVersion();
   var zipFileName = '../breeze-runtime-' + versionNum + '.zip';
@@ -114,16 +102,9 @@ module.exports = function(grunt) {
         ]
       },
       netDlls: {
-        files: [
-          { expand: true, cwd: serverNetDir + 'Breeze.WebApi', src: ['Breeze.WebApi.dll'], dest: tempDir + 'NetDlls'},
-          { expand: true, cwd: serverNetDir + 'Breeze.WebApi.EF', src: ['Breeze.WebApi.EF.dll'], dest: tempDir + 'NetDlls'},
-          { expand: true, cwd: serverNetDir + 'Breeze.WebApi.NH', src: ['Breeze.WebApi.NH.dll'], dest: tempDir + 'NetDlls'},
-          
-          { expand: true, cwd: serverNetDir + 'Breeze.WebApi2', src: ['Breeze.WebApi2.dll'], dest: tempDir + 'NetDlls'},
-          { expand: true, cwd: serverNetDir + 'Breeze.ContextProvider', src: ['Breeze.ContextProvider.dll'], dest: tempDir + 'NetDlls'},
-          { expand: true, cwd: serverNetDir + 'ContextProvider.EF6', src: ['Breeze.ContextProvider.EF6.dll'], dest: tempDir + 'NetDlls'},
-          { expand: true, cwd: serverNetDir + 'Breeze.ContextProvider.NH', src: ['Breeze.ContextProvider.NH.dll'], dest: tempDir + 'NetDlls'},
-        ]
+        files: breezeDlls.map(function(dllName) {
+           return buildDllCopyCmd(dllName);
+        })
       },  
       
       samples: {
@@ -133,7 +114,7 @@ module.exports = function(grunt) {
       },
       
       readMe: {
-        files: [{ expand: true, cwd: serverNetDir + 'Nuget.builds', src: ['readme.txt'], dest: tempDir + 'NetDlls'}],
+        files: [{ expand: true, src: ['readme.txt'], dest: tempDir }],
       }
     },
     
@@ -238,6 +219,18 @@ module.exports = function(grunt) {
     }
     return cmd;
   }
+  
+  function buildDllCopyCmd(dllName) {
+
+    var cmd = { 
+      expand: true, 
+      cwd: serverNetDir + dllName,
+      src: [ dllName + '.dll' ],
+      dest: tempDir + 'NetDlls',
+    }
+    return cmd;
+  }
+   
   
   function execNugetInstall(solutionFileName, config ) {
     
