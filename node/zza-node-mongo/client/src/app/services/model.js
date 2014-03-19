@@ -10,14 +10,14 @@
  * This enrichment takes place once the metadata become available.
  * See `configureMetadataStore()`
  */
-(function() {
+(function(angular) {
     'use strict';
-angular.module("app").factory( 'metadata', factory(breeze) );
+    angular.module("app").factory( 'model', factory );
 
-    function factory(breeze, util) {
+    function factory(breeze, metadata, util) {
 
         var model = {
-            configureMetadataStore: configureMetadataStore,
+            addToMetadataStore:addToMetadataStore,
             Customer: Customer,
             Order: Order
         };
@@ -34,14 +34,18 @@ angular.module("app").factory( 'metadata', factory(breeze) );
         function Product() {}
         function ProductOption(){ }
 
-        // Enrich the types with  add/remove methods,
-        // property aliases, and sub-document navigation properties that can't be
-        // represented (yet) in Breeze metadata.
+        // Fill metadataStore with metadata, then enrich the types
+        // with add/remove methods, property aliases, and sub-document navigation properties
+        // that can't be represented (yet) in Breeze metadata.
         // See OrderItem.product for an example of such a "synthetic" navigation property
-        function configureMetadataStore(metadataStore) {
+        function addToMetadataStore(metadataStore) {
+
             var orderItemType, orderItemOptionType;
             var getEntityById = util.getEntityByIdFromObj;
             var registerType = metadataStore.registerEntityTypeCtor.bind(metadataStore);
+
+            // Stringify metadata before importing (Breeze CSDL-metadata-format 'bug')
+            metadataStore.importMetadata(JSON.stringify( metadata ));
 
             registerCustomer();
             registerOrder();
