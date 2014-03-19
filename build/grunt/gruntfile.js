@@ -15,6 +15,8 @@ module.exports = function(grunt) {
   
   var serverNetDir = '../../../Breeze.server.net/';
   
+  var tempDir = '../_temp/';
+  
   var tempPaths = [
      'bin','obj', 'packages','*_Resharper*','*.suo','*.temp.*'
   ];
@@ -42,7 +44,19 @@ module.exports = function(grunt) {
   
   var sampleSolutionFileNames = grunt.file.expand('../../**/*.sln');
   
-  var tempDir = '../_temp/';
+  var sampleDirs = grunt.file.expand(['../../net/*/', '../../no-server/*/', '../../node/*/']);
+  grunt.log.writeln('SampleDirs ');
+  grunt.log.writeln('---------- ');
+  sampleDirs.forEach(function(fn) {
+     grunt.log.writeln( '    ' + fn);
+  });
+  
+  sampleDirs.forEach(function(dir) {
+     grunt.log.writeln('Dir: ' + dir);
+     grunt.log.writeln('Relative: ' + path.relative('../../', dir));
+  });
+  
+  
  
   var versionNum = getBreezeVersion();
   var zipFileName = '../breeze-runtime-' + versionNum + '.zip';
@@ -71,7 +85,7 @@ module.exports = function(grunt) {
     clean: {
       options: {
         // uncomment to test
-        "no-write": true,
+        // "no-write": true,
         force: true,
       },
       
@@ -108,17 +122,14 @@ module.exports = function(grunt) {
           { expand: true, cwd: serverNetDir + 'Breeze.ContextProvider.NH', src: ['Breeze.ContextProvider.NH.dll'], dest: tempDir + 'Server'},
           
           { expand: true, cwd: serverNetDir + 'Nuget.builds', src: ['readme.txt'], dest: tempDir },
-          buildSampleCopy('../', tempDir , 'DocCode', ['**/Todos.sdf']),
-          buildSampleCopy('../', tempDir , 'ToDo', ['**/*.sdf']),
-          buildSampleCopy('../', tempDir , 'ToDo-Angular', ['**/*.sdf']),
-          buildSampleCopy('../', tempDir , 'ToDo-Require', ['**/*.sdf']),
-          buildSampleCopy('../', tempDir , 'NoDb'),
-          buildSampleCopy('../', tempDir , 'Edmunds'),
-          buildSampleCopy('../', tempDir , 'TempHire'),
-          buildSampleCopy('../', tempDir , 'CarBones', ['**/*.mdf', '**/*.ldf']),
-          buildSampleCopy('../', tempDir , 'ODataBreezeJsSample')
+          
         ]
       },  
+      samples: {
+        files: sampleDirs.map(function(dir) {
+            return buildSampleCopyCmd(dir, tempDir);
+          })
+      },
     },
     
     compress: {
@@ -180,7 +191,7 @@ module.exports = function(grunt) {
   grunt.registerTask('buildRelease', 
    [ 'nugetSolutionUpdate:samples', 'clean:samples', 'msBuild:samples']);
   grunt.registerTask('packageRelease', 
-   [ 'clean:samples', 'copy:preZip', 'compress']);    
+   [ 'clean:samples', 'copy:samples', 'compress']);    
     
   grunt.registerTask('default', ['buildRelease', 'packageRelease']);
     
@@ -209,18 +220,16 @@ module.exports = function(grunt) {
   }
   
  
-  function buildSampleCopy(srcRoot, destRoot, sampleName, patternsToExclude) {
+  function buildSampleCopyCmd(srcRoot, destRoot) {
+    // var baseName = path.basename(srcRoot);
+    var destPath = path.relative('../../', srcRoot);
     var files = ['**/*', '**/.nuget/*'];
-    if (patternsToExclude) {
-      patternsToExclude.forEach(function(pattern) {   
-        files.push('!' + pattern);
-      });
-    }
+
     var cmd = { 
       expand: true, 
-      cwd: srcRoot + 'Samples/' + sampleName, 
+      cwd: srcRoot , 
       src: files,
-      dest: destRoot + 'Samples/' + sampleName,
+      dest: destRoot + destPath,
     }
     return cmd;
   }
