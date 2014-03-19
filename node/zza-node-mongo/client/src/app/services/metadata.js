@@ -2,23 +2,15 @@
     'use strict';
 
     angular.module("app", [ ])
-        .constant( 'metadata', metadata() );
+        .factory( 'metadata', metadata(breeze) );
 
         // **************************************
         // Private construction function
         // **************************************
 
-        function metadata( )
+        function metadata(breeze)
         {
             return {
-                "dataServices":[
-                    {
-                        "serviceName":"breeze/zza/",
-                        "hasServerMetadata":true,
-                        "jsonResultsAdapter":"webApi_default",
-                        "useJsonp":false
-                    }
-                ],
                 "structuralTypes":[
                     {
                         "shortName":"Address",
