@@ -5,15 +5,9 @@
 
         function entityManagerFactory( breeze, metadata, config, model )
         {
+            configureBreezeForThisApp();
             var serviceName = config.serviceName;
             var metadataStore = getMetadataStore();
-
-            // configure Breeze for this app
-            breeze.config.initializeAdapterInstance("dataService", "mongo", true);
-
-            initBreezeAjaxAdapter(config.userSessionId);
-            setNamingConvention();
-
 
             return {
                 newManager: newManager
@@ -26,16 +20,11 @@
             function getMetadataStore() {
                 var store = new breeze.MetadataStore();
 
-                // Import metadata that were downloaded as a script file
-                if (! metadata )   {
-                    throw new Error("'metadata' is not defined; was metadata.js loaded?");
-                }
                 // Because of Breeze bug, must stringify metadata first.
                 store.importMetadata(JSON.stringify( metadata ));
 
-                // Associate these metadata data with the service
-                // if not already associated
-                if (!store.hasMetadataFor(serviceName))   {
+                // Associate these metadata data with this Node service
+                if (!store.hasMetadataFor(serviceName))   { //if not already associated
                     store.addDataService(
                         new breeze.DataService({ serviceName: serviceName }));
                 }
@@ -54,6 +43,11 @@
                 return mgr;
             }
 
+            function configureBreezeForThisApp() {
+                breeze.config.initializeAdapterInstance("dataService", "mongo", true);
+                initBreezeAjaxAdapter(config.userSessionId);
+                setNamingConvention();
+            }
 
             function initBreezeAjaxAdapter(userSessionId) {
                 // get the current default Breeze AJAX adapter
