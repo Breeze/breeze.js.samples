@@ -1,10 +1,9 @@
     /**
      * Module Imports
      */
-var Q        = require( 'q'                  ),
-    bmongo   = require( 'breeze-mongodb'     ),
-    database = require( './mongo/connection' ),
-    zza      = require( './metadata/metadata'),
+var Q          = require( 'q'                  )
+    , bmongo   = require( 'breeze-mongodb')
+    , database = require( './connection' )
 
     BreezeServices = function( db )
     {
@@ -112,7 +111,10 @@ var Q        = require( 'q'                  ),
 
             onRequest_getMetadata = function (req, res, next)
             {
-                res.send( zza.metadata );
+                next({
+                    statusCode: 404,
+                    message: "No metadata from the server; metadata is defined on the client"
+                });
             },
 
             onRequest_saveChanges = function( req, res, next )
