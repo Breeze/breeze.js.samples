@@ -88,7 +88,7 @@ module.exports = function(grunt) {
         // "no-write": true,
         force: true,
       },
-      
+      tempDir: tempDir,
       samples:  join( ['../../**/'], tempPaths),
     },
     
@@ -100,36 +100,41 @@ module.exports = function(grunt) {
     },
     
     copy: {
-      preZip: {
+      jsClient: {
         files: [ 
-          { expand: true, cwd: jsBuildDir, src: ['breeze*.js'], dest: tempDir },
+          { expand: true, cwd: jsBuildDir, src: ['breeze*.js'], dest: tempDir + 'Scripts'},
           { expand: true, cwd: jsSrcDir, src: ['b??_breeze.**js'], dest: tempDir + 'Scripts/Adapters/', 
             rename: function(dest, src) {
               return dest + 'breeze' + src.substring(src.indexOf('.'));
             }
           },
           { expand: true, cwd: qDir , src: ['q.**js'], dest: tempDir + 'Scripts' },
-          { expand: true, cwd: tsSrcDir, src: ['breeze.d.ts'], dest: tempDir },
-          { expand: true, cwd: metadataDir, src: ['*.*'], dest: tempDir },
+          { expand: true, cwd: tsSrcDir, src: ['breeze.d.ts'], dest: tempDir + 'Typescript'},
+          { expand: true, cwd: metadataDir, src: ['*.*'], dest: tempDir + 'MetadataSchema' },
+        ]
+      },
+      netDlls: {
+        files: [
+          { expand: true, cwd: serverNetDir + 'Breeze.WebApi', src: ['Breeze.WebApi.dll'], dest: tempDir + 'NetDlls'},
+          { expand: true, cwd: serverNetDir + 'Breeze.WebApi.EF', src: ['Breeze.WebApi.EF.dll'], dest: tempDir + 'NetDlls'},
+          { expand: true, cwd: serverNetDir + 'Breeze.WebApi.NH', src: ['Breeze.WebApi.NH.dll'], dest: tempDir + 'NetDlls'},
           
-          { expand: true, cwd: serverNetDir + 'Breeze.WebApi', src: ['Breeze.WebApi.dll'], dest: tempDir + 'Server'},
-          { expand: true, cwd: serverNetDir + 'Breeze.WebApi.EF', src: ['Breeze.WebApi.EF.dll'], dest: tempDir + 'Server'},
-          { expand: true, cwd: serverNetDir + 'Breeze.WebApi.NH', src: ['Breeze.WebApi.NH.dll'], dest: tempDir + 'Server'},
-          
-          { expand: true, cwd: serverNetDir + 'Breeze.WebApi2', src: ['Breeze.WebApi2.dll'], dest: tempDir + 'Server'},
-          { expand: true, cwd: serverNetDir + 'Breeze.ContextProvider', src: ['Breeze.ContextProvider.dll'], dest: tempDir + 'Server'},
-          { expand: true, cwd: serverNetDir + 'ContextProvider.EF6', src: ['Breeze.ContextProvider.EF6.dll'], dest: tempDir + 'Server'},
-          { expand: true, cwd: serverNetDir + 'Breeze.ContextProvider.NH', src: ['Breeze.ContextProvider.NH.dll'], dest: tempDir + 'Server'},
-          
-          { expand: true, cwd: serverNetDir + 'Nuget.builds', src: ['readme.txt'], dest: tempDir },
-          
+          { expand: true, cwd: serverNetDir + 'Breeze.WebApi2', src: ['Breeze.WebApi2.dll'], dest: tempDir + 'NetDlls'},
+          { expand: true, cwd: serverNetDir + 'Breeze.ContextProvider', src: ['Breeze.ContextProvider.dll'], dest: tempDir + 'NetDlls'},
+          { expand: true, cwd: serverNetDir + 'ContextProvider.EF6', src: ['Breeze.ContextProvider.EF6.dll'], dest: tempDir + 'NetDlls'},
+          { expand: true, cwd: serverNetDir + 'Breeze.ContextProvider.NH', src: ['Breeze.ContextProvider.NH.dll'], dest: tempDir + 'NetDlls'},
         ]
       },  
+      
       samples: {
         files: sampleDirs.map(function(dir) {
             return buildSampleCopyCmd(dir, tempDir);
           })
       },
+      
+      readMe: {
+        files: [{ expand: true, cwd: serverNetDir + 'Nuget.builds', src: ['readme.txt'], dest: tempDir + 'NetDlls'}],
+      }
     },
     
     compress: {
@@ -189,9 +194,9 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('buildRelease', 
-   [ 'nugetSolutionUpdate:samples', 'clean:samples', 'msBuild:samples']);
+   [ 'nugetSolutionUpdate:samples', 'msBuild:samples']);
   grunt.registerTask('packageRelease', 
-   [ 'clean:samples', 'copy:samples', 'compress']);    
+   [ 'clean', 'copy', 'compress']);    
     
   grunt.registerTask('default', ['buildRelease', 'packageRelease']);
     
@@ -229,7 +234,7 @@ module.exports = function(grunt) {
       expand: true, 
       cwd: srcRoot , 
       src: files,
-      dest: destRoot + destPath,
+      dest: destRoot + "Samples/" + destPath,
     }
     return cmd;
   }
