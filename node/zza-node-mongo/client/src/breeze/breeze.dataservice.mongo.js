@@ -9,7 +9,7 @@
         define(["breeze"], factory);
     }
 }(function(breeze) {
-
+       
     var core = breeze.core;
 
     var MetadataStore = breeze.MetadataStore;
@@ -20,8 +20,8 @@
     var ajaxImpl;
 
     function fmtOData(val) {
-        return val == null ? null : "'" + val + "'" ;
-    }
+        return val == null ? null : "'" + val + "'" ; 
+    } 
 
     function getNextObjectId() {
         return new ObjectId().toString();
@@ -37,13 +37,13 @@
     };
 
     ctor.prototype = new AbstractDataServiceAdapter();
-
+    
     ctor.prototype._prepareSaveBundle = function(saveBundle, saveContext) {
         var em = saveContext.entityManager;
         var metadataStore = em.metadataStore;
         var helper = em.helper;
         var metadata = {};
-
+        
         saveBundle.entities = saveBundle.entities.map(function (e) {
             var rawEntity = helper.unwrapInstance(e);
             var entityTypeName = e.entityType.name;
@@ -87,7 +87,7 @@
     };
 
     ctor.prototype._prepareSaveResult = function (saveContext, data) {
-
+        
         var em = saveContext.entityManager;
         var keys = data.insertedKeys.concat(data.updatedKeys, data.deletedKeys);
         var entities = [];
@@ -122,20 +122,20 @@
     });
 
     /*
-     *
-     * Copyright (c) 2011 Justin Dearing (zippy1981@gmail.com)
-     * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
-     * and GPL (http://www.opensource.org/licenses/gpl-license.php) version 2 licenses.
-     * This software is not distributed under version 3 or later of the GPL.
-     *
-     * Version 1.0.0
-     *
-     */
+    *
+    * Copyright (c) 2011 Justin Dearing (zippy1981@gmail.com)
+    * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
+    * and GPL (http://www.opensource.org/licenses/gpl-license.php) version 2 licenses.
+    * This software is not distributed under version 3 or later of the GPL.
+    *
+    * Version 1.0.0
+    *
+    */
 
     /*
      * Javascript class that mimics how WCF serializes a object of type MongoDB.Bson.ObjectId
      * and converts between that format and the standard 24 character representation.
-     */
+    */
     if (this.document) {
         var ObjectId = (function () {
             var increment = 0;
@@ -177,9 +177,9 @@
                 }
                 else if (typeof (arguments[0]) == 'string' && arguments[0].length == 24) {
                     this.timestamp = Number('0x' + arguments[0].substr(0, 8)),
-                        this.machine = Number('0x' + arguments[0].substr(8, 6)),
-                        this.pid = Number('0x' + arguments[0].substr(14, 4)),
-                        this.increment = Number('0x' + arguments[0].substr(18, 6))
+                    this.machine = Number('0x' + arguments[0].substr(8, 6)),
+                    this.pid = Number('0x' + arguments[0].substr(14, 4)),
+                    this.increment = Number('0x' + arguments[0].substr(18, 6))
                 }
                 else if (arguments.length == 4 && arguments[0] != null) {
                     this.timestamp = arguments[0];
@@ -205,20 +205,20 @@
         };
 
         /*
-         * Turns a WCF representation of a BSON ObjectId into a 24 character string representation.
-         */
+        * Turns a WCF representation of a BSON ObjectId into a 24 character string representation.
+        */
         ObjectId.prototype.toString = function () {
             var timestamp = this.timestamp.toString(16);
             var machine = this.machine.toString(16);
             var pid = this.pid.toString(16);
             var increment = this.increment.toString(16);
             return '00000000'.substr(0, 6 - timestamp.length) + timestamp +
-                '000000'.substr(0, 6 - machine.length) + machine +
-                '0000'.substr(0, 4 - pid.length) + pid +
-                '000000'.substr(0, 6 - increment.length) + increment;
+                   '000000'.substr(0, 6 - machine.length) + machine +
+                   '0000'.substr(0, 4 - pid.length) + pid +
+                   '000000'.substr(0, 6 - increment.length) + increment;
         }
     }
-
+    
     breeze.config.registerAdapter("dataService", ctor);
 
 }));
