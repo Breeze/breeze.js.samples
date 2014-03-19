@@ -16,7 +16,7 @@ module.exports = function(grunt) {
   var serverNetDir = '../../../Breeze.server.net/';
   
   var tempPaths = [
-     'bin','obj', 'packages','*_Resharper*','*.suo'
+     'bin','obj', 'packages','*_Resharper*','*.suo','*.temp.*'
   ];
   
   var nugetPackageNames = [
