@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/>
+
+    <title>Breeze Todos with AngularJs</title>
+    <link rel="stylesheet" href="Content/reset.css" />
+    <link rel="stylesheet" href="Content/toastr.css" />
+    <link rel="stylesheet" href="Content/todo.css" />
+</head>
+<body>
+
+    <div id="applicationHost" class="ng-cloak"
+         data-ng-app="app"
+         data-ng-controller="TodoController as vm">
+        <header>
+            <h1>Breeze Todos</h1><h2>with AngularJs</h2>
+            <form data-ng-submit="vm.addItem()">
+                <input type="text"
+                       data-ng-model="vm.newTodoDescription"
+                       placeholder="What needs to be done?" />
+            </form>
+        </header>
+
+        <section>
+            <div class="mark-all">
+                <span data-ng-show="vm.items.length">
+                    <input id="markAll" type="checkbox" 
+                           data-ng-model="vm.allCompleted" 
+                           data-ng-click="vm.toggleCompleted()" />
+                    <label for="markAll">Mark all as complete </label>
+                </span>
+
+                <input id="includeArchived" type="checkbox" 
+                       data-ng-model="vm.includeArchived" 
+                       data-ng-click="vm.getTodos()" />
+                <label for="includeArchived" class="archived">Show archived</label>
+            </div>
+            <div>
+                <input type="search" placeholder="Filter by name ..."
+                       data-ng-model="vm.itemFilterText" />
+            </div>
+            <ul>
+                <li data-ng-repeat="item in vm.items | filter:vm.itemFilter">
+
+                    <!-- Readonly View -->
+                    <div data-ng-hide="vm.isEditing(item)">
+                        <input type="checkbox"
+                               data-ng-model="item.IsDone"
+                               data-ng-class="{done: item.IsDone}" />
+                        <label data-ng-click="vm.editBegin(item)"
+                               data-ng-class="{done: item.IsDone, archived: item.IsArchived}">
+                            {{item.Description}}
+                        </label>
+                        <a href="#" data-ng-click="vm.deleteItem(item)">X</a>
+                    </div>
+
+                    <!-- Editing View -->
+                    <div data-ng-show="vm.isEditing(item)">
+                        <form data-ng-submit="vm.editEnd()">
+                            <input type="text" autofocus
+                                   data-ng-model="item.Description"
+                                   data-ng-blur="vm.editEnd()"
+                                   data-ng-mouseout="vm.editEnd()" />
+                        </form>
+                    </div>
+                </li>
+
+            </ul>
+
+            <div class="controlLinks">
+                <a href="#" data-ng-click="vm.purge()">Purge</a>&nbsp;&nbsp;
+                <a href="#" data-ng-click="vm.reset()">Reset</a>
+            </div>
+        </section>
+
+        <footer>
+            <div data-ng-show="vm.itemsLeftMessage()">{{vm.itemsLeftMessage()}}</div>
+            <a href="#"
+               data-ng-show="vm.archiveCompletedMessage()"
+               data-ng-click="vm.archiveCompletedItems()">{{vm.archiveCompletedMessage()}}</a>
+        </footer>
+
+    </div>
+
+    <!-- 3rd party libraries -->
+    <script src="Scripts/angular.js"></script>
+    <script src="Scripts/jquery-1.8.3.min.js"></script>
+    <!-- Q is needed by breeze.savequeuing, not by Breeze-->
+    <script src="Scripts/q.min.js"></script>
+    <script src="Scripts/breeze.debug.js"></script>
+    <script src="Scripts/breeze.angular.js"></script>
+    <script src="Scripts/breeze.savequeuing.js"></script>
+    <script src="Scripts/toastr.js"></script>
+
+    <!-- App libraries -->
+    <script src="app/main.js"></script>
+    <script src="app/logger.js"></script>
+    <script src="app/dataservice.js"></script>
+    <script src="app/controller.js"></script>
+
+</body>
+</html>
