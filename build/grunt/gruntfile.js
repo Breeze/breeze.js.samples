@@ -9,7 +9,7 @@ module.exports = function(grunt) {
   
   var jsBuildDir  = breezeJsDir + 'build/';
   var jsSrcDir    = breezeJsDir + 'src/';
-  var tsSrcDir    = breezeJsDir + 'typescript/';
+  var tsSrcDir    = breezeJsDir + 'typescript/typescript';
   var qDir        = breezeJsDir + 'test/vendor/';
   var metadataDir = breezeJsDir + 'docs/metadata/';
   
@@ -97,8 +97,8 @@ module.exports = function(grunt) {
             }
           },
           { expand: true, cwd: qDir , src: ['q.**js'], dest: tempDir + 'Scripts' },
-          { expand: true, cwd: tsSrcDir, src: ['breeze.d.ts'], dest: tempDir + 'Typescript'},
-          { expand: true, cwd: metadataDir, src: ['*.*'], dest: tempDir + 'MetadataSchema' },
+          { expand: true, cwd: tsSrcDir, src: ['*.d.ts'], dest: tempDir + 'Typescript'},
+          { expand: true, cwd: metadataDir, src: ['*.*'], dest: tempDir + 'Scripts/Metadata' },
         ]
       },
       netDlls: {
