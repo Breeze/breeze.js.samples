@@ -1,9 +1,14 @@
-﻿(function( define ) {
-    "use strict";
+﻿(function(angular) {
+    'use strict';
 
-    define( [ ], function( ) {
+    angular.module( "app" )
+           .factory( 'config', configuration );
 
-        function config( environment )
+        // **************************************
+        // Private construction function
+        // **************************************
+
+        function configuration( environment )
         {
             return {
                 version             : '0.5.0',
@@ -17,8 +22,5 @@
             };
         };
 
-        // Register an annotated construction function
-        return [ 'environment', config ];
-    });
 
-}( this.define ));
+}( this.angular ));

@@ -1,11 +1,13 @@
-(function( define ) {
-    "use strict";
+(function(angular) {
+    'use strict';
 
-    // Prefix product images with the image basepath
-    //  Usage:
-    //  <img class="img-polaroid" data-product-src="{{product.image}}" title="{{product.name}}"/>
+   angular.module( "app" )
+        .directive( 'productSrc', productSrc );
 
-    define( [ ], function( ) {
+
+        // Prefix product images with the image basepath
+        //  Usage:
+        //  <img class="img-polaroid" data-product-src="{{product.image}}" title="{{product.name}}"/>
 
         function productSrc ( config )
         {
@@ -25,7 +27,4 @@
             };
         };
 
-        return [ 'config', productSrc ];
-    });
-
-}( this.define ));
+}( this.angular ));

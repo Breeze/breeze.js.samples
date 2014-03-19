@@ -1,7 +1,14 @@
 (function( define ) {
     "use strict";
 
-    define( [ ], function( ) {
+
+   angular.module( "app" )
+           .value( 'routeMap', buildRouteMap );
+
+
+    // **************************************
+    // Private construction function
+    // **************************************
 
         const views = {
             HOME        : "./src/app/views/home.html",
@@ -55,73 +62,5 @@
             };
         };
 
-        /**
-         * Build a <xxx>Provider so Routing can be injected into a config()...
-         * @constructor
-         */
-        function RouteMapProvider()
-        {
-            this.$get = function()
-            {
-                var map = buildRouteMap()
-                return updateRouteResolvers( map );
-            }
-        }
 
-        // Register an annotated construction function
-        return RouteMapProvider;
-    });
-
-
-    // ******************************************************
-    // Private Methods
-    // ******************************************************
-
-
-    /**
-     * For each route, lookup to see if a special `resolve` function should be
-     * prepared
-     * @param map
-     * @returns {*}
-     */
-    function updateRouteResolvers( map )
-    {
-        map.routes.forEach( function( route )
-        {
-            var item = map.routesToResolve[ route.controller ];
-            if ( item )
-            {
-                route.resolve = buildResolver( item );
-            }
-        });
-
-        delete map.routesToResolve;
-        return map;
-    }
-
-    /**
-     * Build a resolve function that initializes the dataservice
-     * for the controller/route
-     */
-    function buildResolver( info )
-    {
-        if ( info && info.dataServiceInit )
-        {
-            // replace `true` with the dataServiceInit function.
-            info.dataServiceInit = ['dataservice', 'logger', initializeDataservice ];
-        }
-
-        return info;
-    }
-
-    /**
-     * Use the injected dataservice to resolve() dataservice `ready` for route changes
-     * @returns {*}
-     */
-    function initializeDataservice( dataservice, logger)
-    {
-        logger.log(controllerName + " is waiting for dataservice init");
-        return dataservice.initialize();
-    }
-
-}( this.define ));
+}( this.angular ));

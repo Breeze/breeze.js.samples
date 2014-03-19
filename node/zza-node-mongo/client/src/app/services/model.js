@@ -1,11 +1,16 @@
-(function() {
+(function(angular) {
     'use strict';
 
-    /**
-     * Mongo-oriented version of model.js
-     */
-    define( [ ], function() {
+   angular.module( "app" )
+        .factory( 'model', model );
 
+        // **************************************
+        // Private construction function
+        // **************************************
+
+        /**
+         * Mongo-oriented version of model.js
+         */
         function model(breeze, util) {
 
             var orderItemType, orderItemOptionType;
@@ -248,7 +253,4 @@
             }
         }
 
-        return [ 'breeze', 'util', model ];
-    });
-
-})(this.define);
+})(this.angular);

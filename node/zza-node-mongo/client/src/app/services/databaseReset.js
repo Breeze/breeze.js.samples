@@ -1,7 +1,12 @@
-﻿(function( define ) {
-    "use strict";
+﻿(function(angular) {
+    'use strict';
 
-    define( [ ], function( ) {
+   angular.module( "app" )
+        .factory( 'databaseReset', dbReset );
+
+        // **************************************
+        // Private construction function
+        // **************************************
 
         function dbReset ( $http, config )
         {
@@ -49,8 +54,5 @@
 
         };
 
-        // Register as global constructor function
-        return ['$http', 'config', dbReset ];
-    });
 
-}( this.define ));
+}( this.angular ));

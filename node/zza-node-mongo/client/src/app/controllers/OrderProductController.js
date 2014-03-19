@@ -1,9 +1,14 @@
-﻿(function( define ) {
-    "use strict";
+﻿(function(angular) {
+    'use strict';
 
-    define( [ ], function() {
+   angular.module( "app" )
+        .controller( 'orderProductController', orderProductController );
 
-            function OrderProductController( $routeParams, routes, dataservice )
+            // **************************************
+            // Private construction function
+            // **************************************
+
+            function orderProductController( $routeParams, routes, dataservice )
             {
                 var route = getTaggedRoute();
                 var tag   = route.tag;
@@ -43,8 +48,5 @@
                 }
             };
 
-        // Register as global constructor function
-        return [ '$routeParams', 'routes', 'dataservice', OrderProductController ];
-    });
 
-}( this.define ));
+}( this.angular ));

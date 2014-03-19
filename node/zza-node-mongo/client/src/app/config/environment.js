@@ -1,7 +1,12 @@
-﻿(function( define ) {
-    "use strict";
+﻿(function(angular) {
+    'use strict';
 
-    define( [ ], function( ) {
+    angular.module( "app" )
+        .constant( 'environment', environment() );
+
+        // **************************************
+        // Private construction function
+        // **************************************
 
         function environment( )
         {
@@ -12,8 +17,5 @@
             };
         };
 
-        // Register an annotated construction function
-        return [ environment ];
-    });
 
-}( this.define ));
+}( this.angular ));

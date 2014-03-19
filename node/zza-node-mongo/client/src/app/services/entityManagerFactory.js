@@ -1,7 +1,12 @@
-﻿(function( define ) {
-    "use strict";
+﻿(function(angular) {
+    'use strict';
 
-    define( [ ], function( ) {
+   angular.module( "app" )
+        .factory( 'entityManagerFactory', entityManagerFactory );
+
+        // **************************************
+        // Private construction function
+        // **************************************
 
         function entityManagerFactory( breeze, metadata, config, model )
         {
@@ -89,9 +94,5 @@
             }
         };
 
-        // Register as global constructor function
-        return [ 'breeze', 'metadata', 'config', 'model', entityManagerFactory ];
 
-    });
-
-}( this.define ));
+}( this.angular ));

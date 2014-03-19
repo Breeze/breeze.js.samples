@@ -1,10 +1,17 @@
-﻿(function(define) {
+﻿(function(angular) {
     'use strict';
 
-    define([ ], function() {
+    angular.module( "app" )
+        .controller( "appController", appController );
 
-        function AppController( $rootScope, logger )
+        // **************************************
+        // Private construction function
+        // **************************************
+
+        function appController( $rootScope, logger )
         {
+            logger.info("appController");
+
             var vm = this;
 
             vm.name = "app";
@@ -41,7 +48,4 @@
             }
         }
 
-        return [ '$scope', 'logger', AppController ];
-    });
-
-})(this.define);
+})(this.angular);

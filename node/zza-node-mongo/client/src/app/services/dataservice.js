@@ -1,9 +1,13 @@
-﻿(function( define ) {
-    "use strict";
+﻿(function(angular) {
+    'use strict';
 
-    define( [ ], function( ) {
+   angular.module( "app" )
+        .factory( 'dataservice', dataservice );
 
-        //  Construction function
+        // **************************************
+        // Private construction function
+        // **************************************
+
         function dataservice( breeze, entityManagerFactory, model, util ) {
 
             var config   = util.config,
@@ -191,8 +195,5 @@
 
         };
 
-        // Register as global constructor function
-        return [ 'breeze', 'entityManagerFactory', 'model', 'util', dataservice ];
-    });
 
-}( this.define ));
+}( this.angular ));

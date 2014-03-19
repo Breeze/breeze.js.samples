@@ -1,15 +1,14 @@
-﻿/**
- *
- *  This DashboardController module uses RequireJS to `define` a AngularJS constructor function
- *  with its dependencies.
- *
- */
-(function( define ) {
-    "use strict";
+﻿(function(angular) {
+    'use strict';
 
-    define( [ ], function( ) {
+    angular.module( "app" )
+           .controller( 'dashboardController', dashboardController );
 
-        function DashboardController( routes, dataservice )
+        // **************************************
+        // Private construction function
+        // **************************************
+
+        function dashboardController( routes, dataservice )
         {
             var vm = this;
 
@@ -18,10 +17,7 @@
                 vm.draftOrder   = dataservice.draftOrder;
         };
 
-        // Register as global constructor function
-        return [ 'routes', 'dataservice', DashboardController ];
 
-    });
 
-}( this.define ));
+}( this.angular ));
 

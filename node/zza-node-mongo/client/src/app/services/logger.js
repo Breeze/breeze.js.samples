@@ -1,14 +1,19 @@
-﻿(function( define ) {
-    "use strict";
+﻿(function(angular) {
+    'use strict';
 
-    /**
-     *   This logger wraps the toastr logger and also logs to console
-     *   toastr.js is library by John Papa that shows messages in pop up toast.
-     *
-     *   @see https://github.com/CodeSeven/toastr
-     */
-    define( [ ], function( ) {
+   angular.module( "app" )
+        .factory( 'logger', logger );
 
+        // **************************************
+        // Private construction function
+        // **************************************
+
+        /**
+         *   This logger wraps the toastr logger and also logs to console
+         *   toastr.js is library by John Papa that shows messages in pop up toast.
+         *
+         *   @see https://github.com/CodeSeven/toastr
+         */
         function logger( $log )
         {
             return {
@@ -44,8 +49,4 @@
 
         };
 
-        // Register as global constructor function
-        return [ '$log', logger ];
-    });
-
-}( this.define ));
+}( this.angular ));

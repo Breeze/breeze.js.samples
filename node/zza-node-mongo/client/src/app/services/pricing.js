@@ -1,7 +1,12 @@
-﻿(function () {
+﻿(function(angular) {
     'use strict';
 
-    define([ ], function() {
+   angular.module( "app" )
+        .factory( 'pricing', pricing );
+
+        // **************************************
+        // Private construction function
+        // **************************************
 
         function pricing() {
 
@@ -90,7 +95,4 @@
             function roundDollars(amt) { return amt ? Math.round(amt * 100) / 100 : 0; }
         }
 
-        return [ pricing ];
-    });
-
-})();
+})(this.angular);

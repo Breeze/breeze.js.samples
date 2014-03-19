@@ -1,9 +1,14 @@
-﻿(function() {
+﻿(function(angular) {
     'use strict';
 
-    define( [ ], function() {
+    angular.module("app")
+           .controller( 'cartController', cartController );
 
-        function CartController( dataservice, pricing)
+        // **************************************
+        // Private construction function
+        // **************************************
+
+        function cartController( dataservice, pricing)
         {
             var vm = this;
 
@@ -35,8 +40,5 @@
                 calc();
             }
         }
-
-        return [ 'dataservice', 'pricing', CartController];
-    });
 
 })();

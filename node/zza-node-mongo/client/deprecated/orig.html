@@ -1,12 +1,11 @@
 <!DOCTYPE html data-ng-app>
-<!DOCTYPE html data-ng-app>
 <html lang="en">
 <head>
     <title>Zza with AngularJs</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/>
-    <link rel="shortcut icon" type="image/png" href="src/app/images/logo.png">
+    <link rel="shortcut icon" type="image/png" href="../src/app/images/logo.png">
     <link href="assets/ie10mobile.css" rel="stylesheet" />
     <link href="assets/font-awesome.css" rel="stylesheet" />
     <link href="assets/bootstrap.css" rel="stylesheet" />
@@ -33,17 +32,17 @@
 <div data-ng-include="'src/app/views/shellFooter.html'"></div>
 
 <!-- 3rd party libraries -->
-<script src="vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/jquery/jquery.min.js"></script>
 <script src="vendor/q/q.js"></script>
-<script src="src/breeze/breeze.debug.js"></script>
+<script src="../src/breeze/breeze.debug.js"></script>
 <script src="src/breeze/breeze.to$q.js"></script>
 <!-- breeze.dataService.mongo.js used in Mongo Zza; ignored by Web API versions -->
-<script src="src/breeze/breeze.dataservice.mongo.js"></script>
+<script src="../src/breeze/breeze.dataservice.mongo.js"></script>
 <script src="src/breeze/breeze.savequeuing.js"></script>
 
-<script src="vendor/toastr/toastr.js"></script>
-<script src="vendor/angular/angular.js"></script>
-<script src="vendor/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+<script src="../vendor/toastr/toastr.js"></script>
+<script src="../vendor/angular/angular.js"></script>
+<script src="../vendor/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
 
 <!-- App libraries -->
 <!-- Must load app.js first; the others can load in any order -->
@@ -52,26 +51,26 @@
 <script src="src/app/config.js"></script>
 <script src="src/app/metadata.js"></script>
 
-<script src="src/app/controllers/appController.js"></script>
-<script src="src/app/controllers/cartController.js"></script>
-<script src="src/app/controllers/dashboardController.js"></script>
+<script src="../src/app/controllers/appController.js"></script>
+<script src="../src/app/controllers/cartController.js"></script>
+<script src="../src/app/controllers/dashboardController.js"></script>
 <script src="src/app/controllers/homeController.js"></script>
-<script src="src/app/controllers/orderItemController.js"></script>
-<script src="src/app/controllers/orderProductController.js"></script>
-<script src="src/app/controllers/routeController.js"></script>
+<script src="../src/app/controllers/orderItemController.js"></script>
+<script src="../src/app/controllers/orderProductController.js"></script>
+<script src="../src/app/controllers/routeController.js"></script>
 <script src="src/app/controllers/testController.js"></script>
 
 <script src="src/app/directives/directives.js"></script>
 <script src="src/app/filters/filters.js"></script>
 
-<script src="src/app/services/databaseReset.js"></script>
-<script src="src/app/services/dataservice.js"></script>
-<script src="src/app/services/entityManagerFactory.js"></script>
-<script src="src/app/services/logger.js"></script>
-<script src="src/app/services/model.js"></script>
-<script src="src/app/services/pricing.js"></script>
+<script src="../src/app/services/databaseReset.js"></script>
+<script src="../src/app/services/dataservice.js"></script>
+<script src="../src/app/services/entityManagerFactory.js"></script>
+<script src="../src/app/services/logger.js"></script>
+<script src="../src/app/services/model.js"></script>
+<script src="../src/app/services/pricing.js"></script>
 <script src="src/app/services/routes.js"></script>
-<script src="src/app/services/util.js"></script>
+<script src="../src/app/services/util.js"></script>
 
 <!-- omit appRun.js in tests -->
 <script src="src/app/appRun.js"></script>

@@ -1,13 +1,18 @@
-﻿(function() {
+﻿(function(angular) {
     'use strict';
 
-    /**
-     * Turn identifiers 'somethingLikeThis' into a title "Something Like This'
-     * Example in Zza: orderItem.html uses it to build tab headers from
-     * product option types (e.g., 'saladDressing' -> 'Salad Dressing')
-     **/
-    define([], function(){
+   angular.module( "app" )
+        .filter( 'toTitle', toTitle );
 
+    // **************************************
+    // Private construction function
+    // **************************************
+
+        /**
+         * Turn identifiers 'somethingLikeThis' into a title "Something Like This'
+         * Example in Zza: orderItem.html uses it to build tab headers from
+         * product option types (e.g., 'saladDressing' -> 'Salad Dressing')
+         **/
         function toTitle() {
             return function (text) {
                 // space before leading caps & uppercase the 1st character
@@ -20,8 +25,4 @@
             };
         }
 
-        return [ toTitle ];
-
-    });
-
-})();
+})(this.angular);

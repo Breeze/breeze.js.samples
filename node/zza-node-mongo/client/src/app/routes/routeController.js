@@ -1,9 +1,14 @@
-﻿(function( define ) {
-    "use strict";
+﻿(function(angular) {
+    'use strict';
 
-    define( [ ], function() {
+   angular.module( "app" )
+        .controller( 'routeController', routeController );
 
-        function RouteController( $scope, $route, routes )
+        // **************************************
+        // Private construction function
+        // **************************************
+
+        function routeController( $scope, $route, routes )
         {
             var vm = this;
 
@@ -22,8 +27,5 @@
 
         };
 
-        // Register as global constructor function
-        return [ '$scope', '$route', 'routes', RouteController ];
-    });
 
-}( this.define ));
+}( this.angular ));

@@ -1,7 +1,8 @@
-(function( define ) {
-    "use strict";
+(function(angular) {
+    'use strict';
 
-    define( [  ], function( ) {
+   angular.module( "app" )
+        .directive( 'appVersion', appVersion );
 
         function appVersion ( config )
         {
@@ -10,8 +11,5 @@
             };
         };
 
-        // Register as global constructor function
-        return [ 'config', appVersion ];
-    });
 
-}( this.define ));
+}( this.angular ));

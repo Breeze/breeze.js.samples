@@ -10,19 +10,17 @@
 
     head.js(
 
-        // Pre-load these for splash-screen progress bar...
-        { jquery       : "./vendor/jquery/jquery.min.js"                   },
-        { require      : "./vendor/require/require.js"                     },
+         { jquery       : "./vendor/jquery/jquery.min.js"                   }
+        ,{ require      : "./vendor/requirejs/require.js"                   }
 
-        { angular      : "./vendor/angular/angular.js"                     },
-        { ngRoute      : "./vendor/angular-route/angular-route.js"         },
-        { ngSanitize   : "./vendor/angular-sanitize/angular-sanitize.js"   },
-        { uibootstrap  : "./vendor/angular-bootstrap/ui-bootstrap-tpls.js" },
-        { toastr       : "./vendor/toastr/toastr.js"                       },
+        ,{ angular      : "./vendor/angular/angular.js"                     }
+        ,{ ngRoute      : "./vendor/angular-route/angular-route.js"         }
+        ,{ ngSanitize   : "./vendor/angular-sanitize/angular-sanitize.js"   }
+        ,{ uibootstrap  : "./vendor/angular-bootstrap/ui-bootstrap-tpls.js" }
 
-        { breeze_ng    : "./src/breeze/breeze.angular.js"                  },
-        { breeze_debug : "./src/breeze/breeze.debug.js"                    },
-        { breeze_mongo : "./src/breeze/breeze.dataservice.mongo.js"        }
+        ,{ breeze_ng    : "./src/breeze/breeze.angular.js"                  }
+        ,{ breeze_debug : "./src/breeze/breeze.debug.js"                    }
+        ,{ breeze_mongo : "./src/breeze/breeze.dataservice.mongo.js"        }
 
     )
     .ready("ALL", function() {
@@ -30,20 +28,24 @@
         require.config (
             {
                 appDir  : '',
-                baseUrl : './src',
+                baseUrl : './src/app',
+
+                paths: {
+                     "jquery": "../../vendor/jquery/jquery.min"
+                    ,"toastr": "../../vendor/toastr/toastr"
+                },
                 shim    :
                 {
-                    'underscore':
-                    {
-                        exports : '_'
-                    }
+                     'jquery'    : { exports : '$' }
+                    ,'underscore': { exports : '_' }
                 }
             });
 
 
-        require( [ "main" ], function( app )
+        require( [ "test" ], function( app )
         {
             // Application has bootstrapped and started...
+
         });
 
 

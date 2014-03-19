@@ -1,9 +1,15 @@
-﻿(function () {
+﻿(function(angular) {
     'use strict';
 
-    define( [ ], function( ) {
+   angular.module( "app" )
+        .factory( 'util', util );
 
-        function util(config, logger, $q, $timeout, $rootScope) {
+
+        // **************************************
+        // Private construction function
+        // **************************************
+
+          function util(config, logger, $q, $timeout, $rootScope) {
 
             extendString();
 
@@ -228,7 +234,4 @@
 
         }
 
-        // Publish annotated construction function
-        return [ 'config','logger','$q','$timeout','$rootScope', util ];
-    });
-})();
+})(this.angular);
