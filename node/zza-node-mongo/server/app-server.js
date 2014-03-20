@@ -1,8 +1,8 @@
 
 var express      = require('express')
-  , path         = require('path')
+  //, path         = require('path')
   , logger       = require('morgan')
-  , cookieParser = require('cookie-parser')
+  //, cookieParser = require('cookie-parser')
   , bodyParser   = require('body-parser')
   , fileServer   = require('serve-static')
   , breezeRoutes = require( './breeze/routes')
@@ -22,7 +22,10 @@ var express      = require('express')
         // Start listen for HTTP requests
         app.listen( port );
 
+        console.log('__dirname = ' + __dirname + '\n' +
+            'process.cwd = ' + process.cwd() );
 
+        console.log('\nListening on port '+ port);
 // ************************************
 // Module Exports
 // ************************************
