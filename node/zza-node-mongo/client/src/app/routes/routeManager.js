@@ -88,7 +88,7 @@
                 var item = map.routesToResolve[ route.controller ];
                 if ( item )
                 {
-                    route.resolve = buildResolver( item );
+                    route.resolve = buildResolver( item, route.controller );
                 }
             });
 
@@ -100,8 +100,18 @@
          * Build a resolve function that initializes the dataservice
          * for the controller/route
          */
-        function buildResolver( info )
+        function buildResolver( info, controllerName )
         {
+                /**
+                 * Use the injected dataservice to resolve() dataservice `ready` for route changes
+                 * @returns {*}
+                 */
+                function initializeDataservice( dataservice, logger)
+                {
+                    logger.log(controllerName + " is waiting for dataservice init");
+                    return dataservice.isReady;
+                }
+
             if ( info && info.dataServiceInit )
             {
                 // replace `true` with the dataServiceInit function.
@@ -111,14 +121,5 @@
             return info;
         }
 
-        /**
-         * Use the injected dataservice to resolve() dataservice `ready` for route changes
-         * @returns {*}
-         */
-        function initializeDataservice( dataservice, logger)
-        {
-            logger.log(controllerName + " is waiting for dataservice init");
-            return dataservice.initialize();
-        }
 
 }( this.angular ));

@@ -2,13 +2,13 @@
     'use strict';
 
    angular.module( "app" )
-        .factory( 'pricing', pricing );
+        .factory( 'pricing', factory );
 
         // **************************************
         // Private construction function
         // **************************************
 
-        function pricing() {
+        function factory() {
 
             return {
                 calcOrderItemsTotal: calcOrderItemsTotal,

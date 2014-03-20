@@ -2,13 +2,13 @@
     'use strict';
 
    angular.module( "app" )
-        .factory( 'dataservice', dataservice );
+        .factory( 'dataservice', factory );
 
         // **************************************
         // Private construction function
         // **************************************
 
-        function dataservice( entityManagerFactory, model, util ) {
+        function factory( breeze, entityManagerFactory, model, util ) {
 
             var config   = util.config,
                 logger   = util.logger,
@@ -51,6 +51,7 @@
                                   })
                                   .catch( function (error) {
                                       logger.error(error.message, "Data initialization failed");
+                                      logger.error("Alert: Is your MongoDB server running ?");
                                       throw error; // so downstream fail handlers hear it too
                                   });
             }

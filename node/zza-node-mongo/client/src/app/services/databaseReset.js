@@ -2,13 +2,13 @@
     'use strict';
 
    angular.module( "app" )
-        .factory( 'databaseReset', dbReset );
+        .factory( 'databaseReset', factory );
 
         // **************************************
         // Private construction function
         // **************************************
 
-        function dbReset ( $http, $q, config )
+        function factory ( $http, $q, config )
         {
             return { reset: reset };
 

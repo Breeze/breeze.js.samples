@@ -34,3 +34,4 @@ breeze*.nupkg
 *.mdf
 *.ldf
 *.sdf
+/node/zza-node-mongo/database/

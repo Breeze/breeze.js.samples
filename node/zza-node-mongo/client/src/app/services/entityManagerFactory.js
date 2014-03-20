@@ -32,7 +32,6 @@
                 serviceName: serviceName,
                 metadataStore: metadataStore
             });
-            mgr.enableSaveQueuing(true);
             return mgr;
         }
 

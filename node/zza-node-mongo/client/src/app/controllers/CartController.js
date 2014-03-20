@@ -8,12 +8,13 @@
         // Private construction function
         // **************************************
 
-        function cartController( dataservice, pricing)
+        function cartController(  $scope, dataservice, pricing)
         {
-            var vm = this;
+            var cartOrder = dataservice.cartOrder;
+            var vm = $scope.vm = this;
 
                 vm.calc       = calc;
-                vm.cartOrder  = dataservice.cartOrder;
+                vm.cartOrder  = cartOrder;
                 vm.removeItem = removeItem;
 
             // Calculate right away...

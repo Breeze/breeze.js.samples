@@ -2,13 +2,13 @@
     'use strict';
 
     angular.module( "app" )
-           .factory( 'config', configuration );
+           .factory( 'config', factory );
 
         // **************************************
         // Private construction function
         // **************************************
 
-        function configuration( environment )
+        function factory( environment )
         {
             return {
                 version             : '0.5.0',

@@ -2,14 +2,14 @@
     'use strict';
 
    angular.module( "app" )
-        .factory( 'util', util );
+        .factory( 'util', factory );
 
 
         // **************************************
         // Private construction function
         // **************************************
 
-          function util(config, logger, $q, $timeout, $rootScope) {
+          function factory(config, logger, $q, $timeout, $rootScope) {
 
             extendString();
 

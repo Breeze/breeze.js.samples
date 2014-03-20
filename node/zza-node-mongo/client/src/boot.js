@@ -28,7 +28,7 @@
     )
     .ready("ALL", function() {
 
-        app = angular.module( "app", [ 'ngRoute' ] )
+        app = angular.module( "app", [ 'ngRoute', 'breeze.angular' ] )
 
         head.js(
 

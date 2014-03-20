@@ -2,7 +2,7 @@
     'use strict';
 
    angular.module( "app" )
-        .factory( 'logger', logger );
+        .factory( 'logger', factory );
 
         // **************************************
         // Private construction function
@@ -14,7 +14,7 @@
          *
          *   @see https://github.com/CodeSeven/toastr
          */
-        function logger( $log )
+        function factory( $log )
         {
             return {
                 error   : error,
