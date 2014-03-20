@@ -14,8 +14,8 @@
 
           { jquery       : "./vendor/jquery/jquery.min.js"                   }
         , { angular      : "./vendor/angular/angular.js"                     }
-        , { ngRoute      : "./vendor/angular-route/angular-route.js"         }
         , { ngSanitize   : "./vendor/angular-sanitize/angular-sanitize.js"   }
+        , { uiRoute      : "./vendor/angular-ui-router/release/angular-ui-router.js" }
         , { uibootstrap  : "./vendor/angular-bootstrap/ui-bootstrap-tpls.js" }
 
         , { toastr       : "./vendor/toastr/toastr.js"                       }
@@ -28,7 +28,7 @@
     )
     .ready("ALL", function() {
 
-        app = angular.module( "app", [ 'ngRoute', 'breeze.angular' ] )
+        app = angular.module( "app", [ 'breeze.angular', 'ui.router' ] )
 
         head.js(
 
@@ -36,10 +36,10 @@
             , "./src/app/config/configuration.js"
 
             , "./src/app/controllers/appController.js"
-            , "./src/app/controllers/cartController.js"
-            , "./src/app/controllers/dashboardController.js"
-            , "./src/app/controllers/orderItemController.js"
-            , "./src/app/controllers/orderProductController.js"
+            , "./src/app/controllers/orderSidebarController.js"
+//            , "./src/app/controllers/cartController.js"
+//            , "./src/app/controllers/orderItemController.js"
+//            , "./src/app/controllers/orderProductController.js"
 
             , "./src/app/directives/appVersion.js"
             , "./src/app/directives/productSrc.js"
@@ -56,8 +56,9 @@
             , "./src/app/services/model.js"
             , "./src/app/services/pricing.js"
 
-            , "./src/app/routes/routeManager.js"
-            , "./src/app/routes/routeController.js"
+            , "./src/app/routes/routeMap.js"
+            , "./src/app/routes/routeStates.js"
+            , "./src/app/routes/navController.js"
 
         )
         .ready("ALL", function()

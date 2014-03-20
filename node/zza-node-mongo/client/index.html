@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:ng="http://angularjs.org/" data-ng-app="app" >
+<html lang="en" xmlns:ng="http://angularjs.org/" >
 
 <head>
     <title>Zza with AngularJs</title>
@@ -19,20 +19,21 @@
 </head>
 
 
+
 <!--
     AngularApp requires bootstrapping from `boot.js`
 -->
-<body class="ng-cloak" data-ng-app data-ng-controller="appController">
+<body class="ng-cloak" data-ng-app="app" data-ng-controller="appController">
 
-    <div data-ng-include="'./src/app/views/shellHeader.html'"></div>
+    <div ui-view="header"></div>
 
-    <div data-ng-view style="margin-top: 50px">
+    <div ui-view="content" style="margin-top: 50px">
         <!--
             Dynamic content area for the SPA
         -->
     </div>
 
-    <div data-ng-include="'src/app/views/shellFooter.html'"></div>
+    <div ui-view="footer"></div>
 
     <script src="./vendor/headjs-notify/src/load.js"   type="text/javascript" ></script>
     <script src="./src/boot.js"                        type="text/javascript" ></script>

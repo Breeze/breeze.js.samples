@@ -1,9 +1,10 @@
-﻿<div data-ng-controller="dashboardController">
+﻿<div >
     <div class="well sidebar-nav">
         Menu
         <ul class="nav nav-list">
-            <li data-ng-repeat="link in productLinks" data-ng-class="{active: activeProduct == link.tag}">
-                <a data-ng-href="#{{link.path}}">{{link.name}}</a>
+            <!--<li data-ng-repeat="link in productLinks" data-ng-class="{active: activeProduct == link.tag}">-->
+            <li data-ng-repeat="link in vm.productLinks" data-ng-class="{active: true}">
+                <a ui-sref="#{{link.sref}}">{{link.name}}</a>
             </li>
         </ul>
     </div>
@@ -12,8 +13,8 @@
         Order Summary
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
-            <tr data-ng-repeat="item in cartOrder.orderItems">
-                <td><a href="#/order/cart/item/{{item.id}}">{{item.product.name}}</a></td>
+            <tr data-ng-repeat="item in vm.cartOrder.orderItems">
+                <td><a ui-sref="order/item/{{item.id}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>
@@ -26,8 +27,8 @@
         Recently Viewed
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
-            <tr data-ng-repeat="item in draftOrder.orderItems">
-                <td><a href="#/order/draft/item/{{item.id}}">{{item.product.name}}</a></td>
+            <tr data-ng-repeat="item in vm.draftOrder.orderItems">
+                <td><a ui-sref="/order/draft/item/{{item.id}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>

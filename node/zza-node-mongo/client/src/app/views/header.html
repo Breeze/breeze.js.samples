@@ -1,0 +1,18 @@
+﻿<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <a class="brand" ui-sref="{{vm.home.sref}}">
+            <span class="title">Zza!</span> 
+        </a>
+        <div>
+            <ul class="nav">
+                <li data-ng-repeat="link in vm.links"
+                    data-ng-class="{ active: link.selected }" ng-click="vm.selectItem(link)" >
+                    <a ui-sref="{{link.sref}}" >{{link.name}}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="btn-group pull-right">
+            <a class="btn btn-warning" ui-sref="{{vm.cart.sref}}"><i class="icon-shopping-cart"></i> Cart</a>
+        </div>
+    </div>
+</nav>
