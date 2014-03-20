@@ -2,7 +2,7 @@
     'use strict';
 
    angular.module( "app" )
-        .directive( 'appVersion', appVersion );
+          .directive( 'appVersion', appVersion );
 
         function appVersion ( config )
         {

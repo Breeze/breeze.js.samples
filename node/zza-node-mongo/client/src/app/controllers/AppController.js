@@ -10,8 +10,6 @@
 
         function appController( $rootScope, logger )
         {
-            logger.info("appController");
-
             var vm = this;
 
             vm.name = "app";

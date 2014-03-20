@@ -13,7 +13,7 @@
 
             extendString();
 
-            var service = {
+            return {
                 // bundle these so util clients don't have to get them
                 $q      : $q,
                 $timeout: $timeout,
@@ -35,16 +35,16 @@
                 keyArray: keyArray
             };
 
-            return service;
-
-            function $broadcast() {
-                return $rootScope.$broadcast.apply($rootScope, arguments);
-            }
 
 
             /*********************************************************
              * Array filter factories
              *********************************************************/
+
+            function $broadcast() {
+                return $rootScope.$broadcast.apply($rootScope, arguments);
+            }
+
             function filterById(array) {
                 return function (id) {
                     var item = array.filter(function (x) { return x.id == id; });//"==" ok; want coercion

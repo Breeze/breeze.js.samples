@@ -2,7 +2,7 @@
     'use strict';
 
    angular.module( "app" )
-        .controller( 'orderProductController', orderProductController );
+          .controller( 'orderProductController', orderProductController );
 
             // **************************************
             // Private construction function

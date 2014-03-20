@@ -8,7 +8,7 @@
         // Private construction function
         // **************************************
 
-        function dbReset ( $http, config )
+        function dbReset ( $http, $q, config )
         {
             return { reset: reset };
 

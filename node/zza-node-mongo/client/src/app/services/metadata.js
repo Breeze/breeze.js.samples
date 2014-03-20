@@ -1,14 +1,14 @@
 (function(angular) {
     'use strict';
 
-    angular.module("app", [ ])
-        .factory( 'metadata', metadata(breeze) );
+    angular.module("app")
+        .factory( 'metadata', metadata );
 
         // **************************************
         // Private construction function
         // **************************************
 
-        function metadata(breeze)
+        function metadata( )
         {
             return {
                 "structuralTypes":[

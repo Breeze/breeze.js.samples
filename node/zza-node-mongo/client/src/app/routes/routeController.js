@@ -8,7 +8,7 @@
         // Private construction function
         // **************************************
 
-        function routeController( $scope, $route, routes )
+        function routeController( $scope, $route, routes)
         {
             var vm = this;
 

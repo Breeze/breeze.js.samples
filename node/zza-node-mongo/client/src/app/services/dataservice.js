@@ -8,7 +8,7 @@
         // Private construction function
         // **************************************
 
-        function dataservice( breeze, entityManagerFactory, model, util ) {
+        function dataservice( entityManagerFactory, model, util ) {
 
             var config   = util.config,
                 logger   = util.logger,

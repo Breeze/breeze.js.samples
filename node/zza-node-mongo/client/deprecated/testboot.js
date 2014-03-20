@@ -29,25 +29,21 @@
     .ready("ALL", function() {
 
         app = angular.module( "app", [ 'ngRoute' ] )
-
+                     .run( configureToastr );
         head.js(
 
-              "./src/app/config/environment.js"
+              "./src/app/services/util.js"
+            , "./src/app/services/logger.js"
+            , "./src/app/config/environment.js"
             , "./src/app/config/configuration.js"
-
             , "./src/app/controllers/appController.js"
             , "./src/app/controllers/cartController.js"
             , "./src/app/controllers/dashboardController.js"
             , "./src/app/controllers/orderItemController.js"
             , "./src/app/controllers/orderProductController.js"
-
             , "./src/app/directives/appVersion.js"
             , "./src/app/directives/productSrc.js"
-
             , "./src/app/filters/toTitle.js"
-
-            , "./src/app/services/util.js"
-            , "./src/app/services/logger.js"
             , "./src/app/services/dataservice.js"
             , "./src/app/services/databaseReset.js"
             , "./src/app/services/dataservice.js"
@@ -55,24 +51,24 @@
             , "./src/app/services/metadata.js"
             , "./src/app/services/model.js"
             , "./src/app/services/pricing.js"
-
             , "./src/app/routes/routeManager.js"
             , "./src/app/routes/routeController.js"
 
-        )
-        .ready("ALL", function()
-        {
-             app.run( function configureToastr( util )
-             {
-                 // configure toastr for this app
-                 toastr.options.timeOut = 2000; // 2 second toast timeout
-                 toastr.options.positionClass = 'toast-bottom-right';
+        );
 
-                 util.logger.info("Zza SPA is loaded and running on " + util.config.server);
-             });
-        });
+            // **************************************
+            // Private construction function
+            // **************************************
 
+            function configureToastr( util )
+            {
+                // configure toastr for this app
+                toastr.options.timeOut = 2000; // 2 second toast timeout
+                toastr.options.positionClass = 'toast-bottom-right';
 
+                util.logger.info("app module is loaded and running on " + util.config.server);
+
+            };
 
     });
 
