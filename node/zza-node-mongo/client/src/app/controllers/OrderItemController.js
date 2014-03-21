@@ -8,9 +8,15 @@
             // Private construction function
             // **************************************
 
-            function orderItemController( $routeParams, $location, dataservice, util )
+            function orderItemController( $scope, $stateParams, $location, dataservice, util )
             {
-                var productTag = $routeParams.product || "";
+                var productTag = $stateParams.item || "";
+
+                // OrderController already builds a `vm`
+                var vm = $scope.vm  ||  this;
+
+                    vm.active.product =  productTag;
+
                 var cartOrder = dataservice.cartOrder;
                 var draftOrder = dataservice.draftOrder;
                 var info = getOrderItemInfo();
@@ -22,7 +28,7 @@
                 var tabVms = createTabVms();
                 var sizeVms = createSizeVms();
 
-                var vm = this;
+
 
                 // bail out if no orderItem
                 if (!orderItem) {

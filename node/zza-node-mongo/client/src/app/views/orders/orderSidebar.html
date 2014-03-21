@@ -2,9 +2,8 @@
     <div class="well sidebar-nav">
         Menu
         <ul class="nav nav-list">
-            <!--<li data-ng-repeat="link in productLinks" data-ng-class="{active: activeProduct == link.tag}">-->
-            <li data-ng-repeat="link in vm.productLinks" data-ng-class="{active: true}">
-                <a ui-sref="#{{link.sref}}">{{link.name}}</a>
+            <li data-ng-repeat="link in vm.products" data-ng-class="{active: link.selected == true }" ng-click="vm.selectItem(link)">
+                <a data-ng-href="#{{link.path}}">{{link.name}}</a>
             </li>
         </ul>
     </div>

@@ -36,10 +36,12 @@
             , "./src/app/config/configuration.js"
 
             , "./src/app/controllers/appController.js"
+            , "./src/app/controllers/headerController.js"
+            , "./src/app/controllers/orderController.js"
             , "./src/app/controllers/orderSidebarController.js"
+            , "./src/app/controllers/orderItemController.js"
+            , "./src/app/controllers/orderProductController.js"
 //            , "./src/app/controllers/cartController.js"
-//            , "./src/app/controllers/orderItemController.js"
-//            , "./src/app/controllers/orderProductController.js"
 
             , "./src/app/directives/appVersion.js"
             , "./src/app/directives/productSrc.js"
@@ -58,7 +60,6 @@
 
             , "./src/app/routes/routeMap.js"
             , "./src/app/routes/routeStates.js"
-            , "./src/app/routes/navController.js"
 
         )
         .ready("ALL", function()

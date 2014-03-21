@@ -11,13 +11,27 @@
         function buildRouteMap( )
         {
             // Declare all the routes.
+            // @see routeState.js
 
-            return [
-                 { path: '/',         sref : 'app',        name: 'Home',  selected: false }
-                ,{ path: '/about',    sref : 'app.about',  name: 'About', selected: false }
-                ,{ path: '/order',    sref : 'app.order',  name: 'Order', selected: false }
-                ,{ path: '/cart',     sref : 'app.cart',                  selected: false }
-            ];
+            return {
+
+                // Routes within the header view which direct content that should be displayed
+
+                header : [
+                     { name: 'Home',  path: '/welcome',  sref : 'app.welcome',  selected: false }
+                    ,{ name: 'About', path: '/about',    sref : 'app.about',    selected: false }
+                    ,{ name: 'Order', path: '/order',    sref : 'app.order',    selected: false }
+                    ,{                path: '/cart',     sref : 'app.cart',     selected: false }
+                ],
+
+                // Routes within the order sidebar view that lead to order content view changes
+
+                sidebar : [
+                     { path: '/order/pizza', name: 'Pizza'   }
+                    ,{ path: '/order/salad', name: 'Salad'   }
+                    ,{ path: '/order/drink', name: 'Drinks'  }
+                ]
+            }
         };
 
 

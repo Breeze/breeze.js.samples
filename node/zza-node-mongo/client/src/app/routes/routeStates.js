@@ -11,22 +11,30 @@
     function routeStates($stateProvider, $urlRouterProvider) {
 
         $stateProvider
-            .state('app', {
-                url: '/home',
+            .state('app',             {
+                url: '',
                 views: {
                     'header': {
                         templateUrl: 'src/app/views/header.html',
-                        controller : 'navController'
+                        controller : 'headerController'
                     },
                     'content': {
-                        templateUrl: 'src/app/views/home.html'
+                        templateUrl: 'src/app/views/welcome.html'
                     },
                     'footer': {
                         templateUrl: 'src/app/views/footer.html'
                     }
                 }
             })
-            .state( 'app.about', {
+            .state( 'app.welcome',    {
+                url : '/welcome',
+                views : {
+                    'content@' : {
+                        templateUrl: 'src/app/views/welcome.html'
+                    }
+                }
+            })
+            .state( 'app.about',      {
                 url : '/about',
                 views : {
                     'content@' : {
@@ -34,20 +42,33 @@
                     }
                 }
             })
-            .state( 'app.order', {
+            .state( 'app.order',      {
                 url : '/order',
                 views : {
                     'content@' : {
-                        templateUrl: 'src/app/views/orders/order.html'
+                        templateUrl: 'src/app/views/orders/order.html',
+                        controller : 'orderController'
                     },
-                    'dashboard@app.order' : {
-                        templateUrl: 'src/app/views/orders/sidebar.html',
+                    'sidebar@app.order' : {
+                        templateUrl: 'src/app/views/orders/orderSidebar.html',
                         controller : 'orderSidebarController'
+                    },
+                    'orderItem@app.order' : {
+                        // NOTE: Blank until an order time/type is selected
+                    }
+                }
+            })
+            .state( 'app.order.item', {
+                url : '/:item',
+                views : {
+                    'orderItem@app.order' : {
+                        templateUrl: 'src/app/views/orders/orderItem.html',
+                        controller : 'orderItemController'
                     }
                 }
             });
 
-        $urlRouterProvider.otherwise('/home');
+        $urlRouterProvider.otherwise('');
     }
 
 }( this.angular ));

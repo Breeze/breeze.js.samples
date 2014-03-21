@@ -5,26 +5,45 @@
            .controller( 'orderSidebarController', orderSidebarController );
 
         // **************************************
-        // Private construction function
+        // Annotated construction function
         // **************************************
 
-        function orderSidebarController( $scope, dataservice )
+        function orderSidebarController( $scope, routes, dataservice )
         {
-            var vm = $scope.vm = this;
+            var vm = $scope.vm || this;
 
-            // Routes within the order view that lead to product list views
-            var orderProductRoutes = [
-                { path: '/order/pizza', name: 'Pizza',  sref : 'order.pizza'   },
-                { path: '/order/salad', name: 'Salad',  sref : 'order.salad'   },
-                { path: '/order/drink', name: 'Drinks', sref : 'order.drink'   }
-            ];
-
-
-            vm.productLinks = orderProductRoutes;
+            vm.products     = routes.sidebar.map( deselect );
             vm.cartOrder    = dataservice.cartOrder;
             vm.draftOrder   = dataservice.draftOrder;
         };
 
+
+        // **************************************
+        // Private Methods
+        // **************************************
+
+
+        /**
+         *  Inject a `selected` value == false at startup
+         * @param item
+         * @returns {*}
+         */
+        function deselect( item )
+        {
+            item.selected = false;
+            return item;
+        }
+
+        /**
+         * Accessor to clear all link selections and
+         * highlight the user-selected item
+         */
+        function selectItem( selectedItem )
+        {
+            vm.links.forEach( function(item){
+                item.selected = ( item === selectedItem );
+            })
+        }
 
 
 }( this.angular ));
