@@ -1,33 +1,40 @@
 
-var express      = require('express')
-  //, path         = require('path')
-  , logger       = require('morgan')
-  //, cookieParser = require('cookie-parser')
-  , bodyParser   = require('body-parser')
-  , fileServer   = require('serve-static')
-  , breezeRoutes = require( './breeze/routes')
-  , port         = process.env["PORT"] || 3000
-  , app          = express();
+var express        = require('express')
+    , app          = express()
+    , bodyParser   = require('body-parser')
+    , breezeRoutes = require('./breeze/routes')
+    , compress     = require('compression')
+    //, cookieParser = require('cookie-parser')
+    , errorHandler = require('./breeze/errorHandler')
+    , favicon      = require('static-favicon')
+    , fileServer   = require('serve-static')
+    , logger       = require('morgan')
+    //, path         = require('path')
+    , port         = process.env["PORT"] || 3000;
 
-        app.use( logger('dev')              );
-        app.use( bodyParser.json()          );
-        app.use( bodyParser.urlencoded()    );
+    module.exports = app;
 
-        // Configure both breeze-specific routes for REST API
-        breezeRoutes.configure( app );
+    app.use( favicon()                  );
+    app.use( logger('dev')              );
+    app.use( compress()                 );
+    app.use( bodyParser.json()          );
+    app.use( bodyParser.urlencoded()    );
 
-        // Support static file content
-        app.use( fileServer( process.cwd() ));
+    // Configure both breeze-specific routes for REST API
+    breezeRoutes.configure( app );
 
-        // Start listen for HTTP requests
-        app.listen( port );
+    // Support static file content
+    app.use( fileServer( process.cwd() ));
 
-        console.log('__dirname = ' + __dirname + '\n' +
-            'process.cwd = ' + process.cwd() );
+    app.use(errorHandler);
 
-        console.log('\nListening on port '+ port);
-// ************************************
-// Module Exports
-// ************************************
+    // Start listening for HTTP requests
+    app.listen( port );
 
-module.exports = app;
+    console.log('env = '+ app.get('env') +
+        '\n__dirname = ' + __dirname  +
+        '\nprocess.cwd = ' + process.cwd() );
+
+    console.log('\nListening on port '+ port);
+
+
