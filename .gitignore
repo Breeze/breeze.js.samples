@@ -35,3 +35,7 @@ breeze*.nupkg
 *.ldf
 *.sdf
 /node/zza-node-mongo/database/
+
+/node/zza-node-mongo/client/deprecated/routeManager.js
+/node/zza-node-mongo/client/deprecated/routeController.js
+/node/zza-node-mongo/client/deprecated/orig.html

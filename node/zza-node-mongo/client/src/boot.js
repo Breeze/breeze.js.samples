@@ -40,7 +40,7 @@
             , "./src/app/controllers/orderController.js"
             , "./src/app/controllers/orderSidebarController.js"
             , "./src/app/controllers/orderItemController.js"
-            , "./src/app/controllers/orderProductController.js"
+            , "./src/app/controllers/orderMenuController.js"
 //            , "./src/app/controllers/cartController.js"
 
             , "./src/app/directives/appVersion.js"

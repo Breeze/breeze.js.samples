@@ -23,11 +23,11 @@
                 var orderItem = info.orderItem;
 
                 // Have orderItem; build out viewmodel
+
                 var isDraftOrder = orderItem.order === dataservice.draftOrder;
                 var optionVms = createOptionVms();
                 var tabVms = createTabVms();
                 var sizeVms = createSizeVms();
-
 
 
                 // bail out if no orderItem

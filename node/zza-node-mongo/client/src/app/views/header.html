@@ -7,7 +7,7 @@
             <ul class="nav">
                 <li data-ng-repeat="link in vm.links"
                     data-ng-class="{ active: link.selected }" ng-click="vm.selectItem(link)" >
-                    <a ui-sref="{{link.sref}}" >{{link.name}}</a>
+                    <a data-ng-href="#{{link.path}}" >{{link.name}}</a>
                 </li>
             </ul>
         </div>
