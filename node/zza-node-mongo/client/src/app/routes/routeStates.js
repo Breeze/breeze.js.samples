@@ -57,8 +57,7 @@
                         controller : 'orderController'
                     },
                     'sidebar@app.order' : {
-                        templateUrl: 'src/app/views/orders/sidebar.html',
-                        controller : 'orderSidebarController'
+                        templateUrl: 'src/app/views/orders/sidebar.html'
                     },
                     'content@app.order' : {
                         // NOTE: Blank until an order time/type is selected

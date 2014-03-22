@@ -10,20 +10,22 @@
 
         function orderSidebarController( $scope, routes, dataservice )
         {
-            $scope.products = routes.sidebar.map( deselect );
-            dataservice.ready( updateOrders );
+            var vm = $scope.vm = this;
+
+            dataservice.ready( function()
+            {
+                vm.products     = routes.sidebar.map( deselect );
+                vm.cartOrder    = dataservice.cartOrder;
+                vm.draftOrder   = dataservice.draftOrder;
+
+                vm.selectItem   = selectItem;
+            });
         };
 
 
         // **************************************
         // Private Methods
         // **************************************
-
-        function updateOrders()
-        {
-            $scope.cartOrder    = dataservice.cartOrder;
-            $scope.draftOrder   = dataservice.draftOrder;
-        }
 
         /**
          *  Inject a `selected` value == false at startup

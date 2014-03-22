@@ -1,8 +1,8 @@
-﻿<div >
+﻿<div data-ng-controller="orderSidebarController as vm">
     <div class="well sidebar-nav">
         Menu
         <ul class="nav nav-list">
-            <li data-ng-repeat="link in products" data-ng-class="{active: link.selected == true }" ng-click="selectItem(link)">
+            <li data-ng-repeat="link in vm.products" data-ng-class="{active: link.selected == true }" ng-click="vm.selectItem(link)">
                 <a data-ng-href="#{{link.path}}">{{link.name}}</a>
             </li>
         </ul>
@@ -12,7 +12,7 @@
         Order Summary
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
-            <tr data-ng-repeat="item in cartOrder.orderItems">
+            <tr data-ng-repeat="item in vm.cartOrder.orderItems">
                 <td><a data-ng-href="order/item/{{item.id}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
@@ -26,7 +26,7 @@
         Recently Viewed
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
-            <tr data-ng-repeat="item in draftOrder.orderItems">
+            <tr data-ng-repeat="item in vm.draftOrder.orderItems">
                 <td><a data-ng-href="/order/draft/item/{{item.id}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
