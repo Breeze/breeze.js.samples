@@ -44,8 +44,7 @@
             var getEntityById = util.getEntityByIdFromObj;
             var registerType = metadataStore.registerEntityTypeCtor.bind(metadataStore);
 
-            // Stringify metadata before importing (Breeze CSDL-metadata-format 'bug')
-            metadataStore.importMetadata(JSON.stringify( metadata ));
+            metadata.fillStore(metadataStore);
 
             registerCustomer();
             registerOrder();
