@@ -2,7 +2,7 @@
     'use strict';
 
    angular.module( "app" )
-        .controller( 'orderController', controllerFn );
+        .controller( 'order', controllerFn );
 
 
         // **************************************

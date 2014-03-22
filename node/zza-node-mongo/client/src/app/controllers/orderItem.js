@@ -2,13 +2,13 @@
     'use strict';
 
    angular.module( "app" )
-        .controller( 'orderItemController', orderItemController );
+        .controller( 'orderItem', orderItem );
 
             // **************************************
             // Private construction function
             // **************************************
 
-            function orderItemController( $stateParams, $location, dataservice, util )
+            function orderItem( $stateParams, $location, dataservice, util )
             {
                 var vm         = this;
                 var category   = $stateParams.category || "";

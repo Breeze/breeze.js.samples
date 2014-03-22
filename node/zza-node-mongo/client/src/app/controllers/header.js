@@ -2,7 +2,7 @@
     'use strict';
 
    angular.module( "app" )
-        .controller( 'headerController', controllerFn );
+        .controller( 'header', controllerFn );
 
 
         // **************************************

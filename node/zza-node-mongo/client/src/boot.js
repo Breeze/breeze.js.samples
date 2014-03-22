@@ -34,13 +34,15 @@
 
               "./src/app/config/environment.js"
             , "./src/app/config/configuration.js"
-            , "./src/app/controllers/appController.js"
-            , "./src/app/controllers/headerController.js"
-            , "./src/app/controllers/orderController.js"
-            , "./src/app/controllers/orderSidebarController.js"
-            , "./src/app/controllers/orderItemController.js"
-            , "./src/app/controllers/orderMenuController.js"
-            , "./src/app/controllers/cartController.js"
+
+            , "./src/app/controllers/session.js"
+            , "./src/app/controllers/header.js"
+            , "./src/app/controllers/order.js"
+            , "./src/app/controllers/orderSidebar.js"
+            , "./src/app/controllers/orderItem.js"
+            , "./src/app/controllers/orderMenu.js"
+            , "./src/app/controllers/cart.js"
+
             , "./src/app/directives/appVersion.js"
             , "./src/app/directives/productSrc.js"
             , "./src/app/filters/toTitle.js"

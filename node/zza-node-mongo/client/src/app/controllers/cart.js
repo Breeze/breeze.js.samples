@@ -2,13 +2,13 @@
     'use strict';
 
     angular.module("app")
-           .controller( 'cartController', cartController );
+           .controller( 'cart', cart );
 
         // **************************************
         // Annotated construction function
         // **************************************
 
-        function cartController( dataservice, pricing)
+        function cart( dataservice, pricing)
         {
             var vm   = this;
             var cart = dataservice.cartOrder;

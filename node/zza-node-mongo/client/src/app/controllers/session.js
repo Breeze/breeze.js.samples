@@ -2,13 +2,13 @@
     'use strict';
 
     angular.module( "app" )
-        .controller( "appController", appController );
+        .controller( "session", session );
 
         // **************************************
         // Private construction function
         // **************************************
 
-        function appController( logger )
+        function session( logger )
         {
             var vm = this;
         }

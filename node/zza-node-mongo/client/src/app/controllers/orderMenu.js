@@ -2,13 +2,13 @@
     'use strict';
 
    angular.module( "app" )
-          .controller( 'orderMenuController', orderMenuController );
+          .controller( 'orderMenu', orderMenu );
 
     // **************************************
     // Annotated construction function
     // **************************************
 
-    function orderMenuController( $stateParams, routes, dataservice )
+    function orderMenu( $stateParams, routes, dataservice )
     {
         var vm  = this;
         var tag = routes.findProductTagBy( $stateParams.category );

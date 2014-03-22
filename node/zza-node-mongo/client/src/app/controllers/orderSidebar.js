@@ -2,13 +2,13 @@
     'use strict';
 
     angular.module( "app" )
-           .controller( 'orderSidebarController', orderSidebarController );
+           .controller( 'orderSidebar', orderSidebar );
 
         // **************************************
         // Annotated construction function
         // **************************************
 
-        function orderSidebarController( routes, dataservice )
+        function orderSidebar( routes, dataservice )
         {
             var vm = this;
 
