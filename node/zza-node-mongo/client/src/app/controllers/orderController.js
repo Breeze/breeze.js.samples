@@ -9,9 +9,9 @@
         // Annotated construction function
         // **************************************
 
-        function controllerFn( $scope )
+        function controllerFn( )
         {
-            var vm = $scope.vm = this;
+            var vm = this;
 
                 // Build state model available to current
                 // controller and all children

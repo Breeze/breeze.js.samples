@@ -8,9 +8,9 @@
     // Annotated construction function
     // **************************************
 
-    function orderMenuController( $scope, $stateParams, routes, dataservice )
+    function orderMenuController( $stateParams, routes, dataservice )
     {
-        var vm  = $scope.vm = this;
+        var vm  = this;
         var tag = routes.findProductTagBy( $stateParams.category );
 
         // When the Breeze dataservices have initialized and are ready...

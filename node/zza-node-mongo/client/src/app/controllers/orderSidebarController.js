@@ -8,9 +8,9 @@
         // Annotated construction function
         // **************************************
 
-        function orderSidebarController( $scope, routes, dataservice )
+        function orderSidebarController( routes, dataservice )
         {
-            var vm = $scope.vm = this;
+            var vm = this;
 
             dataservice.ready( function()
             {

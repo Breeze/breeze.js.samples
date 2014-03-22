@@ -8,9 +8,9 @@
         // Private construction function
         // **************************************
 
-        function appController( $scope, logger )
+        function appController( logger )
         {
-            var vm = $scope.vm =this;
+            var vm = this;
         }
 
 })(this.angular);

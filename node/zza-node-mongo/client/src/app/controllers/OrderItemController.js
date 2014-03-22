@@ -8,9 +8,9 @@
             // Private construction function
             // **************************************
 
-            function orderItemController( $scope, $stateParams, $location, dataservice, util )
+            function orderItemController( $stateParams, $location, dataservice, util )
             {
-                var vm         = $scope.vm =  this;
+                var vm         = this;
                 var category   = $stateParams.category || "";
 
                 var cartOrder  = null;

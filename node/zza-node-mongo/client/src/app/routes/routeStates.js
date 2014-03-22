@@ -15,8 +15,7 @@
                 url: '',
                 views: {
                     'header': {
-                        templateUrl: 'src/app/views/header.html',
-                        controller : 'headerController'
+                        templateUrl: 'src/app/views/header.html'
                     },
                     'content': {
                         templateUrl: 'src/app/views/welcome.html'
@@ -53,8 +52,7 @@
                 url : '/order',
                 views : {
                     'content@' : {
-                        templateUrl: 'src/app/views/orders/order.html',
-                        controller : 'orderController'
+                        templateUrl: 'src/app/views/orders/order.html'
                     },
                     'sidebar@app.order' : {
                         templateUrl: 'src/app/views/orders/sidebar.html'
@@ -77,8 +75,7 @@
                         templateUrl: function( $stateParams )
                         {
                             return ('src/app/views/menus/' + $stateParams.category + '.html');
-                        },
-                        controller : 'orderMenuController'
+                        }
                     }
                 }
             })
@@ -89,8 +86,7 @@
                 url : '/:itemId',
                 views : {
                     'content@app.order' : {
-                        templateUrl : 'src/app/views/orders/orderItem.html',
-                        controller  : 'orderItemController'
+                        templateUrl : 'src/app/views/orders/orderItem.html'
                     }
                 }
             })
@@ -102,8 +98,7 @@
                 url : '/order/cart',
                 views : {
                     'content@app.order' : {
-                        templateUrl : 'src/app/views/orders/cart.html',
-                        controller  : 'cartController'
+                        templateUrl : 'src/app/views/orders/cart.html'
                     }
                 }
             });

@@ -8,9 +8,9 @@
         // Annotated construction function
         // **************************************
 
-        function cartController(  $scope, dataservice, pricing)
+        function cartController( dataservice, pricing)
         {
-            var vm   = $scope;
+            var vm   = this;
             var cart = dataservice.cartOrder;
 
                 vm.hasExtraCost= false;

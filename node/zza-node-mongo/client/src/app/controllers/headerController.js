@@ -9,9 +9,9 @@
         // Annotated construction function
         // **************************************
 
-        function controllerFn( $scope, routes )
+        function controllerFn( routes )
         {
-            var vm = $scope.vm = this;
+            var vm = this;
 
                 vm.home       = routes.header[ 0 ];
                 vm.cart       = routes.header[ 3 ];
