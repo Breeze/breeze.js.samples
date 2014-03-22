@@ -74,6 +74,7 @@
 
                 function create(manager, orderInit) {
                     var init = {
+                        id: breeze.DataType.MongoObjectId.getNext(),
                         ordered: new Date(),
                         delivered: new Date()  // projected //todo: add time
                     };
