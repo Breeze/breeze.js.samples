@@ -9,8 +9,9 @@
         // **************************************
 
         function factory() {
+            var self;
 
-            return {
+            return self = {
                 calcOrderItemsTotal: calcOrderItemsTotal,
                 calcItemTotalPrice: calcItemTotalPrice,
                 calcItemUnitPrice: calcItemUnitPrice,

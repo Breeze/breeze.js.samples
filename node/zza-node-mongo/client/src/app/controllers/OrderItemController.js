@@ -10,52 +10,60 @@
 
             function orderItemController( $scope, $stateParams, $location, dataservice, util )
             {
-                var productTag = $stateParams.item || "";
+                var vm         = $scope.vm =  this;
+                var category   = $stateParams.category || "";
 
-                // OrderController already builds a `vm`
-                var vm = $scope.vm  ||  this;
+                var cartOrder  = null;
+                var draftOrder = null;
+                var info       = null;
+                var orderItem  = null;
+                var isDraft    = true;
 
-                    vm.active.product =  productTag;
+                vm.product          = info ? info.product : null;
+                vm.orderItem        = orderItem;
+                vm.activeProduct    = category;
+                vm.isDraftOrder     = isDraft;
+                vm.sizeVms          = [ ];
+                vm.tabVms           = [ ];
 
-                var cartOrder = dataservice.cartOrder;
-                var draftOrder = dataservice.draftOrder;
-                var info = getOrderItemInfo();
-                var orderItem = info.orderItem;
+                vm.addToCart        = addToCart;
+                vm.selectOption     = selectOption;
+                vm.selectOneOption  = selectOneOption;
 
-                // Have orderItem; build out viewmodel
+                dataservice.ready( function presentOrderItem() {
 
-                var isDraftOrder = orderItem.order === dataservice.draftOrder;
-                var optionVms = createOptionVms();
-                var tabVms = createTabVms();
-                var sizeVms = createSizeVms();
+                    cartOrder  = dataservice.cartOrder;
+                    draftOrder = dataservice.draftOrder;
+                    info       = getOrderItemInfo( +$stateParams.itemId, $stateParams.orderId );
+                    orderItem  = info.orderItem;
+                    isDraft    = orderItem ? orderItem.order === dataservice.draftOrder : false;
 
+                    if ( orderItem )
+                    {
+                        vm.product          = info ? info.product : null;
+                        vm.orderItem        = orderItem;
+                        vm.activeProduct    = category;
+                        vm.isDraftOrder     = isDraft;
+                        vm.sizeVms          = createSizeVms();
+                        vm.tabVms           = createTabVms();
+                    }
 
-                // bail out if no orderItem
-                if (!orderItem) {
-                    info.goNext();
-                    return;
-                }
+                    !orderItem && showProductListingFor( category );
 
-                vm.activeProduct = productTag;
-                vm.isItemView = true;
-                vm.orderItem = orderItem;
-                vm.product = info.product;
-                vm.sizeVms = sizeVms;
-                vm.tabVms = tabVms;
-                vm.isDraftOrder = isDraftOrder;
-                vm.addToCart = addToCart;
-                vm.selectOption = selectOption;
-                vm.selectOneOption = selectOneOption;
+                });
 
                 // *********************************************************
                 // Private methods
                 // *********************************************************
 
 
-                function getOrderItemInfo() {
+                function showProductListingFor( category )
+                {
+                    $location.path('/order/' + category);
+                }
+
+                function getOrderItemInfo( id, orderIdTag ) {
                     // id may be productId or orderItemId, depending upon route tag
-                    var id = +$routeParams.id; // convert to integer w/ '+'
-                    var orderIdTag = $routeParams.orderId;
                     var item, product, sizes;
 
                     if (orderIdTag) {
@@ -63,7 +71,7 @@
                         item = getSelectedItem(orderIdTag, id);
                         if (item) {
                             product = item.product;
-                            productTag = product.type;
+                            category = product.type;
                             sizes = dataservice.productSizes.byProduct(product);
                         }
                     } else {
@@ -75,7 +83,6 @@
                         }
                     }
                     return {
-                        goNext: function () { $location.path('/order/' + productTag); },
                         orderItem: item,
                         product: product,
                         sizes: sizes
@@ -95,9 +102,13 @@
                 // Create a new orderItem if none found.
                 function getOrderItemByProduct(product, defaultSize) {
 
+                    if ( !draftOrder ) return null;
+
                     var prodId = product.id;
-                    var item = draftOrder.orderItems
-                        .filter(function (oi) { return oi.productId == prodId; })[0];
+                    var item =  draftOrder.orderItems.filter(function (oi)
+                                {
+                                    return oi.productId == prodId;
+                                })[0];
 
                     if (!item) {
                         item = draftOrder.addNewItem(product);
@@ -126,7 +137,7 @@
 
                 function createTabVms() {
                     // group the productOption viewmodels by type so they can be displayed on tabs
-                    var tabs = util.groupArray(optionVms,
+                    var tabs = util.groupArray( createOptionVms(),
                         function (vm) { return vm.productOption.type; }, 'type', 'options');
 
                     // distribute the options in each tab among 3 columns
@@ -177,12 +188,13 @@
                 }
 
                 function addToCart() {
-                    if (isDraftOrder) {
+                    if (isDraft) {
                         //don't need to remove if item is an entity (e.g, SQL version)
                         draftOrder.removeItem(orderItem);
                         cartOrder.addItem(orderItem);
                         util.logger.info("Added item to cart");
-                        info.goNext();
+
+                        showProductListingFor( category );
                     }
                 }
 

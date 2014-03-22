@@ -20,7 +20,9 @@
                 service = {
                     saveChanges : saveChanges,
                     resetManager: resetManager,
-                    isReady     : initialize()
+
+                    isReady     : initialize(),
+                    ready       : onReady,
 
                     /* These are added during initialization:
                      cartOrder,
@@ -37,7 +39,14 @@
             //#region implementation
             function initialize() {
 
-                return fetchLookups().then(  setServiceLookups );
+                return fetchLookups()
+                            .then(  setServiceLookups )
+                            .then(  createDraftAndCartOrders );
+            }
+
+            function onReady( resolveHandler, rejectHandler )
+            {
+                return service.isReady.then( resolveHandler,  rejectHandler );
             }
 
 
@@ -144,6 +153,9 @@
                 };
             }
 
+            /**
+             * Only available after lookups have arrived.
+             */
             function createDraftAndCartOrders() {
                 var orderInit = { orderStatus: service.OrderStatus.Pending};
                 service.cartOrder = model.Order.create(manager, orderInit);

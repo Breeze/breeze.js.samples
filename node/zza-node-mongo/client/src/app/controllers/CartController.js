@@ -5,40 +5,46 @@
            .controller( 'cartController', cartController );
 
         // **************************************
-        // Private construction function
+        // Annotated construction function
         // **************************************
 
         function cartController(  $scope, dataservice, pricing)
         {
-            var cartOrder = dataservice.cartOrder;
-            var vm = $scope.vm = this;
+            var vm   = $scope;
+            var cart = dataservice.cartOrder;
 
-                vm.calc       = calc;
-                vm.cartOrder  = cartOrder;
-                vm.removeItem = removeItem;
+                vm.hasExtraCost= false;
+                vm.cartOrder   = cart;
+                vm.updateCosts = calculateCosts;
+                vm.removeItem  = removeItem;
 
-            // Calculate right away...
-            calc();
+            dataservice.ready( calculateCosts );
+
+            calculateCosts();
 
             // *********************************************************
-            // Private methods
+            // Internal methods
             // *********************************************************
 
-            function calc()
+            function calculateCosts()
             {
-                var haveItems = $scope.haveItems = cartOrder.orderItems.length;
-                if (haveItems) {
-                    pricing.calcOrderItemsTotal(cartOrder);
-                    vm.someCostMore = pricing.orderHasExtraCostOptions(cartOrder);
+                cart = dataservice.cartOrder;
+
+                vm.haveItems = (cart.orderItems.length > 0);
+                if ( vm.haveItems )
+                {
+                    var total = pricing.calcOrderItemsTotal( cart );
+                    vm.hasExtraCost = pricing.orderHasExtraCostOptions( cart );
                 }
             }
 
-            function removeItem(orderItem)
+            function removeItem( item )
             {
                 //don't need to remove if item is an entity (e.g, SQL version)
-                dataservice.cartOrder.removeItem(orderItem);
-                dataservice.draftOrder.addItem(orderItem);
-                calc();
+                dataservice.cartOrder.removeItem(item);
+                dataservice.draftOrder.addItem(item);
+
+                calculateCosts();
             }
         }
 

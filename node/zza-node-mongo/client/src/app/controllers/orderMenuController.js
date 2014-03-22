@@ -17,7 +17,7 @@
         // then get the product listing
 
         dataservice.isReady
-                   .then( getProductsByTag( tag, vm ) );
+                   .then( getProductsByTag( tag ) );
 
 
         // *****************************************************************

@@ -16,10 +16,6 @@
                 // Build state model available to current
                 // controller and all children
 
-                vm.active = {
-                    product : ""
-                }
-
         };
 
 

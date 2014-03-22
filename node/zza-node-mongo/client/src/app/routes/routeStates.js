@@ -80,16 +80,41 @@
                             return ('src/app/views/menus/' + $stateParams.category + '.html');
                         },
                         controller : 'orderMenuController'
+                    }
+                }
+            })
+            .state( 'app.order.menus.item', {
 
+                // This state shows the Product details page (pizza, salads, drinks)
+
+                url : '/:itemId',
+                views : {
+                    'content@app.order' : {
+                        templateUrl : 'src/app/views/orders/orderItem.html',
+                        controller  : 'orderItemController'
+                    }
+                }
+            })
+            .state( 'app.order.cart', {
+
+                // This state shows the Cart items list view; and shows
+                // both order item and total cart costs....
+
+                url : '/order/cart',
+                views : {
+                    'content@app.order' : {
+                        templateUrl : 'src/app/views/orders/cart.html',
+                        controller  : 'cartController'
                     }
                 }
             });
 
 
+
         $urlRouterProvider
             .when( '/orderPizza',  '/order/pizza'  )  // Switch to Pizza listing view
             .when( '/orderSalad',  '/order/salad'  )  // Switch to Salad listing view
-            .when( '/orderDrinks', '/order/drinks'  )  // Switch to Salad listing view
+            .when( '/orderDrinks', '/order/drinks'  ) // Switch to Salad listing view
             .otherwise('');                           // Return to the main/welcome screen
     }
 

@@ -28,26 +28,22 @@
     )
     .ready("ALL", function() {
 
-        app = angular.module( "app", [ 'breeze.angular', 'ui.router' ] )
+        app = angular.module( "app", [ 'breeze.angular', 'ui.router', 'ui.bootstrap' ] )
 
         head.js(
 
               "./src/app/config/environment.js"
             , "./src/app/config/configuration.js"
-
             , "./src/app/controllers/appController.js"
             , "./src/app/controllers/headerController.js"
             , "./src/app/controllers/orderController.js"
             , "./src/app/controllers/orderSidebarController.js"
             , "./src/app/controllers/orderItemController.js"
             , "./src/app/controllers/orderMenuController.js"
-//            , "./src/app/controllers/cartController.js"
-
+            , "./src/app/controllers/cartController.js"
             , "./src/app/directives/appVersion.js"
             , "./src/app/directives/productSrc.js"
-
             , "./src/app/filters/toTitle.js"
-
             , "./src/app/services/util.js"
             , "./src/app/services/logger.js"
             , "./src/app/services/dataservice.js"
@@ -58,6 +54,8 @@
             , "./src/app/services/model.js"
             , "./src/app/services/pricing.js"
 
+            // UI-routing configurations
+
             , "./src/app/routes/routeMap.js"
             , "./src/app/routes/routeStates.js"
 
@@ -66,11 +64,13 @@
         {
              app.run( function configureToastr( util )
              {
-                 // configure toastr for this app
-                 toastr.options.timeOut = 2000; // 2 second toast timeout
+                 // Configure toastr for this app
+                 // 2 second toast timeout
+
+                 toastr.options.timeOut       = 2000;
                  toastr.options.positionClass = 'toast-bottom-right';
 
-                 util.logger.info("Zza SPA is loaded and running on " + util.config.server);
+                 util.logger.info( "Zza SPA is loaded and running on " + util.config.server );
              });
         });
 
