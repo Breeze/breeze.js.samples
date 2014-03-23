@@ -2,13 +2,13 @@
     'use strict';
 
    angular.module( "app" )
-          .controller( 'orderMenu', orderMenu );
+          .controller( 'catalog', controllerFn );
 
     // **************************************
     // Annotated construction function
     // **************************************
 
-    function orderMenu( $stateParams, routes, dataservice )
+    function controllerFn( $stateParams, routes, dataservice )
     {
         var vm  = this;
         var tag = routes.findProductTagBy( $stateParams.category );
@@ -16,8 +16,7 @@
         // When the Breeze dataservices have initialized and are ready...
         // then get the product listing
 
-        dataservice.isReady
-                   .then( getProductsByTag( tag ) );
+        dataservice.ready( getProductsByTag( tag ) );
 
 
         // *****************************************************************

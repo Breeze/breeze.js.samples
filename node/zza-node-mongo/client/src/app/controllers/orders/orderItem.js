@@ -8,10 +8,9 @@
             // Private construction function
             // **************************************
 
-            function orderItem( $stateParams, $location, dataservice, util )
+            function orderItem( $stateParams, $state, dataservice, util )
             {
                 var vm         = this;
-                var category   = $stateParams.category || "";
 
                 var cartOrder  = null;
                 var draftOrder = null;
@@ -19,22 +18,11 @@
                 var orderItem  = null;
                 var isDraft    = true;
 
-                vm.product          = info ? info.product : null;
-                vm.orderItem        = orderItem;
-                vm.activeProduct    = category;
-                vm.isDraftOrder     = isDraft;
-                vm.sizeVms          = [ ];
-                vm.tabVms           = [ ];
-
-                vm.addToCart        = addToCart;
-                vm.selectOption     = selectOption;
-                vm.selectOneOption  = selectOneOption;
-
                 dataservice.ready( function presentOrderItem() {
 
                     cartOrder  = dataservice.cartOrder;
                     draftOrder = dataservice.draftOrder;
-                    info       = getOrderItemInfo( +$stateParams.itemId, $stateParams.orderId );
+                    info       = getOrderItemInfo( $stateParams );
                     orderItem  = info.orderItem;
                     isDraft    = orderItem ? orderItem.order === dataservice.draftOrder : false;
 
@@ -42,13 +30,16 @@
                     {
                         vm.product          = info ? info.product : null;
                         vm.orderItem        = orderItem;
-                        vm.activeProduct    = category;
                         vm.isDraftOrder     = isDraft;
                         vm.sizeVms          = createSizeVms();
                         vm.tabVms           = createTabVms();
+
+                        vm.addToCart        = addToCart;
+                        vm.selectOption     = selectOption;
+                        vm.selectOneOption  = selectOneOption;
                     }
 
-                    !orderItem && showProductListingFor( category );
+                    !orderItem && showCatalog( );
 
                 });
 
@@ -57,21 +48,27 @@
                 // *********************************************************
 
 
-                function showProductListingFor( category )
+                function showCatalog( category )
                 {
-                    $location.path('/order/' + category);
+                   // $state.go('app.order.catalog', {category : $stateParams.category});
                 }
 
-                function getOrderItemInfo( id, orderIdTag ) {
-                    // id may be productId or orderItemId, depending upon route tag
+                function getOrderItemInfo( options )
+                {
+                        // id may be `productId` or `orderItemId`, depending upon route tag
+                        // `category` identifies the group of products: pizza, drinks, salads
+
+                    var id        = options.orderId || options.productId
+                        ,category = options.category
+                        ,isOrder  = options.orderId != null;
+
                     var item, product, sizes;
 
-                    if (orderIdTag) {
+                    if ( isOrder ) {
                         // reached this page from an existing orderItem so id is the orderItemId
-                        item = getSelectedItem(orderIdTag, id);
+                        item = getSelectedItem(id, category);
                         if (item) {
                             product = item.product;
-                            category = product.type;
                             sizes = dataservice.productSizes.byProduct(product);
                         }
                     } else {
@@ -194,7 +191,7 @@
                         cartOrder.addItem(orderItem);
                         util.logger.info("Added item to cart");
 
-                        showProductListingFor( category );
+                        showCatalog();
                     }
                 }
 

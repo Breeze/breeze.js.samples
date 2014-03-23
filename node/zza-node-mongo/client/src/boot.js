@@ -37,11 +37,11 @@
 
             , "./src/app/controllers/session.js"
             , "./src/app/controllers/header.js"
-            , "./src/app/controllers/order.js"
-            , "./src/app/controllers/orderSidebar.js"
-            , "./src/app/controllers/orderItem.js"
-            , "./src/app/controllers/orderMenu.js"
-            , "./src/app/controllers/cart.js"
+            , "./src/app/controllers/orders/order.js"
+            , "./src/app/controllers/orders/sidebar.js"
+            , "./src/app/controllers/orders/orderItem.js"
+            , "./src/app/controllers/orders/catalog.js"
+            , "./src/app/controllers/orders/cart.js"
 
             , "./src/app/directives/appVersion.js"
             , "./src/app/directives/productSrc.js"

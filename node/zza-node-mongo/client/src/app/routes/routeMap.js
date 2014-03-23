@@ -17,7 +17,7 @@
 
             return map = {
 
-                // Routes within the header view which direct content that should be displayed
+                // Routes within the HEADER view which direct content that should be displayed
                 // NOTE: the Order page defaults to showing the Pizza product listings...
                 // @see routeStates .when() overrides
 
@@ -28,7 +28,7 @@
                     ,{                path: '/order/cart',  sref : 'app.order.cart', selected: false }
                 ],
 
-                // Routes within the order sidebar view that lead to order content view changes
+                // Routes within the order SIDEBAR view that lead to order content view changes
 
                 sidebar : [
                      { path: '/order/pizza'   ,name: 'Pizza'  ,tag : 'pizza' }

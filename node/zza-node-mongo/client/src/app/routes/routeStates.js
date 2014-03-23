@@ -63,7 +63,7 @@
                 }
 
             })
-            .state( 'app.order.menus', {
+            .state( 'app.order.catalog', {
 
                 // This state shows the Product listings (pizza, salads, drinks)
                 // from which a product can be selected; selection navigates to the
@@ -74,19 +74,26 @@
                     'content@app.order' : {
                         templateUrl: function( $stateParams )
                         {
-                            return ('src/app/views/menus/' + $stateParams.category + '.html');
+                            // Should we navigate to the products list view or the item details view ?
+                            var listProductsURL = ('src/app/views/catalog/' + $stateParams.category + '.html'),
+                                viewItemURL     = 'src/app/views/orders/orderItem.html';
+
+                            return $stateParams.productId ? viewItemURL : listProductsURL;
                         }
                     }
                 }
             })
-            .state( 'app.order.menus.item', {
+            .state( 'app.order.item', {
 
-                // This state shows the Product details page (pizza, salads, drinks)
+                // This state shows the OrderItem editor for an item currently in your cart
 
-                url : '/:itemId',
+                url : '/:category/:productId',
                 views : {
                     'content@app.order' : {
-                        templateUrl : 'src/app/views/orders/orderItem.html'
+                        templateUrl : function( $state, $stateParams)
+                        {
+                            return 'src/app/views/orders/orderItem.html';
+                        }
                     }
                 }
             })
@@ -95,7 +102,7 @@
                 // This state shows the Cart items list view; and shows
                 // both order item and total cart costs....
 
-                url : '/order/cart',
+                url : '/cart',
                 views : {
                     'content@app.order' : {
                         templateUrl : 'src/app/views/orders/cart.html'
@@ -109,7 +116,7 @@
             .when( '/orderPizza',  '/order/pizza'  )  // Switch to Pizza listing view
             .when( '/orderSalad',  '/order/salad'  )  // Switch to Salad listing view
             .when( '/orderDrinks', '/order/drinks'  ) // Switch to Salad listing view
-            .otherwise('');                           // Return to the main/welcome screen
+            .otherwise('/orderPizza');                // Return to the main/welcome screen
     }
 
 }( this.angular, this.supplant ));
