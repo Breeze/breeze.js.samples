@@ -14,8 +14,8 @@
 
           { jquery       : "./vendor/jquery/jquery.min.js"                   }
         , { angular      : "./vendor/angular/angular.js"                     }
-        , { ngRoute      : "./vendor/angular-route/angular-route.js"         }
         , { ngSanitize   : "./vendor/angular-sanitize/angular-sanitize.js"   }
+        , { uiRoute      : "./vendor/angular-ui-router/release/angular-ui-router.js" }
         , { uibootstrap  : "./vendor/angular-bootstrap/ui-bootstrap-tpls.js" }
 
         , { toastr       : "./vendor/toastr/toastr.js"                       }
@@ -28,19 +28,22 @@
     )
     .ready("ALL", function() {
 
-        app = angular.module( "app", [ 'ngRoute' ] )
-                     .run( configureToastr );
-        head.js(
+        app = angular.module( "app", [ 'breeze.angular', 'ui.router', 'ui.bootstrap' ] )
 
-              "./app/services/util.js"
-            , "./app/services/logger.js"
-            , "./app/config/config.js"
-            , "./app/controllers/appController.js"
-            , "./app/controllers/cartController.js"
-            , "./app/controllers/dashboardController.js"
-            , "./app/controllers/orderItemController.js"
-            , "./app/controllers/orderProductController.js"
+        head.js(
+              "./app/config/config.js"
+
+            , "./app/controllers/session.js"
+            , "./app/controllers/header.js"
+            , "./app/controllers/orders/order.js"
+            , "./app/controllers/orders/orderSidebar.js"
+            , "./app/controllers/orders/orderItem.js"
+            , "./app/controllers/catalog.js"
+            , "./app/controllers/orders/cart.js"
+
             , "./app/directives/productImgSrcDirective.js"
+            , "./app/services/util.js"
+            , "./app/services/logger.js"
             , "./app/services/dataservice.js"
             , "./app/services/databaseReset.js"
             , "./app/services/dataservice.js"
@@ -48,24 +51,28 @@
             , "./app/services/metadata.js"
             , "./app/services/model.js"
             , "./app/services/pricing.js"
-            , "./app/routes/routeManager.js"
-            , "./app/routes/routeController.js"
 
-        );
+            // UI-routing configurations
 
-            // **************************************
-            // Private construction function
-            // **************************************
+            , "./app/routes/routeMap.js"
+            , "./app/routes/routeStates.js"
 
-            function configureToastr( util )
-            {
-                // configure toastr for this app
-                toastr.options.timeOut = 2000; // 2 second toast timeout
-                toastr.options.positionClass = 'toast-bottom-right';
+        )
+        .ready("ALL", function()
+        {
+             app.run( function configureToastr( util )
+             {
+                 // Configure toastr for this app
+                 // 2 second toast timeout
 
-                util.logger.info("app module is loaded and running on " + util.config.server);
+                 toastr.options.timeOut       = 2000;
+                 toastr.options.positionClass = 'toast-bottom-right';
 
-            };
+                 util.logger.info( "Zza SPA is loaded and running on " + util.config.server );
+             });
+        });
+
+
 
     });
 

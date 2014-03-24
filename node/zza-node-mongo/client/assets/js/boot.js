@@ -18,9 +18,9 @@
         ,{ ngSanitize   : "./vendor/angular-sanitize/angular-sanitize.js"   }
         ,{ uibootstrap  : "./vendor/angular-bootstrap/ui-bootstrap-tpls.js" }
 
-        ,{ breeze_ng    : "./src/breeze/breeze.angular.js"                  }
-        ,{ breeze_debug : "./src/breeze/breeze.debug.js"                    }
-        ,{ breeze_mongo : "./src/breeze/breeze.dataservice.mongo.js"        }
+        ,{ breeze_ng    : "./breeze/breeze.angular.js"                  }
+        ,{ breeze_debug : "./breeze/breeze.debug.js"                    }
+        ,{ breeze_mongo : "./breeze/breeze.dataservice.mongo.js"        }
 
     )
     .ready("ALL", function() {
@@ -28,11 +28,11 @@
         require.config (
             {
                 appDir  : '',
-                baseUrl : './src/app',
+                baseUrl : './app',
 
                 paths: {
-                     "jquery": "../../vendor/jquery/jquery.min"
-                    ,"toastr": "../../vendor/toastr/toastr"
+                     "jquery": "../vendor/jquery/jquery.min"
+                    ,"toastr": "../vendor/toastr/toastr"
                 },
                 shim    :
                 {
