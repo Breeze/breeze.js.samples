@@ -22,18 +22,18 @@
                 // @see routeStates .when() overrides
 
                 header : [
-                     { name: 'Home',  path: '/welcome',         sref : 'app.welcome',    selected: false }
-                    ,{ name: 'Order', path: '/catalog/pizza',   sref : 'app.catalog.products',      selected: false }
-                    ,{ name: 'About', path: '/about',           sref : 'app.about',      selected: false }
-                    ,{                path: '/order/cart',      sref : 'app.cart', selected: false }
+                     { name: 'Home',  path: '/welcome',         sref : 'app.welcome',       selected: false }
+                    ,{ name: 'Order', path: '/menu/pizza',      sref : 'app.menu.products', selected: false }
+                    ,{ name: 'About', path: '/about',           sref : 'app.about',         selected: false }
+                    ,{                path: '/order/cart',      sref : 'app.cart',          selected: false }
                 ],
 
                 // Routes within the order SIDEBAR view that lead to order content view changes
 
                 sidebar : [
-                     { path: '/catalog/pizza'   ,name: 'Pizza'  ,tag : 'pizza' }
-                    ,{ path: '/catalog/salad'   ,name: 'Salad'  ,tag : 'salad' }
-                    ,{ path: '/catalog/drink'   ,name: 'Drinks' ,tag : 'drink' }
+                     { path: '/menu/pizza'   ,name: 'Pizza'  ,tag : 'pizza' }
+                    ,{ path: '/menu/salad'   ,name: 'Salad'  ,tag : 'salad' }
+                    ,{ path: '/menu/drink'   ,name: 'Drinks' ,tag : 'drink' }
                 ],
 
                 /**

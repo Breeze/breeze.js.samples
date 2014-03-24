@@ -30,7 +30,7 @@
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
             <tr data-ng-repeat="item in vm.draftOrder.orderItems">
-                <td><a  ng-href="#/catalog/{{item.product.type}}/{{item.productId}}">{{item.product.name}}</a></td>
+                <td><a  ng-href="#/menu/{{item.product.type}}/{{item.productId}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>

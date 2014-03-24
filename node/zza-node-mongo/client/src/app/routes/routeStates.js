@@ -88,26 +88,26 @@
                     }
                 }
             })
-            .state( 'app.catalog',
+            .state( 'app.menu',
             {
                 // This is the abstract shell layout for the Catalog dashboard
                 // ( which is currently the same as the base Order dashboard:
                 // with s Sidebar view with a order content area )
 
-                url : '/catalog',
+                url : '/menu',
                 views : {
                     'content@' : {
                         templateUrl: 'src/app/views/orders/order.html'
                     },
-                    'sidebar@app.catalog' : {
+                    'sidebar@app.menu' : {
                         templateUrl: 'src/app/views/orders/sidebar.html'
                     },
-                    'content@app.catalog' : {
+                    'content@app.menu' : {
                         // NOTE: Blank until an order time/type is selected
                     }
                 }
             })
-            .state( 'app.catalog.products',
+            .state( 'app.menu.products',
             {
                 // This is the Product listing view for the Catalog dashboard
                 //
@@ -117,11 +117,13 @@
 
                 url : '/:category',
                 views : {
-                    'content@app.catalog' : {
+                    'content@app.menu' : {
                         templateUrl: function( $stateParams )
                         {
                             // Make sure we have a valid product `category`
-                            // TODO - use `routes` to determine acceptable routes...
+
+                            // TODO - use templateProvider to inject `routes` information
+                            //        that can be used to determine acceptable routes...
 
                             var category = ($stateParams.nCategory || "").toLowerCase(),
                                 isValid  = (['pizza','salad','drink'].indexOf(category) > -1);
@@ -133,13 +135,13 @@
                     }
                 }
             })
-            .state( 'app.catalog.products.item',
+            .state( 'app.menu.products.item',
             {
                 // This state shows the product details for an recently viewed product
 
                 url : '/:productId',
                 views : {
-                    'content@app.catalog' : {
+                    'content@app.menu' : {
                         templateUrl : 'src/app/views/orders/orderItem.html'
                     }
                 }
@@ -148,10 +150,10 @@
 
 
         $urlRouterProvider
-            .when( '/orderPizza',  '/catalog/pizza'  )  // Switch to Pizza listing view
-            .when( '/orderSalad',  '/catalog/salad'  )  // Switch to Salad listing view
-            .when( '/orderDrinks', '/catalog/drinks'  ) // Switch to Salad listing view
-            .otherwise('/catalog/pizza');               // Return to the main/welcome screen
+            .when( '/orderPizza',  '/menu/pizza'  )  // Switch to Pizza listing view
+            .when( '/orderSalad',  '/menu/salad'  )  // Switch to Salad listing view
+            .when( '/orderDrinks', '/menu/drinks'  ) // Switch to Salad listing view
+            .otherwise('/menu/pizza');               // Return to the main/welcome screen
     }
 
 }( this.angular, this.supplant ));
