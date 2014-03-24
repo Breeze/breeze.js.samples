@@ -22,7 +22,7 @@
                     resetManager: resetManager,
 
                     isReady     : initialize(),
-                    ready       : onReady,
+                    ready       : onReady
 
                     /* These are added during initialization:
                      cartOrder,

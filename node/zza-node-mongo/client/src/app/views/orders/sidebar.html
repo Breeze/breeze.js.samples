@@ -13,7 +13,7 @@
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
             <tr data-ng-repeat="item in vm.cartOrder.orderItems">
-                <td><a ui-sref="app.cart.item({category: item.product.type, orderId : item.productId})">{{item.product.name}}</a></td>
+                <td><a ng-href="#/order/{{item.product.type}}/{{item.id}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>
@@ -30,7 +30,7 @@
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
             <tr data-ng-repeat="item in vm.draftOrder.orderItems">
-                <td><a  href="#/order/{{item.product.type}}/{{item.productId}}">{{item.product.name}}</a></td>
+                <td><a  ng-href="#/catalog/{{item.product.type}}/{{item.productId}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>

@@ -22,18 +22,18 @@
                 // @see routeStates .when() overrides
 
                 header : [
-                     { name: 'Home',  path: '/welcome',     sref : 'app.welcome',    selected: false }
-                    ,{ name: 'Order', path: '/orderPizza',  sref : 'app.order',      selected: false }
-                    ,{ name: 'About', path: '/about',       sref : 'app.about',      selected: false }
-                    ,{                path: '/order/cart',  sref : 'app.order.cart', selected: false }
+                     { name: 'Home',  path: '/welcome',         sref : 'app.welcome',    selected: false }
+                    ,{ name: 'Order', path: '/catalog/pizza',   sref : 'app.catalog.products',      selected: false }
+                    ,{ name: 'About', path: '/about',           sref : 'app.about',      selected: false }
+                    ,{                path: '/order/cart',      sref : 'app.cart', selected: false }
                 ],
 
                 // Routes within the order SIDEBAR view that lead to order content view changes
 
                 sidebar : [
-                     { path: '/order/pizza'   ,name: 'Pizza'  ,tag : 'pizza' }
-                    ,{ path: '/order/salad'   ,name: 'Salad'  ,tag : 'salad' }
-                    ,{ path: '/order/drink'   ,name: 'Drinks' ,tag : 'drink' }
+                     { path: '/catalog/pizza'   ,name: 'Pizza'  ,tag : 'pizza' }
+                    ,{ path: '/catalog/salad'   ,name: 'Salad'  ,tag : 'salad' }
+                    ,{ path: '/catalog/drink'   ,name: 'Drinks' ,tag : 'drink' }
                 ],
 
                 /**
@@ -49,7 +49,8 @@
                             return list[j].tag;
                         }
                     }
-                    return null;
+                    // Return `pizza` as the default product listing
+                    return 'pizza';
                 }
             }
         };

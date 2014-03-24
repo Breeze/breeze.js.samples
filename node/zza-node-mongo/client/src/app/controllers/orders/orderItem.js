@@ -8,7 +8,7 @@
             // Private construction function
             // **************************************
 
-            function orderItem( $stateParams, $state, dataservice, util )
+            function orderItem( $stateParams, dataservice, util )
             {
                 var vm         = this;
 
@@ -87,12 +87,9 @@
                 }
 
                 // Get the order item by the order item id.  Returns falsey if not found.
-                function getSelectedItem(orderIdTag, id) {
-                    // Todo: in future, could be the orderId of any order
-                    var item = orderIdTag == 'cart' ?
-                        cartOrder.getSelectedItem(id) :
-                        draftOrder.getSelectedItem(id);
-                    return item;
+                function getSelectedItem(id, category ) {
+
+                    return cartOrder.getSelectedItem(id);
                 }
 
                 // Find an orderItem on the draft order for the given product.

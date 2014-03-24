@@ -11,7 +11,8 @@
     function routeStates($stateProvider, $urlRouterProvider) {
 
         $stateProvider
-            .state('app',             {
+            .state('app',
+            {
                 url: '',
                 views: {
                     'header': {
@@ -25,7 +26,8 @@
                     }
                 }
             })
-            .state( 'app.welcome',    {
+            .state( 'app.welcome',
+            {
                 url : '/welcome',
                 views : {
                     'content@' : {
@@ -33,7 +35,8 @@
                     }
                 }
             })
-            .state( 'app.about',      {
+            .state( 'app.about',
+            {
                 url : '/about',
                 views : {
                     'content@' : {
@@ -41,8 +44,8 @@
                     }
                 }
             })
-            .state( 'app.order',      {
-
+            .state( 'app.order',
+            {
                 // This is the shell layout for the Order dashboard (e.g. order.html)
                 // which has Sidebar view with a order content area
                 //
@@ -61,44 +64,20 @@
                         // NOTE: Blank until an order time/type is selected
                     }
                 }
-
             })
-            .state( 'app.order.catalog', {
-
-                // This state shows the Product listings (pizza, salads, drinks)
-                // from which a product can be selected; selection navigates to the
-                // the produce details page.
-
-                url : '/:category',
-                views : {
-                    'content@app.order' : {
-                        templateUrl: function( $stateParams )
-                        {
-                            // Should we navigate to the products list view or the item details view ?
-                            var listProductsURL = ('src/app/views/catalog/' + $stateParams.category + '.html'),
-                                viewItemURL     = 'src/app/views/orders/orderItem.html';
-
-                            return $stateParams.productId ? viewItemURL : listProductsURL;
-                        }
-                    }
-                }
-            })
-            .state( 'app.order.item', {
-
+            .state( 'app.order.item',
+            {
                 // This state shows the OrderItem editor for an item currently in your cart
 
-                url : '/:category/:productId',
+                url : '/:category/:orderId',
                 views : {
                     'content@app.order' : {
-                        templateUrl : function( $state, $stateParams)
-                        {
-                            return 'src/app/views/orders/orderItem.html';
-                        }
+                        templateUrl : 'src/app/views/orders/orderItem.html'
                     }
                 }
             })
-            .state( 'app.order.cart', {
-
+            .state( 'app.order.cart',
+            {
                 // This state shows the Cart items list view; and shows
                 // both order item and total cart costs....
 
@@ -108,15 +87,71 @@
                         templateUrl : 'src/app/views/orders/cart.html'
                     }
                 }
+            })
+            .state( 'app.catalog',
+            {
+                // This is the abstract shell layout for the Catalog dashboard
+                // ( which is currently the same as the base Order dashboard:
+                // with s Sidebar view with a order content area )
+
+                url : '/catalog',
+                views : {
+                    'content@' : {
+                        templateUrl: 'src/app/views/orders/order.html'
+                    },
+                    'sidebar@app.catalog' : {
+                        templateUrl: 'src/app/views/orders/sidebar.html'
+                    },
+                    'content@app.catalog' : {
+                        // NOTE: Blank until an order time/type is selected
+                    }
+                }
+            })
+            .state( 'app.catalog.products',
+            {
+                // This is the Product listing view for the Catalog dashboard
+                //
+                // This state shows the Product listings (pizza, salads, drinks)
+                // from which a product can be selected; selection navigates to the
+                // the produce details page.
+
+                url : '/:category',
+                views : {
+                    'content@app.catalog' : {
+                        templateUrl: function( $stateParams )
+                        {
+                            // Make sure we have a valid product `category`
+                            // TODO - use `routes` to determine acceptable routes...
+
+                            var category = ($stateParams.nCategory || "").toLowerCase(),
+                                isValid  = (['pizza','salad','drink'].indexOf(category) > -1);
+
+                            if ( !isValid ) category = 'pizza'
+
+                            return 'src/app/views/catalog/' + category + '.html';
+                        }
+                    }
+                }
+            })
+            .state( 'app.catalog.products.item',
+            {
+                // This state shows the product details for an recently viewed product
+
+                url : '/:productId',
+                views : {
+                    'content@app.catalog' : {
+                        templateUrl : 'src/app/views/orders/orderItem.html'
+                    }
+                }
             });
 
 
 
         $urlRouterProvider
-            .when( '/orderPizza',  '/order/pizza'  )  // Switch to Pizza listing view
-            .when( '/orderSalad',  '/order/salad'  )  // Switch to Salad listing view
-            .when( '/orderDrinks', '/order/drinks'  ) // Switch to Salad listing view
-            .otherwise('/orderPizza');                // Return to the main/welcome screen
+            .when( '/orderPizza',  '/catalog/pizza'  )  // Switch to Pizza listing view
+            .when( '/orderSalad',  '/catalog/salad'  )  // Switch to Salad listing view
+            .when( '/orderDrinks', '/catalog/drinks'  ) // Switch to Salad listing view
+            .otherwise('/catalog/pizza');               // Return to the main/welcome screen
     }
 
 }( this.angular, this.supplant ));

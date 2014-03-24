@@ -12,19 +12,19 @@
         {
             var vm = this;
 
-            updateCartAndHistory();
-
             dataservice.ready( function()
             {
-                $scope.$watch( onCartOrHistoryChange ,updateCartAndHistory);
+                $scope.$watch( hasChangedCartOrHistory ,updateCartAndHistory );
 
                 vm.products     = routes.sidebar.map( deselectItem );
                 vm.cartOrder    = dataservice.cartOrder;
                 vm.draftOrder   = dataservice.draftOrder;
 
                 vm.selectItem   = selectItem;
+
             });
 
+            hasChangedCartOrHistory();
 
             // *****************************************************
             // Manage views of Cart or Recent Activity areas...
@@ -38,7 +38,7 @@
              *
              * @returns {string}
              */
-            function onCartOrHistoryChange()
+            function hasChangedCartOrHistory()
             {
                 var cart    = vm.cartOrder,
                     history = vm.draftOrder;
