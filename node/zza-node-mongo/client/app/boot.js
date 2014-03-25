@@ -31,9 +31,7 @@
         app = angular.module( "app", [ 'breeze.angular', 'ui.router', 'ui.bootstrap' ] )
 
         head.js(
-              "./app/config/config.js"
-
-            , "./app/controllers/header.js"
+              "./app/controllers/header.js"
             , "./app/controllers/menu.js"
             , "./app/controllers/orders/cart.js"
             , "./app/controllers/orders/optionTypeVm.js"
@@ -46,6 +44,7 @@
             , "./app/routes/routeMap.js"
             , "./app/routes/routeStates.js"
 
+            , "./app/services/config.js"
             , "./app/services/databaseReset.js"
             , "./app/services/dataservice.js"
             , "./app/services/entityManagerFactory.js"
