@@ -121,7 +121,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\breeze.directives.css" />
     <Content Include="Content\reset.css" />
     <Content Include="Content\toastr.css" />
     <Content Include="Content\todo.css" />
@@ -139,7 +138,6 @@
     <None Include="Scripts\breeze.intellisense.js" />
     <Content Include="Scripts\breeze.angular.js" />
     <Content Include="Scripts\breeze.debug.js" />
-    <Content Include="Scripts\breeze.directives.js" />
     <Content Include="Scripts\breeze.min.js" />
     <Content Include="Scripts\breeze.savequeuing.js" />
     <Content Include="Scripts\jquery-1.8.3.js" />
@@ -213,9 +211,7 @@
   COPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.min.js" "$(ProjectDir)Scripts" /Y
   COPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.debug.js" "$(ProjectDir)Scripts" /Y
   COPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.intellisense.js" "$(ProjectDir)Scripts" /Y
-  COPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.angular.js" "$(ProjectDir)Scripts" /Y
-  COPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.directives.js" "$(ProjectDir)Scripts" /Y
-  COPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.directives.css" "$(ProjectDir)Content" /Y       
+  COPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.angular.js" "$(ProjectDir)Scripts" /Y    
   COPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.savequeuing.js" "$(ProjectDir)Scripts" /Y
   :done</PreBuildEvent>
   </PropertyGroup>
