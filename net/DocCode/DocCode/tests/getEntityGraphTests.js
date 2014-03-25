@@ -311,6 +311,14 @@
         equal(graph[0], order, "should return only the root");
     });
 
+    test("returns just the root when root is in deleted state", 1, function () {
+        var order = orders.pop();
+        order.entityAspect.setDeleted();
+
+        var graph = getEntityGraph(order, 'OrderDetails.Product, Customer');
+        equal(graph[0], order, "should return only the root");
+    });
+
     test("should error if root is not an entity", 1, function () {
         throws(function () {
             var graph = getEntityGraph({}, 'OrderDetails');
@@ -323,6 +331,23 @@
         throws(function() {
             var graph = getEntityGraph(order, 'OrderDetails');
         }, /detached/, "throws 'detached' error");
+    });
+
+    test("should error when root is created-and-deleted (detached)", 1, function () {
+        // for variety, call getEntityGraph with one unchanged and one detached root
+        var unchangedOrder = orders.pop();
+
+        var detachedOrder = manager.createEntity('Order', {
+            Customer: customers[0],
+            ShipName: 'New order that we delete'
+        });
+        detachedOrder.entityAspect.setDeleted();
+
+        var roots = [unchangedOrder, detachedOrder];
+
+        throws(function () {
+            var graph = getEntityGraph(roots, 'OrderDetails.Product, Customer');
+        }, /detached/, "created-and-deleted (detached) root throws 'detached' error");
     });
 
     test("should error if mixed type roots", 1, function () {
