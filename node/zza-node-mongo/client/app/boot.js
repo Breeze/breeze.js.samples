@@ -33,64 +33,36 @@
         head.js(
               "./app/config/config.js"
 
-            , "./app/controllers/session.js"
             , "./app/controllers/header.js"
-            , "./app/controllers/orders/order.js"
-            , "./app/controllers/orders/orderItem.js"
             , "./app/controllers/menu.js"
             , "./app/controllers/orders/cart.js"
+            , "./app/controllers/orders/optionTypeVm.js"
+            , "./app/controllers/orders/orderItem.js"
+            , "./app/controllers/orders/orderSidebar.js"
 
             , "./app/directives/productImgSrcDirective.js"
-            , "./app/services/util.js"
-            , "./app/services/logger.js"
-            , "./app/services/dataservice.js"
-            , "./app/services/databaseReset.js"
-            , "./app/services/dataservice.js"
-            , "./app/services/entityManagerFactory.js"
-            , "./app/services/metadata.js"
-            , "./app/services/model.js"
-            , "./app/services/pricing.js"
 
             // UI-routing configurations
-
             , "./app/routes/routeMap.js"
             , "./app/routes/routeStates.js"
 
+            , "./app/services/databaseReset.js"
+            , "./app/services/dataservice.js"
+            , "./app/services/entityManagerFactory.js"
+            , "./app/services/logger.js"
+            , "./app/services/metadata.js"
+            , "./app/services/model.js"
+            , "./app/services/pricing.js"
+            , "./app/services/util.js"
         )
         .ready("ALL", function()
         {
-             app.run( function configureToastr( util )
+             app.run( function ( util )
              {
-                 // Configure toastr for this app
-                 // 2 second toast timeout
-
-                 toastr.options.timeOut       = 2000;
-                 toastr.options.positionClass = 'toast-bottom-right';
-
                  util.logger.info( "Zza SPA is loaded and running on " + util.config.server );
              });
-
-            app.run(function ($rootScope, $log){
-                $rootScope.$on('$stateChangeStart',
-                    function(event, toState, toParams, fromState, fromParams){
-                        $log.log("stateChangeStart: from '"+fromState.name + "' to '"+ toState.name+"'");
-                    });
-
-                $rootScope.$on('$stateChangeError',
-                    function(event, toState, toParams, fromState, fromParams, error){
-                        $log.log("stateChangeError: from '"+fromState.name + "' to '"+ toState.name+"' with error: "+error);
-                    });
-
-                $rootScope.$on('$stateChangeSuccess',
-                    function(event, toState, toParams, fromState, fromParams){
-                        $log.log("stateChangeSuccess: from '"+fromState.name + "' to '"+ toState.name+"'");
-                    });
-            });
         });
 
-
-
     });
-
 
 }( window.head ));

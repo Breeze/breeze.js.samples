@@ -1,9 +1,9 @@
-﻿<!-- OrderSideBar, a sub-view that is controlled by the parent viewmodel, Order -->
-<div  ng-show="vm.cartOrder">
+﻿<!-- OrderSideBar-->
+<div data-ng-controller="orderSidebar as vm" data-ng-show="vm.cartOrder">
     <div class="well sidebar-nav">
         Menu
         <ul class="nav nav-list">
-            <li data-ng-repeat="link in vm.links" data-ng-class="{active: vm.isSelected(link)}" >
+            <li data-ng-repeat="link in vm.menuLinks" data-ng-class="{active: vm.isSelected(link)}" >
                 <a data-ng-href="#{{link.path}}">{{link.name}}</a>
             </li>
         </ul>
@@ -14,7 +14,7 @@
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
             <tr data-ng-repeat="item in vm.cartOrder.orderItems">
-                <td><a ng-href="{{vm.orderItemLink(item)}">{{item.product.name}}</a></td>
+                <td><a ng-href="{{vm.cartItemLink(item)}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>
@@ -31,7 +31,7 @@
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
             <tr data-ng-repeat="item in vm.draftOrder.orderItems">
-                <td><a data-ng-href="{{vm.orderItemLink(item)}">{{item.product.name}}</a></td>
+                <td><a data-ng-href="{{vm.draftItemLink(item)}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>

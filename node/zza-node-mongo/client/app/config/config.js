@@ -4,22 +4,22 @@
     angular.module( "app" )
            .factory( 'config', factory );
 
-        // **************************************
-        // Private construction function
-        // **************************************
+    function factory( ) {
+        // Configure toastr for this app
+        // 2 second toast timeout
+        toastr.options.timeOut       = 2000;
+        toastr.options.positionClass = 'toast-bottom-right';
 
-        function factory( ) {
-            return {
-                version             : '0.5.0',
-                server              : 'Express',
-                serviceName         : 'breeze/zza',
-                devServiceName      : 'breeze/Dev',
-                productImageBasePath: 'app/images/products/',
-                productUnknownImage : 'app/images/products/unknown.jpg',
-                userSessionId       : '0', //breeze.core.getUuid(),
-                serverTimeoutMs     : 5000 // 5 seconds should be long enough
-            };
+        return {
+            version             : '0.5.0',
+            debug               : true,
+            server              : 'Express',
+            serviceName         : 'breeze/zza',
+            devServiceName      : 'breeze/Dev',
+            productImageBasePath: 'app/images/products/',
+            productUnknownImage : 'app/images/products/unknown.jpg',
+            userSessionId       : '0' //breeze.core.getUuid()
         };
-
+    };
 
 }( this.angular ));

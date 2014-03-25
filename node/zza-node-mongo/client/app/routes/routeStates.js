@@ -1,12 +1,9 @@
-(function( angular, supplant ) {
+(function( angular ) {
     'use strict';
 
     angular.module( "app" )
-           .config( routeStates );
-
-    // **************************************
-    // Private construction function
-    // **************************************
+           .config( routeStates )
+           .run(reportStateChanges);
 
     function routeStates($stateProvider, $urlRouterProvider) {
 
@@ -48,9 +45,6 @@
                 {
                     // This is the shell layout for the Order dashboard (e.g. order.html)
                     // which has an orderSidebar area and an order content area
-                    //
-                    // NOTE: The order content can display Product listings or the OrderItem details.
-
                     url : '/order',
                     views : {
                         'content@' : {
@@ -60,15 +54,15 @@
                             templateUrl: 'app/views/orders/orderSidebar.html'
                         },
                         'content@app.order' : {
-                            // NOTE: Blank until an order time/type is selected
+                            // NOTE: Blank until filled by a more specific app.order state
                         }
                     }
                 })
                     .state( 'app.order.item',
                     {
-                        // This state shows the OrderItem editor for an item currently in your cart
-
-                        url : '/:category/:orderId',
+                        // An OrderItem editor state
+                        // The state the user picks an OrderItem from one of the orders
+                        url : '/:orderId/:productType/:orderItemId',
                         views : {
                             'content@app.order' : {
                                 templateUrl : 'app/views/orders/orderItem.html'
@@ -76,12 +70,10 @@
                         }
                     })
                     .state( 'app.order.product',
-                    // The stat after a user picks a product, which implicitly
-                    // switches to a draft cart OrderItem.
-                    // either by locating that item in the draft cart by productId
-                    // or by creating a new draft item for the product with that productId
                     {
-                        url : '^/menu/:category/:productId',
+                        // An OrderItem editor state
+                        // The state after a user picks a product from a product menu
+                        url : '^/menu/:productType/:productId',
                         views : {
                             'content@app.order' : {
                                 templateUrl : 'app/views/orders/orderItem.html'
@@ -90,9 +82,7 @@
                     })
                     .state( 'app.order.cart',
                     {
-                        // This state shows the Cart items list view; and shows
-                        // both order item and total cart costs....
-
+                        // This state shows the Cart items list view
                         url : '/cart',
                         views : {
                             'content@app.order' : {
@@ -101,47 +91,44 @@
                         }
                     })
 
-
                 .state( 'app.menu',
                 {
-                    // This is the abstract shell layout for the Catalog dashboard
-                    // ( which is currently the same as the base Order dashboard:
-                    // with an orderSidebar area and an order content area )
-
-                    url : '/menu',
+                    // This state shows the Product listings (pizzas, salads, drinks)
+                    // from which a product can be selected; selection navigates to the
+                    // the produce details page.
+                    url: '/menu/:productType',
                     views : {
                         'content@' : {
-                            templateUrl: 'app/views/orders/order.html'
+                            templateUrl: 'app/views/menu/menu.html'
                         },
                         'orderSidebar@app.menu' : {
                             templateUrl: 'app/views/orders/orderSidebar.html'
-                        },
-                        'content@app.menu' : {
-                            // NOTE: Blank until an order time/type is selected
-                            templateUrl: 'app/views/menu/menu.html'
                         }
                     }
-                })
-
-                    .state( 'app.menu.productType',
-                    {
-                    // This is the Product listing view for the Catalog dashboard
-                    // This state shows the Product listings (pizza, salads, drinks)
-                    // from which a product can be selected; selection navigates to the
-                    // the produce details page.
-                    url: '/:productType',
-                       views : {
-                          'content@app.menu' : {
-                              templateUrl: 'app/views/menu/menu.html'
-                          }
-                       }
-                    });
+                });
 
         $urlRouterProvider
-            //.when( '/orderPizza',  '/menu/pizza'  )  // Switch to Pizza listing view
-            //.when( '/orderSalad',  '/menu/salad'  )  // Switch to Salad listing view
-            //.when( '/orderDrinks', '/menu/drinks'  ) // Switch to Salad listing view
-            .otherwise('/menu/pizza');               // Return to the main ordering screen
+            .when( '/menu', '/menu/pizza'  ) // Switch to Pizza listing view
+            .otherwise('/menu/pizza');       // Return to the main ordering screen
     }
 
-}( this.angular, this.supplant ));
+    function reportStateChanges($rootScope, $log, config){
+        if (config.debug) {
+            $rootScope.$on('$stateChangeStart',
+                function(event, toState, toParams, fromState, fromParams){
+                    $log.log("stateChangeStart: from '"+fromState.name + "' to '"+ toState.name+"'");
+                });
+
+            $rootScope.$on('$stateChangeError',
+                function(event, toState, toParams, fromState, fromParams, error){
+                    $log.log("stateChangeError: from '"+fromState.name + "' to '"+ toState.name+"' with error: "+error);
+                });
+
+            $rootScope.$on('$stateChangeSuccess',
+                function(event, toState, toParams, fromState, fromParams){
+                    $log.log("stateChangeSuccess: from '"+fromState.name + "' to '"+ toState.name+"'");
+                });
+        }
+    }
+
+}( this.angular ));

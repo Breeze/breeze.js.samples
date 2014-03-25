@@ -1,7 +1,7 @@
 ﻿(function(angular) {
     'use strict';
 
-   angular.module( "app" ).controller( 'menu', controller );
+    angular.module( "app" ).controller( 'menu', controller );
 
     function controller( $stateParams, dataservice ) {
         var vm  = this;
@@ -19,7 +19,7 @@
                 type = types[types.indexOf(type.toLowerCase())];
             }
             type = type || 'pizza';
-            var templateBase = 'app/views/menu/';
+            var templateBase = 'app/views/menu/menu.';
             vm.products = dataservice.products.byTag( type );
             vm.productLink = productLink;
             vm.template = templateBase + type + '.html';

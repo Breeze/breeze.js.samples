@@ -6,6 +6,7 @@
     'use strict';
 
     angular.module("app").factory( 'metadata', factory );
+
     function factory(breeze) {
         setNamingConvention();
         return {
