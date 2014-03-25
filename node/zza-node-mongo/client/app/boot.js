@@ -36,9 +36,8 @@
             , "./app/controllers/session.js"
             , "./app/controllers/header.js"
             , "./app/controllers/orders/order.js"
-            , "./app/controllers/orders/orderSidebar.js"
             , "./app/controllers/orders/orderItem.js"
-            , "./app/controllers/catalog.js"
+            , "./app/controllers/menu.js"
             , "./app/controllers/orders/cart.js"
 
             , "./app/directives/productImgSrcDirective.js"
@@ -70,6 +69,23 @@
 
                  util.logger.info( "Zza SPA is loaded and running on " + util.config.server );
              });
+
+            app.run(function ($rootScope, $log){
+                $rootScope.$on('$stateChangeStart',
+                    function(event, toState, toParams, fromState, fromParams){
+                        $log.log("stateChangeStart: from '"+fromState.name + "' to '"+ toState.name+"'");
+                    });
+
+                $rootScope.$on('$stateChangeError',
+                    function(event, toState, toParams, fromState, fromParams, error){
+                        $log.log("stateChangeError: from '"+fromState.name + "' to '"+ toState.name+"' with error: "+error);
+                    });
+
+                $rootScope.$on('$stateChangeSuccess',
+                    function(event, toState, toParams, fromState, fromParams){
+                        $log.log("stateChangeSuccess: from '"+fromState.name + "' to '"+ toState.name+"'");
+                    });
+            });
         });
 
 

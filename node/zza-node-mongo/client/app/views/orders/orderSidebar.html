@@ -1,36 +1,37 @@
-﻿<div data-ng-controller="orderSidebar as vm" ng-hide="!vm.cartOrder">
+﻿<!-- OrderSideBar, a sub-view that is controlled by the parent viewmodel, Order -->
+<div  ng-show="vm.cartOrder">
     <div class="well sidebar-nav">
         Menu
         <ul class="nav nav-list">
-            <li data-ng-repeat="link in vm.products" data-ng-class="{active: link.selected == true }" ng-click="vm.selectItem(link)">
+            <li data-ng-repeat="link in vm.links" data-ng-class="{active: vm.isSelected(link)}" >
                 <a data-ng-href="#{{link.path}}">{{link.name}}</a>
             </li>
         </ul>
     </div>
 
-    <div class="well" ng-hide="vm.hideCart" style="background-color: rgb(199, 235, 199); padding-bottom: 40px;">
+    <div class="well" style="background-color: rgb(199, 235, 199); padding-bottom: 40px;">
         Order Summary
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
             <tr data-ng-repeat="item in vm.cartOrder.orderItems">
-                <td><a ng-href="#/order/{{item.product.type}}/{{item.id}}">{{item.product.name}}</a></td>
+                <td><a ng-href="{{vm.orderItemLink(item)}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>
         </table>
         <p></p>
         <div class="btn-group pull-right">
-            <a class="btn btn-warning" ui-sref="app.order.cart"><i class="icon-shopping-cart"></i> Cart</a>
+            <a class="btn btn-warning" data-ui-sref="app.order.cart"><i class="icon-shopping-cart"></i> Cart</a>
         </div>
 
     </div>
 
-    <div class="well" ng-hide="vm.hideHistory" >
+    <div class="well" >
         Recently Viewed
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
             <tr data-ng-repeat="item in vm.draftOrder.orderItems">
-                <td><a  ng-href="#/menu/{{item.product.type}}/{{item.productId}}">{{item.product.name}}</a></td>
+                <td><a data-ng-href="{{vm.orderItemLink(item)}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>

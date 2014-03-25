@@ -48,12 +48,12 @@
 
                 function showCatalog( category )
                 {
-                   // $state.go('app.order.catalog', {category : $stateParams.category});
+                   // $state.go('app.order.menu', {category : $stateParams.category});
                 }
 
                 function getOrderItemInfo( options )
                 {
-                        // id may be `productId` or `orderItemId`, depending upon route tag
+                        // id may be `productId` or `orderItemId`, depending upon stateParams
                         // `category` identifies the group of products: pizza, drinks, salads
 
                     var id        = options.orderId || options.productId
