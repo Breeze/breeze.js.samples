@@ -2,10 +2,10 @@
     'use strict';
 
     angular.module( "app" )
-           .config( routeStates )
+           .config( configureStates )
            .run(reportStateChanges);
 
-    function routeStates($stateProvider, $urlRouterProvider) {
+    function configureStates($stateProvider, $urlRouterProvider) {
 
         $stateProvider
             .state('app',
@@ -13,13 +13,13 @@
                 url: '',
                 views: {
                     'header': {
-                        templateUrl: 'app/views/header.html'
+                        templateUrl: 'app/shell/header.html'
                     },
                     'content': {
-                        templateUrl: 'app/views/welcome.html'
+                        templateUrl: 'app/shell/welcome.html'
                     },
                     'footer': {
-                        templateUrl: 'app/views/footer.html'
+                        templateUrl: 'app/shell/footer.html'
                     }
                 }
             })
@@ -28,7 +28,7 @@
                     url : '/welcome',
                     views : {
                         'content@' : {
-                            templateUrl: 'app/views/welcome.html'
+                            templateUrl: 'app/shell/welcome.html'
                         }
                     }
                 })
@@ -37,7 +37,7 @@
                     url : '/about',
                     views : {
                         'content@' : {
-                            templateUrl: 'app/views/about.html'
+                            templateUrl: 'app/shell/about.html'
                         }
                     }
                 })
@@ -48,10 +48,10 @@
                     url : '/order',
                     views : {
                         'content@' : {
-                            templateUrl: 'app/views/orders/order.html'
+                            templateUrl: 'app/order/order.html'
                         },
                         'orderSidebar@app.order' : {
-                            templateUrl: 'app/views/orders/orderSidebar.html'
+                            templateUrl: 'app/order/orderSidebar.html'
                         },
                         'content@app.order' : {
                             // NOTE: Blank until filled by a more specific app.order state
@@ -61,11 +61,11 @@
                     .state( 'app.order.item',
                     {
                         // An OrderItem editor state
-                        // The state the user picks an OrderItem from one of the orders
+                        // The state the user picks an OrderItem from one of the order
                         url : '/:orderId/:productType/:orderItemId',
                         views : {
                             'content@app.order' : {
-                                templateUrl : 'app/views/orders/orderItem.html'
+                                templateUrl : 'app/order/orderItem.html'
                             }
                         }
                     })
@@ -76,7 +76,7 @@
                         url : '^/menu/:productType/:productId',
                         views : {
                             'content@app.order' : {
-                                templateUrl : 'app/views/orders/orderItem.html'
+                                templateUrl : 'app/order/orderItem.html'
                             }
                         }
                     })
@@ -86,7 +86,7 @@
                         url : '/cart',
                         views : {
                             'content@app.order' : {
-                                templateUrl : 'app/views/orders/cart.html'
+                                templateUrl : 'app/order/cart.html'
                             }
                         }
                     })
@@ -99,10 +99,10 @@
                     url: '/menu/:productType',
                     views : {
                         'content@' : {
-                            templateUrl: 'app/views/menu/menu.html'
+                            templateUrl: 'app/menu/menu.html'
                         },
                         'orderSidebar@app.menu' : {
-                            templateUrl: 'app/views/orders/orderSidebar.html'
+                            templateUrl: 'app/order/orderSidebar.html'
                         }
                     }
                 });

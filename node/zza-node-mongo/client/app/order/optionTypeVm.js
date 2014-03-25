@@ -7,6 +7,10 @@
         .factory( 'OptionTypeVm', factory );
 
     function factory( util ) {
+        var choiceTemplateBase = './app/order/',
+            manyChoiceTemplate = choiceTemplateBase+'orderItemOptionMany.html',
+            oneChoiceTemplate = choiceTemplateBase+'orderItemOptionOne.html';
+
         extendOptionTypeVm()
         return OptionTypeVm;
 
@@ -30,9 +34,11 @@
             // distribute the options in each tab among 3 columns
             typeVm.columnOptions = util.deal(typeVm.options, 3);
             setOptionTypeVmCostFlags(typeVm);
+
             // indicates which typeVms allow only one choice
-            typeVm.oneChoice = typeVm.type == 'crust'; // can only pick one crust
-            if (typeVm.oneChoice) {ensureOneOptionSelected(typeVm);}
+            var oneChoice = typeVm.type == 'crust'; // can only pick one crust
+            typeVm.choiceTemplate = oneChoice ? oneChoiceTemplate : manyChoiceTemplate;
+            if (oneChoice) {ensureOneOptionSelected(typeVm);}
         }
 
         function ensureOneOptionSelected(typeVm){

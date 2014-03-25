@@ -9,7 +9,7 @@
     "use strict";
 
     var app;
-
+    /* Load vendor libraries */
     head.js(
 
           { jquery       : "./vendor/jquery/jquery.min.js"                   }
@@ -26,24 +26,25 @@
         , { breeze_metah : "./breeze/breeze.metadata-helper.js"          }
 
     )
+    /* Define 'app' module and load application scripts */
     .ready("ALL", function() {
 
         app = angular.module( "app", [ 'breeze.angular', 'ui.router', 'ui.bootstrap' ] )
 
         head.js(
-              "./app/controllers/header.js"
-            , "./app/controllers/menu.js"
-            , "./app/controllers/orders/cart.js"
-            , "./app/controllers/orders/optionTypeVm.js"
-            , "./app/controllers/orders/orderItem.js"
-            , "./app/controllers/orders/orderSidebar.js"
+            /* Feature Areas: views and controllers */
+              "./app/menu/menu.js"
+            , "./app/order/cart.js"
+            , "./app/order/optionTypeVm.js"
+            , "./app/order/orderItem.js"
+            , "./app/order/orderSidebar.js"
+            , "./app/shell/header.js"
 
+            /* Directives & Routing */
             , "./app/directives/productImgSrcDirective.js"
+            , "./app/routeStates.js"
 
-            // UI-routing configurations
-            , "./app/routes/routeMap.js"
-            , "./app/routes/routeStates.js"
-
+            /* Services */
             , "./app/services/config.js"
             , "./app/services/databaseReset.js"
             , "./app/services/dataservice.js"

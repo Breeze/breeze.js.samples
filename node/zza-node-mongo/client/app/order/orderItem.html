@@ -12,7 +12,7 @@
                 <tr data-ng-repeat="svm in vm.sizeVms">
                     <td><label class="radio" for="size{{svm.id}}">{{svm.name}}</label> </td>
                     <td><label class="radio" for="size{{svm.id}}">
-                            <input type="radio" data-ng-model="orderItem.productSizeId"
+                            <input type="radio" data-ng-model="vm.orderItem.productSizeId"
                                    value="{{svm.id}}" name="selectedSize" id="size{{svm.id}}"/>
                             {{svm.price | currency}}
                         </label>
@@ -36,14 +36,7 @@
                 <tab data-ng-repeat="tab in vm.typeVms" heading="{{tab.title}}" active="tab.active" disabled="tab.disabled">
                     <p data-ng-show="tab.allFree" class="optionMessage">These choices are all free! Enjoy!</p>
                     <p data-ng-show="tab.someCostMore" class="optionMessage">Choices with an (*) after the name count as 2.</p>
-
-                    <div data-ng-if="tab.oneChoice" >
-                        <div data-ng-include="'./app/views/orders/orderItemOptionOne.html'"></div>
-                    </div>
-                    <div data-ng-if="!tab.oneChoice" >
-                        <div data-ng-include="'./app/views/orders/orderItemOptionMany.html'"></div>
-                    </div>
-
+                    <div data-ng-include="tab.choiceTemplate"></div>
                 </tab>
             </tabset>
             <p></p>

@@ -19,7 +19,7 @@
                 type = types[types.indexOf(type.toLowerCase())];
             }
             type = type || 'pizza';
-            var templateBase = 'app/views/menu/menu.';
+            var templateBase = 'app/menu/menu.';
             vm.products = dataservice.products.byTag( type );
             vm.productLink = productLink;
             vm.template = templateBase + type + '.html';

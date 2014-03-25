@@ -41,7 +41,7 @@ You only install these modules once.
 
 	>The default location per MongoDB installation instructions is *C:\mongodb\bin*. Your location may be different.
 
-3.	Type **mongod** to start MongoDB. 
+3.	Type **mongod** to start MongoDB.
 
 	>Do not close this window. Closing the window will end the MongoDB process.
 
@@ -50,16 +50,15 @@ You only install these modules once.
 5.	Navigate to the *Zza-Node-Mongo* directory.
 
 6.	Type **node server** to start the Node.js/Express server.
-7.	
+7.
 	>Do not close this window. Closing the window will end the Express process.
 
 ### Run Zza
 
 Open **localhost:3000** in a web browser to run the Zza application.
 
-## Release 0.5
+## Release 0.7.0
 * Initial release.
 * Demonstrates fundamental characteristics of a MongoDB app.
 * Maintainable w/o any Microsoft assets at all, neither code nor development tools.
 * Demonstrates more sophisticated user interaction paradigms than other Breeze samples. (It actually looks like a SPA.)
-* Makes better use of Angular than other Breeze + Angular samples.

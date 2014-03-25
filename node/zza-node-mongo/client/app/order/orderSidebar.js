@@ -30,9 +30,10 @@
             return '#/order/draft/'+item.product.type+'/'+item.id;
         }
 
-        function isSelected( link )
-        {
-            return -1 < $location.path().toLowerCase().indexOf(link.tag);
+        function isSelected( link ){
+            var path = $location.path().toLowerCase();
+            if (path === '/menu/') {path = path+'pizza';}
+            return -1 < path.indexOf(link.tag);
         }
 
     };

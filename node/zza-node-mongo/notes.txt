@@ -11,7 +11,5 @@ db.Customer.find({"firstName":"Derek"})
 
 
 Need Bower installs and Grunt build script
-Need RequireJS
-Need contextual NG modules
 
-Need description of
+
