@@ -3,25 +3,20 @@
 
     angular.module( "app" ).factory( 'dataservice', factory );
 
-    function factory( breeze, entityManagerFactory, model, util ) {
+    function factory( breeze, entityManagerFactory, lookups, model, util ) {
 
-        var config   = util.config,
-            logger   = util.logger,
-            $timeout = util.$timeout,
-            $q       = util.$q;
+        var logger   = util.logger,
+            manager,
+            $timeout = util.$timeout
 
-        var EntityQuery = breeze.EntityQuery,
-            manager = entityManagerFactory.newManager(),
-            service = {
-                saveChanges : saveChanges,
+        var service = {
+                ready       : ready,
                 resetManager: resetManager,
-
-                isReady     : initialize(),
-                ready       : onReady
-
+                saveChanges : saveChanges
                 /* These are added during initialization:
                  cartOrder,
                  draftOrder,
+                 isReady,
                  orderStatuses,
                  products,
                  productOptions,
@@ -29,132 +24,38 @@
                  */
             };
 
+        initialize();
         return service;
 
-        //#region implementation
+        /* implementation */
+
         function initialize() {
-
-            return fetchLookups()
-                        .then(  setServiceLookups )
-                        .then(  createDraftAndCartOrders );
-        }
-
-        function onReady( resolveHandler, rejectHandler )
-        {
-            return service.isReady.then( resolveHandler,  rejectHandler );
-        }
-
-
-        function fetchLookups() {
-
-            return EntityQuery.from('Lookups')
-                              .using(manager)
-                              .execute()
-                              .then(function () {
-                                  logger.info("Lookups loaded from server.");
-                              })
-                              .catch( function (error) {
-                                  logger.error(error.message, "Data initialization failed");
-                                  logger.error("Alert: Is your MongoDB server running ?");
-                                  throw error; // so downstream fail handlers hear it too
-                              });
-        }
-
-        function setServiceLookups( ) {
-
-            // set service lookups from  lookup data in cache
-            service.OrderStatus = {
-                statuses : manager.getEntities('OrderStatus')
-            };
-            service.products        = manager.getEntities('Product');
-            service.productOptions  = manager.getEntities('ProductOption');
-            service.productSizes    = manager.getEntities('ProductSize');
-            extendLookups();
-        }
-
-        function extendLookups() {
-            var u = util, s = service, os = s.OrderStatus; // for brevity
-
-            os.byId = u.filterById(os.statuses);
-            os.byName = u.filterByName(os.statuses);
-
-            // OrderStatus enums
-            os.Ordered = os.byName(/Ordered/i)[0];
-            os.PickedUp = os.byName(/PickedUp/i)[0];
-            os.Delivered = os.byName(/Delivered/i)[0];
-            os.Cancelled = os.byName(/Cancelled/i)[0];
-            os.Pending = os.byName(/Pending/i)[0];
-
-            s.products.byId = u.filterById(s.products);
-            s.products.byName = u.filterByName(s.products);
-            s.products.byTag = filterProductsByTag(s.products);
-
-            s.productSizes.byId = u.filterById(s.productSizes);
-            s.productSizes.byProduct = filterSizesByProduct(s.productSizes);
-
-            s.productOptions.byId = u.filterById(s.productOptions);
-            s.productOptions.byTag = filterOptionsByTag(s.productOptions);
-            s.productOptions.byProduct = filterOptionsByProduct(s.productOptions);
-
-        }
-
-        function filterProductsByTag(products) {
-            return function (tag) {
-                return products.filter(function (p) { return p.type === tag; });
-            };
-        }
-
-        function filterSizesByProduct(productSizes) {
-            return function (product) {
-                var sizeIds = product.productSizeIds;
-                var type = product.type;
-                if (sizeIds.length) {
-                    return productSizes.filter(function (ps) {
-                        return (ps.type == type) && (sizeIds.indexOf(ps.id) >= 0);
+            manager = entityManagerFactory.newManager();
+            service.isReady = lookups.fetchLookups(service, manager)
+                    .then( createDraftAndCartOrders )
+                    .catch( function (error) {
+                        logger.error(error.message, "Data initialization failed");
+                        logger.error("Alert: Is your MongoDB server running ?");
+                        throw error; // so downstream fail handlers hear it too
                     });
-                } else {
-                    return productSizes.filter(function (ps) { return ps.type === type; });
-                }
-            };
         }
 
-        function filterOptionsByTag(productOptions) {
-            return function (tag) {
-                if (tag == 'pizza') {
-                    return productOptions.filter(function (o) { return o.isPizzaOption; });
-                } else if (tag == 'salad') {
-                    return productOptions.filter(function (o) { return o.isSaladOption; });
-                }
-                return [];  // drink tag has no options
-            };
-        }
-
-        function filterOptionsByProduct(productOptions){
-            return function (product) {
-                var type = product.type;
-                if (type == 'pizza') {
-                    if (product.hasOptions) {
-                        return productOptions.filter(function(o) { return o.isPizzaOption;});
-                    } else {
-                        // even pizza without options has crust and spice options
-                        return productOptions.filter(
-                            function (o) { return o.isPizzaOption &&
-                                (o.type === "crust" || o.type === "spice");});
-                    }
-                } else if (type == 'salad') {
-                    return productOptions.filter(function(o) { return o.isSaladOption; });
-                }
-                return [];  // drink tag has no options
-            };
-        }
-
-        /**
-         * Only available after lookups have arrived.
-         */
         function createDraftAndCartOrders() {
+            // Don't call until OrderStatus is available (from lookups)
             var orderInit = { orderStatus: service.OrderStatus.Pending};
             service.cartOrder = model.Order.create(manager, orderInit);
             service.draftOrder = model.Order.create(manager, orderInit);
+        }
+
+        function ready(success, fail) {
+            var promise = service.isReady;
+            if (success) {
+                promise = promise.then(success);
+            }
+            if (fail){
+                promise = promise.catch(fail);
+            }
+            return promise
         }
 
         function saveChanges() {
@@ -191,15 +92,14 @@
             attachEntities(service.productOptions);
             attachEntities(service.productSizes);
             createDraftAndCartOrders();
-        }
 
-        // Should be in Breeze itself
-        function attachEntities(entities ) {
-            entities.forEach(function (entity) {
-                manager.attachEntity( entity );
-            });
+            // Should be in Breeze itself
+            function attachEntities(entities ) {
+                entities.forEach(function (entity) {
+                    manager.attachEntity( entity );
+                });
+            }
         }
-        //#endregion
 
     };
 

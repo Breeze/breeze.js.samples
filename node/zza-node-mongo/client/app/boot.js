@@ -47,6 +47,7 @@
             , "./app/services/config.js"
             , "./app/services/databaseReset.js"
             , "./app/services/dataservice.js"
+            , "./app/services/dataservice.lookups.js"
             , "./app/services/entityManagerFactory.js"
             , "./app/services/logger.js"
             , "./app/services/metadata.js"
