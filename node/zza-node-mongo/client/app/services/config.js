@@ -11,7 +11,7 @@
         toastr.options.positionClass = 'toast-bottom-right';
 
         return {
-            version             : '0.5.0',
+            version             : '0.6.0',
             debug               : true,
             server              : 'Express',
             serviceName         : 'breeze/zza',
