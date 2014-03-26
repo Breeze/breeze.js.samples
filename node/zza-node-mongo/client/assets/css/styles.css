@@ -2,6 +2,9 @@
   display: none;
 }
 
+.hand {
+  cursor:pointer
+}
 /* put some horizontal space around the top nav and footer */
 .navbar .navbar-inner {
     padding-left:20px;
@@ -10,7 +13,7 @@
 
 /* Add some air above the description */
 p.description {
-   margin-top: 10px; 
+   margin-top: 10px;
 }
 
 /* Ex: "These choices are all free" */
