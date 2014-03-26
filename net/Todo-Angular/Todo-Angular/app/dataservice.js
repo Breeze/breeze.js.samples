@@ -28,6 +28,7 @@
             hasChanges: hasChanges,
             purge: purge,
             reset: reset,
+            removePropertyChangeHandler: removePropertyChangeHandler,
             saveChanges: saveChanges
         };
         return service;
@@ -35,6 +36,7 @@
         /*** implementation details ***/
 
         function addPropertyChangeHandler(handler) {
+            // Actually adds any 'entityChanged' event handler
             // call handler when an entity property of any entity changes
             return manager.entityChanged.subscribe(function(changeArgs) {
                 var action = changeArgs.entityAction;
@@ -92,6 +94,11 @@
                 manager.clear();
                 if (callback) callback();
             });
+        }
+
+        function removePropertyChangeHandler(handler) {
+            // Actually removes any 'entityChanged' event handler
+            return manager.entityChanged.unsubscribe(handler);
         }
 
         function reset(callback) {

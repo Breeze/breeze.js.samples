@@ -8,9 +8,9 @@
 (function() {
 
     angular.module('app').controller('TodoController',
-    ['$q', '$timeout', 'dataservice', 'logger', controller]);
+    ['$q', '$scope', '$timeout', 'dataservice', 'logger', controller]);
 
-    function controller($q, $timeout, dataservice, logger) {
+    function controller($q, $scope, $timeout, dataservice, logger) {
         // The controller's API to which the view binds
         var vm = this;
         vm.addItem = addItem;
@@ -35,7 +35,7 @@
         getTodos();
 
         // Listen for property change of ANY entity so we can (optionally) save
-        dataservice.addPropertyChangeHandler(propertyChanged);
+        listenForPropertyChanged();
 
         /* Implementation */
 
@@ -167,6 +167,24 @@
             return null;
         };
 
+        function listenForPropertyChanged() {
+            // Listen for property change of ANY entity so we can (optionally) save
+            var token = dataservice.addPropertyChangeHandler(propertyChanged);
+
+            // Arrange to remove the handler when the controller is destroyed
+            // which won't happen in this app but would in a multi-page app
+            $scope.$on("$destroy", function () {
+                dataservice.removePropertyChangeHandler(token);
+            });
+
+            function propertyChanged(changeArgs) {
+                // propertyChanged triggers save attempt UNLESS the property is the 'Id'
+                // because THEN the change is actually the post-save Id-fixup 
+                // rather than user data entry so there is actually nothing to save.
+                if (changeArgs.args.propertyName !== 'Id') { save(); }
+            }
+        }
+
         function markAllCompleted(value) {
             suspendSave = true;
             vm.items.forEach(function (item) {
@@ -176,15 +194,6 @@
             suspendSave = false;
             save(true);
         };
-
-        function propertyChanged(changeArgs) {
-            // propertyChanged triggers save attempt UNLESS the property is the 'Id'
-            // because THEN the change is actually the post-save Id-fixup 
-            // rather than user data entry so there is actually nothing to save.
-            if (changeArgs.args.propertyName !== 'Id') {
-                save();
-            }
-        }
 
         function purge() {
             return dataservice.purge(vm.getTodos);
@@ -221,5 +230,4 @@
         };
 
     }
-
 })();
