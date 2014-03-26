@@ -11,7 +11,7 @@
             <tbody data-ng-repeat="item in vm.cartOrder.orderItems">
                 <tr>
                     <td><button class="btn" data-ng-click="vm.removeItem(item)">Remove</button></td>
-                    <td><a href="{{vm.cartItemLink(item)}}"><strong>{{item.product.name}}</strong></a></td>
+                    <td><a href="#" data-ui-sref="{{vm.cartItemState(item)}}"><strong>{{item.product.name}}</strong></a></td>
                     <td>{{item.productSize.name}}</td>
                     <td><input type="text" data-ng-model="item.quantity" data-ng-change="vm.updateCosts()" class="input-mini" /></td>
                     <td>{{item.unitPrice | currency}}</td>

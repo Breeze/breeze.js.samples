@@ -4,14 +4,14 @@
     angular.module( "app" )
            .factory( 'config', factory );
 
-    function factory( ) {
+    function factory($rootScope ) {
         // Configure toastr for this app
         // 2 second toast timeout
         toastr.options.timeOut       = 2000;
         toastr.options.positionClass = 'toast-bottom-right';
 
         return {
-            version             : '0.7.0',
+            version             : $rootScope.version = '0.7.0',
             debug               : true,
             server              : 'Express',
             serviceName         : 'breeze/zza',
