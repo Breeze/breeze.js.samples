@@ -3,8 +3,8 @@
     <div class="well sidebar-nav">
         Menu
         <ul class="nav nav-list">
-            <li data-ng-repeat="link in vm.menuLinks" data-ng-class="{active: vm.isSelected(link)}" >
-                <a data-ng-href="#{{link.path}}">{{link.name}}</a>
+            <li data-ng-repeat="state in vm.menuStates" data-ng-class="{active: vm.isSelected(state)}" >
+                <a href="#" data-ui-sref="{{state.sref}}">{{state.name}}</a>
             </li>
         </ul>
     </div>
@@ -14,14 +14,14 @@
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
             <tr data-ng-repeat="item in vm.cartOrder.orderItems">
-                <td><a ng-href="{{vm.cartItemLink(item)}}">{{item.product.name}}</a></td>
+                <td><a href="#" data-ui-sref="{{vm.cartItemStateRef(item)}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>
         </table>
         <p></p>
         <div class="btn-group pull-right">
-            <a class="btn btn-warning" data-ui-sref="app.order.cart"><i class="icon-shopping-cart"></i> Cart</a>
+            <a class="btn btn-warning" href="#" data-ui-sref="app.order.cart"><i class="icon-shopping-cart"></i> Cart</a>
         </div>
 
     </div>
@@ -31,7 +31,7 @@
         <table class="table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
             <tr data-ng-repeat="item in vm.draftOrder.orderItems">
-                <td><a data-ng-href="{{vm.draftItemLink(item)}}">{{item.product.name}}</a></td>
+                <td><a href="#" data-ui-sref="{{vm.draftItemStateRef(item)}}">{{item.product.name}}</a></td>
                 <td>{{item.productSize.name}}</td>
                 <td>{{item.quantity}}</td>
             </tr>

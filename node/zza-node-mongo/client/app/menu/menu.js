@@ -5,28 +5,28 @@
 
     function controller( $stateParams, dataservice ) {
         var vm  = this;
-        dataservice.ready(getProductsForType);
+        dataservice.ready(onReady);
 
         /**
-         * Sets vm.products with the products for a given product category
+         * Sets vm.products with the products for a given product type
          * Call it after the dataservice is ready with products
          */
-        function getProductsForType( )
-        {
-            var types = ['drink', 'pizza', 'salad' ];
+        function onReady() {
             var type = $stateParams.productType;
             if (type){
+                var types = ['drink', 'pizza', 'salad'];
                 type = types[types.indexOf(type.toLowerCase())];
             }
             type = type || 'pizza';
-            var templateBase = 'app/menu/menu.';
+
             vm.products = dataservice.products.byTag( type );
-            vm.productLink = productLink;
-            vm.template = templateBase + type + '.html';
+            vm.productSref = productSref;
+            vm.template = 'app/menu/menu.' + type + '.html';
         }
 
-        function productLink(product){
-            return '#/menu/'+product.type+'/'+product.id;
+        function productSref(p) {
+            return "app.order.product({productType: '" + p.type + "', productId: '" + p.id +"'})";
+            //return '#/menu/'+p.type+'/'+p.id;
         }
     }
 

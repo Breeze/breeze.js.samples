@@ -6,34 +6,49 @@
 
     function controller( $location, dataservice ) {
         var vm = this;
-        var menuLinks = [
-             { path: '/menu/pizza' ,name: 'Pizza' , tag: 'pizza'  }
-            ,{ path: '/menu/salad' ,name: 'Salad' , tag: 'salad' }
-            ,{ path: '/menu/drink' ,name: 'Drinks', tag: 'drink' }
-        ];
 
-        dataservice.ready( function()
-        {
-            vm.cartItemLink  = cartItemLink;
-            vm.cartOrder     = dataservice.cartOrder;
-            vm.draftItemLink = draftItemLink;
-            vm.draftOrder    = dataservice.draftOrder;
-            vm.isSelected    = isSelected;
-            vm.menuLinks     = menuLinks;
+        dataservice.ready( function() {
+            vm.cartItemStateRef  = cartItemStateRef;
+            vm.cartOrder         = dataservice.cartOrder;
+            vm.draftItemStateRef = draftItemStateRef;
+            vm.draftOrder        = dataservice.draftOrder;
+            vm.isSelected        = isSelected;
+            vm.menuStates        = getMenuStates();
         });
 
-        function cartItemLink(item){
-            return '#/order/cart/'+item.product.type+'/'+item.id;
+        function cartItemStateRef(item){
+            return getItemStateRef('cart', item)
         }
 
-        function draftItemLink(item){
-            return '#/order/draft/'+item.product.type+'/'+item.id;
+        function draftItemStateRef(item){
+            return getItemStateRef('draft', item)
         }
 
-        function isSelected( link ){
+        function getItemStateRef(orderId, item){
+            var params = {orderId: orderId, productType: item.product.type, orderItemId: item.id };
+            return 'app.order.item('+JSON.stringify(params)+')';
+            //return '#/order/cart/'+item.product.type+'/'+item.id;
+        }
+
+        function getMenuStates(){
+            var menus = [
+                { name: 'Pizza',  tag: 'pizza'},
+                { name: 'Salad',  tag: 'salad'},
+                { name: 'Drinks', tag: 'drink'}
+            ];
+            return menus.map(function(s){
+                return {
+                    name: s.name,
+                    sref: "app.menu({productType: '"+ s.tag + "'})",
+                    tag: s.tag
+                }
+            });
+        }
+
+        function isSelected( state ){
             var path = $location.path().toLowerCase();
             if (path === '/menu/') {path = path+'pizza';}
-            return -1 < path.indexOf(link.tag);
+            return -1 < path.indexOf(state.tag);
         }
 
     };
