@@ -121,6 +121,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="app\view.html" />
     <Content Include="Content\reset.css" />
     <Content Include="Content\toastr.css" />
     <Content Include="Content\todo.css" />
