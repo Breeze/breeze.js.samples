@@ -33,7 +33,7 @@
             </div>
 
             <tabset>
-                <tab data-ng-repeat="tab in vm.typeVms" heading="{{tab.title}}" active="tab.active" disabled="tab.disabled">
+                <tab data-ng-repeat="tab in vm.typeVms" heading="{{tab.title}}">
                     <p data-ng-show="tab.allFree" class="optionMessage">These choices are all free! Enjoy!</p>
                     <p data-ng-show="tab.someCostMore" class="optionMessage">Choices with an (*) after the name count as 2.</p>
                     <div data-ng-include="tab.choiceTemplate"></div>
