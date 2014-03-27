@@ -1,10 +1,14 @@
-﻿(function(angular) {
+﻿/*
+ * Provides configuration values used widely in the app
+ * Also configures 'toastr', the pop-up message component
+ */
+(function(angular) {
     'use strict';
 
-    angular.module( "app" )
-           .factory( 'config', factory );
+    angular.module( "app" ).factory( 'config',
+        ['$rootScope', factory] );
 
-    function factory($rootScope ) {
+    function factory($rootScope) {
         // Configure toastr for this app
         // 2 second toast timeout
         toastr.options.timeOut       = 2000;

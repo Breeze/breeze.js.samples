@@ -1,9 +1,14 @@
-﻿(function(angular) {
+﻿/*
+ * Query and save remote data with the Breeze EntityManager
+ * Also exposes certain cached entities for easy ViewModel access
+ */
+(function(angular) {
     'use strict';
 
-    angular.module( "app" ).factory( 'dataservice', factory );
+    angular.module( "app" ).factory( 'dataservice',
+        ['entityManagerFactory', 'dataservice.lookups', 'model', 'util', factory]);
 
-    function factory( breeze, entityManagerFactory, lookups, model, util ) {
+    function factory( entityManagerFactory, lookups, model, util ) {
 
         var logger   = util.logger,
             manager,

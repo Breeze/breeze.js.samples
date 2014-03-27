@@ -1,17 +1,20 @@
-﻿(function(angular) {
+﻿/*
+ * orderItem viewmodel associated with orderItem.html view
+ * and its orderItem**.html sub-views.
+ */
+(function(angular) {
     'use strict';
 
-    angular.module( "app" )
-        .controller( 'orderItem', controller );
+    angular.module( "app" ).controller( 'orderItem',
+        ['$state', '$stateParams', 'dataservice', 'OptionTypeVm', 'util', controller] );
 
     function controller($state, $stateParams, dataservice, OptionTypeVm, util ) {
-        var vm           = this;
-        dataservice.ready(presentOrderItem);
+        var vm = this;
+        dataservice.ready(onReady);
 
-        // *********************************************************
-        // Private methods
-        // *********************************************************
-        function presentOrderItem() {
+        /* implementation */
+
+        function onReady() {
 
             var cartOrder    = dataservice.cartOrder;
             var draftOrder   = dataservice.draftOrder;

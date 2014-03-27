@@ -1,7 +1,14 @@
-﻿(function(angular) {
+﻿/*
+ * A utility service loaded with helper methods and access to selected services
+ * (e.g. logger, $timeout) that are often needed by other services.
+ * Collecting them in a single util service reduces repetitious dependency injection
+ * and long lists of constructor parameters in those services.
+ */
+(function(angular) {
     'use strict';
 
-    angular.module( "app" ).factory( 'util', factory );
+    angular.module( "app" ).factory( 'util',
+        ['$q', '$rootScope', '$timeout', 'config', 'logger', factory]);
 
     function factory($q, $rootScope, $timeout, config, logger) {
 
@@ -18,6 +25,7 @@
             $broadcast: $broadcast,
 
             deal: deal,
+            defineProperty: defineProperty,
             filterById: filterById,
             filterByName: filterByName,
             filterByType: filterByType,
@@ -32,6 +40,18 @@
 
         function $broadcast() {
             return $rootScope.$broadcast.apply($rootScope, arguments);
+        }
+
+        // Assist in adding an ECMAScript 5 "definedProperty" to a class
+        function defineProperty(klass, propertyName, getter, setter){
+            var config = {
+                enumerable: true,
+                get: getter
+            };
+            if (setter){
+                config.set = setter;
+            }
+            Object.defineProperty(klass.prototype, propertyName, config);
         }
 
         /*********************************************************

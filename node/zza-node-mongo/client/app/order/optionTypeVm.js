@@ -1,10 +1,12 @@
-// OptionTypeVm: a viewmodel of the OrderItemOptions for a particular product type
-// The orderItem controller creates and displays instances of OptionTypeVm
+/*
+ * OptionTypeVm: a viewmodel of the OrderItemOptions for a particular product type
+ * The orderItem controller creates and displays instances of OptionTypeVm
+ */
 (function(angular) {
     'use strict';
 
-    angular.module( "app" )
-        .factory( 'OptionTypeVm', factory );
+    angular.module( "app" ).factory( 'OptionTypeVm',
+        ['util', factory] );
 
     function factory( util ) {
         var choiceTemplateBase = './app/order/',

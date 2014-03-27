@@ -12,10 +12,11 @@
  */
 (function(angular) {
     'use strict';
-    angular.module("app").factory( 'model', factory );
+    angular.module("app").factory( 'model',
+        ['breeze', 'metadata', 'util', factory ]);
 
     function factory(breeze, metadata, util) {
-
+        var defineProperty = util.defineProperty;
         var model = {
             addToMetadataStore:addToMetadataStore,
             Customer: Customer,
@@ -221,19 +222,6 @@
                 );
             }
         }
-    }
-
-    // Assist in adding an ECMAScript 5 "definedProperty" to a class
-    // Todo: move to util as it is general purpose
-    function defineProperty(klass, propertyName, getter, setter){
-        var config = {
-            enumerable: true,
-            get: getter
-        };
-        if (setter){
-            config.set = setter;
-        }
-        Object.defineProperty(klass.prototype, propertyName, config);
     }
 
 }( this.angular ));
