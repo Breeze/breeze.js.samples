@@ -1,0 +1,73 @@
+﻿body {
+    font-family: arial;
+    position: absolute;
+    left: 50%;
+    width: 750px;
+    margin-top: 0;
+    margin-left: -350px;
+    background: white;
+}
+h1
+{
+    text-align: center;
+    font-size: 3em;
+    text-shadow: rgba(0, 0, 0, .5) 2.5px 2.5px 2px;
+    margin-bottom: .5em;
+}
+div {
+    padding: .1em 0 ;
+}
+div .car {
+    padding: .7em 0 ;
+    border-bottom: 1px solid rgb(191, 191, 191);
+}
+.short-name{
+    width: 5em;
+}
+.description {
+    font-style: italic;
+    font-size: .8em;
+    margin-left:.5em;
+}
+#name-desc {
+    font-style: italic;
+    font-size: .8em;
+    margin-left: .5em;
+}
+.options-section {
+    margin-left: 2em;
+}
+.hidden {
+    display: none;
+}
+li {
+    padding: .1em 0 .1em 0;
+}
+a {
+    font-size: .8em;
+}
+
+.log-error { color: red; font-weight: bold; }
+.log-validation-error { color: rgb(243, 162, 13); font-weight: bold;}
+.log-info { color: blue; }
+.log-success { color: green; }
+.log-warning { color: orchid; }
+
+@media screen and (max-width: 750px)
+{
+    body
+    {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        left: 8px;
+        top: 4px;
+        position: fixed;
+    }
+
+    header h1
+    {
+        font-size: 2em;
+        margin-bottom: .2em;
+    }
+}
