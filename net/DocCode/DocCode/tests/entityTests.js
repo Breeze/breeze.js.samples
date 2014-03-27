@@ -739,6 +739,50 @@
             //ok(!em.hasChanges(),
             //    "EntityManager should NOT have pending changes.");
         });
+
+    /*********************************************************
+    * setting another EntityState of a detached entity is harmless
+    * Fails. See defect #2581
+    *********************************************************/
+    test("setting another EntityState on a detached entity is harmless", 4,
+        function () {
+            var em = newEm(); // new empty EntityManager
+            var order = em.createEntity('Order', { OrderID: 1 });
+
+            var aspect = order.entityAspect;
+
+            aspect.setDetached(); 
+            ok(aspect.entityState.isDetached(),
+                "'order' should be detached after setDetached()");
+
+            try {
+                aspect.setDeleted();
+                remainsDetachedWhenSet('Deleted');
+            } catch (e) { threwWhenSet(e, 'Deleted');}
+            
+            try {
+                aspect.setModified();
+                remainsDetachedWhenSet('Modified');
+            } catch (e) { threwWhenSet(e, 'Modified'); }
+
+            try {
+                aspect.setUnchanged();
+                remainsDetachedWhenSet('Unchanged');
+            } catch (e) { threwWhenSet(e, 'Unchanged'); }
+
+            // helpers
+            function remainsDetachedWhenSet(method) {
+                var isDetached = aspect.entityState.isDetached();
+                ok(isDetached, "'order' should remain detached after set"+ method +"()");
+            }
+
+            function threwWhenSet(error, method) {
+                ok(false, "Breeze threw exception when called set" + method +
+                    " on detached entity; error was " + error.message);
+            }
+
+        });
+
     /*********************************************************
      * changing a property raises propertyChanged 
      *********************************************************/
