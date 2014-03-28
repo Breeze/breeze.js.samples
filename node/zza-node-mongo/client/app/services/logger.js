@@ -1,14 +1,16 @@
-﻿(function(angular) {
+﻿/*
+ * Semantic logging service that passes messages both to
+ * toastr (pop-up messages) and the console (via Angular's $log)
+ *
+ * toastr.js is library by John Papa that shows messages in pop up toast.
+ * @see https://github.com/CodeSeven/toastr
+ */
+(function(angular) {
     'use strict';
 
-    angular.module( "app" ).factory( 'logger', factory );
+    angular.module( "app" ).factory( 'logger',
+        ['$log', factory ] );
 
-    /**
-     *   This logger wraps the toastr logger and also logs to console
-     *   toastr.js is library by John Papa that shows messages in pop up toast.
-     *
-     *   @see https://github.com/CodeSeven/toastr
-     */
     function factory( $log ) {
         return {
             error   : error,

@@ -1,7 +1,11 @@
-﻿(function(angular) {
+﻿/*
+ * Cart viewmodel associated with cart.html view
+ */
+(function(angular) {
     'use strict';
 
-    angular.module("app").controller( 'cart', cart );
+    angular.module("app").controller( 'cart',
+        ['dataservice', 'pricing', cart] );
 
     function cart( dataservice, pricing) {
         var vm   = this;

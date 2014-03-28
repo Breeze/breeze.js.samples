@@ -1,8 +1,16 @@
-﻿// fetch lookups and extend dataservice with easy access to lookups
+﻿/*
+ * Extends the dataservice with easy access to "Lookups"
+ * which it fetches from the server.
+ * "Lookups" are relatively-stable reference entities
+ * typically presented as choices for property values of primary entities.
+ *
+ * Exs: Products, ProductOptions, ProductSizes
+ */
 (function(angular) {
     'use strict';
 
-    angular.module( "app" ).factory( 'lookups', factory );
+    angular.module( "app" ).factory( 'dataservice.lookups',
+        ['breeze', 'util', factory]);
 
     function factory( breeze, util ) {
 

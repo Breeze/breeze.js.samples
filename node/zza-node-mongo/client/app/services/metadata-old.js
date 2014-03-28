@@ -1,11 +1,10 @@
 /**
  * Fill metadataStore with metadata
- * DO NOT USE
+ * DO NOT USE!
  * This is the old version whose metadata were semi-generated in tortured fashion
- * from an EDM. The current version defines metadata by hand using the
- * Breeze Labs: breeze.metadata.helper.js
+ * from an EDM. The current version is metadata.js which defines metadata by hand
  *
- * Hold on to this version for reference in case the hand-rolled metadata go bad
+ * Hold on to this version for reference
  */
 (function(angular) {
     'use strict';

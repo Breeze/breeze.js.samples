@@ -1,12 +1,20 @@
-﻿(function(angular) {
+﻿/**
+ * Order pricing service
+ * Calculates how much the ordered pizza, salad, and drinks cost
+ *
+ * Instead of sending a tentative order to the server for pricing
+ * we do it on the client to provide a snappy user experience
+ * Of course, for committed saved orders, the pricing SHOULD be performed again
+ * on the server as we shouldn't trust a client to handle our money.
+ *
+ */
+(function(angular) {
     'use strict';
 
     angular.module( "app" ).factory( 'pricing', factory );
 
     function factory() {
-        var self;
-
-        return self = {
+        var pricing = {
             calcOrderItemsTotal: calcOrderItemsTotal,
             calcItemTotalPrice: calcItemTotalPrice,
             calcItemUnitPrice: calcItemUnitPrice,
@@ -14,6 +22,8 @@
             calcItemOptionUnitPrice: calcItemOptionUnitPrice,
             orderHasExtraCostOptions: orderHasExtraCostOptions
         };
+
+        return pricing;
 
         /** Both calculates and sets the order.itemsTotal **/
         function calcOrderItemsTotal(order) {

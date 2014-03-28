@@ -1,6 +1,16 @@
-﻿(function(angular) {
+﻿/*
+ * Server delivers a new Breeze EntityManager on request.
+ *
+ * During service initialization:
+ * - configures Breeze for use by this app
+ * - gets entity metadata and sets up the client entity model
+ * - configures the app to call the server during service initialization
+ */
+(function(angular) {
     'use strict';
-    angular.module("app").factory( 'entityManagerFactory', factory );
+
+    angular.module("app").factory( 'entityManagerFactory',
+        ['breeze', 'config', 'model', factory] );
 
     function factory( breeze, config, model ) {
         configureBreezeForThisApp();
@@ -11,9 +21,7 @@
             newManager: newManager
         };
 
-        // *********************************************************
-        // Private methods
-        // *********************************************************
+        /* implementation */
 
         function getMetadataStore() {
             var metadataStore = new breeze.MetadataStore();

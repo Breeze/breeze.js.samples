@@ -1,11 +1,12 @@
 /**
  * Fill metadataStore with metadata, crafted by hand using
  * Breeze Labs: breeze.metadata.helper.js
+ * @see http://www.breezejs.com/documentation/metadata-by-hand
  */
 (function(angular) {
     'use strict';
 
-    angular.module("app").factory( 'metadata', factory );
+    angular.module("app").factory( 'metadata',  ['breeze', factory] );
 
     function factory(breeze) {
         setNamingConvention();

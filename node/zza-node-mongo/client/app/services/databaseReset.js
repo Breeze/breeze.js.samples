@@ -1,4 +1,8 @@
-﻿(function(angular) {
+﻿/*
+ * Service to reset the demo database to a "pristine" state
+ * Also adds "state-change" reporting for debugging during development
+ */
+(function(angular) {
     'use strict';
 
     angular.module( "app" ).factory( 'databaseReset', factory );
@@ -6,16 +10,13 @@
     function factory ( $http, $q, config ) {
         return { reset: reset };
 
-        // ***********************************
-        // Private Method
-        // ***********************************
+        /* implementation */
 
-        function reset()
-        {
+        function reset() {
             var deferred = $q.defer();
 
             //See http://docs.angularjs.org/api/ng.$http
-            $http.post(config.devServiceName + '/reset')
+            return $http.post(config.devServiceName + '/reset')
                  .success(success)
                  .error(fail);
 
@@ -25,11 +26,11 @@
             // Internal Handlers
             // ***********************************
 
-            function onSuccessReset(data) {
+            function success(data) {
                 deferred.resolve("Database reset succeeded with message: " + data);
             }
 
-            function onFailReset(data, status) {
+            function fail(data, status) {
                 deferred.reject( getMessage(data, status) );
             }
         }
