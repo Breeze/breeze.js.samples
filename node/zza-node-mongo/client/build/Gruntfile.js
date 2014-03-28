@@ -90,6 +90,7 @@ module.exports = function(grunt) {
                     }
                 ]
             },
+            /*
             prod_boot: {
                 files: [
                     {
@@ -107,6 +108,7 @@ module.exports = function(grunt) {
                     }
                 ]
             },
+            */
             build_vendorjs: {
                 files: [
                     {
@@ -145,13 +147,15 @@ module.exports = function(grunt) {
              * source code into a single file.
              */
             source: {
+                /*
                 options: {
                     banner: '<%= meta.banner %>'
                 },
                 src: [
-                    '<%= buildDir %>/assets/js/quizzler.js'
+                    '<%= buildDir %>???.js'
                 ],
-                dest: '<%= buildDir %>/assets/js/quizzler.js'
+                dest: '<%= buildDir %>???.js'
+                */
             }
         },
 
@@ -193,23 +197,25 @@ module.exports = function(grunt) {
          */
         requirejs: {
             compile: {
+                /*
                 options: {
                     baseUrl: "../client/src",
                     paths   :
                     {
                         // Configure alias to full paths; relative to `baseURL`
 
-                        'auth'         : './quizzer/authentication',
-                        'quiz'         : './quizzer/quiz',
-                        'utils'        : './mindspace/utils'
+                        'auth'         : './???/authentication',
+                        '????'         : './???/????',
+                        'utils'        : './???/utils'
 
                     },
-                    out: '<%= buildDir %>/assets/js/quizzler.js',
+                    out: '<%= buildDir %>/assets/js/???.js',
                     name: 'main'
 
                 },
                 preserveLicenseComments : false,
                 optimize: "uglify"
+                */
             }
         }
 
@@ -226,7 +232,7 @@ module.exports = function(grunt) {
         'copy:build_assets',
         'copy:build_appjs',
         'copy:build_vendorjs',
-        'copy:dev_boot',
+        //'copy:dev_boot',
         'copy:index'
 
     ]);
@@ -235,10 +241,9 @@ module.exports = function(grunt) {
         'clean:src',
         'copy:build_assets',
         'copy:build_vendorjs',
-        'copy:prod_boot',
+        //'copy:prod_boot',
         'copy:index',
         "requirejs",
-        "concat:source"
     ]);
 
 

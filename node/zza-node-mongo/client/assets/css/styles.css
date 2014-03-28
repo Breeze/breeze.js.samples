@@ -5,6 +5,10 @@
 .hand {
   cursor:pointer
 }
+
+#shell-content {
+  margin-top: 50px
+}
 /* put some horizontal space around the top nav and footer */
 .navbar .navbar-inner {
     padding-left:20px;
