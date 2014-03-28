@@ -6,12 +6,10 @@ var express        = require('express')
     , bodyParser   = require('body-parser')
     , breezeRoutes = require('./breeze-routes')
     , compress     = require('compression')
-    //, cookieParser = require('cookie-parser')
     , errorHandler = require('./errorHandler')
     , favicon      = require('static-favicon')
     , fileServer   = require('serve-static')
     , logger       = require('morgan')
-    //, path         = require('path')
     , port         = process.env["PORT"] || 3000;
 
 module.exports = app;
