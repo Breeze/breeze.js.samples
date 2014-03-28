@@ -5,8 +5,7 @@ module.exports = {
     configure: configureRoutes
 };
 
-var Q        = require('q')
-  , bmongo   = require('breeze-mongodb')
+var bmongo   = require('breeze-mongodb')
   , database = require('./database' );
 
 /**
@@ -47,42 +46,39 @@ function BreezeOperations( ) {
         var queryCountDown = 0;
         var done = makeBreezeResponseHandler(res, next);
 
-        getAll('OrderStatus',   'OrderStatus');
-        getAll('Product',       'Product');
-        getAll('ProductOption', 'ProductOption');
-        getAll('ProductSize',   'ProductSize');
+        getAll('OrderStatus');
+        getAll('Product');
+        getAll('ProductOption');
+        getAll('ProductSize');
 
         function getAll(collectionName, entityType) {
-            db.collection(
-                collectionName,
-                {strict: true},
-                function (err, collection)
-                {
-                    if (err) {
-                        err = { statusCode: 404, message: "Unable to locate: " + collectionName, error: err };
-                        done(err, null);
-                        return;
-                    }
-                    queryCountDown += 1;
+            queryCountDown += 1;
+            var entityType = entityType || collectionName;
+            db.collection( collectionName,{strict: true}, collectionCallback );
 
-                    collection.find()
-                              .toArray(function (err, results)
-                              {
-                                  queryCountDown -= 1;
-                                  if (err) {
-                                      done(err,null);
-                                      return;
-                                  }
-                                  //Todo: explain why we add $type
-                                  results.forEach(function(r) {r.$type = entityType});
-                                  lookups[collectionName]=results;
-
-                                  if (queryCountDown === 0) {
-                                      done(null, lookups);
-                                  }
-                              });
+            function collectionCallback(err, collection) {
+                if (err) {
+                    err = { statusCode: 404, message: "Unable to locate: " + collectionName, error: err };
+                    done(err, null);
+                } else {
+                    collection.find().toArray(findCallback);
                 }
-            );
+            }
+
+            function findCallback(err, results) {
+                queryCountDown -= 1;
+                if (err) {
+                    done(err,null);
+                } else {
+                    lookups[collectionName] = results;
+                    results.forEach(function (r) {
+                        r.$type = entityType;//Todo: explain why we add $type
+                    });
+                    if (queryCountDown === 0) {
+                        done(null, lookups);
+                    }
+                }
+            }
         }
     }
 
@@ -136,41 +132,11 @@ function BreezeOperations( ) {
         makeCollectionQueryFor('ProductSize');
 
         function makeCollectionQueryFor (collectionName, resourceName) {
-            if (!resourceName){
-                resourceName = pluralize(collectionName);
-            }
-            namedQueries[resourceName.toLowerCase()] = function(req, res, next) {
+            resourceName = (resourceName || pluralize(collectionName)).toLowerCase();
+            namedQueries[resourceName] = function(req, res, next) {
                 var callback = makeBreezeResponseHandler(res, next);
                 var query    = new bmongo.MongoQuery(req.query);
-
-                //  -------------------------------------------
-                //  Version #1 - Callback used with Thomas' MongoQuery Promise API
-                //
-                //  Note: here MongoQuery has been enhanced to support BOTH
-                //        callbacks and promises.
-                //  -------------------------------------------
-
                 query.execute( db, collectionName, callback );
-                // to prove that callback is invoked first, then the "then" callback
-                //.then(function( results )
-                //{
-                //   console.log( "We already did res.send() in the callback." );
-                //});
-
-                //  -------------------------------------------
-                //  Version #2 - if MongoQuery did not support Promises
-                //
-                //  Note: could have used Q.denodeify( query.execute.bind( query ) )
-                //        but Q.nbind() is easier
-                //  -------------------------------------------
-
-                //  var execute   = Q.nbind( query.execute, query ),
-                //      onResults = function( results ) { callback( null,  results ); },
-                //      onError   = function( fault   ) { callback( fault, null );    };
-                //
-                //  execute( db, collectionName )
-                //      .then( onResults, onError );
-
             };
         }
     }
