@@ -99,8 +99,8 @@ namespace DocCode.Controllers
         }
 
         [HttpGet]
-        // should guard against pulling too much data with limiting Queryable, e.g.
-        //[Queryable(MaxTop = 10)]
+        // should guard against pulling too much data with limiting BreezeQueryableAttribute, e.g.
+        [BreezeQueryable(MaxTop = 10)]
         public IQueryable<Order> OrdersAndDetails()
         {
             return _repository.OrdersAndDetails;
@@ -112,6 +112,7 @@ namespace DocCode.Controllers
         }
 
         [HttpGet]
+        [BreezeQueryable(MaxExpansionDepth = 3)]
         public IQueryable<OrderDetail> OrderDetails() {
             return _repository.OrderDetails;
         }
