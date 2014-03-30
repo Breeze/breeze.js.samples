@@ -332,10 +332,11 @@
   echo Source breeze.debug.js was not found in '$(ProjectDir)..\..\..\..\breeze.js\build\' and was not copied
   GOTO :done
   :breezeSourceExists
-  echo Copying breeze.*.js from '$(ProjectDir)..\..\..\..\breeze.js\build\' to Scripts\
+  @echo Copying breeze.*.js from '$(ProjectDir)..\..\..\..\breeze.js\build\' to Scripts\
   XCOPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.min.js" "$(ProjectDir)Scripts" /Y 2>nul
   XCOPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.debug.js" "$(ProjectDir)Scripts" /Y 2>nul
-  XCOPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.intellisense.js" "$(ProjectDir)Scripts" /Y 2>nul    
+  XCOPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.intellisense.js" "$(ProjectDir)Scripts" /Y 2>nul  
+  XCOPY "$(ProjectDir)..\..\..\..\breeze.server.labs\EdmBuilder.cs" "$(ProjectDir)App_Start" /Y 2>nul  
   :done</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

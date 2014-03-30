@@ -17,15 +17,13 @@ namespace ODataBreezejsSample
             // Web API routes
             config.MapHttpAttributeRoutes();
 
-            using (var context = new TodoListContext())
-            {
-                config.Routes.MapODataRoute(
-                    routeName: "odata", 
-                    routePrefix: "odata", 
-                    model: context.GetEdm(), 
-                    batchHandler: new DefaultODataBatchHandler(GlobalConfiguration.DefaultServer)
-                    );
-            }
+            config.Routes.MapODataRoute(
+                routeName: "odata", 
+                routePrefix: "odata",
+                model: EdmBuilder.GetCodeFirstEdm<TodoListContext>(), 
+                batchHandler: new DefaultODataBatchHandler(GlobalConfiguration.DefaultServer)
+                );
+
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
