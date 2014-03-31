@@ -7,8 +7,7 @@
 
     angular.module( "app" )
            .config( ['$stateProvider', '$urlRouterProvider', configureStates] )
-           .run(    ['$rootScope', 'config', 'logger', reportStateChanges]);
-
+    /////////////////////
     function configureStates($stateProvider, $urlRouterProvider) {
 
         $stateProvider
@@ -114,26 +113,6 @@
         $urlRouterProvider
             .when( '/menu', '/menu/pizza'  ) // Switch to Pizza listing view
             .otherwise('/menu/pizza');       // Return to the main ordering screen
-    }
-
-    function reportStateChanges($rootScope, config, logger){
-        if (config.debug) {
-            $rootScope.$on('$stateChangeStart',
-                function(event, toState, toParams, fromState, fromParams){
-                    logger.log("stateChangeStart: from '"+fromState.name + "' to '"+ toState.name+"'");
-                });
-
-            $rootScope.$on('$stateChangeError',
-                function(event, toState, toParams, fromState, fromParams, error){
-                    logger.log("stateChangeError: from '"+fromState.name + "' to '"+ toState.name+"' with error: "+error);
-                });
-
-            $rootScope.$on('$stateChangeSuccess',
-                function(event, toState, toParams, fromState, fromParams){
-                    logger.log("stateChangeSuccess: from '"+fromState.name + "' to '"+ toState.name+"' with params " +
-                    JSON.stringify(toParams));
-                });
-        }
     }
 
 }( this.angular ));

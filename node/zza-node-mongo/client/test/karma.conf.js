@@ -24,7 +24,6 @@ module.exports = function(config) {
         './vendor/breeze/breeze.metadata-helper.js',
 
         './vendor/jquery/jquery.min.js',
-        './vendor/jquery/jquery.min.map',
         './vendor/toastr/toastr.js',
 
         /* test libraries */
@@ -35,6 +34,7 @@ module.exports = function(config) {
         './test/lib/bind-polyfill.js', // Needed for phantomJS
 
         /* application scripts */
+        './app/app.js', // ensure it loads first
         './app/**/*.js',
 
         /* test data and helper function support */
@@ -49,7 +49,7 @@ module.exports = function(config) {
     exclude: [
         /* testrunner configurations */
         './test/support/**/*.config.js',
-        './test/support/**/*.boot.js',
+        './test/support/**/*.boot.js'
     ],
 
 
