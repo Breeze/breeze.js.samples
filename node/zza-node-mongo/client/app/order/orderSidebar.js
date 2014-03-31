@@ -10,16 +10,17 @@
 
     function controller( $location, dataservice ) {
         var vm = this;
+        dataservice.ready(onReady );
 
-        dataservice.ready( function() {
+        function onReady() {
             vm.cartItemStateRef  = cartItemStateRef;
             vm.cartOrder         = dataservice.cartOrder;
             vm.draftItemStateRef = draftItemStateRef;
             vm.draftOrder        = dataservice.draftOrder;
             vm.isSelected        = isSelected;
             vm.menuStates        = getMenuStates();
-        });
-
+        }
+        /////////////////////
         function cartItemStateRef(item){
             return getItemStateRef('cart', item)
         }

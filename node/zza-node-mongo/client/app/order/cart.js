@@ -21,9 +21,7 @@
 
             calculateCosts()
         }
-
-        /* implementation */
-
+        /////////////////////
         function calculateCosts() {
             var cart = vm.cartOrder;
             vm.hasExtraCost = false;

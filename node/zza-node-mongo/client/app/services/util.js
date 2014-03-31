@@ -37,7 +37,7 @@
             keyArray: keyArray,
             toTitle: toTitle
         };
-
+        /////////////////////
         function $broadcast() {
             return $rootScope.$broadcast.apply($rootScope, arguments);
         }

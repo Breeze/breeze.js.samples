@@ -15,7 +15,7 @@
         return {
             fillStore: fillStore
         };
-
+        /////////////////////
         function setNamingConvention() {
             // Translate certain zza property names between MongoDb names and client names
             var convention = new breeze.NamingConvention({

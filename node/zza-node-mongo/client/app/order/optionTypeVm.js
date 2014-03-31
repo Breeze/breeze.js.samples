@@ -15,7 +15,7 @@
 
         extendOptionTypeVm()
         return OptionTypeVm;
-
+        /////////////////////
         function extendOptionTypeVm(){
             OptionTypeVm.prototype.selectOneOption  = selectOneOption;
             OptionTypeVm.prototype.selectOption = selectOption;
