@@ -14,6 +14,8 @@
 #In samples we don't commit breeze files; we build them again
 breeze*.js
 breeze*.css
+#Same with the Breeze Labs EdmBuilder
+EdmBuilder.cs
 
 node_modules
 bin

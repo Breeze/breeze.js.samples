@@ -1,9 +1,13 @@
+/*
+ * Configures the UI-Router states and their associated URL routes and views
+ * Also adds "state-change" reporting for debugging during development
+ */
 (function( angular ) {
     'use strict';
 
     angular.module( "app" )
-           .config( configureStates )
-           .run(reportStateChanges);
+           .config( ['$stateProvider', '$urlRouterProvider', configureStates] )
+           .run(    ['$rootScope', 'config', 'logger', reportStateChanges]);
 
     function configureStates($stateProvider, $urlRouterProvider) {
 
@@ -112,21 +116,22 @@
             .otherwise('/menu/pizza');       // Return to the main ordering screen
     }
 
-    function reportStateChanges($rootScope, $log, config){
+    function reportStateChanges($rootScope, config, logger){
         if (config.debug) {
             $rootScope.$on('$stateChangeStart',
                 function(event, toState, toParams, fromState, fromParams){
-                    $log.log("stateChangeStart: from '"+fromState.name + "' to '"+ toState.name+"'");
+                    logger.log("stateChangeStart: from '"+fromState.name + "' to '"+ toState.name+"'");
                 });
 
             $rootScope.$on('$stateChangeError',
                 function(event, toState, toParams, fromState, fromParams, error){
-                    $log.log("stateChangeError: from '"+fromState.name + "' to '"+ toState.name+"' with error: "+error);
+                    logger.log("stateChangeError: from '"+fromState.name + "' to '"+ toState.name+"' with error: "+error);
                 });
 
             $rootScope.$on('$stateChangeSuccess',
                 function(event, toState, toParams, fromState, fromParams){
-                    $log.log("stateChangeSuccess: from '"+fromState.name + "' to '"+ toState.name+"'");
+                    logger.log("stateChangeSuccess: from '"+fromState.name + "' to '"+ toState.name+"' with params " +
+                    JSON.stringify(toParams));
                 });
         }
     }

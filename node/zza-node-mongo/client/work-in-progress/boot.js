@@ -1,5 +1,5 @@
 /**
- *  Use aysnc script loader, configure the application module (for AngularJS)
+ *  Use async script loader, configure the application module (for AngularJS)
  *  and initialize the application ( which configures routing )
  *
  *  @author Thomas Burleson
@@ -56,12 +56,13 @@
             , "./app/services/pricing.js"
             , "./app/services/util.js"
         )
-        .ready("ALL", function()
-        {
-             app.run( function ( util )
-             {
-                 util.logger.info( "Zza SPA is loaded and running on " + util.config.server );
-             });
+        .ready("ALL", function() {
+            // Injecting dataservice for a side-effect: the initial loading of data from server
+            // The app may appear to be more responsive if this happens in background
+            // while the app launches on a splash page that doesn't actually need data.
+            app.run( ['util', 'dataservice', function run ( util ) {
+                util.logger.info( "Zza SPA is loaded and running on " + util.config.server );
+            }]);
         });
 
     });

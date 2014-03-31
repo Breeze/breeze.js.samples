@@ -1,10 +1,14 @@
-﻿(function(angular) {
+﻿/*
+ * header viewmodel associated with the header.html view
+ * at the top of the shell.
+ * It displays navigation among the main app 'pages'
+ */
+(function(angular) {
     'use strict';
 
-    angular.module( "app" )
-        .controller( 'header', controllerFn);
+    angular.module( "app" ).controller( 'header', controller);
 
-    function controllerFn(  ) {
+    function controller(  ) {
 
         var headerStates = [
              { name: 'Home',  sref: 'app.welcome' }

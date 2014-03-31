@@ -1,13 +1,18 @@
-﻿(function(angular) {
+﻿/*
+ * menu viewmodel associated with the menu.html view
+ * and its menu.*.html sub-view templates
+ */
+(function(angular) {
     'use strict';
 
-    angular.module( "app" ).controller( 'menu', controller );
+    angular.module( "app" ).controller( 'menu',
+        ['$state', '$stateParams', 'dataservice', controller] );
 
     function controller($state, $stateParams, dataservice ) {
         var vm  = this;
         dataservice.ready(onReady);
 
-        /**
+        /*
          * Sets vm.products with the products for a given product type
          * Call it after the dataservice is ready with products
          */
@@ -25,10 +30,12 @@
             vm.template = 'app/menu/menu.' + type + '.html';
         }
 
-        // An ng-click callback that uses $state to navigate
-        // the link url is not visible in the browser and must
-        // style the anchor tag with 'hand' for the cursor to indicate a clickable.
-        // See pizza.html for an example of this approach
+        /*
+         * An ng-click callback that uses $state to navigate
+         * the link url is not visible in the browser and must
+         * style the anchor tag with 'hand' for the cursor to indicate a clickable.
+         * See pizza.html for an example of this approach
+         */
         function go(product) {
             $state.go('app.order.product', {productType : product.type, productId: product.id});
         }

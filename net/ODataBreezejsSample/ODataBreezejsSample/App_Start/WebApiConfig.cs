@@ -1,8 +1,5 @@
 ﻿using Microsoft.Data.Edm;
 using ODataBreezejsSample.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web.Http;
 using System.Web.Http.OData.Batch;
 
@@ -17,15 +14,13 @@ namespace ODataBreezejsSample
             // Web API routes
             config.MapHttpAttributeRoutes();
 
-            using (var context = new TodoListContext())
-            {
-                config.Routes.MapODataRoute(
-                    routeName: "odata", 
-                    routePrefix: "odata", 
-                    model: context.GetEdm(), 
-                    batchHandler: new DefaultODataBatchHandler(GlobalConfiguration.DefaultServer)
-                    );
-            }
+            config.Routes.MapODataRoute(
+                routeName: "odata", 
+                routePrefix: "odata",
+                model: EdmBuilder.GetEdm<TodoListContext>(), 
+                batchHandler: new DefaultODataBatchHandler(GlobalConfiguration.DefaultServer)
+                );
+
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",

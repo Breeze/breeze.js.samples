@@ -1,3 +1,6 @@
+/*
+ * Beginnings of Thomas Burleson's require-based packaging experiment
+ */
 (function( window ) {
     "use strict";
 
