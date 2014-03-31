@@ -44,7 +44,7 @@ module.exports = function(grunt) {
   
   var sampleSolutionFileNames = grunt.file.expand('../../**/*.sln');
   
-  var sampleDirs = grunt.file.expand(['../../net/*/', '../../no-server/*/', '../../node/*/']);
+  var sampleDirs = grunt.file.expand(['../../net/*/', '../../no-server/*/', '../../node/*/', '../../ruby/*/']);
  
   var versionNum = getBreezeVersion();
   var zipFileName = '../breeze-runtime-' + versionNum + '.zip';
