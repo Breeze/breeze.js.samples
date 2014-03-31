@@ -1,8 +1,5 @@
 ﻿using Microsoft.Data.Edm;
 using ODataBreezejsSample.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web.Http;
 using System.Web.Http.OData.Batch;
 
@@ -20,7 +17,7 @@ namespace ODataBreezejsSample
             config.Routes.MapODataRoute(
                 routeName: "odata", 
                 routePrefix: "odata",
-                model: EdmBuilder.GetCodeFirstEdm<TodoListContext>(), 
+                model: EdmBuilder.GetEdm<TodoListContext>(), 
                 batchHandler: new DefaultODataBatchHandler(GlobalConfiguration.DefaultServer)
                 );
 
