@@ -4,12 +4,16 @@
             <h2>Windows Azure</h2>
             <h1>Breeze Mobile Services</h1>
 
-            <p id="button-bar">
-                <input type="checkbox" data-ng-model="vm.showCompleted" > Show completed
+            <p class="button-bar">
+                <input type="checkbox" data-ng-model="vm.showCompleted" > Show completed &nbsp;&nbsp;
+                <input type="checkbox" data-ng-model="vm.showDeleted" > Show deleted
+                <button class="btn-save" title="Save changes to Azure"
+                        data-ng-disabled="vm.saveDisabled()" data-ng-click="vm.save()" >Save</button>
+                <button class="btn-reset"  title="Clear cache and reload from Azure"
+                        data-ng-disabled="vm.resetDisabled()" data-ng-click="vm.reset()">Reset</button>
             </p>
 
             <form id="add-item" data-ng-submit="vm.addItem()">
-                <button type="submit">Add</button>
                 <div>
                     <input id="new-item-text" data-ng-model="vm.newItemText" autofocus="true" placeholder="Enter new task" />
                 </div>
@@ -20,17 +24,21 @@
         <ul id="todo-items">
             <li  data-ng-repeat="item in vm.todos | filter:vm.itemsFilter">
                 <button class="item-delete" data-ng-click="vm.deleteItem(item)">Delete</button>
-                <input type="checkbox" class="item-complete" data-ng-model="item.complete"   data-ng-change="vm.updateItem(item)"/>
+                <input type="checkbox" class="item-complete" data-ng-model="item.complete"/>
                 <div>
-                    <input class="item-text" data-ng-model="item.text"                       data-ng-change="vm.updateItem(item)"/>
+                    <input class="item-text {{item.entityStateName}}" data-ng-model="item.text"/>
                 </div>
             </li>
         </ul>
 
         <p id="summary">
-            <span data-ng-show="vm.isLoading"></span>
-            <span data-ng-hide="vm.isLoading">
-                <strong>{{vm.todos.length}}</strong></span> item(s)</span>
+            <span data-ng-show="vm.isBusy"></span>
+            <span data-ng-hide="vm.isBusy">
+                <strong>{{vm.counts.all}} item(s)</strong>&nbsp;&nbsp; </span>
+                <span class="Added">Added: {{vm.counts.Added}}&nbsp;&nbsp; </span>
+                <span class="Modified">Modified: {{vm.counts.Modified}}&nbsp;&nbsp; </span>
+                <span class="Deleted">Deleted: {{vm.counts.Deleted}}</span>
+            </span>
         </p>
     </article>
 

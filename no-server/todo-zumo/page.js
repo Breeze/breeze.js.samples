@@ -8,63 +8,85 @@
     function controller(datacontext) {
 
         var vm = this;
-        vm.newItemText = '';
         vm.addItem = addItem;
+        vm.counts = datacontext.counts;
         vm.deleteItem = deleteItem;
-        vm.isLoading = false;
+        vm.isBusy = false;
         vm.itemsFilter = itemsFilter;
         vm.errorLog = [];
-        vm.refresh = refreshTodoItems;
+        vm.newItemText = '';
+        vm.reset = reset;
+        vm.resetDisabled = resetDisabled;
         vm.save = save;
+        vm.saveDisabled = saveDisabled;
         vm.showCompleted = false;
+        vm.showDeleted = false;
         vm.todos = [];
 
-        // On initial load, start by fetching the current data
-        refreshTodoItems();
+        getTodoItems(); // initial load
 
         ////////////////////////////
-        function itemsFilter(todoItem) {
-            return !todoItem.deleted  && (!todoItem.complete || vm.showCompleted);
-            // Beware: this is called a lot!
-            /*
-            var itemFilterText = vm.itemFilterText;
-            return itemFilterText ?
-                // if there is search text, look for it in the description; else return true
-                -1 != todoItem.Description.toLowerCase().indexOf(itemFilterText.toLowerCase()) :
-                true;
-            */
-        }
-
-        function refreshTodoItems() {
-            vm.isLoading = true;
-            return datacontext.refreshTodoItems()
-                .then(function(todoItems) {
-                    vm.isLoading = false;
-                    vm.todos = todoItems;
-                })
-                .then(null, handleError);
-        }
-
-        function handleError(error) {
-            vm.isLoading = false;
-            vm.errorLog.push((vm.errorLog.length+1) + ': ' + (error && error.message || 'unknown error'));
-        }
 
         function addItem() {
             if (vm.newItemText !== '') {
-                datacontext.addTodoItem({ text: vm.newItemText})
-                    .then(refreshTodoItems, handleError);
+                var newTodo = datacontext.addTodoItem({ text: vm.newItemText});
+                vm.todos.unshift(newTodo);
+                vm.newItemText='';
             }
         }
 
         function deleteItem(todoItem){
-            datacontext.deleteTodoItem(todoItem)
-                .then(refreshTodoItems, handleError);
+            datacontext.deleteTodoItem(todoItem);
+            if (todoItem.entityAspect.entityState.isDetached()){
+                // remove from the list if became detached
+                var ix = vm.todos.indexOf(todoItem);
+                if (ix > -1) { vm.todos.splice(ix,1); }
+            }
+        }
+
+        function getTodoItems() {
+            vm.isBusy = true;
+            return datacontext.getTodoItems()
+                .then(function(todoItems) {
+                    vm.isBusy = false;
+                    vm.todos = todoItems;
+                })
+                .catch(handleError);
+        }
+
+        function handleError(error) {
+            vm.isBusy = false;
+            vm.errorLog.push((vm.errorLog.length+1) + ': ' + (error && error.message || 'unknown error'));
+        }
+
+        function itemsFilter(todoItem) {
+            // Beware: this is called a lot!
+            var state = todoItem.entityAspect.entityState;
+            return !state.isDetached() &&
+                (!state.isDeleted() || vm.showDeleted)  &&
+                (!todoItem.complete || vm.showCompleted);
+        }
+
+        function reset(){
+            return datacontext.reset(); // not implemented yet
+        }
+
+        function resetDisabled(){
+            return vm.isBusy;
         }
 
         function save(){
-            return datacontext(save); // not implemented yet
+            vm.isBusy = true;
+            return datacontext.save()
+                .then(function(todoItems) {
+                    vm.isBusy = false;
+                    vm.todos = todoItems;
+                })
+                .catch(handleError);
         }
 
+        function saveDisabled(){
+            return vm.isBusy || !datacontext.hasChanges();
+        }
     }
 })();

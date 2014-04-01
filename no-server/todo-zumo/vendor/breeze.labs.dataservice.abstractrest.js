@@ -4,32 +4,33 @@
  *  v.0.2.3
  *
  * Extends Breeze with a REST DataService Adapter abstract type
- * 
- * N.B.: This adapter CANNOT be used directly!
- *  
- * It's a base type for concrete REST adapters such as the SharePoint OData DataService Adapter
  *
- * A concrete REST adapter 
- * 
+ * N.B.: This adapter CANNOT be used directly!
+ *
+ * It's a base type for concrete REST adapters such as the SharePoint OData DataService Adapter
+ * and the Azure Mobile Services adapter
+ *
+ * A concrete REST adapter
+ *
  * - MUST replace the _createSaveRequest with a concrete implementation to enable save
- * 
- * - SHOULD replace the "noop" JsonResultsAdapter. 
- * 
- * - WILL LIKELY replace the executeQuery method. 
- * 
- * - COULD replace the fetchMetadata method and MUST do so if getting metadata from the server. 
- *  
+ *
+ * - SHOULD replace the "noop" JsonResultsAdapter.
+ *
+ * - WILL LIKELY replace the executeQuery method.
+ *
+ * - COULD replace the fetchMetadata method and MUST do so if getting metadata from the server.
+ *
  * - MAY replace any of the protected members prefixed by '_'.
- * 
+ *
  * FOR EXAMPLE IMPLEMENTATION, SEE breeze.labs.dataservice.sharepoint.js
- *  
+ *
  * By default this adapter permits multiple entities to be saved at a time,
- * each in a separate request that this adapter fires off in parallel. 
+ * each in a separate request that this adapter fires off in parallel.
  * and waits for all to complete.
- * 
+ *
  * If 'saveOnlyOne' == true, the adapter throws an exception
  * when asked to save more than one entity at a time.
- * 
+ *
  * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.
  * Licensed under the MIT License
  * http://opensource.org/licenses/mit-license.php
@@ -43,7 +44,7 @@
         var b = require('breeze');
         definition(b);
     } else if (typeof define === "function" && define["amd"] && !window.breeze) {
-        // Requirejs / AMD 
+        // Requirejs / AMD
         define(['breeze'], definition);
     } else {
         throw new Error("Can't find breeze");
@@ -105,20 +106,20 @@
         if (!adapter.jsonResultsAdapter) {
             adapter.jsonResultsAdapter = adapter._createJsonResultsAdapter();
         }
-    };
+    }
 
     function checkForRecomposition(interfaceInitializedArgs) {
         if (interfaceInitializedArgs.interfaceName === "ajax" && interfaceInitializedArgs.isDefault) {
             this.initialize();
         }
-    };
+    }
 
     function executeQuery(mappingContext) {
         var adapter = this;
         var deferred = adapter.Q.defer();
         var url = mappingContext.getUrl();
         var headers = {
-            'Accept': 'application/json',
+            'Accept': 'application/json'
         };
 
         adapter._ajaxImpl.ajax({
@@ -149,7 +150,7 @@
 
     function fetchMetadata() {
         throw new Error("Cannot process server metadata; create your own and use that instead");
-    };
+    }
 
     function saveChanges(saveContext, saveBundle) {
         var adapter = this;
@@ -199,7 +200,7 @@
         function saveFailed(error) {
             return Q.reject(error);
         }
-    };
+    }
 
     /*** Members a derived Type might use or replace ***/
 
@@ -237,7 +238,8 @@
     }
 
     function _getEntityTypeFromMappingContext(mappingContext) {
-        var query = mappingContext.query; // 'this' must be the mappingContext
+        var query = mappingContext.query;
+        if (!query) {return null;}
         var entityType = query.entityType || query.resultEntityType;
         if (!entityType) { // try to figure it out from the query.resourceName
             var metadataStore = mappingContext.metadataStore;
@@ -254,7 +256,7 @@
         // A utility for implementation of jsonResultsAdapter.visitNode
         // typeName: a string on the node that identifies the type of the raw data
         //
-        // This method memoizes the type names it encounters 
+        // This method memoizes the type names it encounters
         // by adding a 'typeMap' object to the JsonResultsAdapter.
         if (!typeName) { return undefined; }
 
@@ -285,8 +287,8 @@
     function _serializeToJson(rawEntityData) {
         // Serialize raw entity data to JSON during save
         // You could override this default version
-        // Note that DataJS has an amazingly complex set of tricks for this, 
-        // all of them depending on metadata attached to the property values 
+        // Note that DataJS has an amazingly complex set of tricks for this,
+        // all of them depending on metadata attached to the property values
         // which breeze entity data never have.
         return JSON.stringify(rawEntityData);
     }

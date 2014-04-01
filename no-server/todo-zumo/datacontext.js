@@ -1,50 +1,64 @@
 /*
- * datacontext service
- * Encapsulates data access and model definition
- * This is the Windows Azure Mobile Services version
+ * datacontext servicee encapsulates data access and model definition
  */
-(function (WindowsAzure){
+(function (){
 
-    angular.module('app').factory('datacontext', ['$log', '$q', 'breeze', factory]);
+    angular.module('app').factory('datacontext',
+        ['$log', 'breeze','entityManagerFactory', factory]);
 
-    function factory($log, $q, breeze){
-
-        var extend = breeze.core.extend;
-
-        var msInfo ={
-            // Ward's Todo Mobile Service
-            // url: 'https://wardtodomobileservice.azure-mobile.net/',
-            // appKey: 'psChxvAmcXMcsgEhqqjmfTkoxzwuWG62'
-
-            //Donna Malayeri's Todo Mobile Service
-            url: 'https://donnam-zumotest.azure-mobile.net/',
-            appKey: 'MxhjqYLwepMvaSSJdCAauHzhfddkQC33'
-        };
-
-        var manager = getEntityManager();
-
-        var client = new WindowsAzure.MobileServiceClient(msInfo.url, msInfo.appKey);
-
-        var todoItemTable = client.getTable('todoitem');
+    function factory($log, breeze, entityManagerFactory){
+        var manager = entityManagerFactory.getEntityManager();
+        manager.entityChanged.subscribe(entityCountsChanged);
+        var todoItemType =manager.metadataStore.getEntityType('TodoItem');
 
         var datacontext = {
             addTodoItem:      addTodoItem,
+            counts:           {},
             deleteTodoItem:   deleteTodoItem,
-            refreshTodoItems: refreshTodoItems,
-            save:             save,
-            updateTodoItem:   updateTodoItem // TODO: won't use in Breeze version
+            getTodoItems:     getTodoItems,
+            hasChanges:       hasChanges,
+            reset:            reset,
+            save:             save
         };
+        updateCounts();
         return datacontext;
         /////////////////////////////
 
         function addTodoItem(initialValues){
-            initialValues = extend({complete: false}, initialValues);
-            return todoItemTable.insert(initialValues).then(null, handleError);
+            return manager.createEntity(todoItemType, initialValues);
         }
 
         function deleteTodoItem(todoItem){
-            todoItem.deleted = true;
-            return todoItemTable.del({ id: todoItem.id }).then(null, handleError);
+            var aspect = todoItem.entityAspect;
+            if (aspect.entityState !== breeze.EntityState.Detached){
+                aspect.setDeleted();
+            }
+        }
+
+        function entityCountsChanged(changeArgs){
+            var action = changeArgs.entityAction;
+            if (action !== breeze.EntityAction.PropertyChange){
+                updateCounts();
+            }
+        }
+
+        // Includes deleted todoItems
+        function getCachedTodoItems(){
+            return manager.getEntities(todoItemType);
+        }
+
+        function getTodoItems(includeComplete) {
+            var query = breeze.EntityQuery.from('TodoItem');
+            if (typeof includeComplete === 'boolean'){
+                query = query.where('complete', 'eq', includeComplete);
+            }
+
+            return manager.executeQuery(query)
+                .then(function (data){
+                    $log.log('breeze query succeeded');
+                    // return data.results; // normally ok but excludes deleted items so do this instead
+                    return getCachedTodoItems();
+                }, handleError);
         }
 
         function handleError(error) {
@@ -53,72 +67,35 @@
             throw new Error(err); // so downstream listener gets it.
         }
 
-        function refreshTodoItems(includeComplete) {
-
-            return breeze.EntityQuery.from('TodoItem')
-                .using(manager).execute()
-                .then(bSuccess).catch(handleError);
-
-            function bSuccess(data){
-                $log.log('breeze query succeeded');
-                return data.results;
-            }
-
-            var query = todoItemTable;
-            // get all unless 'includeComplete' is a bool
-            if (typeof includeComplete === 'boolean') {
-              query = query.where({ complete: includeComplete });
-            }
-            return query.read().then(null, handleError);
+        function hasChanges(){
+            return manager.hasChanges();
         }
 
-        function save(){ /* not implemented yet */}
+        function reset(){ /* not implemented yet */}
 
-        /* TODO: way chatty now but we won't use in Breeze version anyway */
-        function updateTodoItem(todoItem){
-            var values = {
-                id: todoItem.id,
-                complete: todoItem.complete,
-                text: todoItem.text
-            }
-            return todoItemTable.update(values).then(null, handleError);
+        function save(){
+            return manager.saveChanges()
+                .then(function (){
+                    $log.log('breeze save succeeded');
+                    return getCachedTodoItems();
+                })
+                .catch(handleError);
         }
 
+        function updateCounts() {
+            var counts = datacontext.counts;
+            counts.all = 0;
+            counts.Added = 0;
+            counts.Deleted = 0;
+            counts.Modified = 0;
+            counts.Unchanged = 0;
+            manager.getEntities().forEach(countIt);
 
-        function getEntityManager(){
-            // use mobile services dataservice adapter to query and save
-            var adapter = breeze.config.initializeAdapterInstance('dataService', 'mobileservices', true);
-            adapter.mobileServicesInfo = msInfo;
-            adapter.Q = $q;
-
-            var serviceName = msInfo.url+"tables/";
-            var manager = new breeze.EntityManager(serviceName);
-            setMetadata(manager);
-            return manager;
-        }
-
-        function setMetadata(manager) {
-
-            var helper = new breeze.config.MetadataHelper('model', breeze.AutoGeneratedKeyType.Identity);
-            var DT = breeze.DataType;
-            var store = manager.metadataStore;
-            store.addDataService(manager.dataService);
-            addTodoItem();
-
-            function addTodoItem() {
-                var et = {
-                    name: "TodoItem",
-                    defaultResourceName: "TodoItem",
-                    dataProperties: {
-                        id:       { dataType: DT.Guid },
-                        text:     { maxLength: 400, nullOk: false  },
-                        complete: { dataType: DT.Boolean, nullOk: false }
-                    }
-                };
-
-                return helper.addTypeToStore(store, et);
+            function countIt(entity){
+                var state = entity.entityAspect.entityState.name;
+                counts[state] += 1;
+                counts.all += 1;
             }
         }
-
     }
-})(this.WindowsAzure);
+})();
