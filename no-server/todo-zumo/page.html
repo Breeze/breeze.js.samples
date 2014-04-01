@@ -1,0 +1,45 @@
+<div id="wrapper" data-ng-controller="pageController as vm">
+    <article>
+        <header>
+            <h2>Windows Azure</h2>
+            <h1>Breeze Mobile Services</h1>
+
+            <p id="button-bar">
+                <input type="checkbox" data-ng-model="vm.showCompleted" > Show completed
+            </p>
+
+            <form id="add-item" data-ng-submit="vm.addItem()">
+                <button type="submit">Add</button>
+                <div>
+                    <input id="new-item-text" data-ng-model="vm.newItemText" autofocus="true" placeholder="Enter new task" />
+                </div>
+            </form>
+        </header>
+        <!-- Uncomment next line for debugging -->
+        <!-- <pre>{{vm.todos | json}}</pre> -->
+        <ul id="todo-items">
+            <li  data-ng-repeat="item in vm.todos | filter:vm.itemsFilter">
+                <button class="item-delete" data-ng-click="vm.deleteItem(item)">Delete</button>
+                <input type="checkbox" class="item-complete" data-ng-model="item.complete"   data-ng-change="vm.updateItem(item)"/>
+                <div>
+                    <input class="item-text" data-ng-model="item.text"                       data-ng-change="vm.updateItem(item)"/>
+                </div>
+            </li>
+        </ul>
+
+        <p id="summary">
+            <span data-ng-show="vm.isLoading"></span>
+            <span data-ng-hide="vm.isLoading">
+                <strong>{{vm.todos.length}}</strong></span> item(s)</span>
+        </p>
+    </article>
+
+    <footer>
+        <ul id="errorlog" >
+            <li data-ng-repeat="err in vm.errorLog">{{err}}</li>
+        </ul>
+        <a href="http://www.windowsazure.com/en-us/develop/mobile/">
+            Learn more about Windows Azure Mobile Services
+        </a>
+    </footer>
+</div>

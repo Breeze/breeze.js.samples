@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Todo list MobileService</title>
+        <link rel="stylesheet" href="styles.css" />
+        <meta name="viewport" content="width=device-width" />
+        <script>
+         if (!Object.defineProperty){
+             throw new Error("This app only runs on modern ECMAScript 5+ browser. It won't run on <IE9");
+         }
+        </script>
+    </head>
+    <body>
+
+        <div ng-app="app" ng-include="'page.html'"></div>
+
+        <!-- 3rd party vendor -->
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.js"></script> <!--angular.js -->
+        <script src="vendor/breeze.debug.js"></script><!--<script src="vendor/vendor.min.js"></script>-->
+        <script src="vendor/breeze.angular.js"></script>
+
+        <script src="vendor/breeze.labs.dataservice.abstractrest.js"></script>
+        <script src="vendor/breeze.labs.dataservice.mobileservices.js"></script>
+        <script src="vendor/breeze.metadata-helper.js"></script>
+
+        <script src="http://ajax.aspnetcdn.com/ajax/mobileservices/MobileServices.Web-1.1.0.min.js"></script>
+
+        <!-- application scripts -->
+        <script src="app.js"></script>
+        <script src="page.js"></script>
+        <script src="datacontext.js"></script>
+    </body>
+</html>
