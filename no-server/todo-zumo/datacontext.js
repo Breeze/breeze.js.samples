@@ -7,6 +7,8 @@
         ['$log', 'breeze','entityManagerFactory', factory]);
 
     function factory($log, breeze, entityManagerFactory){
+        var addedState = breeze.EntityState.Added;
+        var deletedState = breeze.EntityState.Deleted;
         var manager = entityManagerFactory.getEntityManager();
         manager.entityChanged.subscribe(entityCountsChanged);
         var todoItemType =manager.metadataStore.getEntityType('TodoItem');
@@ -15,10 +17,10 @@
             addTodoItem:      addTodoItem,
             counts:           {},
             deleteTodoItem:   deleteTodoItem,
-            getTodoItems:     getTodoItems,
+            getAllTodoItems:  getAllTodoItems,
             hasChanges:       hasChanges,
             reset:            reset,
-            save:             save
+            sync:             sync
         };
         updateCounts();
         return datacontext;
@@ -42,23 +44,32 @@
             }
         }
 
-        // Includes deleted todoItems
-        function getCachedTodoItems(){
-            return manager.getEntities(todoItemType);
-        }
+        function getAllTodoItems() {
+            return breeze.EntityQuery.from('TodoItem')
+                .using(manager).execute().then(success).catch(handleError);
 
-        function getTodoItems(includeComplete) {
-            var query = breeze.EntityQuery.from('TodoItem');
-            if (typeof includeComplete === 'boolean'){
-                query = query.where('complete', 'eq', includeComplete);
+            function success(data){
+                var fetched = data.results;
+                $log.log('breeze query succeeded; count = '+ fetched.length);
+                // Normally ok to just return fetched but this excludes new and deleted items
+                // Therefore we build results from all cached entities including those just fetched
+                // and purge deleted/unchanged that are no longer on the server
+                var cached = manager.getEntities(todoItemType);
+                var results=[];
+                cached.forEach(function (ce){
+                    var notFound = fetched.indexOf(ce) === -1;
+                    if (notFound){
+                        var state = ce.entityAspect.entityState;
+                        if ( state.isUnchanged() || state.isDeleted() ){
+                            // it's no longer on the server, remove it
+                            ce.entityAspect.setDetached();
+                            return; // don't include in results
+                        }
+                    }
+                    results.push(ce);
+                });
+                return results;
             }
-
-            return manager.executeQuery(query)
-                .then(function (data){
-                    $log.log('breeze query succeeded');
-                    // return data.results; // normally ok but excludes deleted items so do this instead
-                    return getCachedTodoItems();
-                }, handleError);
         }
 
         function handleError(error) {
@@ -73,11 +84,11 @@
 
         function reset(){ /* not implemented yet */}
 
-        function save(){
+        function sync(){
             return manager.saveChanges()
                 .then(function (){
                     $log.log('breeze save succeeded');
-                    return getCachedTodoItems();
+                    return getAllTodoItems();
                 })
                 .catch(handleError);
         }

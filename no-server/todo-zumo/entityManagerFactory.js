@@ -19,8 +19,7 @@
         configureBreeze();
 
         var emFactory =  {
-            getEntityManager: getEntityManager,
-            mobileServiceInfo: msInfo //TODO: Not needed after we get rid of MobileServices,
+            getEntityManager: getEntityManager
         }
         return emFactory;
         //////////////////////
@@ -52,7 +51,7 @@
                     defaultResourceName: "TodoItem",
                     dataProperties: {
                         id:       { dataType: DT.Guid },
-                        text:     { maxLength: 400, nullOk: false  },
+                        text:     { maxLength: 50, nullOk: false  },
                         complete: { dataType: DT.Boolean, nullOk: false }
                     }
                 };

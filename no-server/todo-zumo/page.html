@@ -7,10 +7,12 @@
             <p class="button-bar">
                 <input type="checkbox" data-ng-model="vm.showCompleted" > Show completed &nbsp;&nbsp;
                 <input type="checkbox" data-ng-model="vm.showDeleted" > Show deleted
-                <button class="btn-save" title="Save changes to Azure"
-                        data-ng-disabled="vm.saveDisabled()" data-ng-click="vm.save()" >Save</button>
-                <button class="btn-reset"  title="Clear cache and reload from Azure"
-                        data-ng-disabled="vm.resetDisabled()" data-ng-click="vm.reset()">Reset</button>
+                <button class="btn-sync" title="Sync changes with Azure."
+                        data-ng-disabled="vm.syncDisabled()" data-ng-click="vm.sync()" >Sync</button>
+                <button class="btn-refresh" title="Refresh with changes from Azure but don't save."
+                        data-ng-click="vm.refresh()" >Refresh</button>
+                <button class="btn-reset"  title="Discard changes and reload from Azure."
+                        data-ng-click="vm.reset()">Reset</button>
             </p>
 
             <form id="add-item" data-ng-submit="vm.addItem()">

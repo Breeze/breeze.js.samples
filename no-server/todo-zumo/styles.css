@@ -17,8 +17,10 @@ header h2 { text-transform: uppercase; font-weight: normal; color: white; font-s
 /* "Button Bar" */
 .button-bar {margin:10px 0 0 0;}
 .button-bar button {margin-left: 8px; ; padding: 6px 10px;}
-.btn-save {background-color: lightgreen;}
-.btn-save:enabled:hover { background-color: green; color: white}
+.btn-sync {background-color: lightgreen;}
+.btn-sync:enabled:hover { background-color: green; color: white}
+.btn-refresh {background-color: orange;}
+.btn-refresh:enabled:hover { background-color:brown; color: white}
 .btn-reset {background-color: lightcoral;}
 .btn-reset:enabled:hover { background-color:red; color: white}
 

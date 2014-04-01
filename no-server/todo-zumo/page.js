@@ -15,15 +15,16 @@
         vm.itemsFilter = itemsFilter;
         vm.errorLog = [];
         vm.newItemText = '';
+        vm.refresh = refresh;
         vm.reset = reset;
         vm.resetDisabled = resetDisabled;
-        vm.save = save;
-        vm.saveDisabled = saveDisabled;
+        vm.sync = sync;
+        vm.syncDisabled = syncDisabled;
         vm.showCompleted = false;
         vm.showDeleted = false;
         vm.todos = [];
 
-        getTodoItems(); // initial load
+        getAllTodoItems(); // initial load
 
         ////////////////////////////
 
@@ -44,9 +45,9 @@
             }
         }
 
-        function getTodoItems() {
+        function getAllTodoItems() {
             vm.isBusy = true;
-            return datacontext.getTodoItems()
+            return datacontext.getAllTodoItems()
                 .then(function(todoItems) {
                     vm.isBusy = false;
                     vm.todos = todoItems;
@@ -67,17 +68,17 @@
                 (!todoItem.complete || vm.showCompleted);
         }
 
+        function refresh(){
+            return getAllTodoItems();
+        }
+
         function reset(){
             return datacontext.reset(); // not implemented yet
         }
 
-        function resetDisabled(){
-            return vm.isBusy;
-        }
-
-        function save(){
+        function sync(){
             vm.isBusy = true;
-            return datacontext.save()
+            return datacontext.sync()
                 .then(function(todoItems) {
                     vm.isBusy = false;
                     vm.todos = todoItems;
@@ -85,8 +86,8 @@
                 .catch(handleError);
         }
 
-        function saveDisabled(){
-            return vm.isBusy || !datacontext.hasChanges();
+        function syncDisabled(){
+            return vm.isBusy;
         }
     }
 })();
