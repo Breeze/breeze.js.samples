@@ -46,7 +46,7 @@ header h2 { text-transform: uppercase; font-weight: normal; color: white; font-s
 
 /* Footer */
 footer { text-align: center; font-size: 0.8em; margin-top: 20px; }
-footer a { color: #666; display: block; }
+footer a { color: #666; }
 #errorlog { color: red; font-weight: bold; padding: 8px; text-align: left; }
 #errorlog li { list-style-type: none; text-align: left;  margin-top: 8px;  }
 #errorlog button { border-color: red; color: red;  }
