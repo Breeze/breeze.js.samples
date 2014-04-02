@@ -90,7 +90,7 @@
 
         function reset(){
             vm.newItemText='';
-            return datacontext.reset(); // not implemented yet
+            return datacontext.reset().then(querySuccess, handleError);
         }
 
         function sync(){

@@ -21,9 +21,10 @@
             </form>
         </header>
         <!-- Uncomment next line for debugging -->
+
         <!-- <pre>{{vm.todos | json}}</pre> -->
         <ul id="todo-items">
-            <li  data-ng-repeat="item in vm.todos | filter:vm.itemsFilter">
+            <li class="fader-animation" data-ng-repeat="item in vm.todos | filter:vm.itemsFilter">
                 <button class="item-delete" data-ng-click="vm.deleteItem(item)">Delete</button>
                 <input type="checkbox" class="item-complete" data-ng-model="item.complete"/>
                 <div>
@@ -42,20 +43,20 @@
             </span>
         </p>
     </article>
-
     <footer>
-        <ul id="wip-messages" data-ng-show="vm.wipMessages.length">
-            <li data-ng-repeat="msg in vm.wipMessages">{{msg}}</li>
-        </ul>
+
+        <a href="http://www.windowsazure.com/en-us/develop/mobile/">
+            Learn more about Windows Azure Mobile Services
+        </a>
+
+            <ul id="wip-messages" data-ng-show="vm.wipMessages.length" >
+                <li data-ng-repeat="msg in vm.wipMessages">{{msg}}</li>
+            </ul>
 
         <ul id="errorlog" >
             <li data-ng-repeat="err in vm.errorLog">{{err}}</li>
         </ul>
-        <p>
-            <a href="http://www.windowsazure.com/en-us/develop/mobile/">
-                Learn more about Windows Azure Mobile Services
-            </a>
-        </p>
+
 
     </footer>
 </div>

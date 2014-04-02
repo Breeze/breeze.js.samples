@@ -45,6 +45,8 @@
             }
         }
 
+        // Get all TodoItems from the server and cache and purge
+        // unmodified or deleted cached entities that aren't on the server
         function getAllTodoItems() {
             return breeze.EntityQuery.from('TodoItem')
                 .using(manager).execute().then(success).catch(handleError);
@@ -85,19 +87,31 @@
             return manager.hasChanges();
         }
 
-        // Load into an empty cache (clears the cache first!)
+        // Load cache at app start from server and wip stash.
+        // Unlike getAllTodoItems, it does not purge cache of dead wood
         function loadTodoItems(){
-            manager.clear();
+            var restored = wip.restore();
             return breeze.EntityQuery.from('TodoItem')
                 .using(manager).execute().then(success).catch(handleError);
             function success(data) {
-                var fetched = data.results;
-                $log.log('breeze query succeeded; count = ' + fetched.length);
-                return fetched;
+                var loaded = data.results;
+                $log.log('breeze load succeeded; fetch count = ' + loaded.length);
+                if (restored && restored.length > 0) {
+                   // get from cache so we are sure to include 'new' entities.
+                    loaded = manager.getEntities(todoItemType);
+                }
+                return loaded;
             }
         }
 
-        function reset(){ /* not implemented yet */}
+        // Clear everything local and reload from server.
+        function reset(){
+            wip.stop();
+            wip.clear();
+            manager.clear();
+            return loadTodoItems()
+                .finally(function(){wip.resume();});
+        }
 
         function sync(){
             return manager.saveChanges()

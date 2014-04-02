@@ -16,14 +16,16 @@
             initialize: initialize,
             isEnabled: function(){return !disabled;},
             isStopped: function(){return !!stopped;},
-            restore: false,
+            restore: restore,
             resume: resume,
+            stashCount: function(){return stashCount;},
+            start: resume, //alias
             stop: stop
         };
 
         var db = $window.localStorage;
 
-        var delay = 5000; // debounce for 5 seconds
+        var delay = 3000; // debounce for 3 seconds
         var disabled = undefined;
         var entityChangedToken = undefined;
         var eventName = "WIP";
@@ -34,6 +36,7 @@
         var stashName = "wip";
         var stashTypes = [];
         var stopped = false;
+        var stashCount = undefined;
 
         return wip;
         ///////////////////////
@@ -41,8 +44,9 @@
             if (disabled) {return;}
             try {
                db.removeItem(stashName);
+               stashCount = 0;
                sendWipMessage('Cleared WIP stash');
-            } catch(e) {/* doesn't matter */}
+            } catch(e) { stashCount= undefined; /* err doesn't matter */}
         }
 
         function entityChanged(changeArgs){
@@ -60,13 +64,14 @@
             }
             if (!db){
                 disabled = true;
+                stashCount = 0;
                 $log.error("Browser does not support local storage; WIP disabled.")
             } else {
                 manager = entityManager;
                 setStashTypes(typesToStash);
                 listenForChanges();
                 disabled = false;
-                $log.log('WIP enabled');
+                sendWipMessage('WIP enabled');
             }
         }
 
@@ -77,22 +82,28 @@
         }
 
         function restore(){
-            if (disabled) {return;}
+            var imports = [];
+            stashCount = 0;
+            if (disabled) {return imports;}
             // imports changes from stash
             isRestoring = true;
             try {
                 var changes = db.getItem(stashName);
                 if (changes){
                     // should confirm that metadata and app version are still valid but this is a demo
-                    var imports = manager.importEntities(changes);
-                    sendWipMessage('Restoring '+imports.length+' change(s) from WIP');
+                    imports = manager.importEntities(changes).entities;
+                    stashCount = imports.length;
+                    sendWipMessage('Restored '+stashCount+' change(s) from stash');
+                } else {
+                    sendWipMessage('Restore found no stashed changes');
                 }
-            } catch (error){
+            } catch (error){ /* log but don't crash */
                 $log.error('WIP restore failed');
                 $log.error(error);
             } finally {
                 isRestoring = false;
             }
+            return imports;
         }
 
         function resume(){
@@ -104,7 +115,7 @@
         }
 
         function sendWipMessage(message){
-            $log.log('WIP message sent "'+message+'"');
+            $log.log('WIP event: "'+message+'"');
             $rootScope.$broadcast(eventName, message);
         }
 
@@ -126,13 +137,15 @@
             if (manager.hasChanges()){
                 // export changes w/o metadata
                 var changes = manager.getChanges(stashTypes);
-                sendWipMessage('Stashing '+changes.length+' change(s) in WIP stash');
+                stashCount = changes.length;
+                sendWipMessage('Stashing '+ stashCount +' change(s)');
                 var exported = manager.exportEntities(changes, false);
                 // should stash with metadata and app version but this is a demo
                 db.setItem(stashName, exported);
-            } else {
-                sendWipMessage('No changes; clearing WIP stash');
+            } else  if (stashCount !== 0){
+                sendWipMessage('No changes; clearing stash');
                 db.removeItem(stashName);
+                stashCount = 0;
             }
 
         }
