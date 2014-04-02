@@ -63,6 +63,7 @@
         }
 
         function handleError(error) {
+            error.message = prettifyErrorMessage(error.message);
             var status = error.status ? error.status + ' - ' : '';
             var err = status + (error.message ? error.message : 'unknown error; check console.log');
             throw new Error(err); // so downstream listener gets it.
@@ -75,6 +76,21 @@
         function loadTodoItems(){
             wip.restore();
             return getAllTodoItems();
+        }
+
+        function prettifyErrorMessage(message){
+            // When message returns the TodoItem guid id,
+            // try to replace with the TodoItem text which displays better
+            var re=/with id '([1234567890abcdef\-]*)'/i;
+            var match = message && message.match(re);
+            if (match){
+                var id = match[1];
+                var todo = id && manager.getEntityByKey('TodoItem',id);
+                if (todo) {
+                    message = message.replace(re,'named "'+todo.text+'"')+" [key: "+id+"]";
+                }
+            }
+            return message;
         }
 
         // Clear everything local and reload from server.

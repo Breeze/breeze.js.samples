@@ -27,7 +27,8 @@
         <!-- <pre>{{vm.todos | json}}</pre> -->
         <ul id="todo-items">
             <li class="fader-animation" data-ng-repeat="item in vm.todos | filter:vm.itemsFilter">
-                <button class="item-delete" data-ng-click="vm.deleteItem(item)">Delete</button>
+                <button class="item-delete" title="delete {{item.id}}"
+                        data-ng-click="vm.deleteItem(item)" >Delete</button>
                 <input type="checkbox" class="item-complete" data-ng-model="item.complete"/>
                 <div>
                     <input class="item-text {{item.entityStateName}}" data-ng-model="item.text"/>
@@ -36,7 +37,7 @@
         </ul>
 
         <p id="summary">
-            <span data-ng-show="vm.isBusy"></span>
+            <span data-ng-show="vm.isBusy">Loading ...</span>
             <span data-ng-hide="vm.isBusy">
                 <strong>{{vm.counts.all}} item(s)</strong>&nbsp;&nbsp; </span>
                 <span class="Added">Added: {{vm.counts.Added}}&nbsp;&nbsp; </span>
