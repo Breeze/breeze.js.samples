@@ -3,9 +3,10 @@
  */
 (function (){
 
-    angular.module('app').factory('entityManagerFactory', ['$q', 'breeze', factory]);
+    angular.module('app').factory('entityManagerFactory', ['$q', 'breeze', 'wip-service', service]);
 
-    function factory($q, breeze){
+    function service($q, breeze, wip){
+        var manager;
         var msInfo ={
             // Ward's Todo Mobile Service
             // url: 'https://wardtodomobileservice.azure-mobile.net/',
@@ -31,9 +32,12 @@
         }
 
         function getEntityManager(){
-            var serviceName = msInfo.url+"tables/";
-            var manager = new breeze.EntityManager(serviceName);
-            setMetadata(manager);
+            if (!manager) {
+                var serviceName = msInfo.url + "tables/";
+                manager =  new breeze.EntityManager(serviceName);
+                setMetadata(manager);
+                wip.initialize(manager, 'TodoItem');
+            }
             return manager;
         }
 

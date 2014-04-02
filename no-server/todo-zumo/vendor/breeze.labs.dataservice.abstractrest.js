@@ -1,7 +1,7 @@
 ﻿/*
  * Breeze Labs Abstract REST DataServiceAdapter
  *
- *  v.0.2.3
+ *  v.0.2.4
  *
  * Extends Breeze with a REST DataService Adapter abstract type
  *
@@ -67,6 +67,7 @@
         // Configuration API
         checkForRecomposition: checkForRecomposition,
         saveOnlyOne: false, // true if may only save one entity at a time.
+        ignoreDeleteNotFound: true, // true if should ignore a 404 error from a delete
 
         // "protected" members available to derived concrete dataservice adapter types
         _addToSaveContext: _addToSaveContext,
@@ -365,8 +366,8 @@
 
         function tryRequestSucceeded(response) {
             try {
-                var statusCode = response.status;
-                if ((!statusCode) || statusCode >= 400) {
+                var status = +response.status;
+                if ((!status) || status >= 400) {
                     tryRequestFailed(response);
                 } else {
                     var savedEntity = saveRequestSucceeded(saveContext, response, index);
@@ -381,12 +382,22 @@
 
         function tryRequestFailed(response) {
             try {
-                // Do NOT fail saveChanges at the request level
-                saveContext.saveResult.entitiesWithErrors.push({
-                    entity: saveContext.originalEntities[index],
-                    error: adapter._createErrorFromResponse(response, url)
-                });
-                deferred.resolve(false);
+                var status = +response.status;
+                if (status && status === 404 && adapter.ignoreDeleteNotFound &&
+                    saveContext.originalEntities[index].entityAspect.entityState.isDeleted()) {
+                    // deleted entity not found; treat as if successfully deleted.
+                    response.status = 204;
+                    response.statusText = 'resource was already deleted; no content';
+                    response.data = undefined;
+                    tryRequestSucceeded(response);
+                } else {
+                    // Do NOT fail saveChanges at the request level
+                    saveContext.saveResult.entitiesWithErrors.push({
+                        entity: saveContext.originalEntities[index],
+                        error: adapter._createErrorFromResponse(response, url)
+                    });
+                    deferred.resolve(false);
+                }
             } catch (e) {
                 // program error means adapter is broken, not remote server or the user
                 deferred.reject("Program error: failed while processing save error");

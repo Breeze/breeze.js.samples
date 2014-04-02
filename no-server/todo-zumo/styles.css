@@ -49,3 +49,6 @@ footer { text-align: center; font-size: 0.8em; margin-top: 20px; }
 footer a { color: #666; display: block; }
 #errorlog { color: red; font-weight: bold; padding: 8px; display: inline-block; text-align: left; }
 #errorlog li { list-style-type: none; text-align: left;  }
+
+#wip-messages {  padding: 8px; display: inline-block; text-align: left; background-color: lightcyan }
+#wip-messages li { list-style-type: none; text-align: left;  }

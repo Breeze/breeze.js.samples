@@ -1,12 +1,12 @@
 /*
- * datacontext servicee encapsulates data access and model definition
+ * datacontext service encapsulates data access and model definition
  */
 (function (){
 
     angular.module('app').factory('datacontext',
-        ['$log', 'breeze','entityManagerFactory', factory]);
+        ['$log', 'breeze','entityManagerFactory', 'wip-service', service]);
 
-    function factory($log, breeze, entityManagerFactory){
+    function service($log, breeze, entityManagerFactory, wip){
         var addedState = breeze.EntityState.Added;
         var deletedState = breeze.EntityState.Deleted;
         var manager = entityManagerFactory.getEntityManager();
@@ -18,6 +18,7 @@
             counts:           {},
             deleteTodoItem:   deleteTodoItem,
             getAllTodoItems:  getAllTodoItems,
+            loadTodoItems:    loadTodoItems,
             hasChanges:       hasChanges,
             reset:            reset,
             sync:             sync
@@ -51,22 +52,24 @@
             function success(data){
                 var fetched = data.results;
                 $log.log('breeze query succeeded; count = '+ fetched.length);
-                // Normally ok to just return fetched but this excludes new and deleted items
+                // Fetched lacks new and deleted items and entities others deleted may be in cache
                 // Therefore we build results from all cached entities including those just fetched
                 // and purge deleted/unchanged that are no longer on the server
                 var cached = manager.getEntities(todoItemType);
                 var results=[];
                 cached.forEach(function (ce){
-                    var notFound = fetched.indexOf(ce) === -1;
-                    if (notFound){
+                    // WARNING: DEMO CODE. ridiculously slow when 'fetched' is large
+                    if (fetched.indexOf(ce) === -1){  // cached entity not in fetched
                         var state = ce.entityAspect.entityState;
                         if ( state.isUnchanged() || state.isDeleted() ){
-                            // it's no longer on the server, remove it
+                            // remove from cache and exclude from results
                             ce.entityAspect.setDetached();
-                            return; // don't include in results
+                        } else {
+                            results.push(ce); // keep new and modified
                         }
+                    } else { // cached entity is in fetched; keep it
+                        results.push(ce);
                     }
-                    results.push(ce);
                 });
                 return results;
             }
@@ -82,12 +85,25 @@
             return manager.hasChanges();
         }
 
+        // Load into an empty cache (clears the cache first!)
+        function loadTodoItems(){
+            manager.clear();
+            return breeze.EntityQuery.from('TodoItem')
+                .using(manager).execute().then(success).catch(handleError);
+            function success(data) {
+                var fetched = data.results;
+                $log.log('breeze query succeeded; count = ' + fetched.length);
+                return fetched;
+            }
+        }
+
         function reset(){ /* not implemented yet */}
 
         function sync(){
             return manager.saveChanges()
                 .then(function (){
                     $log.log('breeze save succeeded');
+                    wip.clear();
                     return getAllTodoItems();
                 })
                 .catch(handleError);

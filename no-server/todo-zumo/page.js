@@ -3,9 +3,11 @@
  */
 (function() {
 
-    angular.module('app').controller('pageController', ['datacontext', controller]);
+    angular.module('app').controller('pageController',
+        ['$scope', '$timeout', 'datacontext', 'wip-service', controller]);
 
-    function controller(datacontext) {
+    function controller($scope, $timeout, datacontext, wip) {
+        var wipMsgCount = 0;
 
         var vm = this;
         vm.addItem = addItem;
@@ -17,14 +19,15 @@
         vm.newItemText = '';
         vm.refresh = refresh;
         vm.reset = reset;
-        vm.resetDisabled = resetDisabled;
         vm.sync = sync;
         vm.syncDisabled = syncDisabled;
         vm.showCompleted = false;
         vm.showDeleted = false;
         vm.todos = [];
+        vm.wipMessages = [];
 
-        getAllTodoItems(); // initial load
+        listenForWipMessages();
+        loadTodoItems(); // initial load
 
         ////////////////////////////
 
@@ -47,12 +50,7 @@
 
         function getAllTodoItems() {
             vm.isBusy = true;
-            return datacontext.getAllTodoItems()
-                .then(function(todoItems) {
-                    vm.isBusy = false;
-                    vm.todos = todoItems;
-                })
-                .catch(handleError);
+            return datacontext.getAllTodoItems().then(querySuccess, handleError);
         }
 
         function handleError(error) {
@@ -68,22 +66,37 @@
                 (!todoItem.complete || vm.showCompleted);
         }
 
+        function listenForWipMessages(){
+            $scope.$on(wip.eventName(), function(event, message){
+                vm.wipMessages.push((wipMsgCount+=1)+' - '+message);
+                $timeout(function(){vm.wipMessages.length=0;}, 3000);
+            })
+        }
+
+        function loadTodoItems(){
+            vm.isBusy = true;
+            return datacontext.loadTodoItems().then(querySuccess, handleError);
+        }
+
+        function querySuccess(todoItems){
+            vm.isBusy = false;
+            vm.todos = todoItems;
+        }
+
         function refresh(){
+            addItem();  // might have one pending
             return getAllTodoItems();
         }
 
         function reset(){
+            vm.newItemText='';
             return datacontext.reset(); // not implemented yet
         }
 
         function sync(){
+            addItem(); // might have one pending
             vm.isBusy = true;
-            return datacontext.sync()
-                .then(function(todoItems) {
-                    vm.isBusy = false;
-                    vm.todos = todoItems;
-                })
-                .catch(handleError);
+            return datacontext.sync().then(querySuccess, handleError);
         }
 
         function syncDisabled(){
