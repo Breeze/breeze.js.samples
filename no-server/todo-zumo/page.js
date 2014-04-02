@@ -2,7 +2,7 @@
  * page - the controller for the page view
  */
 (function() {
-
+    'use strict';
     angular.module('app').controller('pageController',
         ['$scope', '$timeout', 'datacontext', 'wip-service', controller]);
 
@@ -11,6 +11,7 @@
 
         var vm = this;
         vm.addItem = addItem;
+        vm.clearErrorLog = clearErrorLog;
         vm.counts = datacontext.counts;
         vm.deleteItem = deleteItem;
         vm.isBusy = false;
@@ -23,15 +24,12 @@
         vm.syncDisabled = syncDisabled;
         vm.showCompleted = false;
         vm.showDeleted = false;
-        vm.showErrorLog = true; // but only if it exists
         vm.todos = [];
         vm.wipMessages = [];
 
-        listenForWipMessages();
+        reportWipMessages();
         loadTodoItems(); // initial load
-
         ////////////////////////////
-
         function addItem() {
             if (vm.newItemText !== '') {
                 var newTodo = datacontext.addTodoItem({ text: vm.newItemText});
@@ -39,6 +37,8 @@
                 vm.newItemText='';
             }
         }
+
+        function clearErrorLog() { vm.errorLog = [];}
 
         function deleteItem(todoItem){
             datacontext.deleteTodoItem(todoItem);
@@ -67,13 +67,6 @@
                 (!todoItem.complete || vm.showCompleted);
         }
 
-        function listenForWipMessages(){
-            $scope.$on(wip.eventName(), function(event, message){
-                vm.wipMessages.push((wipMsgCount+=1)+' - '+message);
-                $timeout(function(){vm.wipMessages.length=0;}, 3000);
-            })
-        }
-
         function loadTodoItems(){
             vm.isBusy = true;
             return datacontext.loadTodoItems().then(querySuccess, handleError);
@@ -87,6 +80,13 @@
         function refresh(){
             addItem();  // might have one pending
             return getAllTodoItems();
+        }
+
+        function reportWipMessages(){
+            $scope.$on(wip.eventName(), function(event, message){
+                vm.wipMessages.push((wipMsgCount+=1)+' - '+message);
+                $timeout(function(){vm.wipMessages.length=0;}, 4000);
+            })
         }
 
         function reset(){

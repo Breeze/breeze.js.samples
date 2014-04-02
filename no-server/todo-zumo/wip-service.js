@@ -4,7 +4,7 @@
  * to that manager in a throttled way.
  */
 (function (){
-
+    'use strict';
     angular.module('app').factory('wip-service',
         ['$log','$rootScope','$timeout','$window', 'breeze', service]);
 
@@ -24,7 +24,6 @@
         };
 
         var db = $window.localStorage;
-
         var delay = 3000; // debounce for 3 seconds
         var disabled = undefined;
         var entityChangedToken = undefined;
@@ -107,11 +106,12 @@
         }
 
         function resume(){
-            if (disabled) {return;}
-            stash();
-            listenForChanges();
-            sendWipMessage('WIP re-enabled');
-            stopped = false;
+            if (!disabled && stopped) {
+                stopped = false;
+                stash();
+                listenForChanges();
+                sendWipMessage('WIP re-enabled');
+            }
         }
 
         function sendWipMessage(message){
@@ -151,10 +151,11 @@
         }
 
         function stop(){
-            if (disabled) {return;}
-            stopListeningForChanges();
-            sendWipMessage('WIP has been stopped');
-            stopped = true;
+            if (!disabled && !stopped) {
+                stopped = true;
+                stopListeningForChanges();
+                sendWipMessage('WIP has been stopped');
+            }
         }
 
         function stopListeningForChanges() {

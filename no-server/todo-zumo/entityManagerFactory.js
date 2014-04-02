@@ -2,21 +2,12 @@
  * entityManagerFactory creates the model and delivers a new EntityManager
  */
 (function (){
+    'use strict';
+    angular.module('app').factory('entityManagerFactory',
+        ['$q', 'breeze', 'config', 'wip-service', service]);
 
-    angular.module('app').factory('entityManagerFactory', ['$q', 'breeze', 'wip-service', service]);
-
-    function service($q, breeze, wip){
+    function service($q, breeze, config, wip){
         var manager;
-        var msInfo ={
-            // Ward's Todo Mobile Service
-            // url: 'https://wardtodomobileservice.azure-mobile.net/',
-            // appKey: 'psChxvAmcXMcsgEhqqjmfTkoxzwuWG62'
-
-            //Donna Malayeri's Todo Mobile Service
-            url: 'https://donnam-zumotest.azure-mobile.net/',
-            appKey: 'MxhjqYLwepMvaSSJdCAauHzhfddkQC33'
-        };
-
         configureBreeze();
 
         var emFactory =  {
@@ -27,13 +18,13 @@
         function configureBreeze(){
             // use Breeze Labs mobile services dataservice adapter to query and save
             var adapter = breeze.config.initializeAdapterInstance('dataService', 'azure-mobile-services', true);
-            adapter.mobileServicesInfo = msInfo;
+            adapter.mobileServicesInfo = {url: config.appUrl, appKey: config.appKey};
             adapter.Q = $q;
         }
 
         function getEntityManager(){
             if (!manager) {
-                var serviceName = msInfo.url + "tables/";
+                var serviceName = config.appUrl + "tables/";
                 manager =  new breeze.EntityManager(serviceName);
                 setMetadata(manager);
                 wip.initialize(manager, 'TodoItem');

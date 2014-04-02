@@ -58,9 +58,8 @@
 
         <!-- Error Log -->
         <div id="errorlog" data-ng-show="vm.errorLog.length">
-            <input type="checkbox" checked data-ng-model="vm.showErrorLog" >
-            Show error log with {{vm.errorLog.length}} error(s).
-            <ul data-ng-show="vm.showErrorLog">
+            <button data-ng-click="vm.clearErrorLog()">Clear error log</button>
+            <ul>
                 <li data-ng-repeat="err in vm.errorLog">{{err}}</li>
             </ul>
         </div>

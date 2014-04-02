@@ -2,9 +2,9 @@
  * datacontext service encapsulates data access and model definition
  */
 (function (){
-
+    'use strict';
     angular.module('app').factory('datacontext',
-        ['$log', 'breeze','entityManagerFactory', 'wip-service', service]);
+        ['$log', 'breeze', 'entityManagerFactory', 'wip-service', service]);
 
     function service($log, breeze, entityManagerFactory, wip){
         var addedState = breeze.EntityState.Added;
@@ -18,15 +18,14 @@
             counts:           {},
             deleteTodoItem:   deleteTodoItem,
             getAllTodoItems:  getAllTodoItems,
-            loadTodoItems:    loadTodoItems,
             hasChanges:       hasChanges,
+            loadTodoItems:    loadTodoItems,
             reset:            reset,
             sync:             sync
         };
         updateCounts();
         return datacontext;
         /////////////////////////////
-
         function addTodoItem(initialValues){
             return manager.createEntity(todoItemType, initialValues);
         }
@@ -45,35 +44,21 @@
             }
         }
 
-        // Get all TodoItems from the server and cache and purge
-        // unmodified or deleted cached entities that aren't on the server
+        // Get all TodoItems from the server and cache combined
         function getAllTodoItems() {
-            return breeze.EntityQuery.from('TodoItem')
-                .using(manager).execute().then(success).catch(handleError);
+            var query = breeze.EntityQuery.from('TodoItem');
+            return manager.executeQuery(query).then(success).catch(handleError);
 
             function success(data){
                 var fetched = data.results;
-                $log.log('breeze query succeeded; count = '+ fetched.length);
-                // Fetched lacks new and deleted items and entities others deleted may be in cache
-                // Therefore we build results from all cached entities including those just fetched
-                // and purge deleted/unchanged that are no longer on the server
-                var cached = manager.getEntities(todoItemType);
-                var results=[];
-                cached.forEach(function (ce){
-                    // WARNING: DEMO CODE. ridiculously slow when 'fetched' is large
-                    if (fetched.indexOf(ce) === -1){  // cached entity not in fetched
-                        var state = ce.entityAspect.entityState;
-                        if ( state.isUnchanged() || state.isDeleted() ){
-                            // remove from cache and exclude from results
-                            ce.entityAspect.setDetached();
-                        } else {
-                            results.push(ce); // keep new and modified
-                        }
-                    } else { // cached entity is in fetched; keep it
-                        results.push(ce);
-                    }
-                });
-                return results;
+                $log.log('breeze query succeeded. fetched: '+ fetched.length);
+                return manager.getEntities(todoItemType);
+
+                // Normally would re-query the cache to combine cached and fetched
+                // but need the deleted entities too for this UI.
+                // For demo, we returned every cached Todo
+                // Warning: the cache will accumulate entities that
+                // have been deleted by other users until it is entirely rebuilt via 'refresh'
             }
         }
 
@@ -87,21 +72,9 @@
             return manager.hasChanges();
         }
 
-        // Load cache at app start from server and wip stash.
-        // Unlike getAllTodoItems, it does not purge cache of dead wood
         function loadTodoItems(){
-            var restored = wip.restore();
-            return breeze.EntityQuery.from('TodoItem')
-                .using(manager).execute().then(success).catch(handleError);
-            function success(data) {
-                var loaded = data.results;
-                $log.log('breeze load succeeded; fetch count = ' + loaded.length);
-                if (restored && restored.length > 0) {
-                   // get from cache so we are sure to include 'new' entities.
-                    loaded = manager.getEntities(todoItemType);
-                }
-                return loaded;
-            }
+            wip.restore();
+            return getAllTodoItems();
         }
 
         // Clear everything local and reload from server.
@@ -109,7 +82,7 @@
             wip.stop();
             wip.clear();
             manager.clear();
-            return loadTodoItems()
+            return getAllTodoItems()
                 .finally(function(){wip.resume();});
         }
 
