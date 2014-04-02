@@ -47,12 +47,12 @@ header h2 { text-transform: uppercase; font-weight: normal; color: white; font-s
 /* Footer */
 footer { text-align: center; font-size: 0.8em; margin-top: 20px; }
 footer a { color: #666; display: block; }
-#errorlog { color: red; font-weight: bold; padding: 8px; display: inline-block; text-align: left; }
-#errorlog li { list-style-type: none; text-align: left;  }
+#errorlog { color: red; font-weight: bold; padding: 8px; text-align: left; }
+#errorlog li { list-style-type: none; text-align: left;  margin-top: 8px;  }
 
-#wip-messages {  padding: 8px; margin: 8px 0 0 0; display: inline-block; text-align: left; background-color: #B8DCFA;
+#wip-messages {  padding: 8px; margin: 8px 0 0 0; text-align: left; background-color: #B8DCFA;
                  border-radius: 4px;  }
-#wip-messages li { list-style-type: none; text-align: left;  }
+#wip-messages li { list-style-type: none; text-align: left; margin-top: 8px; }
 
 /* Angular ng-include, ng-view, ng-repeat fader animation  - John Papa*/
 .fader-animation.ng-enter,

@@ -23,6 +23,7 @@
         vm.syncDisabled = syncDisabled;
         vm.showCompleted = false;
         vm.showDeleted = false;
+        vm.showErrorLog = true; // but only if it exists
         vm.todos = [];
         vm.wipMessages = [];
 
