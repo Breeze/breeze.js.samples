@@ -741,11 +741,12 @@
         });
 
     /*********************************************************
-    * setting another EntityState of a detached entity is harmless
-    * Fails. See defect #2581
+    * Setting EntityState on a detached entity throws good exception
+    * The exception message is  defect #2581
     *********************************************************/
-    test("setting another EntityState on a detached entity is harmless", 4,
+    test("setting EntityState on a detached entity throws good exception", 5,
         function () {
+
             var em = newEm(); // new empty EntityManager
             var order = em.createEntity('Order', { OrderID: 1 });
 
@@ -757,28 +758,36 @@
 
             try {
                 aspect.setDeleted();
-                remainsDetachedWhenSet('Deleted');
+                didNotThrow('Deleted');
             } catch (e) { threwWhenSet(e, 'Deleted');}
             
             try {
                 aspect.setModified();
-                remainsDetachedWhenSet('Modified');
+                didNotThrow('Modified');
             } catch (e) { threwWhenSet(e, 'Modified'); }
 
             try {
                 aspect.setUnchanged();
-                remainsDetachedWhenSet('Unchanged');
+                didNotThrow('Unchanged');
             } catch (e) { threwWhenSet(e, 'Unchanged'); }
 
+            aspect.setDetached();
+            ok(true, "'setDetached' on an already detached entity is ok");
+
             // helpers
-            function remainsDetachedWhenSet(method) {
-                var isDetached = aspect.entityState.isDetached();
-                ok(isDetached, "'order' should remain detached after set"+ method +"()");
+            function didNotThrow(method) {
+                ok(fail,
+                "should throw expected exception when called set" + method + " on detached entity");
             }
 
             function threwWhenSet(error, method) {
-                ok(false, "Breeze threw exception when called set" + method +
-                    " on detached entity; error was " + error.message);
+                var isDetached = aspect.entityState.isDetached();
+
+                var re = /cannot set the 'entityState' of an entity when it is detached/;
+                var threwExpectedError = re.test(error.message);
+                ok(threwExpectedError && isDetached,
+                "should remain detached and throw expected exception when called set" +
+                 method + " on detached entity");
             }
 
         });
