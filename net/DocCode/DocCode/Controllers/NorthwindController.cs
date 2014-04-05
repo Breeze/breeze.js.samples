@@ -89,6 +89,7 @@ namespace DocCode.Controllers
             return _repository.InternationalOrders;
         }
         [HttpGet]
+        [BreezeQueryable(MaxExpansionDepth = 3)]
         public IQueryable<Order> Orders() {
             return _repository.Orders;
         }
@@ -112,7 +113,6 @@ namespace DocCode.Controllers
         }
 
         [HttpGet]
-        [BreezeQueryable(MaxExpansionDepth = 3)]
         public IQueryable<OrderDetail> OrderDetails() {
             return _repository.OrderDetails;
         }
