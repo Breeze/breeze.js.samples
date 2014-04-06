@@ -1,5 +1,13 @@
-// Test the menu controller defined in menu.js
-ddescribe("Menu Controller: ", function () {
+/************************
+ * Test the menu controller defined in menu.js
+ *
+ * To Test:
+ * - each valid product type can return a products array
+ * - invalid product type returns 'pizza' products
+ * - can generate the right link for a product
+ * - calling vm.go goes to the right view for the product
+ *******************************/
+describe("Menu Controller: ", function () {
 
     testFns.spyOnToastr();
 
@@ -7,15 +15,18 @@ ddescribe("Menu Controller: ", function () {
         controllerFactory,
         controllerName='menu',
         dataservice,
-        expectedProducts
+        expectedProducts,
+        menuStateName = 'app.menu',
+        $state
 
     beforeEach( module('app', function($provide){
         dataservice = new DataServiceMock();
         $provide.value('dataservice', dataservice);
     }));
 
-    beforeEach(inject(function($controller) {
+    beforeEach(inject(function($controller, _$state_) {
         controllerFactory = $controller;
+        $state = _$state_;
     }));
 
     describeStateParamSpec('drink');
@@ -36,6 +47,40 @@ ddescribe("Menu Controller: ", function () {
         runStateParamSpecs('pizza');
     });
 
+    describe("when select a pizza product", function () {
+        var product = new ProductMock('pizza', 42);
+        beforeEach(function () {
+            createControllerForProductType('pizza');
+        });
+
+        it("creates correct link for the product", function () {
+            var sref = controller.productSref(product);
+            expect(sref).toBe('#/menu/pizza/42')
+        });
+
+        it("calling 'go' goes to the right location for the product", function () {
+            // not very testable because we have to know all of the view templates,
+            // top to bottom, for the target state
+            // so we can fake them in $templateCache
+            inject( function($location, $rootScope, $templateCache){
+                // fakes of the views that would be loaded to get to this state
+                $templateCache.put('app/shell/header.html','');
+                $templateCache.put('app/shell/footer.html','');
+                $templateCache.put('app/shell/welcome.html','');
+                $templateCache.put('app/order/order.html','');
+                $templateCache.put('app/order/orderSidebar.html','');
+                $templateCache.put('app/order/orderItem.html','');
+
+                controller.go(product);
+                $rootScope.$digest(); // flush the route change
+
+                expect($location.$$path).toBe('/menu/pizza/42')
+            });
+        });
+
+    });
+
+    /* spec helpers */
     function describeStateParamSpec(productType){
 
         describe("given $stateParams for the '"+productType+"' product type",  function(){
@@ -48,7 +93,7 @@ ddescribe("Menu Controller: ", function () {
 
     function createControllerForProductType(productType){
         var  ctorArgs ={
-            "$stateParams": $stateParams = {productType: productType },
+            "$stateParams": {productType: productType },
             "dataservice" :  dataservice
         }
         expectedProducts = [new ProductMock(productType)];
@@ -69,12 +114,6 @@ ddescribe("Menu Controller: ", function () {
             expect(template).toMatch(re);
         });
     }
-
-
-    /* To be tested */
-    it("can tell UI-router to go to the state for the designated product");
-    it("can generate a link to the UI-router state for the designated product.")
-
 
     function DataServiceMock(){
         this.products = {

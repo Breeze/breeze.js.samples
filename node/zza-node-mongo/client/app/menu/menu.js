@@ -38,9 +38,9 @@
 
         // Generates a link that you can see in the browser
         // See drink.html for an example of this approach
-        function productSref(p) {
-            return "app.order.product({productType: '" + p.type + "', productId: '" + p.id +"'})";
-            //return '#/menu/'+p.type+'/'+p.id;
+        function productSref(product) {
+            return $state.href('app.order.product', {productType : product.type, productId: product.id});
+            //return '#/menu/'+product.type+'/'+product.id;
         }
     }
 
