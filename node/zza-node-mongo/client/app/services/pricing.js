@@ -22,9 +22,8 @@
             calcItemOptionUnitPrice: calcItemOptionUnitPrice,
             orderHasExtraCostOptions: orderHasExtraCostOptions
         };
-
         return pricing;
-
+        /////////////////////
         /** Both calculates and sets the order.itemsTotal **/
         function calcOrderItemsTotal(order) {
             if (!order) { return 0; }

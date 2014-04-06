@@ -17,7 +17,7 @@
         return {
             fetchLookups: fetchLookups
         };
-
+        /////////////////////
         function fetchLookups(service, manager) {
 
             return breeze.EntityQuery.from('Lookups')

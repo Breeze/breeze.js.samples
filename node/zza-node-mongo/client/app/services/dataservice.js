@@ -28,15 +28,11 @@
                  productSizes
                  */
             };
-
-        initialize();
         return service;
-
-        /* implementation */
-
+        /////////////////////
         function initialize() {
             manager = entityManagerFactory.newManager();
-            service.isReady = lookups.fetchLookups(service, manager)
+            return service.isReady = lookups.fetchLookups(service, manager)
                     .then( createDraftAndCartOrders )
                     .catch( function (error) {
                         logger.error(error.message, "Data initialization failed");
@@ -54,6 +50,9 @@
 
         function ready(success, fail) {
             var promise = service.isReady;
+            if (!promise){
+                promise = initialize();
+            }
             if (success) {
                 promise = promise.then(success);
             }

@@ -22,9 +22,8 @@
             Customer: Customer,
             Order: Order
         };
-
         return model;
-
+        /////////////////////
         // Model classes
         function Customer() {}
         function Order() {}

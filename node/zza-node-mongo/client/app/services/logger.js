@@ -21,8 +21,7 @@
             // straight to console; bypass toast
             log     : $log.log
         };
-
-        //#region implementation
+        /////////////////////
         function error(message, title) {
             toastr.error(message, title);
             $log.error("Error: " + message);

@@ -9,9 +9,7 @@
 
     function factory ( $http, $q, config ) {
         return { reset: reset };
-
-        /* implementation */
-
+        /////////////////////
         function reset() {
             var deferred = $q.defer();
 

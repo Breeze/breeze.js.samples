@@ -12,10 +12,7 @@
         var vm = this;
         dataservice.ready(onReady);
 
-        /* implementation */
-
         function onReady() {
-
             var cartOrder    = dataservice.cartOrder;
             var draftOrder   = dataservice.draftOrder;
             var info         = getOrderItemInfo( );
@@ -33,7 +30,7 @@
             } else {
                 showMenu();
             }
-
+        /////////////////////
             function addToCart() {
                 if (isDraftOrder) {
                     draftOrder.removeItem(vm.orderItem);

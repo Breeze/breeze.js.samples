@@ -20,9 +20,7 @@
         return {
             newManager: newManager
         };
-
-        /* implementation */
-
+        /////////////////////
         function getMetadataStore() {
             var metadataStore = new breeze.MetadataStore();
 

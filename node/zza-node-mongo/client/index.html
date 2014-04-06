@@ -13,7 +13,7 @@
     <link href="./assets/css/font-awesome.css" rel="stylesheet" />
     <link href="./assets/css/bootstrap.css" rel="stylesheet" />
     <link href="./assets/css/bootstrap-responsive.css" rel="stylesheet" />
-    <link href="./assets/css/toastr.css" rel="stylesheet" />
+    <link href="./vendor/toastr/toastr.css" rel="stylesheet" />
     <link href="./assets/css/styles.css" rel="stylesheet" />
 
 </head>
@@ -30,20 +30,21 @@
     <!-- *** Vendor scripts  *** -->
     <script src="vendor/angular/angular.js"></script>
     <script src="vendor/angular-sanitize/angular-sanitize.js"></script>
-    <script src="vendor/angular-ui-router/release/angular-ui-router.js"></script>
+    <script src="vendor/angular-ui-router/angular-ui-router.js"></script>
     <script src="vendor/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 
-    <script src="breeze/breeze.debug.js"></script>
-    <script src="breeze/breeze.angular.js"></script>
-    <script src="breeze/breeze.dataservice.mongo.js"></script>
-    <script src="breeze/breeze.metadata-helper.js"></script>
+    <script src="vendor/breeze/breeze.debug.js"></script>
+    <script src="vendor/breeze/breeze.angular.js"></script>
+    <script src="vendor/breeze/breeze.dataservice.mongo.js"></script>
+    <script src="vendor/breeze/breeze.metadata-helper.js"></script>
 
     <!-- toastr requires jQuery, not breeze or this app -->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/toastr/toastr.js"></script>
 
     <!-- *** Application scripts *** -->
-    <script src="app/app.js"></script>
+    <script src="app/app.js"></script>  <!-- must load first -->
+    <script src="app/appStart.js"></script>
 
     <!-- Feature Areas: views and controllers -->
     <script src="app/menu/menu.js"></script>

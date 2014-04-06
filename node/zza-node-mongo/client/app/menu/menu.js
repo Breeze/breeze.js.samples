@@ -12,10 +12,6 @@
         var vm  = this;
         dataservice.ready(onReady);
 
-        /*
-         * Sets vm.products with the products for a given product type
-         * Call it after the dataservice is ready with products
-         */
         function onReady() {
             var type = $stateParams.productType;
             if (type){
@@ -29,7 +25,7 @@
             vm.go = go;
             vm.template = 'app/menu/menu.' + type + '.html';
         }
-
+        /////////////////////
         /*
          * An ng-click callback that uses $state to navigate
          * the link url is not visible in the browser and must
