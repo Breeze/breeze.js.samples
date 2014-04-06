@@ -9,8 +9,6 @@
  *******************************/
 describe("Menu Controller: ", function () {
 
-    testFns.spyOnToastr();
-
     var controller,
         controllerFactory,
         controllerName='menu',
@@ -19,10 +17,10 @@ describe("Menu Controller: ", function () {
         menuStateName = 'app.menu',
         $state
 
-    beforeEach( module('app', function($provide){
+    testFns.beforeEachApp( function($provide){
         dataservice = new DataServiceMock();
         $provide.value('dataservice', dataservice);
-    }));
+    });
 
     beforeEach(inject(function($controller, _$state_) {
         controllerFactory = $controller;

@@ -34,15 +34,19 @@ describe('When the app starts', function () {
     });
 
     describe("when 'appStart' service is stubbed out ", function () {
-        // appStart service spy
         var appStart = {
             start: jasmine.createSpy('start')
         };
-        // example of anonymous module function that overrides an app service
+
+        // see this inside testFns.beforeEachApp();
         beforeEach(function() {
-            module('app', function ($provide) {
-                $provide.value('appStart', appStart);
-            });
+            module('app',
+                // an example of anonymous module function that overrides an app service
+                // this one is based on testFns.appStartMock
+                function ($provide) {
+                    $provide.value('appStart', appStart);
+                }
+            );
 
             inject();// use of injector triggers 'app' load
         });

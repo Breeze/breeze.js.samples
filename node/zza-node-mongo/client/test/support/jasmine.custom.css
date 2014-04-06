@@ -1,4 +1,7 @@
-/*jasmine style overrides make "pending" more prominent*/
+/**************
+ * css overrides make "pending" tests appear more prominent
+ * For use in a 'specrunner.html' when/if we create one
+ ***************/
 .html-reporter .symbol-summary li.pending:before {
     color: #0c56aa /*#ba9d37*/;
     content: "*";

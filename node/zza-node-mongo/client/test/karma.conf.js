@@ -36,8 +36,9 @@ module.exports = function(config) {
         './app/app.js', // ensure it loads first
         './app/**/*.js',
 
-        /* test data and helper function support */
+        /* test helper functions and test data */
         './test/support/testFns.js',
+        './test/support/**/*.js',
 
         /* Specs (tests) */
         './test/specs/*.spec.js'
@@ -47,8 +48,7 @@ module.exports = function(config) {
     // list of files to exclude
     exclude: [
         /* testrunner configurations */
-        './test/support/**/*.config.js',
-        './test/support/**/*.boot.js'
+        './test/support/**/*.config.js'
     ],
 
 

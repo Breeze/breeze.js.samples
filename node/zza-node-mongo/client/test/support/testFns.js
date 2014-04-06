@@ -25,6 +25,8 @@ var testFns = (function () {
     extendExpect();
 
     var fns = {
+        appStartMock: appStartMock,
+        beforeEachApp: beforeEachApp,    // typical spec setup
         expectToFailFn: expectToFailFn,
         failed: failed,
         spyOnToastr: spyOnToastr
@@ -32,6 +34,27 @@ var testFns = (function () {
 
     return fns;
     ////////////
+    /*******************************************************
+     * Ensure that 'appStart' service doesn't do anything
+     ********************************************************/
+    function appStartMock($provide) {
+        // appStart service spy ... to see that start was called ... if you care
+        var appStart = {
+            start: jasmine.createSpy('start')
+        };
+        $provide.value('appStart', appStart);
+    }
+    /*******************************************************
+     * the 'beforeEach' that establishes the 'App' module with
+     * 'appStart' disabled.
+     ********************************************************/
+    function beforeEachApp() {
+        var moduleArgs = ['app', appStartMock];
+        moduleArgs.push.apply(moduleArgs, arguments);
+
+        spyOnToastr(); // make sure toastr doesn't pop toasts.
+        beforeEach(angular.mock.module.apply(angular.mock.module, moduleArgs));
+    }
     /*******************************************************
      * String extensions
      * Monkey punching JavaScript native String class
