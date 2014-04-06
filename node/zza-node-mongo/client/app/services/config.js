@@ -22,6 +22,7 @@
             devServiceName      : 'breeze/Dev',
             productImageBasePath: 'app/images/products/',
             productUnknownImage : 'app/images/products/unknown.jpg',
+            reportStateChanges  : true,
             userSessionId       : '0' //breeze.core.getUuid()
         };
     };

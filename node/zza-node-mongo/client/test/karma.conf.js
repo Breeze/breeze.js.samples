@@ -29,7 +29,6 @@ module.exports = function(config) {
         /* test libraries */
         './test/lib/angular-mocks.js',
         './test/lib/ngMidwayTester.js',
-// './test/lib/ngSpecPrep.js',
         './test/lib/sinon-1.9.0.js',
         './test/lib/bind-polyfill.js', // Needed for phantomJS
 
@@ -38,10 +37,10 @@ module.exports = function(config) {
         './app/**/*.js',
 
         /* test data and helper function support */
-// './test/support/fns.test.js',
+        './test/support/testFns.js',
 
         /* Specs (tests) */
-        './test/**/*[Ss]pec.js'
+        './test/specs/*[Ss]pec.js'
     ],
 
 

@@ -1,5 +1,5 @@
 {
-  "name": "Zza-Node-Mongo",
+  "name": "Zza-Node-Mongo-Server",
   "description": "A demonstration of Breeze, MongoDb, Express, Angular, and Node.js (BMEAN)",
   "version": "0.6.0",
   "private": true,

@@ -14,7 +14,7 @@
         var reportStateChangesEnabled = false;
 
         var appStart = {
-            reportStateChanges: reportStateChanges,
+            reportStateChangesEnabled: false,
             start: start
         };
         return appStart;
@@ -26,14 +26,13 @@
             // The app may appear to be more responsive if loading happens in background
             // while the app launches on a splash page that doesn't actually need data.
             dataservice.ready();
-            appStart.reportStateChanges();
+            reportStateChanges();
         }
 
         // report to console when UI-Router state changes
         function reportStateChanges(){
-            if (reportStateChangesEnabled){ return;}
-            if (config.debug) {
-                reportStateChangesEnabled = true;
+            if (config.reportStateChanges) {
+                appStart.reportStateChangesEnabled = true;
                 $rootScope.$on('$stateChangeStart',
                     function(event, toState, toParams, fromState, fromParams){
                         logger.log("stateChangeStart: from '"+fromState.name + "' to '"+ toState.name+"'");
