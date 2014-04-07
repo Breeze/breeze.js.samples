@@ -11,7 +11,7 @@
 
     <div class="well" style="background-color: rgb(199, 235, 199); padding-bottom: 40px;">
         Order Summary
-        <table class="table-condensed" style="font-size:small">
+        <table class="table table-condensed" style="font-size:small">
             <tr><th>Item</th><th>Size</th><th>Qty</th></tr>
             <tr data-ng-repeat="item in vm.cartOrder.orderItems">
                 <td><a href="#" data-ui-sref="{{vm.cartItemStateRef(item)}}">{{item.product.name}}</a></td>
