@@ -1,59 +1,73 @@
 ﻿/*
- * A data service with easy access to "lookup" reference entities
+ * Lookups - a data service with easy access to "lookup" reference entities
  * which it can fetch from the server.
  * "Lookups" are relatively-stable reference entities
  * typically presented as choices for property values of primary entities.
  *
  * Exs: Products, ProductOptions, ProductSizes
+ *
+ * The service relies on the apps 'master manager' for its entities
  */
 (function(angular) {
     'use strict';
 
     angular.module( "app" ).factory( 'lookups',
-        ['breeze', 'util', factory]);
+        ['breeze', 'entityManagerFactory', 'util', factory]);
 
-    function factory( breeze, util ) {
+    function factory( breeze, emFactory, util ) {
+        var isReady  = null,// becomes a promise, not a boolean
+            manager  = emFactory.getManager(); // get the master manager
 
-        var lookups = {
-            fetchLookups: fetchLookups,
-            initialize: initialize
+        var service = {
+            ready: ready
+            // extended during initialization
         };
-        return lookups;
+        return service;
         /////////////////////
-        function fetchLookups(manager) {
+        function ready(success, fail) {
+            if (!isReady){ isReady = initialize();}
+            if (success) { isReady = isReady.then(success);}
+            if (fail)    { isReady = isReady.catch(fail);}
+            return isReady
+        }
+
+        function initialize(){
             if (hasLookups(manager)){
-                initialize(manager);
+                extendService(manager);
                 return util.resolved;
             } else {
-                return breeze.EntityQuery.from('Lookups')
-                    .using(manager).execute()
-                    .then(function () {
-                        util.logger.info("Lookups loaded from server.");
-                        initialize(manager)
-                    });
+                return fetchLookups();
             }
         }
 
+        function fetchLookups() {
+            return breeze.EntityQuery.from('Lookups')
+                .using(manager).execute()
+                .then(function () {
+                    util.logger.info("Lookups loaded from server.");
+                    extendService(manager)
+                });
+        }
+
         // Check if the lookup entities have already been loaded
-        function hasLookups(manager){
+        function hasLookups(){
            // assume has lookup entities if there are OrderStatuses
            return manager.getEntities('OrderStatus').length > 0;
         }
 
-        // initialize this lookups service from lookup data presumed to be in cache
-        function initialize(manager) {
-
-            lookups.OrderStatus = {
+        // extend this lookups service with lookup accessors from data presumed to be in cache
+        function extendService() {
+            service.OrderStatus = {
                 statuses : manager.getEntities('OrderStatus')
             };
-            lookups.products        = manager.getEntities('Product');
-            lookups.productOptions  = manager.getEntities('ProductOption');
-            lookups.productSizes    = manager.getEntities('ProductSize');
+            service.products        = manager.getEntities('Product');
+            service.productOptions  = manager.getEntities('ProductOption');
+            service.productSizes    = manager.getEntities('ProductSize');
             extendLookups();
         }
 
         function extendLookups() {
-            var u = util, s = lookups, os = s.OrderStatus; // for brevity
+            var u = util, s = service, os = s.OrderStatus; // for brevity
 
             os.byId = u.filterById(os.statuses);
             os.byName = u.filterByName(os.statuses);
@@ -128,6 +142,5 @@
             };
         }
     }
-
 
 }( this.angular ));

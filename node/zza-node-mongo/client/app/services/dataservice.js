@@ -11,7 +11,8 @@
     function factory( entityManagerFactory, lookups, model, util ) {
 
         var logger   = util.logger,
-            manager,
+            isReady  = null,// becomes a promise, not a boolean
+            manager  = entityManagerFactory.getManager(),
             $timeout = util.$timeout;
 
         var service = {
@@ -24,15 +25,19 @@
         };
         return service;
         /////////////////////
+        function ready(success, fail) {
+            if (!isReady){ isReady = initialize();}
+            if (success) { isReady = isReady.then(success);}
+            if (fail)    { isReady = isReady.catch(fail);}
+            return isReady
+        }
+
         function initialize() {
-            manager = entityManagerFactory.newManager();
-            return service.isReady = lookups.fetchLookups(manager)
-                .then( createDraftAndCartOrders )
-                .catch( function (error) {
-                        logger.error(error.message, "Data initialization failed");
-                        logger.error("Alert: Is your MongoDB server running ?");
-                        throw error; // so downstream fail handlers hear it too
-                    });
+            return lookups.ready(createDraftAndCartOrders, function (error) {
+                logger.error(error.message, "Data initialization failed");
+                logger.error("Alert: Is your MongoDB server running ?");
+                throw error; // so downstream fail handlers hear it too
+            });
         }
 
         function createDraftAndCartOrders() {
@@ -40,14 +45,6 @@
             var orderInit = { orderStatus: lookups.OrderStatus.Pending};
             service.cartOrder = model.Order.create(manager, orderInit);
             service.draftOrder = model.Order.create(manager, orderInit);
-        }
-
-        function ready(success, fail) {
-            var promise = service.isReady;
-            if (!promise){ promise = initialize();}
-            if (success) { promise = promise.then(success);}
-            if (fail)    { promise = promise.catch(fail);}
-            return promise
         }
 
         function saveChanges() {

@@ -423,6 +423,19 @@
                         }
                     },
                     {
+                        "id": 46,
+                        "type": "meat",
+                        "name": "BBQ Chicken*",
+                        "factor": "2",
+                        "productTypes": [
+                            "pizza",
+                            "salad"
+                        ],
+                        "entityAspect": {
+                            "entityState": "Unchanged"
+                        }
+                    },
+                    {
                         "id": 53,
                         "type": "spice",
                         "name": "Basil",

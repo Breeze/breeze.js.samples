@@ -20,22 +20,19 @@
     }]);
 
     function entityManagerFactoryDecorator($delegate) {
-        var manager = null;
-        var emFactory = {
-            manager: manager,      // direct access to the last manager from newManager()
-            newManager: newManager // function called by services
-        };
-        return emFactory;
+        // monkey patch the original 'newManager' with method that dresses up the result.
+        var origNewManager = $delegate.newManager.bind($delegate);
+        $delegate.newManager =  newManager;
+        return $delegate;
         //////////////////
         function newManager() {
-            manager = $delegate.newManager();
-            emFactory.manager = manager;
+            var manager = origNewManager();
 
             // Prime with lookups data
             manager.importEntities(testFns.lookupsExport);
 
             // prevent default queries from going remote;
-            setManagerToFetchFromCache();
+            setManagerToFetchFromCache(manager);
 
             return manager;
         }
@@ -43,7 +40,7 @@
         /*******************************************************
          * In sync tests we want queries to fetch from cache by default
          *******************************************************/
-        function setManagerToFetchFromCache() {
+        function setManagerToFetchFromCache(manager) {
             manager.setProperties({
                 queryOptions: new breeze.QueryOptions({
                     // query the cache by default
