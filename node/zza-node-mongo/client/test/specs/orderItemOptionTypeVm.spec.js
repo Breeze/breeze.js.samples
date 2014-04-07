@@ -7,17 +7,15 @@
  *******************************/
 describe("OrderItemOptionTypeVm: ", function () {
 
-    var breeze, EntityQuery, lookups, manager, model, optionTypeVm;
+    var lookups, manager, model, optionTypeVm;
 
     testFns.beforeEachApp('emFactoryMock');
 
-    beforeEach(inject(function(_breeze_, entityManagerFactory, _lookups_, _model_, orderItemOptionTypeVm) {
-        breeze = _breeze_;
-        EntityQuery = breeze.EntityQuery;
-        lookups = _lookups_;
+    beforeEach(inject(function(entityManagerFactory, _lookups_, _model_, orderItemOptionTypeVm) {
         manager = entityManagerFactory.newManager();
-        model = _model_;
+        lookups = _lookups_;
         lookups.initialize(manager);
+        model = _model_;
         optionTypeVm = orderItemOptionTypeVm;
     }));
 

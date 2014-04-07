@@ -29,9 +29,11 @@
         //////////////////
         function newManager() {
             manager = $delegate.newManager();
+            emFactory.manager = manager;
 
-            // Prime with test data
+            // Prime with lookups data
             manager.importEntities(testFns.lookupsExport);
+            manager.hasLookups=true;
 
             // prevent default queries from going remote;
             setManagerToFetchFromCache();

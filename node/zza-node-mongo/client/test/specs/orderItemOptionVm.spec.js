@@ -6,18 +6,18 @@
  *******************************/
 describe("OrderItemOptionVm: ", function () {
 
-    var breeze, EntityQuery, lookups, manager, model, OptionVm;
+    var breeze, lookups, manager, model, optionVm;
 
     testFns.beforeEachApp('emFactoryMock');
 
     beforeEach(inject(function(_breeze_, entityManagerFactory, _lookups_, _model_, orderItemOptionVm) {
-        breeze = _breeze_;
-        EntityQuery = breeze.EntityQuery;
-        lookups = _lookups_;
         manager = entityManagerFactory.newManager();
+        lookups = _lookups_;
         lookups.initialize(manager);
         model = _model_;
         optionVm = orderItemOptionVm;
+
+        breeze = _breeze_;
     }));
 
     // Verify that the mocking emFactory actually works
@@ -30,7 +30,7 @@ describe("OrderItemOptionVm: ", function () {
 
         it("a query targets the cache (rather than the server)", function () {
             inject(function($rootScope){
-                EntityQuery.from('Products').using(manager).execute()
+                breeze.EntityQuery.from('Products').using(manager).execute()
                     .then(success).catch(testFns.failed);
 
                 $rootScope.$digest(); // flush the async fn queue
@@ -75,29 +75,29 @@ describe("OrderItemOptionVm: ", function () {
 
         it("vm is selected when pizza has corresponding option", function () {
             var ix = 2; // give it one selected option
-            var option = orderItem.addNewOption(productOptions[ix])
+            orderItem.addNewOption(productOptions[ix]);
             var vms = optionVm.createVms(orderItem);
             expect(vms[ix].selected).toBe(true);
         });
 
         it("vm has the item option when pizza has corresponding option", function () {
             var ix = 2; // give it one selected option
-            var option = orderItem.addNewOption(productOptions[ix])
+            var option = orderItem.addNewOption(productOptions[ix]);
             var vms = optionVm.createVms(orderItem);
             expect(vms[ix].itemOption).toBe(option);
         });
 
         it("no vm is selected except one corresponding to an item option", function () {
             var ix = 2; // give it one selected option
-            var option = orderItem.addNewOption(productOptions[ix])
+            var option = orderItem.addNewOption(productOptions[ix]);
             var vms = optionVm.createVms(orderItem);
             var bad = vms.some(function(vm){return vm.selected && vm.itemOption !== option;});
             expect(bad).toBe(false);
         });
 
         it("it has fewer options than a 'Make Your Own' pizza", function () {
-            myo = lookups.products.byId(2); // "Make your own"
-            myoOptions = lookups.productOptions.byProduct(myo);
+            var myo = lookups.products.byId(2); // "Make your own"
+            var myoOptions = lookups.productOptions.byProduct(myo);
             var vms = optionVm.createVms(orderItem);
             expect(vms.length).toBeLessThan(myoOptions.length);
         });
