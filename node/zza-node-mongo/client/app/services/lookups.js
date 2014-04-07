@@ -21,13 +21,23 @@
         return lookups;
         /////////////////////
         function fetchLookups(manager) {
-            return breeze.EntityQuery.from('Lookups')
-                .using(manager).execute()
-                .then(function () {
-                     util.logger.info("Lookups loaded from server.");
-                     manager.hasLookups = true;
-                     initialize(manager)
-                });
+            if (hasLookups(manager)){
+                initialize(manager);
+                return util.resolved;
+            } else {
+                return breeze.EntityQuery.from('Lookups')
+                    .using(manager).execute()
+                    .then(function () {
+                        util.logger.info("Lookups loaded from server.");
+                        initialize(manager)
+                    });
+            }
+        }
+
+        // Check if the lookup entities have already been loaded
+        function hasLookups(manager){
+           // assume has lookup entities if there are OrderStatuses
+           return manager.getEntities('OrderStatus').length > 0;
         }
 
         // initialize this lookups service from lookup data presumed to be in cache

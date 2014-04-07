@@ -33,7 +33,6 @@
 
             // Prime with lookups data
             manager.importEntities(testFns.lookupsExport);
-            manager.hasLookups=true;
 
             // prevent default queries from going remote;
             setManagerToFetchFromCache();

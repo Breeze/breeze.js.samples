@@ -25,23 +25,14 @@
         return service;
         /////////////////////
         function initialize() {
-            var promise;
             manager = entityManagerFactory.newManager();
-            if (manager.hasLookups){
-                // lookup entities loaded already so just initialize the lookups service
-                lookups.initialize(manager);
-                promise = util.resolved;
-            } else {
-                // tell lookups service to get 'em and init itself
-                promise = lookups.fetchLookups(manager)
-                    .catch( function (error){
+            return service.isReady = lookups.fetchLookups(manager)
+                .then( createDraftAndCartOrders )
+                .catch( function (error) {
                         logger.error(error.message, "Data initialization failed");
                         logger.error("Alert: Is your MongoDB server running ?");
                         throw error; // so downstream fail handlers hear it too
                     });
-            }
-
-            return service.isReady = promise.then( createDraftAndCartOrders );
         }
 
         function createDraftAndCartOrders() {
