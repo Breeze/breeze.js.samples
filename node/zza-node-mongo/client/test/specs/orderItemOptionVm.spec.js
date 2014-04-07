@@ -4,7 +4,7 @@
  * One such vm for each option type (e.g., 'pesto sauce").
  * These vms appear in the tabs on the orderItem view.
  *******************************/
-describe("orderItemOptionVm: ", function () {
+describe("OrderItemOptionVm: ", function () {
 
     var breeze, EntityQuery, lookups, manager, model, OptionVm;
 

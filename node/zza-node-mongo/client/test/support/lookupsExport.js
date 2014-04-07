@@ -447,6 +447,54 @@
                         "entityAspect": {
                             "entityState": "Unchanged"
                         }
+                    },
+                    {
+                        "id": 58,
+                        "type": "saladDressing",
+                        "name": "No Dressing",
+                        "factor": "0",
+                        "productTypes": [
+                            "salad"
+                        ],
+                        "entityAspect": {
+                            "entityState": "Unchanged"
+                        }
+                    },
+                    {
+                        "id": 59,
+                        "type": "saladDressing",
+                        "name": "Vinaigrette",
+                        "factor": "1",
+                        "productTypes": [
+                            "salad"
+                        ],
+                        "entityAspect": {
+                            "entityState": "Unchanged"
+                        }
+                    },
+                    {
+                        "id": 60,
+                        "type": "saladDressing",
+                        "name": "Ranch",
+                        "factor": "1",
+                        "productTypes": [
+                            "salad"
+                        ],
+                        "entityAspect": {
+                            "entityState": "Unchanged"
+                        }
+                    },
+                    {
+                        "id": 61,
+                        "type": "saladDressing",
+                        "name": "Caesar",
+                        "factor": "1",
+                        "productTypes": [
+                            "salad"
+                        ],
+                        "entityAspect": {
+                            "entityState": "Unchanged"
+                        }
                     }
                 ]
             },
