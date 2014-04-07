@@ -12,33 +12,40 @@
 
         var logger   = util.logger,
             manager,
-            $timeout = util.$timeout
+            $timeout = util.$timeout;
 
         var service = {
-                lookups     : lookups,
-                ready       : ready,
-                resetManager: resetManager,
-                saveChanges : saveChanges
-                /* These are added during initialization:
-                 cartOrder,
-                 draftOrder,
-                 */
-            };
+            cartOrder   : null,
+            draftOrder  : null,
+            lookups     : lookups,
+            ready       : ready,
+            resetManager: resetManager,
+            saveChanges : saveChanges
+        };
         return service;
         /////////////////////
         function initialize() {
+            var promise;
             manager = entityManagerFactory.newManager();
-            return service.isReady = lookups.fetchLookups(manager)
-                    .then( createDraftAndCartOrders )
-                    .catch( function (error) {
+            if (manager.hasLookups){
+                // lookup entities loaded already so just initialize the lookups service
+                lookups.initialize(manager);
+                promise = util.resolved;
+            } else {
+                // tell lookups service to get 'em and init itself
+                promise = lookups.fetchLookups(manager)
+                    .catch( function (error){
                         logger.error(error.message, "Data initialization failed");
                         logger.error("Alert: Is your MongoDB server running ?");
                         throw error; // so downstream fail handlers hear it too
                     });
+            }
+
+            return service.isReady = promise.then( createDraftAndCartOrders );
         }
 
         function createDraftAndCartOrders() {
-            // Don't call until OrderStatus is available (from lookups)
+            // Can't call until OrderStatus is available (from lookups)
             var orderInit = { orderStatus: lookups.OrderStatus.Pending};
             service.cartOrder = model.Order.create(manager, orderInit);
             service.draftOrder = model.Order.create(manager, orderInit);
@@ -46,15 +53,9 @@
 
         function ready(success, fail) {
             var promise = service.isReady;
-            if (!promise){
-                promise = initialize();
-            }
-            if (success) {
-                promise = promise.then(success);
-            }
-            if (fail){
-                promise = promise.catch(fail);
-            }
+            if (!promise){ promise = initialize();}
+            if (success) { promise = promise.then(success);}
+            if (fail)    { promise = promise.catch(fail);}
             return promise
         }
 
@@ -100,6 +101,6 @@
                 });
             }
         }
-    };
+    }
 
 }( this.angular ));

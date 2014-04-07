@@ -21,14 +21,13 @@
         return lookups;
         /////////////////////
         function fetchLookups(manager) {
-
             return breeze.EntityQuery.from('Lookups')
-                              .using(manager)
-                              .execute()
-                              .then(function () {
-                                  util.logger.info("Lookups loaded from server.");
-                                  initialize(manager)
-                              })
+                .using(manager).execute()
+                .then(function () {
+                     util.logger.info("Lookups loaded from server.");
+                     manager.hasLookups = true;
+                     initialize(manager)
+                });
         }
 
         // initialize this lookups service from lookup data presumed to be in cache
@@ -118,7 +117,7 @@
                 return [];  // drink tag has no options
             };
         }
-    };
+    }
 
 
 }( this.angular ));

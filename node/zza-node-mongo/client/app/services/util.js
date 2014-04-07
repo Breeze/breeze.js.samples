@@ -35,7 +35,8 @@
             getEntityValidationErrMsgs: getEntityValidationErrMsgs,
             groupArray: groupArray,
             keyArray: keyArray,
-            toTitle: toTitle
+            toTitle: toTitle,
+            resolved: $q.when(true) // a re-usable resolved promise
         };
         /////////////////////
         function $broadcast() {
