@@ -1,32 +1,53 @@
-/*
- * OptionTypeVm: a viewmodel of the OrderItemOptions for a particular product type
- * The orderItem controller creates and displays instances of OptionTypeVm
- */
+/************************
+ * orderItemOptionTypeVm:
+ * Creates viewmodels of the orderItemOptionVms for a given OrderItem.
+ * See orderItemOptionVm.
+ * There is one such vm for each option type (e.g., 'sauce").
+ * Each vm appears as one of the tabs on the orderItem view.
+ *******************************/
 (function(angular) {
     'use strict';
 
-    angular.module( "app" ).factory( 'OptionTypeVm',
-        ['util', factory] );
+    angular.module( "app" ).factory( 'orderItemOptionTypeVm',
+        ['util', 'orderItemOptionVm', factory] );
 
-    function factory( util ) {
+    function factory( util, orderItemOptionVm ) {
+
         var choiceTemplateBase = './app/order/',
             manyChoiceTemplate = choiceTemplateBase+'orderItemOptionMany.html',
             oneChoiceTemplate = choiceTemplateBase+'orderItemOptionOne.html';
 
-        extendOptionTypeVm()
-        return OptionTypeVm;
+        extendOptionTypeVm();
+
+        return {
+            createVms: createVms
+        };
         /////////////////////
+        // Create an orderItemOptionTypeVm for each distinct type of productOption (e.g., spice).
+        // Each vm will be displayed in its own tab
+        // Each vm contains the orderItemOptionVms for its type of productOption (e.g., all spices).
+        function createVms(orderItem) {
+            // group the productOptions by type
+            var optionVms = orderItemOptionVm.createVms(orderItem);
+            var typeGrps = util.groupArray( optionVms,
+                function (ovm) { return ovm.productOption.type; }, 'type', 'options');
+            var typeVms = typeGrps.map(function (tg) {return new OptionTypeVm(orderItem, tg)});
+            return typeVms;
+        }
+
+
         function extendOptionTypeVm(){
             OptionTypeVm.prototype.selectOneOption  = selectOneOption;
             OptionTypeVm.prototype.selectOption = selectOption;
         }
 
-        // OptionTypeVm is a viewmodel for all productOptions of a single type (e.g., spice)
-        // for a single OrderItem.
+        // OptionTypeVm is the private ctor name for the orderItemOptionTypeVm viewmodel
+        // Each such VM presents all orderItemOptions of a particular option type (e.g., 'sauce")
+        // for a given OrderItem. Appears as one of the tabs on the orderItem view.
         // orderItem: the OrderItem associated with this VM
         // typeGroup:
         //    type: the type of productOption (e.g., spice)
-        //    options: OptionVms' for every productOption of that type
+        //    options: OptionVms for every productOption of that type
         function OptionTypeVm(orderItem, typeGroup){
             var typeVm = this;
             typeVm.orderItem = orderItem;
@@ -76,7 +97,7 @@
         }
 
         function selectOption(optionVm) {
-            var orderItem = this.orderItem
+            var orderItem = this.orderItem;
             var itemOption = optionVm.itemOption;
 
             if (optionVm.selected) {

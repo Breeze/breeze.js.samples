@@ -1,12 +1,12 @@
 ﻿/*
  * Query and save remote data with the Breeze EntityManager
- * Also exposes certain cached entities for easy ViewModel access
+ * Also exposes the 'lookups' service which it initializes
  */
 (function(angular) {
     'use strict';
 
     angular.module( "app" ).factory( 'dataservice',
-        ['entityManagerFactory', 'dataservice.lookups', 'model', 'util', factory]);
+        ['entityManagerFactory', 'lookups', 'model', 'util', factory]);
 
     function factory( entityManagerFactory, lookups, model, util ) {
 
@@ -15,24 +15,20 @@
             $timeout = util.$timeout
 
         var service = {
+                lookups     : lookups,
                 ready       : ready,
                 resetManager: resetManager,
                 saveChanges : saveChanges
                 /* These are added during initialization:
                  cartOrder,
                  draftOrder,
-                 isReady,
-                 orderStatuses,
-                 products,
-                 productOptions,
-                 productSizes
                  */
             };
         return service;
         /////////////////////
         function initialize() {
             manager = entityManagerFactory.newManager();
-            return service.isReady = lookups.fetchLookups(service, manager)
+            return service.isReady = lookups.fetchLookups(manager)
                     .then( createDraftAndCartOrders )
                     .catch( function (error) {
                         logger.error(error.message, "Data initialization failed");
@@ -43,7 +39,7 @@
 
         function createDraftAndCartOrders() {
             // Don't call until OrderStatus is available (from lookups)
-            var orderInit = { orderStatus: service.OrderStatus.Pending};
+            var orderInit = { orderStatus: lookups.OrderStatus.Pending};
             service.cartOrder = model.Order.create(manager, orderInit);
             service.draftOrder = model.Order.create(manager, orderInit);
         }
@@ -91,10 +87,10 @@
         // Creates a new draftOrder and cartOrder
         function resetManager() {
             manager.clear(); // detaches everything
-            attachEntities(service.OrderStatus.statuses);
-            attachEntities(service.products);
-            attachEntities(service.productOptions);
-            attachEntities(service.productSizes);
+            attachEntities(lookups.OrderStatus.statuses);
+            attachEntities(lookups.products);
+            attachEntities(lookups.productOptions);
+            attachEntities(lookups.productSizes);
             createDraftAndCartOrders();
 
             // Should be in Breeze itself
@@ -104,8 +100,6 @@
                 });
             }
         }
-
     };
-
 
 }( this.angular ));

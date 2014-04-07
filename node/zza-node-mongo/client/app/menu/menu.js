@@ -20,7 +20,7 @@
             }
             type = type || 'pizza';
 
-            vm.products = dataservice.products.byTag( type );
+            vm.products = dataservice.lookups.products.byTag( type );
             vm.productSref = productSref;
             vm.go = go;
             vm.template = 'app/menu/menu.' + type + '.html';

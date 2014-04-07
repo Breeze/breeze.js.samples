@@ -1,6 +1,6 @@
 ﻿/*
- * Extends the dataservice with easy access to "Lookups"
- * which it fetches from the server.
+ * A data service with easy access to "lookup" reference entities
+ * which it can fetch from the server.
  * "Lookups" are relatively-stable reference entities
  * typically presented as choices for property values of primary entities.
  *
@@ -9,40 +9,42 @@
 (function(angular) {
     'use strict';
 
-    angular.module( "app" ).factory( 'dataservice.lookups',
+    angular.module( "app" ).factory( 'lookups',
         ['breeze', 'util', factory]);
 
     function factory( breeze, util ) {
 
-        return {
-            fetchLookups: fetchLookups
+        var lookups = {
+            fetchLookups: fetchLookups,
+            initialize: initialize
         };
+        return lookups;
         /////////////////////
-        function fetchLookups(service, manager) {
+        function fetchLookups(manager) {
 
             return breeze.EntityQuery.from('Lookups')
                               .using(manager)
                               .execute()
                               .then(function () {
                                   util.logger.info("Lookups loaded from server.");
-                                  setServiceLookups(service, manager)
+                                  initialize(manager)
                               })
         }
 
-        function setServiceLookups(service, manager ) {
+        // initialize this lookups service from lookup data presumed to be in cache
+        function initialize(manager) {
 
-            // set service lookups from  lookup data in cache
-            service.OrderStatus = {
+            lookups.OrderStatus = {
                 statuses : manager.getEntities('OrderStatus')
             };
-            service.products        = manager.getEntities('Product');
-            service.productOptions  = manager.getEntities('ProductOption');
-            service.productSizes    = manager.getEntities('ProductSize');
-            extendLookups(service);
+            lookups.products        = manager.getEntities('Product');
+            lookups.productOptions  = manager.getEntities('ProductOption');
+            lookups.productSizes    = manager.getEntities('ProductSize');
+            extendLookups();
         }
 
-        function extendLookups(service) {
-            var u = util, s = service, os = s.OrderStatus; // for brevity
+        function extendLookups() {
+            var u = util, s = lookups, os = s.OrderStatus; // for brevity
 
             os.byId = u.filterById(os.statuses);
             os.byName = u.filterByName(os.statuses);
@@ -116,7 +118,6 @@
                 return [];  // drink tag has no options
             };
         }
-
     };
 
 
