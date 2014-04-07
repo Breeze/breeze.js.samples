@@ -95,7 +95,7 @@ describe("Menu Controller: ", function () {
             "dataservice" :  dataservice
         }
         expectedProducts = [new ProductMock(productType)];
-        dataservice.products.byTag.and.returnValue(expectedProducts);
+        dataservice.lookups.products.byTag.and.returnValue(expectedProducts);
 
         controller = controllerFactory(controllerName, ctorArgs);
     }
@@ -114,9 +114,12 @@ describe("Menu Controller: ", function () {
     }
 
     function DataServiceMock(){
-        this.products = {
-            byTag: jasmine.createSpy('byTag')
-        };
+        // dataservice.lookups.products.byTag
+        this.lookups = {
+                products:{
+                    byTag: jasmine.createSpy('byTag')
+                }
+            };
         this.ready =  function (success){ return (success) ? success() : undefined;}
     }
 

@@ -1,4 +1,4 @@
-(function(window, angular, undefined) {
+(function(angular) {
 
     'use strict';
     /**
@@ -59,4 +59,4 @@
 
     }
 
-})(window, window.angular);
+})(window.angular);
