@@ -7,14 +7,9 @@
 
     function config(){
         return {
-
             // Ward's Todo Mobile Service
-            // appUrl: 'https://wardtodomobileservice.azure-mobile.net/',
-            // appKey: 'psChxvAmcXMcsgEhqqjmfTkoxzwuWG62'
-
-            //Donna Malayeri's Todo Mobile Service
-            appUrl: 'https://donnam-zumotest.azure-mobile.net/',
-            appKey: 'MxhjqYLwepMvaSSJdCAauHzhfddkQC33'
+            appUrl: 'https://wardtodomobileservice.azure-mobile.net/',
+            appKey: 'psChxvAmcXMcsgEhqqjmfTkoxzwuWG62'  //this is never a secret.
         };
     }
 

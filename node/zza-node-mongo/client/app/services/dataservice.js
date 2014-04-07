@@ -1,65 +1,50 @@
 ﻿/*
  * Query and save remote data with the Breeze EntityManager
- * Also exposes certain cached entities for easy ViewModel access
+ * Also exposes the 'lookups' service which it initializes
  */
 (function(angular) {
     'use strict';
 
     angular.module( "app" ).factory( 'dataservice',
-        ['entityManagerFactory', 'dataservice.lookups', 'model', 'util', factory]);
+        ['entityManagerFactory', 'lookups', 'model', 'util', factory]);
 
     function factory( entityManagerFactory, lookups, model, util ) {
 
         var logger   = util.logger,
-            manager,
-            $timeout = util.$timeout
+            isReady  = null,// becomes a promise, not a boolean
+            manager  = entityManagerFactory.getManager(),
+            $timeout = util.$timeout;
 
         var service = {
-                ready       : ready,
-                resetManager: resetManager,
-                saveChanges : saveChanges
-                /* These are added during initialization:
-                 cartOrder,
-                 draftOrder,
-                 isReady,
-                 orderStatuses,
-                 products,
-                 productOptions,
-                 productSizes
-                 */
-            };
+            cartOrder   : null,
+            draftOrder  : null,
+            lookups     : lookups,
+            ready       : ready,
+            resetManager: resetManager,
+            saveChanges : saveChanges
+        };
         return service;
         /////////////////////
+        function ready(success, fail) {
+            if (!isReady){ isReady = initialize();}
+            if (success) { isReady = isReady.then(success);}
+            if (fail)    { isReady = isReady.catch(fail);}
+            return isReady
+        }
+
         function initialize() {
-            manager = entityManagerFactory.newManager();
-            return service.isReady = lookups.fetchLookups(service, manager)
-                    .then( createDraftAndCartOrders )
-                    .catch( function (error) {
-                        logger.error(error.message, "Data initialization failed");
-                        logger.error("Alert: Is your MongoDB server running ?");
-                        throw error; // so downstream fail handlers hear it too
-                    });
+            return lookups.ready(createDraftAndCartOrders, function (error) {
+                logger.error(error.message, "Data initialization failed");
+                logger.error("Alert: Is your MongoDB server running ?");
+                throw error; // so downstream fail handlers hear it too
+            });
         }
 
         function createDraftAndCartOrders() {
-            // Don't call until OrderStatus is available (from lookups)
-            var orderInit = { orderStatus: service.OrderStatus.Pending};
+            // Can't call until OrderStatus is available (from lookups)
+            var orderInit = { orderStatus: lookups.OrderStatus.Pending};
             service.cartOrder = model.Order.create(manager, orderInit);
             service.draftOrder = model.Order.create(manager, orderInit);
-        }
-
-        function ready(success, fail) {
-            var promise = service.isReady;
-            if (!promise){
-                promise = initialize();
-            }
-            if (success) {
-                promise = promise.then(success);
-            }
-            if (fail){
-                promise = promise.catch(fail);
-            }
-            return promise
         }
 
         function saveChanges() {
@@ -91,10 +76,10 @@
         // Creates a new draftOrder and cartOrder
         function resetManager() {
             manager.clear(); // detaches everything
-            attachEntities(service.OrderStatus.statuses);
-            attachEntities(service.products);
-            attachEntities(service.productOptions);
-            attachEntities(service.productSizes);
+            attachEntities(lookups.OrderStatus.statuses);
+            attachEntities(lookups.products);
+            attachEntities(lookups.productOptions);
+            attachEntities(lookups.productSizes);
             createDraftAndCartOrders();
 
             // Should be in Breeze itself
@@ -104,8 +89,6 @@
                 });
             }
         }
-
-    };
-
+    }
 
 }( this.angular ));

@@ -6,26 +6,27 @@
     'use strict';
 
     angular.module( "app" ).controller( 'orderItem',
-        ['$state', '$stateParams', 'dataservice', 'OptionTypeVm', 'util', controller] );
+        ['$state', '$stateParams', 'dataservice', 'orderItemOptionTypeVm', 'util', controller] );
 
-    function controller($state, $stateParams, dataservice, OptionTypeVm, util ) {
+    function controller($state, $stateParams, dataservice, orderItemOptionTypeVm, util ) {
         var vm = this;
         dataservice.ready(onReady);
 
         function onReady() {
             var cartOrder    = dataservice.cartOrder;
             var draftOrder   = dataservice.draftOrder;
+            var lookups      = dataservice.lookups;
+
             var info         = getOrderItemInfo( );
-            var isDraftOrder = false;
 
             if ( info ) {
-                isDraftOrder    = info.orderItem.order === dataservice.draftOrder;
-                vm.addToCart    = addToCart;
-                vm.isDraftOrder = isDraftOrder;
-                vm.orderItem    = info.orderItem;
-                vm.product      = info.product;
-                vm.sizeVms      = createSizeVms(info);
-                vm.typeVms      = createOptionTypeVms(info);
+                var isDraftOrder = info.orderItem.order === dataservice.draftOrder;
+                vm.addToCart     = addToCart;
+                vm.isDraftOrder  = isDraftOrder;
+                vm.orderItem     = info.orderItem;
+                vm.product       = info.product;
+                vm.sizeVms       = createSizeVms(info);
+                vm.typeVms       = orderItemOptionTypeVm.createVms(info.orderItem);
 
             } else {
                 showMenu();
@@ -61,7 +62,7 @@
                         info = {
                             orderItem: orderItem,
                             product: orderItem.product,
-                            sizes: dataservice.productSizes.byProduct(orderItem.product)
+                            sizes: lookups.productSizes.byProduct(orderItem.product)
                         }
                     }
                     return info;
@@ -70,10 +71,10 @@
                 // Get the order item info from the productId.
                 function getInfoByProduct() {
                     var prodId = +$stateParams.productId
-                    var product = dataservice.products.byId(prodId);
+                    var product = lookups.products.byId(prodId);
                     if (!product){ return null; }
 
-                    var sizes = dataservice.productSizes.byProduct(product);
+                    var sizes = lookups.productSizes.byProduct(product);
 
                     // Find an orderItem on the draft order for the given product.
                     var orderItem =  draftOrder.orderItems.filter(function (oi) {
@@ -94,40 +95,6 @@
                     };
                 }
             }
-
-        }
-
-        // Create an OptionTypeVm for each distinct type of productOption.
-        // See optionTypeVm.js
-        // Each OptionTypeVm will be displayed in its own tab
-        // Each OptionTypeVm contains the OptionVms for one type of productOption (e.g., spice)
-        function createOptionTypeVms(info) {
-            // group the productOptions by type
-            var optionVms = createOptionVms(info);
-            var typeGrps = util.groupArray( optionVms,
-                function (ovm) { return ovm.productOption.type; }, 'type', 'options');
-            var typeVms = typeGrps.map(function (tg) {return new OptionTypeVm(info.orderItem, tg)});
-            return typeVms;
-        }
-
-        // A VM for each productOption for the given product
-        // The VM has an itemOption if the current OrderItem has an ItemOption for that product
-        function createOptionVms(info) {
-            var productOptions = dataservice.productOptions.byProduct(info.product);
-
-            var itemOptions =
-                util.keyArray(info.orderItem.orderItemOptions, function (o) { return o.productOptionId; });
-
-            return productOptions.map(function (po) {
-                var io = itemOptions[po.id];
-                return {
-                    id: po.id,
-                    name: po.name,
-                    productOption: po,
-                    selected: !!io,
-                    itemOption: io
-                };
-            });
         }
 
         function createSizeVms(info) {

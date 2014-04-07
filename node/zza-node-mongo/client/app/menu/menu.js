@@ -20,8 +20,8 @@
             }
             type = type || 'pizza';
 
-            vm.products = dataservice.products.byTag( type );
-            vm.productSref = productSref;
+            vm.products = dataservice.lookups.products.byTag( type );
+            vm.productRef = productRef;
             vm.go = go;
             vm.template = 'app/menu/menu.' + type + '.html';
         }
@@ -38,9 +38,13 @@
 
         // Generates a link that you can see in the browser
         // See drink.html for an example of this approach
-        function productSref(p) {
-            return "app.order.product({productType: '" + p.type + "', productId: '" + p.id +"'})";
-            //return '#/menu/'+p.type+'/'+p.id;
+        // Link: '#/menu/'+product.type+'/'+product.id;
+        function productRef(product) {
+            // bind this with href (or data-ng-href to be safe) because it produces a regular href
+            return $state.href('app.order.product', {productType : product.type, productId: product.id});
+
+            // bind this version with data-ui-sref because it produces a "state ref"
+            // return "app.order.product({productType: '" + product.type + "', productId: '" + product.id +"'})";
         }
     }
 

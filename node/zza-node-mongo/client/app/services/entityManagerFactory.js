@@ -14,12 +14,15 @@
 
     function factory( breeze, config, model ) {
         configureBreezeForThisApp();
+        var masterManager = null;
         var serviceName = config.serviceName;
         var metadataStore = getMetadataStore();
 
-        return {
-            newManager: newManager
+        var service =  {
+            getManager: getManager, // get the "master manager", creating if necessary
+            newManager: newManager  // creates a new manager, not the "master manager"
         };
+        return service;
         /////////////////////
         function getMetadataStore() {
             var metadataStore = new breeze.MetadataStore();
@@ -32,13 +35,16 @@
 
             return metadataStore;
         }
-
+        // get the "master manager", creating if necessary
+        function getManager(){
+            return masterManager || (masterManager = service.newManager());
+        }
+        // create a new manager, not the "master manager"
         function newManager() {
-            var mgr = new breeze.EntityManager({
+            return new breeze.EntityManager({
                 serviceName: serviceName,
                 metadataStore: metadataStore
             });
-            return mgr;
         }
 
         function configureBreezeForThisApp() {
@@ -55,7 +61,6 @@
                 }
             };
         }
-
     }
 
 }( this.angular ));
