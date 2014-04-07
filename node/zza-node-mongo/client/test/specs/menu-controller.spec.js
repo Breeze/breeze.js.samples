@@ -14,8 +14,7 @@ describe("Menu Controller: ", function () {
         controllerName='menu',
         dataservice,
         expectedProducts,
-        menuStateName = 'app.menu',
-        $state
+        $state;
 
     testFns.beforeEachApp( function($provide){
         dataservice = new DataServiceMock();
@@ -52,8 +51,8 @@ describe("Menu Controller: ", function () {
         });
 
         it("creates correct link for the product", function () {
-            var sref = controller.productSref(product);
-            expect(sref).toBe('#/menu/pizza/42')
+            var ref = controller.productRef(product);
+            expect(ref).toBe('#/menu/pizza/42')
         });
 
         it("calling 'go' goes to the right location for the product", function () {
@@ -93,7 +92,7 @@ describe("Menu Controller: ", function () {
         var  ctorArgs ={
             "$stateParams": {productType: productType },
             "dataservice" :  dataservice
-        }
+        };
         expectedProducts = [new ProductMock(productType)];
         dataservice.lookups.products.byTag.and.returnValue(expectedProducts);
 
