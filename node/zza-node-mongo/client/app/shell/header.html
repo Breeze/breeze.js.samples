@@ -6,7 +6,7 @@
         <div>
             <ul class="nav">
                 <li data-ng-repeat="state in vm.states"
-                    data-ng-class="{ active: state.selected }" ng-click="vm.selectState(state)" >
+                    data-ng-class="{ active: vm.isSelected(state) }" ng-click="vm.selectState(state)" >
                     <a href="#" data-ui-sref="{{state.sref}}" >{{state.name}}</a>
                 </li>
             </ul>
