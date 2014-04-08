@@ -7,7 +7,7 @@
 }
 
 #shell-content {
-  margin-top: 50px
+  margin-top: 20px
 }
 /* put some horizontal space around the top nav and footer */
 .navbar .navbar-inner {
@@ -45,3 +45,4 @@ tr.narrow td {
 .tab-pane {
     min-height: 6em;
 }
+

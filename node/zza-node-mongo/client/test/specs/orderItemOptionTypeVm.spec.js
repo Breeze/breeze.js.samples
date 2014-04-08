@@ -5,7 +5,7 @@
  * There is one OptionType vm for each option type (e.g., 'sauce").
  * Each vm appears as one of the tabs on the orderItem view.
  *******************************/
-ddescribe("OrderItemOptionTypeVm: ", function () {
+describe("OrderItemOptionTypeVm: ", function () {
 
     var lookups, manager, model, optionTypeVm;
 
@@ -28,7 +28,6 @@ ddescribe("OrderItemOptionTypeVm: ", function () {
             vms = optionTypeVm.createVms(orderItem);
             crust = vms[0];
             spice = vms[1];
-
         });
 
         it("pizza has two vms", function () {

@@ -13,6 +13,7 @@
         var headerStates = [
              { name: 'Home',  sref: 'app.welcome' }
             ,{ name: 'Order', sref: 'app.menu({productType: \'pizza\'})' }
+            ,{ name: 'Customer', sref: 'app.customer' }
             ,{ name: 'About', sref: 'app.about'}
         ];
 

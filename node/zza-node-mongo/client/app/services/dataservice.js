@@ -6,9 +6,9 @@
     'use strict';
 
     angular.module( "app" ).factory( 'dataservice',
-        ['entityManagerFactory', 'lookups', 'model', 'util', factory]);
+        ['breeze', 'entityManagerFactory', 'lookups', 'model', 'util', factory]);
 
-    function factory( entityManagerFactory, lookups, model, util ) {
+    function factory( breeze, entityManagerFactory, lookups, model, util ) {
 
         var logger   = util.logger,
             isReady  = null,// becomes a promise, not a boolean
@@ -16,12 +16,14 @@
             $timeout = util.$timeout;
 
         var service = {
-            cartOrder   : null,
-            draftOrder  : null,
-            lookups     : lookups,
-            ready       : ready,
+            cartOrder: null,
+            draftOrder: null,
+            getCustomers: getCustomers,
+            getOrderHeadersForCustomer: getOrderHeadersForCustomer,
+            lookups: lookups,
+            ready: ready,
             resetManager: resetManager,
-            saveChanges : saveChanges
+            saveChanges: saveChanges
         };
         return service;
         /////////////////////
@@ -33,11 +35,7 @@
         }
 
         function initialize() {
-            return lookups.ready(createDraftAndCartOrders, function (error) {
-                logger.error(error.message, "Data initialization failed");
-                logger.error("Alert: Is your MongoDB server running ?");
-                throw error; // so downstream fail handlers hear it too
-            });
+            return lookups.ready(createDraftAndCartOrders);
         }
 
         function createDraftAndCartOrders() {
@@ -45,6 +43,36 @@
             var orderInit = { orderStatus: lookups.OrderStatus.Pending};
             service.cartOrder = model.Order.create(manager, orderInit);
             service.draftOrder = model.Order.create(manager, orderInit);
+        }
+
+        function getCustomers(){
+            var customers =  manager.getEntities('Customer');
+            return customers.length ?
+                util.$q.when(customers) :
+
+                breeze.EntityQuery.from('Customers')
+                    .orderBy('firstName, lastName')
+                    .using(manager).execute()
+                    .then(function(data){return data.results;})
+                    .catch(queryFailed);
+
+        }
+
+        function getOrderHeadersForCustomer(customer){
+            var query = breeze.EntityQuery.from('Orders')
+                .where('customerId', 'eq', customer.id)
+                .orderBy('ordered desc')
+                .select('id, statusId, status, ordered, delivered, deliveryCharge, itemsTotal');
+
+            return manager.executeQuery(query)
+                .then(function(data){return data.results;})
+                .catch(queryFailed);
+        }
+
+        function queryFailed(error){
+            var resourceName = (error.query && error.query.resourceName) || '';
+            logger.error(error.message, resourceName+" query failed");
+            throw error; // so downstream fail handlers hear it too
         }
 
         function saveChanges() {

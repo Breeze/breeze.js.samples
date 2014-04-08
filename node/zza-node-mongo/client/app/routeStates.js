@@ -108,6 +108,18 @@
                             templateUrl: 'app/order/orderSidebar.html'
                         }
                     }
+                })
+                .state( 'app.customer',
+                {
+                    url: '/customer',
+                    views : {
+                        'content@' : {
+                            templateUrl: 'app/customer/customer.html'
+                        },
+                        'orderSidebar@app.menu' : {
+                            templateUrl: 'app/order/orderSidebar.html'
+                        }
+                    }
                 });
 
         $urlRouterProvider

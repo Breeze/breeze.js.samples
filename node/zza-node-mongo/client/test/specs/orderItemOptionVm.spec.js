@@ -6,7 +6,7 @@
  *******************************/
 describe("OrderItemOptionVm: ", function () {
 
-    var breeze, lookups, manager, model, optionVm;
+    var lookups, manager, model, optionVm;
 
     testFns.beforeEachApp('emFactoryMock');
 
