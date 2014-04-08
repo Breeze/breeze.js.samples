@@ -16,6 +16,7 @@
 
     function factory( breeze, emFactory, util ) {
         var isReady  = null,// becomes a promise, not a boolean
+            logger = util.logger,
             manager  = emFactory.getManager(); // get the master manager
 
         var service = {
@@ -44,8 +45,13 @@
             return breeze.EntityQuery.from('Lookups')
                 .using(manager).execute()
                 .then(function () {
-                    util.logger.info("Lookups loaded from server.");
+                    logger.info("Lookups loaded from server.");
                     extendService(manager)
+                })
+                .catch(function (error) {
+                    logger.error(error.message, "lookups initialization failed");
+                    logger.error("Alert: Is your MongoDB server running ?");
+                    throw error; // so downstream fail handlers hear it too
                 });
         }
 
