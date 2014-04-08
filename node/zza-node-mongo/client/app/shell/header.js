@@ -6,26 +6,32 @@
 (function(angular) {
     'use strict';
 
-    angular.module( "app" ).controller( 'header', controller);
+    angular.module( "app" ).controller( 'header', ['$location', controller]);
 
-    function controller(  ) {
+    function controller( $location ) {
 
         var headerStates = [
-             { name: 'Home',  sref: 'app.welcome' }
-            ,{ name: 'Order', sref: 'app.menu({productType: \'pizza\'})' }
-            ,{ name: 'Customer', sref: 'app.customer' }
-            ,{ name: 'About', sref: 'app.about'}
+             { name: 'Home',     sref: 'app.welcome',                        roots: ['/welcome'] }
+            ,{ name: 'Order',    sref: 'app.menu({productType: \'pizza\'})', roots: ['/order','/menu'] }
+            ,{ name: 'Customer', sref: 'app.customer',                       roots: ['/customer'] }
+            ,{ name: 'About',    sref: 'app.about',                          roots: ['/about']}
         ];
 
         var vm = this;
             vm.homeSref    = 'app.welcome';
             vm.cartSref    = 'app.order.cart';
+            vm.isSelected  = isSelected;
             vm.states      = headerStates;
-            vm.selectState = selectState;
-
-         //Clear all state selections and highlight the user-selected state
-        function selectState( selectedState ) {
-            vm.states.forEach( function(s){ s.selected = ( s === selectedState );})
+        
+        function isSelected( state ){
+            var path = $location.path().toLowerCase() || '/welcome';
+            var roots = state.roots;
+            if (roots){
+                for (var i = roots.length; i--;){
+                    if (-1 < path.indexOf(roots[i])){return true;}
+                }
+            }
+            return false;
         }
     };
 
