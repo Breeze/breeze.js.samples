@@ -9,11 +9,6 @@
 #shell-content {
   margin-top: 20px
 }
-/* put some horizontal space around the top nav and footer */
-.navbar .navbar-inner {
-    padding-left:20px;
-    padding-right:20px;
-}
 
 /* Add some air above the description */
 p.description {
@@ -46,7 +41,15 @@ tr.narrow td {
     min-height: 6em;
 }
 
-/* Bootstrap replacements */
+/*** Bootstrap replacements ***/
+.navbar-fixed-top {
+    position:static; // keeps the top navbar from overlapping the content
+}
+/* put some horizontal space around the top nav and footer */
+.navbar .navbar-inner {
+    padding-left:20px;
+    padding-right:20px;
+}
 .navbar-inverse .brand,
 .navbar-inverse .nav > li > a {
     color: #DDDDDD; //#999999;
