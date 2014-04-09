@@ -5,23 +5,27 @@
 (function(angular) {
     'use strict';
 
-    // customer controller state preserved beyond controller's lifetime
+    // Customer controller state that survives the controller's routine creation and destruction.
+    // Saves a network trip when simply toggling among the views.
+    // - customerFilterText: the most recent filtering search text
+    // - selectedCustomerId: the id of the most recently selected customer
+    // - orderHeaders:       a "headers" projection of the orders of the selectedCustomer
     angular.module( "app" ).value( 'customer.state', {});
 
-    // customer controller defined
+    // Customer controller
     angular.module( "app" ).controller( 'customer',
         ['customer.state', 'dataservice', controller] );
 
     function controller(customerState, dataservice) {
 
         var vm  = this;
-        vm.customerFilterText = '';
+        vm.customerFilterText = customerState.customerFilterText || '';
         vm.customers = [];
         vm.filteredCustomers = filteredCustomers;
         vm.isLoadingCustomers = false;
         vm.isLoadingOrders = false;
         vm.isSelected =isSelected;
-        vm.orderHeaders = [];
+        vm.orderHeaders = orderHeaders;
         vm.select = select;
         vm.selectedCustomer = null;
         /////////////////////
@@ -29,6 +33,7 @@
 
         function filteredCustomers(){
             var text = vm.customerFilterText.toLowerCase();
+            customerState.customerFilterText = text;
             return text === '' ?
                 vm.customers :
                 vm.customers.filter(function (c){
@@ -55,8 +60,9 @@
 
         function getCustomerOrderHeaders(customer){
             vm.isLoadingOrders = true;
+            customerState.orderHeaders = null;
             dataservice.getOrderHeadersForCustomer(customer)
-                .then(function(orderHeaders){ vm.orderHeaders = orderHeaders;})
+                .then(function(orderHeaders){ customerState.orderHeaders = orderHeaders;})
                 .finally(function(){ vm.isLoadingOrders = false;});
         }
 
@@ -64,13 +70,21 @@
             return vm.selectedCustomer === customer;
         }
 
+        function orderHeaders(){
+            return customerState.orderHeaders;
+        }
+
         // Keep 'vm.selectedCustomerId' in a 'customerState' ngValue object
         // where it survives creation and destruction of this controller
         function select(customer){
             if (vm.selectedCustomer === customer ) {return;}  // no change
             vm.selectedCustomer = customer;
-            customerState.selectedCustomerId = customer && customer.id;
-            getCustomerOrderHeaders(customer);
+            var id = customer && customer.id;
+            if (id && id !== customerState.selectedCustomerId){
+                // customer changed, get its orderHeaders and update customerState
+                customerState.selectedCustomerId = id;
+                getCustomerOrderHeaders(customer);
+            }
         }
     }
 
