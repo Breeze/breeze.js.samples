@@ -14,7 +14,7 @@
         <table class="table" >
             <tr><th>Status</th><th>Ordered</th><th>Delivered</th><th>D.Chg</th><th>Total</th></tr>
             <tbody >
-                <tr class="narrow" data-ng-repeat="order in vm.orderHeaders">
+                <tr class="narrow" data-ng-repeat="order in vm.orderHeaders()">
                     <td>{{order.status}}</td>
                     <td>{{order.ordered | date:'shortDate'}}</td>
                     <td>{{order.delivered | date:'shortDate'}}</td>

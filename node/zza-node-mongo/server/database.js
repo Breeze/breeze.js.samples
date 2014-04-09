@@ -1,29 +1,35 @@
 /*
- * database service with an 'open' method that
- * creates a new MongoDb instance for the zza database
- * and opens it with optional post-open handler
+ * database - access to the zza mongo database
+ * getDb -> 'db', the singleton mongoDb instance
+ * which it creates and caches.
+ * see http://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html
  */
-module.exports = {
-    open: open
-};
+(function(database){
 
-var mongodb = require('mongodb');
+    var MongoClient = require('mongodb').MongoClient;
 
-function open(openHandler ) {
+    database.getDb = getDb;
 
-    var dbName = 'zza'
-      , host = 'localhost'
-      , port = 27017;
+    var db = null;
+    // todo: get from configuration
+    var mongoUrl = 'mongodb://localhost:27017/zza';
+    var mongoOptions = {
+        server: {auto_reconnect: true}
+    };
 
-    var dbServer = new mongodb.Server(host, port, { auto_reconnect: true});
+    function getDb(next) {
+        if (db){
+            next(null, db);
+        } else {
+            MongoClient.connect(mongoUrl, mongoOptions, function (err, theDb){
+                if (err) {
+                    next(err, null)
+                } else {
+                    db = theDb;
+                    next(null, db);
+                }
+            });
+        }
+    }
 
-    var db = new mongodb.Db(dbName, dbServer, {
-        strict:true,
-        w: 1,
-        safe: true
-    });
-
-    openHandler = openHandler || function() {/* noop handler*/};
-    db.open(openHandler);
-    return db;
-}
+})(module.exports);
