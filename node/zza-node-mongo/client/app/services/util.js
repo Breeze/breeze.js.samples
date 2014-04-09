@@ -29,6 +29,7 @@
             filterById: filterById,
             filterByName: filterByName,
             filterByType: filterByType,
+            filterHttpError: filterHttpError,
             getEntityByIdFromObj: getEntityByIdFromObj,
             getEntityManager: getEntityManager,
             getSaveErrorMessages: getSaveErrorMessages,
@@ -77,6 +78,17 @@
                 var re = (typeof type === 'string') ? new RegExp(type, 'i') : type;
                 return array.filter(function (x) { return re.test(x.type); });
             };
+        }
+
+        // filter some http errors
+        function filterHttpError(error){
+            var message = error.message;
+            var response = error.httpResponse;
+            var status = error.status;
+            if (status === 0 && !message ){
+                error.message = 'It appears the request timed-out. Is the MongoDb server running?';
+            }
+            return error;
         }
 
         /** Complex type helpers **/

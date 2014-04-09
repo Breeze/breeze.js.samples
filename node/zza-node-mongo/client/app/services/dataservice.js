@@ -70,6 +70,7 @@
         }
 
         function queryFailed(error){
+            error = util.filterHttpError(error);
             var resourceName = (error.query && error.query.resourceName) || '';
             logger.error(error.message, resourceName+" query failed");
             throw error; // so downstream fail handlers hear it too
@@ -86,6 +87,7 @@
             }
 
             function saveFailed(error) {
+                error = util.filterHttpError(error);
                 var msg = 'Save failed: ' + util.getSaveErrorMessages(error);
                 error.message = msg;
 

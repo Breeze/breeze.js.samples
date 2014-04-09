@@ -58,7 +58,8 @@
             ajaxAdapter.defaultSettings = {
                 headers: {
                     "X-UserSessionId": userSessionId
-                }
+                },
+                timeout: config.httpTimeout || 10000
             };
         }
     }

@@ -17,6 +17,7 @@
         return {
             version             : $rootScope.version = '0.7.0',
             debug               : true,
+            httpTimeout         : 2500,
             server              : 'Express',
             serviceName         : 'breeze/zza',
             devServiceName      : 'breeze/Dev',

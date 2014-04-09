@@ -23,6 +23,7 @@
         } else {
             MongoClient.connect(mongoUrl, mongoOptions, function (err, theDb){
                 if (err) {
+                    err.message = (err.message || '')+'. Is the MongoDb server running?';
                     next(err, null)
                 } else {
                     db = theDb;
