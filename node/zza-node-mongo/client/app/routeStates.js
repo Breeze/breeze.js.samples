@@ -19,19 +19,19 @@
                         templateUrl: 'app/shell/header.html'
                     },
                     'content': {
-                        templateUrl: 'app/shell/welcome.html'
+                        templateUrl: 'app/shell/home.html'
                     },
                     'footer': {
                         templateUrl: 'app/shell/footer.html'
                     }
                 }
             })
-                .state( 'app.welcome',
+                .state( 'app.home',
                 {
-                    url : '/welcome',
+                    url : '/home',
                     views : {
                         'content@' : {
-                            templateUrl: 'app/shell/welcome.html'
+                            templateUrl: 'app/shell/home.html'
                         }
                     }
                 })

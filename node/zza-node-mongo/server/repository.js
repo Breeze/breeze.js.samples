@@ -54,7 +54,7 @@
     function getDb(callback, next){
         database.getDb(function(err, db){
             if (err) {
-                next(err, null);
+                next(err);
             } else {
                 try {
                     callback(db); // assume callback knows about 'next'
@@ -62,7 +62,7 @@
                     err = new Error('Died in the repository; review server console');
                     err.stack = e.stack;
                     err.innerError = e;
-                    next(err, null);
+                    next(err);
                 }
             }
         });
@@ -99,7 +99,7 @@
                     if (err) {
                         failed = true;
                         err = { statusCode: 404, message: "Unable to locate: " + collectionName, error: err };
-                        next(err, null);
+                        next(err);
                     } else {
                         if (!failed){
                             collection.find().toArray(findCallback);
@@ -113,14 +113,14 @@
                       // already failed, forget it
                     } else if (err) {
                         failed = true;
-                        next(err,null);
+                        next(err);
                     } else {
-                        lookups[collectionName] = results;
                         results.forEach(function (r) {
-                            r.$type = entityType;//Todo: explain why we add $type
+                            r.$type = entityType;    //Todo: explain why we add $type
                         });
-                        if (queryCountDown === 0) {
-                            next(null, lookups);
+                        lookups[collectionName] = results;
+                        if (queryCountDown === 0) { // last of the queries
+                            next(null, lookups);    // we're done
                         }
                     }
                 }

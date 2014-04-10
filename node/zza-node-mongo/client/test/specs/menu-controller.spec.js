@@ -63,7 +63,7 @@ describe("Menu Controller: ", function () {
                 // fakes of the views that would be loaded to get to this state
                 $templateCache.put('app/shell/header.html','');
                 $templateCache.put('app/shell/footer.html','');
-                $templateCache.put('app/shell/welcome.html','');
+                $templateCache.put('app/shell/home.html','');
                 $templateCache.put('app/order/order.html','');
                 $templateCache.put('app/order/orderSidebar.html','');
                 $templateCache.put('app/order/orderItem.html','');
