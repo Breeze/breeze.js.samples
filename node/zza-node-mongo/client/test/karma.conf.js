@@ -29,7 +29,6 @@ module.exports = function(config) {
         /* test libraries */
         './test/lib/angular-mocks.js',
         './test/lib/ngMidwayTester.js',
-        './test/lib/sinon-1.9.0.js',
         './test/lib/bind-polyfill.js', // Needed for phantomJS
 
         /* application scripts */
