@@ -1,4 +1,4 @@
-﻿<nav class="navbar navbar-inverse navbar-fixed-top" ng-controller="header as vm">
+﻿<nav class="navbar navbar-inverse navbar-fixed-top" data-ng-controller="header as vm">
     <div class="navbar-inner">
         <a href="#" class="brand" data-ui-sref="{{vm.homeSref}}">
             <span class="title">Zza!</span>
@@ -6,7 +6,7 @@
         <div>
             <ul class="nav">
                 <li data-ng-repeat="state in vm.states"
-                    data-ng-class="{ active: vm.isSelected(state) }" ng-click="vm.selectState(state)" >
+                    data-ng-class="{ active: vm.isSelected(state) }" data-ng-click="vm.selectState(state)" >
                     <a href="#" data-ui-sref="{{state.sref}}" >{{state.name}}</a>
                 </li>
             </ul>

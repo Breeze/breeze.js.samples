@@ -38,7 +38,7 @@
         var resourceName  = req.params.resource;
         var query = repository['get'+resourceName.toLowerCase()];
 
-        if ( query ) {
+        if ( !!query ) {
             query(req.query, makeBreezeResponseHandler(res, next));
         } else {
             next({ // 404 if the request does not map to a registered query

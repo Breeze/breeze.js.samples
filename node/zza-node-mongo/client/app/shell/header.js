@@ -18,7 +18,7 @@
         ];
 
         var vm = this;
-            vm.homeSref    = 'app.welcome';
+            vm.homeSref    = 'app.home';
             vm.cartSref    = 'app.order.cart';
             vm.isSelected  = isSelected;
             vm.states      = headerStates;
