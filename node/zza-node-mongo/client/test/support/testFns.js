@@ -49,10 +49,14 @@ var testFns = (function () {
      * 'appStart' disabled.
      ********************************************************/
     function beforeEachApp() {
+        // start with these modules
         var moduleArgs = ['app', appStartMock];
+        // add beforeEachApp() arguments to the end of these moduleArgs
         moduleArgs.push.apply(moduleArgs, arguments);
 
         spyOnToastr(); // make sure toastr doesn't pop toasts.
+
+        // Tell Ng mock module to evaluate these module args in order
         beforeEach(angular.mock.module.apply(angular.mock.module, moduleArgs));
     }
     /*******************************************************
