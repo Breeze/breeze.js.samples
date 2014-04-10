@@ -12,22 +12,36 @@ var express        = require('express')
     , logger       = require('morgan')
     , port         = process.env["PORT"] || 3000;
 
-app.use( favicon()                  );
-app.use( logger('dev')              );
-app.use( compress()                 );
-app.use( bodyParser.json()          );
-app.use( bodyParser.urlencoded()    );
-app.use( fileServer( process.cwd()  ));// Support static file content
+app.use( favicon());
+app.use( logger('dev'));
+app.use( compress());
+app.use( bodyParser()); // both json & urlencoded
+
+// Support static file content
+// Consider 'st' module for caching: https://github.com/isaacs/st
+app.use( fileServer( process.cwd() ));
 
 // Configure breeze-specific routes for REST API
 breezeRoutes.configure( app );
+
+
+
+// a test POST endpoint ... for the demo
+app.post( '/ping', function(req, res, next){
+    console.log(req.body);
+    res.send('pinged!!!');
+});
+
+
 
 // this middleware goes last to catches anything left
 // in the pipeline and reports to client as an error
 app.use(errorHandler);
 
+
 // Start listening for HTTP requests
 app.listen( port );
+
 
 console.log('env = '+ app.get('env') +
     '\n__dirname = ' + __dirname  +

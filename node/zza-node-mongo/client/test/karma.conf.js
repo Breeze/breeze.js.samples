@@ -13,18 +13,18 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
         /* vendor libraries */
-        './vendor/angular/angular.js',
-        './vendor/angular-sanitize/angular-sanitize.js',
-        './vendor/angular-ui-router/angular-ui-router.js',
-        './vendor/angular-bootstrap/ui-bootstrap-tpls.js',
+        './lib/angular/angular.js',
+        './lib/angular-sanitize/angular-sanitize.js',
+        './lib/angular-ui-router/angular-ui-router.js',
+        './lib/angular-bootstrap/ui-bootstrap-tpls.js',
 
-        './vendor/breeze/breeze.debug.js',
-        './vendor/breeze/breeze.angular.js',
-        './vendor/breeze/breeze.dataservice.mongo.js',
-        './vendor/breeze/breeze.metadata-helper.js',
+        './lib/breeze/breeze.debug.js',
+        './lib/breeze/breeze.angular.js',
+        './lib/breeze/breeze.dataservice.mongo.js',
+        './lib/breeze/breeze.metadata-helper.js',
 
-        './vendor/jquery/jquery.min.js',
-        './vendor/toastr/toastr.js',
+        './lib/jquery/jquery.min.js',
+        './lib/toastr/toastr.js',
 
         /* test libraries */
         './test/lib/angular-mocks.js',

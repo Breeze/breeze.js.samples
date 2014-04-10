@@ -22,7 +22,6 @@
             getOrderHeadersForCustomer: getOrderHeadersForCustomer,
             lookups: lookups,
             ready: ready,
-            resetManager: resetManager,
             saveChanges: saveChanges
         };
         return service;
@@ -70,6 +69,7 @@
         }
 
         function queryFailed(error){
+            error = util.filterHttpError(error);
             var resourceName = (error.query && error.query.resourceName) || '';
             logger.error(error.message, resourceName+" query failed");
             throw error; // so downstream fail handlers hear it too
@@ -86,6 +86,7 @@
             }
 
             function saveFailed(error) {
+                error = util.filterHttpError(error);
                 var msg = 'Save failed: ' + util.getSaveErrorMessages(error);
                 error.message = msg;
 
@@ -99,24 +100,6 @@
             }
         }
 
-        // Reset the manager to its base state
-        // Clears the manager, re-populates with the lookups
-        // Creates a new draftOrder and cartOrder
-        function resetManager() {
-            manager.clear(); // detaches everything
-            attachEntities(lookups.OrderStatus.statuses);
-            attachEntities(lookups.products);
-            attachEntities(lookups.productOptions);
-            attachEntities(lookups.productSizes);
-            createDraftAndCartOrders();
-
-            // Should be in Breeze itself
-            function attachEntities(entities ) {
-                entities.forEach(function (entity) {
-                    manager.attachEntity( entity );
-                });
-            }
-        }
     }
 
 }( this.angular ));

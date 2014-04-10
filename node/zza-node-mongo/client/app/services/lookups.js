@@ -49,8 +49,8 @@
                     extendService(manager)
                 })
                 .catch(function (error) {
+                    error = util.filterHttpError(error);
                     logger.error(error.message, "lookups initialization failed");
-                    logger.error("Alert: Is your MongoDB server running ?");
                     throw error; // so downstream fail handlers hear it too
                 });
         }

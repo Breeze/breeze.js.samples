@@ -1,5 +1,7 @@
 /*
- * database repository that accesses the zza mongo database
+ * Data repository that accesses the zza mongo database
+ * using the breeze-mongodb server-side module to handle clients requests
+ * produced by the breeze.dataservice.mongo client-side dataservice adapter
  */
 (function(repository){
 
@@ -46,21 +48,21 @@
      * Passes trappable errors along.
      * Private to this module
      *
-     * @param callback - the query function to execute
-     * @param next
+     * @param callback {function} the query function to execute
+     * @param next {function} next(err, results)
      */
     function getDb(callback, next){
         database.getDb(function(err, db){
             if (err) {
-                next(err, null);
+                next(err);
             } else {
                 try {
-                    callback(db);
+                    callback(db); // assume callback knows about 'next'
                 } catch (e) {
                     err = new Error('Died in the repository; review server console');
                     err.stack = e.stack;
                     err.innerError = e;
-                    next(err, null);
+                    next(err);
                 }
             }
         });
@@ -70,7 +72,7 @@
      * lookups query whose result is an object with
      * several sets of reference ('lookup') entities
      *
-     * @param next
+     * @param next {function} next(err, results)
      */
     function getLookups( next) {
         getDb(get, next);
@@ -97,7 +99,7 @@
                     if (err) {
                         failed = true;
                         err = { statusCode: 404, message: "Unable to locate: " + collectionName, error: err };
-                        next(err, null);
+                        next(err);
                     } else {
                         if (!failed){
                             collection.find().toArray(findCallback);
@@ -111,14 +113,14 @@
                       // already failed, forget it
                     } else if (err) {
                         failed = true;
-                        next(err,null);
+                        next(err);
                     } else {
-                        lookups[collectionName] = results;
                         results.forEach(function (r) {
-                            r.$type = entityType;//Todo: explain why we add $type
+                            r.$type = entityType;    //Todo: explain why we add $type
                         });
-                        if (queryCountDown === 0) {
-                            next(null, lookups);
+                        lookups[collectionName] = results;
+                        if (queryCountDown === 0) { // last of the queries
+                            next(null, lookups);    // we're done
                         }
                     }
                 }
@@ -128,13 +130,12 @@
 
     /**
      * Products query
-     * An example of a "special case" query that can't be done as a "named query"
+     * An example of a "special case" query that requires extra manipulation on the server.
      * As implemented, this query _could_ be done as a regular collection query
-     * But imagine that it was special, perhaps because you needed to add custom Mongo filters
-     * as described inside the implementation.
+     * But imagine that it was special, perhaps because you needed to add custom MongoDb filters.
      *
      * @param queryString {string} client's OData query string
-     * @param next
+     * @param next {function} next(err, results)
      */
     function getProducts(queryString, next) {
         getDb(get, next);
@@ -142,7 +143,7 @@
             var query = new bmongo.MongoQuery(queryString);
             // add your own custom filters to the 'query' here
             // don't have any in this case but shows you where you'd put them
-            query.execute(db, "Product",next);
+            query.execute(db, "Product", next);
         }
     }
 
@@ -161,7 +162,7 @@
     /**
      * Breeze change-set save
      * @param saveBundle {object} a json "saveBundle" from a Breeze client
-     * @param next
+     * @param next {function} next(err, results)
      */
     function saveChanges( saveBundle, next ) {
         getDb(save, next);

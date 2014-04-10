@@ -9,20 +9,17 @@
 
     /**
      * Configure Express app with get()/post() Breeze route handlers
-     * that perform Breeze persistence operations against the Mongo `zza` database
+     * that perform Breeze persistence operations against the MongoDb `zza` database
      *
      * @param app Instance of express() application;
      */
     function configureRoutes(app) {
-        // Create instance of BreezeOperations that is
-        // initialized with open database connection
-        // Configure get()/post() request handlers with Breeze operations
         app.get( '/breeze/zza/Lookups',     getLookups   ); // demo specialized route
         app.get( '/breeze/zza/Metadata',    getMetadata  );
         app.post('/breeze/zza/SaveChanges', saveChanges  );
 
-        // '/breeze/zza/:slug' must be the last breeze API route
-        app.get( '/breeze/zza/:slug',       getNamedQuery);
+        // '/breeze/zza/:resource' must be the last breeze/zza API route
+        app.get( '/breeze/zza/:resource',       getQuery);
     }
 
     function getLookups(req, res, next) {
@@ -37,14 +34,14 @@
     }
 
     // Generic approach to processing a Breeze client query
-    function getNamedQuery(req, res, next) {
-        var resourceName  = req.params.slug;
-        var namedQuery = repository['get'+resourceName.toLowerCase()];
+    function getQuery(req, res, next) {
+        var resourceName  = req.params.resource;
+        var query = repository['get'+resourceName.toLowerCase()];
 
-        if ( namedQuery ) {
-            namedQuery(req.query, makeBreezeResponseHandler(res, next));
+        if ( query ) {
+            query(req.query, makeBreezeResponseHandler(res, next));
         } else {
-            next({ // 404 if the request does not map to a named query
+            next({ // 404 if the request does not map to a registered query
                 statusCode: 404,
                 message: "Unable to locate query for " + resourceName
             });

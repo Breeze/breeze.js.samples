@@ -11,7 +11,7 @@
     function controller( $location ) {
 
         var headerStates = [
-             { name: 'Home',     sref: 'app.welcome',                        roots: ['/welcome'] }
+             { name: 'Home',     sref: 'app.home',                           roots: ['/home'] }
             ,{ name: 'Order',    sref: 'app.menu({productType: \'pizza\'})', roots: ['/order','/menu'] }
             ,{ name: 'Customer', sref: 'app.customer',                       roots: ['/customer'] }
             ,{ name: 'About',    sref: 'app.about',                          roots: ['/about']}
@@ -22,9 +22,9 @@
             vm.cartSref    = 'app.order.cart';
             vm.isSelected  = isSelected;
             vm.states      = headerStates;
-        
+
         function isSelected( state ){
-            var path = $location.path().toLowerCase() || '/welcome';
+            var path = $location.path().toLowerCase() || '/home';
             var roots = state.roots;
             if (roots){
                 for (var i = roots.length; i--;){

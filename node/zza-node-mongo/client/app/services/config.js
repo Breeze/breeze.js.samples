@@ -15,13 +15,14 @@
         toastr.options.positionClass = 'toast-bottom-right';
 
         return {
-            version             : $rootScope.version = '0.7.0',
+            version             : $rootScope.version = '0.8.0',
             debug               : true,
+            httpTimeout         : 2500,
             server              : 'Express',
             serviceName         : 'breeze/zza',
             devServiceName      : 'breeze/Dev',
-            productImageBasePath: 'app/images/products/',
-            productUnknownImage : 'app/images/products/unknown.jpg',
+            productImageBasePath: 'images/products/',
+            productUnknownImage : 'images/products/unknown.jpg',
             reportStateChanges  : true,
             userSessionId       : '0' //breeze.core.getUuid()
         };
