@@ -9,6 +9,7 @@ var express        = require('express')
     , errorHandler = require('./errorHandler')
     , favicon      = require('static-favicon')
     , fileServer   = require('serve-static')
+    , isDev        = app.get('env') === 'development'
     , logger       = require('morgan')
     , port         = process.env["PORT"] || 3000;
 
@@ -27,11 +28,12 @@ breezeRoutes.configure( app );
 
 
 // a test POST endpoint ... for the demo
-app.post( '/ping', function(req, res, next){
-    console.log(req.body);
-    res.send('pinged!!!');
-});
-
+if (isDev){
+    app.post( '/ping', function(req, res, next){
+        console.log(req.body);
+        res.send('pinged!!!');
+    });
+}
 
 
 // this middleware goes last to catches anything left
