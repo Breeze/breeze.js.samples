@@ -2,8 +2,9 @@
 The "Zza Node Mongo" sample app is a single page application (SPA) built with Breeze, Angular, Node, and MongoDB.
 
 ## Prerequisites
-* Node.js
-* MongoDB
+* Node.js >=0.10
+* <a href="http://blog.mongodb.org/post/82092813806/mongodb-2-6-our-biggest-release-ever"
+  target="_blank" title="MongoDb release 2.6 announcement">MongoDb >= v.2.6</a>
 
 ## Install and use
 
@@ -22,11 +23,11 @@ You only have to install this database once.
 2. Navigate to the *Zza-Node-Mongo* directory.
 
 3. Use npm to install the following three modules:
-<pre style="margin-left: 2em">
-npm install mongodb
-npm install express
-npm install breeze-mongodb
-</pre>
+
+
+     npm install mongodb
+     npm install express
+     npm install breeze-mongodb
 
 Confirm that all of them ran without error (warnings are ok). You can close this window when you're done.
 
@@ -57,7 +58,7 @@ You only install these modules once.
 
 Open **localhost:3000** in a web browser to run the Zza application.
 
-## Release 0.7.0
+## Release 0.8.0
 * Initial release.
 * Demonstrates fundamental characteristics of a MongoDB app.
 * Maintainable w/o any Microsoft assets at all, neither code nor development tools.
