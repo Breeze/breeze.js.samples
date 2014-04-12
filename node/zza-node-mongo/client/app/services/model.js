@@ -216,7 +216,7 @@
 
                 defineProperty(ProductOption,"isSaladOption",
                     function () {
-                        return this.productTypes.indexOf('salad') > -1
+                        return this.productTypes.indexOf('salad') > -1;
                     }
                 );
             }

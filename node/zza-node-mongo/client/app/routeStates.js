@@ -5,8 +5,8 @@
 (function( angular ) {
     'use strict';
 
-    angular.module( "app" )
-           .config( ['$stateProvider', '$urlRouterProvider', configureStates] )
+    angular.module("app")
+        .config(['$stateProvider', '$urlRouterProvider', configureStates]);
     /////////////////////
     function configureStates($stateProvider, $urlRouterProvider) {
 
