@@ -40,7 +40,8 @@ module.exports = function(config) {
         './test/support/**/*.js',
 
         /* Specs (tests) */
-        './test/specs/*.spec.js'
+        './test/specs/*.spec.js',
+        './test/specs.async/*.spec.js'
     ],
 
 

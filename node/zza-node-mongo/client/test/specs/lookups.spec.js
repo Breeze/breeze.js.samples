@@ -3,7 +3,7 @@
  *******************************/
 describe("lookups service with faked http response:", function () {
 
-    var $httpBackend, $injector, $log, flush$q, lookups, manager;
+    var $httpBackend, $log, flush$q, lookups;
     var failed = testFns.failed;
 
     var lookupsUrl = 'breeze/zza/Lookups?';      // Url of the lookups endpoint
@@ -13,13 +13,11 @@ describe("lookups service with faked http response:", function () {
 
     testFns.beforeEachApp(); // not faking out the EntityManagerFactory!
 
-    beforeEach(inject(function(_$httpBackend_, _$injector_, _$log_, $rootScope, entityManagerFactory, _lookups_) {
+    beforeEach(inject(function(_$httpBackend_, _$log_, $rootScope, _lookups_) {
         $httpBackend = _$httpBackend_;
-        $injector = _$injector_;
         $log = _$log_;
         flush$q = function() { $rootScope.$apply(); };
         lookups = _lookups_;
-        manager = entityManagerFactory.getManager();
     }));
 
     afterEach(function() {
@@ -33,7 +31,7 @@ describe("lookups service with faked http response:", function () {
         });
 
         it("$httpBackend works when calling $httpGET with dummy response", function () {
-            var $http = $injector.get('$http');
+            var $http = this.$injector.get('$http');
             $httpBackend.expectGET(lookupsUrlRe).respond({foo: "bar"});
 
             $http.get(lookupsUrl)
@@ -44,7 +42,7 @@ describe("lookups service with faked http response:", function () {
         });
 
         it("$httpBackend works when calling $httpGET with valid Lookups Response", function () {
-            var $http = $injector.get('$http');
+            var $http = this.$injector.get('$http');
             $httpBackend.expectGET(lookupsUrlRe).respond(validLookupsResponse.data);
 
             $http.get(lookupsUrl)
@@ -67,6 +65,12 @@ describe("lookups service with faked http response:", function () {
         });
         it("doesn't bomb", function () {
             expect(true).toBe(true);
+        });
+        it("'ready()' invokes success callback", function () {
+           var success = jasmine.createSpy('success');
+            lookups.ready(success);
+            flush$q();
+            expect(success).toHaveBeenCalled();
         });
         it("has OrderStatus", function () {
             expect(lookups.OrderStatus).toBeDefined();
@@ -102,17 +106,17 @@ describe("lookups service with faked http response:", function () {
     });
 
     describe("when remote server misbehaves with a 500", function () {
-        var detectedFail, serverFailMessage = 'uh oh!';
+        var failSpy, serverFailMessage = 'uh oh!';
 
         beforeEach(function () {
-            detectedFail = false;
+            failSpy = jasmine.createSpy('fail').and.callFake(fail);
             $httpBackend.expectGET(lookupsUrlRe).respond(500, serverFailMessage);
         });
 
         it("'ready()' invokes fail callback", function () {
-            lookups.ready(success, fail);
+            lookups.ready(success, failSpy);
             flush();
-            expect(detectedFail).toBe(true);
+            expect(failSpy).toHaveBeenCalled();
         });
 
         it("breeze logged failure", function () {
@@ -128,11 +132,10 @@ describe("lookups service with faked http response:", function () {
         });
 
         function fail(error){
-            detectedFail = true;
             expect(error.message).toEqual(serverFailMessage);
         }
 
-        function success(data){
+        function success() {
             expect.toFail('success callback should NOT have been called');
         }
 

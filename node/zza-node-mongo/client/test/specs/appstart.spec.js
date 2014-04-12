@@ -2,37 +2,6 @@
 describe('When the app starts', function () {
     'use strict';
 
-    // stubs out 'toastr' so the app doesn't try to pop up toast messages
-    // copied from testFns.spyOnToastr
-    beforeEach(function () {
-        // Do not let toastr pop-up toasts
-        spyOn(toastr, 'error');
-        spyOn(toastr, 'info');
-        spyOn(toastr, 'success');
-        spyOn(toastr, 'warning');
-    });
-
-    describe("when calling toastr", function () {
-        var msg = 'some message';
-
-        it("can call error('some message')", function () {
-            toastr.error(msg);
-            expect(toastr.error).toHaveBeenCalledWith(msg);
-        });
-        it("can call info('some message')", function () {
-            toastr.info(msg);
-            expect(toastr.info).toHaveBeenCalledWith(msg);
-        });
-        it("can call success('some message')", function () {
-            toastr.success(msg);
-            expect(toastr.success).toHaveBeenCalledWith(msg);
-        });
-        it("can call warning('some message')", function () {
-            toastr.warning(msg);
-            expect(toastr.warning).toHaveBeenCalledWith(msg);
-        });
-    });
-
     describe("when 'appStart' service is stubbed out ", function () {
         var appStart = {
             start: jasmine.createSpy('start')
@@ -92,5 +61,26 @@ describe('When the app starts', function () {
             });
         });
 
+    });
+
+    describe("when calling toastr", function () {
+        var msg = 'some message';
+        testFns.spyOnToastr(); // let us know when a toastr method was called
+        it("can call error('some message')", function () {
+            toastr.error(msg);
+            expect(toastr.error).toHaveBeenCalledWith(msg);
+        });
+        it("can call info('some message')", function () {
+            toastr.info(msg);
+            expect(toastr.info).toHaveBeenCalledWith(msg);
+        });
+        it("can call success('some message')", function () {
+            toastr.success(msg);
+            expect(toastr.success).toHaveBeenCalledWith(msg);
+        });
+        it("can call warning('some message')", function () {
+            toastr.warning(msg);
+            expect(toastr.warning).toHaveBeenCalledWith(msg);
+        });
     });
 });
