@@ -9,8 +9,8 @@ describe('When querying Zza web api with $http', function () {
 
     var $http, tester = null;
     var testFns = window.testFns,
-        host = testFns.host,
-        serviceName = host+testFns.serviceName;
+        base = testFns.serviceBase,
+        serviceName = base+testFns.serviceName;
 
     beforeEach(function () {
         tester = ngMidwayTester('ng');
@@ -24,7 +24,7 @@ describe('When querying Zza web api with $http', function () {
     });
 
     it('can reach the node server', function (done) {
-        var url = host+'ping';
+        var url = base+'ping';
         $http.post(url,  {"message": "hello, server"})
             .then(function(response){
                 var data = response.data;
@@ -33,7 +33,7 @@ describe('When querying Zza web api with $http', function () {
             })
             .catch(function(error){
                 expect.toFail('Server ping at '+url+' failed. Is the app server running?'+
-                    'Are you sure the host ('+host+') is correct for that server?'+
+                    'Are you sure the base ('+base+') is correct for that server?'+
                     'Error was '+JSON.stringify(error));
             })
             .finally(done);

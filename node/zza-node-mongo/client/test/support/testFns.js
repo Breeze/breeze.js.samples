@@ -18,9 +18,7 @@
 var testFns = (function () {
     'use strict';
 
-    window.testing = true;
-
-    var metadataStore;
+    window.testing = true; // crutch
 
     extendString();
     addCustomMatchers();
@@ -30,10 +28,11 @@ var testFns = (function () {
         appStartMock: appStartMock,
         beforeEachApp: beforeEachApp,    // typical spec setup
         create_appEntityManager: create_appEntityManager,
+        create_okToRun: create_okToRun,
         create_testAppModule: create_testAppModule,
         expectToFailFn: expectToFailFn,
         failed: failed,
-        host: 'http://localhost:3000/',  // MAKE SURE THIS IS RIGHT AND THE SERVER IS RUNNING
+        serviceBase: 'http://localhost:3000/',  // MAKE SURE THIS IS RIGHT AND THE SERVER IS RUNNING
         serviceName: 'breeze/zza/',
         spyOnToastr: spyOnToastr
     };
@@ -51,8 +50,28 @@ var testFns = (function () {
         $provide.value('appStart', appStart);
     }
     /*******************************************************
-     * the 'beforeEach' that establishes the 'App' module with
-     * 'appStart' disabled.
+     * Adjusts config.js values for the test environment
+     *
+     * Most important are the service names which must
+     * go to a different origin than the karma
+     ********************************************************/
+    function appConfigDecorator($provide){
+
+        $provide.decorator('config', appConfigDecorator);
+
+        function appConfigDecorator($delegate) {
+            //  original config values are something like this:
+            //      serviceName    : 'breeze/zza',
+            //      devServiceName : 'breeze/Dev',
+            $delegate.serviceName    = testFns.serviceBase + $delegate.serviceName;
+            $delegate.devServiceName = testFns.serviceBase + $delegate.devServiceName;
+            return $delegate;
+        }
+    }
+    /*******************************************************
+     * A Jasmine 'beforeEach' block that establishes the 'App' module
+     * with 'appStart' disabled so it doesn't immediately start running.
+      Call it inside a Jasmine 'describe'.
      ********************************************************/
     function beforeEachApp() {
         // start with these modules
@@ -70,13 +89,18 @@ var testFns = (function () {
      * Creates test version of the Angular 'app' module
      * with its 'start' disabled by the 'appStartMock'.
      * Accepts additional mocking modules/providers as arguments
+     * Call it inside a Jasmine 'describe'.
+     *
      * SIMILAR to body of  'beforeEachApp'
+     *
      * DIFFERS in that it calls 'angular.module' rather than 'angular.mock.module'
+     * and does not call Jasmine 'beforeEach' because you probably want to
+     * call it only once per file.
      ********************************************************/
     function create_testAppModule(){
         // start with 'app' module and 'appStartMock'
         // which disables the 'appStart' service called by app.run()
-        var moduleArgs = ['app', appStartMock];
+        var moduleArgs = ['app', appStartMock, appConfigDecorator];
 
         // add createTestAppModule() arguments to the end of these moduleArgs
         moduleArgs.push.apply(moduleArgs, arguments);
@@ -88,7 +112,6 @@ var testFns = (function () {
         var module = angular.module('testApp', moduleArgs);
         return module;
     }
-
     /*******************************************************
      * Create a BreezeJS 'EntityManager'
      * with the app's dataservice and metadata and model
@@ -97,7 +120,7 @@ var testFns = (function () {
     function create_appEntityManager(injectFn){
         var breeze = injectFn('breeze');
 
-        var fullServiceName = testFns.host+testFns.serviceName;
+        var fullServiceName = testFns.serviceBase+testFns.serviceName;
 
         var dataService = new breeze.DataService({
                 hasServerMetadata: false,
@@ -116,7 +139,39 @@ var testFns = (function () {
         });
         return em;
     }
+    /*******************************************************
+     * Enables async specs to fail fast.
+     *
+     * create a wrapper of the test function passed into 'it'
+     * that runs that test function unless 'isNotOkFn'
+     * returns a reason not to run it as when
+     * a critical data load failed so the tests shouldn't bother
+     *
+     * Example: lookups.async.spec.js which loads lookups in the beforeEach
+     * if that fails, all tests will fail
+     *
+     * Todo: consider generating it, xit, iit
+     ********************************************************/
+    function create_okToRun(isNotOkFn){
+        return okToRun;
 
+        function okToRun(specFn){
+            var isAsync = specFn.length > 0;
+            return isAsync ?
+                function(done){ doit.bind(this)(done);} :
+                function()    { doit.bind(this)();};
+
+            function doit(done){
+                var reason = isNotOkFn();
+                if (reason){
+                    expect.toFail('test aborted because '+reason);
+                    if (done){done();}
+                } else {
+                    specFn.bind(this)(done);
+                }
+            }
+        }
+    }
     /*******************************************************
      * String extensions
      * Monkey punching JavaScript native String class
@@ -184,6 +239,7 @@ var testFns = (function () {
     function failed(err) {
         var msg = 'Unexpected test failure: ' + (err.message || err);
         if (err.body) {
+            // yes, it really is "body.Message", not "body.message"
             msg += err.body.Message + " " + err.body.MessageDetail;
         } else if (err.statusText) {
             msg += err.statusText;
