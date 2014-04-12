@@ -20,6 +20,8 @@ var testFns = (function () {
 
     window.testing = true;
 
+    var metadataStore;
+
     extendString();
     addCustomMatchers();
     extendExpect();
@@ -27,8 +29,12 @@ var testFns = (function () {
     var fns = {
         appStartMock: appStartMock,
         beforeEachApp: beforeEachApp,    // typical spec setup
+        create_appEntityManager: create_appEntityManager,
+        create_testAppModule: create_testAppModule,
         expectToFailFn: expectToFailFn,
         failed: failed,
+        host: 'http://localhost:3000/',  // MAKE SURE THIS IS RIGHT AND THE SERVER IS RUNNING
+        serviceName: 'breeze/zza/',
         spyOnToastr: spyOnToastr
     };
 
@@ -57,8 +63,60 @@ var testFns = (function () {
         spyOnToastr(); // make sure toastr doesn't pop toasts.
 
         // Tell Ng mock module to evaluate these module args in order
-        beforeEach(angular.mock.module.apply(angular.mock.module, moduleArgs));
+        var moduleFn = angular.mock.module.apply(angular.mock.module, moduleArgs);
+        beforeEach(moduleFn);
     }
+    /*******************************************************
+     * Creates test version of the Angular 'app' module
+     * with its 'start' disabled by the 'appStartMock'.
+     * Accepts additional mocking modules/providers as arguments
+     * SIMILAR to body of  'beforeEachApp'
+     * DIFFERS in that it calls 'angular.module' rather than 'angular.mock.module'
+     ********************************************************/
+    function create_testAppModule(){
+        // start with 'app' module and 'appStartMock'
+        // which disables the 'appStart' service called by app.run()
+        var moduleArgs = ['app', appStartMock];
+
+        // add createTestAppModule() arguments to the end of these moduleArgs
+        moduleArgs.push.apply(moduleArgs, arguments);
+
+        spyOnToastr(); // make sure toastr doesn't pop toasts.
+
+        // Create the 'testApp' module with these dependent modules evaluated in order
+        // Assume can keep redefining this 'testApp' as often as we like.
+        var module = angular.module('testApp', moduleArgs);
+        return module;
+    }
+
+    /*******************************************************
+     * Create a BreezeJS 'EntityManager'
+     * with the app's dataservice and metadata and model
+     * given an injector function with access to the necessary app services
+     ********************************************************/
+    function create_appEntityManager(injectFn){
+        var breeze = injectFn('breeze');
+
+        var fullServiceName = testFns.host+testFns.serviceName;
+
+        var dataService = new breeze.DataService({
+                hasServerMetadata: false,
+                serviceName: fullServiceName}
+        );
+
+        var metadataStore = new breeze.MetadataStore();
+        metadataStore.addDataService(dataService);
+
+        var model = injectFn('model');
+        model.addToMetadataStore(metadataStore);
+
+        var em = new breeze.EntityManager({
+            dataService: dataService,
+            metadataStore: metadataStore
+        });
+        return em;
+    }
+
     /*******************************************************
      * String extensions
      * Monkey punching JavaScript native String class
@@ -153,11 +211,17 @@ var testFns = (function () {
      * A jasmine 'beforeEach' that stubs out 'toastr' so the
      * app doesn't try to pop up toast messages in the DOM
      * jasmine removes after each spec
+     * We CAN know if the methods were called and how
      *********************************************************/
     function spyOnToastr() {
         beforeEach(function () {
             // Do not let toastr pop-up toasts
             // Do make spy so can find out when called and how
+            // '.and' and '.calls' are telltales of a jasmine spy
+            // according to 'j$.isSpy' in jasmine.js [~171]
+            if (toastr.error.and || toastr.error.calls) {
+                return; // already spying on toastr
+            }
             spyOn(toastr, 'error');
             spyOn(toastr, 'info');
             spyOn(toastr, 'success');
