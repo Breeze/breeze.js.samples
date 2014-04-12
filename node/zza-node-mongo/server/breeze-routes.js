@@ -5,7 +5,7 @@
 
     var repository = require('./repository' );
 
-    routes.configure = configureRoutes;
+    routes.init = configureRoutes;
 
     /**
      * Configure Express app with get()/post() Breeze route handlers
