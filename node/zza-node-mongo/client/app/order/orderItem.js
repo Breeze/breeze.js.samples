@@ -45,7 +45,7 @@
             // Get the OrderItem information base on $stateParams
             function getOrderItemInfo( ) {
                 var fromOrder   = $stateParams.orderItemId != null;
-                return fromOrder ? getInfoFromOrder() : getInfoByProduct()
+                return fromOrder ? getInfoFromOrder() : getInfoByProduct();
 
                 // Get the order item info from the order and orderItem id.
                 function getInfoFromOrder( ) {
@@ -70,7 +70,7 @@
 
                 // Get the order item info from the productId.
                 function getInfoByProduct() {
-                    var prodId = +$stateParams.productId
+                    var prodId = +$stateParams.productId;
                     var product = lookups.products.byId(prodId);
                     if (!product){ return null; }
 

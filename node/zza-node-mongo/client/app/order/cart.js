@@ -5,9 +5,9 @@
     'use strict';
 
     angular.module("app").controller( 'cart',
-        ['dataservice', 'pricing', cart] );
+        ['dataservice', 'pricing', controller]);
 
-    function cart( dataservice, pricing) {
+    function controller(dataservice, pricing) {
         var vm   = this;
         dataservice.ready( onReady );
 
@@ -19,7 +19,7 @@
             vm.updateCosts   = calculateCosts;
             vm.removeItem    = removeItem;
 
-            calculateCosts()
+            calculateCosts();
         }
         /////////////////////
         function calculateCosts() {
@@ -27,7 +27,7 @@
             vm.hasExtraCost = false;
             vm.haveItems = (cart.orderItems.length > 0);
             if ( vm.haveItems ) {
-                var total = pricing.calcOrderItemsTotal( cart );
+                pricing.calcOrderItemsTotal( cart );
                 vm.hasExtraCost = pricing.orderHasExtraCostOptions( cart );
             }
         }

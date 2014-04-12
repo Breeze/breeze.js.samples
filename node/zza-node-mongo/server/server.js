@@ -10,6 +10,7 @@ var express        = require('express')
     , errorHandler = require('./errorHandler')
     , favicon      = require('static-favicon')
     , fileServer   = require('serve-static')
+    , http         = require('http')
     , isDev        = app.get('env') === 'development'
     , logger       = require('morgan')
     , port         = process.env["PORT"] || 3000;
@@ -24,7 +25,7 @@ app.use( bodyParser()); // both json & urlencoded
 app.use( fileServer( process.cwd() ));
 
 app.use(cors());               // enable ALL CORS requests
-breezeRoutes.configure( app ); // Configure breeze-specific routes for REST API
+breezeRoutes.init( app ); // Configure breeze-specific routes for REST API
 
 // a test POST endpoint ... for the demo
 if (isDev){
@@ -39,10 +40,11 @@ if (isDev){
 // in the pipeline and reports to client as an error
 app.use(errorHandler);
 
+// create server (in case interested in socket.io)
+var server = http.createServer(app);
 
 // Start listening for HTTP requests
-app.listen( port );
-
+server.listen(port); // app.listen( port ); // if we weren't using 'server'
 
 console.log('env = '+ app.get('env') +
     '\n__dirname = ' + __dirname  +

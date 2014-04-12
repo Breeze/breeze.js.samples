@@ -25,15 +25,15 @@
         return service;
         /////////////////////
         function getMetadataStore() {
-            var metadataStore = new breeze.MetadataStore();
+            var store = new breeze.MetadataStore();
 
             // Associate these metadata data with this Node service
-            metadataStore.addDataService(new breeze.DataService({ serviceName: serviceName }));
+            store.addDataService(new breeze.DataService({ serviceName: serviceName }));
 
             // Extend model types with metadata, properties, and behavior
-            model.addToMetadataStore(metadataStore);
+            model.addToMetadataStore(store);
 
-            return metadataStore;
+            return store;
         }
         // get the "master manager", creating if necessary
         function getManager(){

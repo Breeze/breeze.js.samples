@@ -11,7 +11,6 @@
     function factory ($rootScope, dataservice, util){
         var config = util.config;
         var logger = util.logger;
-        var reportStateChangesEnabled = false;
 
         var appStart = {
             reportStateChangesEnabled: false,
@@ -34,7 +33,7 @@
             if (config.reportStateChanges) {
                 appStart.reportStateChangesEnabled = true;
                 $rootScope.$on('$stateChangeStart',
-                    function(event, toState, toParams, fromState, fromParams){
+                    function(event, toState, toParams, fromState){
                         logger.log("stateChangeStart: from '"+fromState.name + "' to '"+ toState.name+"'");
                     });
 
@@ -44,7 +43,7 @@
                     });
 
                 $rootScope.$on('$stateChangeSuccess',
-                    function(event, toState, toParams, fromState, fromParams){
+                    function(event, toState, toParams, fromState){
                         logger.log("stateChangeSuccess: from '"+fromState.name + "' to '"+ toState.name+"' with params " +
                             JSON.stringify(toParams));
                     });

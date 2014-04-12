@@ -60,8 +60,6 @@
 
             /*** Convenience fns and vars ***/
 
-            var store; // the metadataStore that we'll be building
-
             // addType - make it easy to add the type to the store using the helper
             var addType = function (type) { helper.addTypeToStore(store, type); };
 

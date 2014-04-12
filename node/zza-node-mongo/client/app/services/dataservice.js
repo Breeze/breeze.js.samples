@@ -30,7 +30,7 @@
             if (!isReady){ isReady = initialize();}
             if (success) { isReady = isReady.then(success);}
             if (fail)    { isReady = isReady.catch(fail);}
-            return isReady
+            return isReady;
         }
 
         function initialize() {

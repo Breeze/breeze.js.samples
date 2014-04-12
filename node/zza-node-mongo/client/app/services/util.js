@@ -83,7 +83,6 @@
         // filter some http errors
         function filterHttpError(error){
             var message = error.message;
-            var response = error.httpResponse;
             var status = error.status;
             if (status === 0 && !message ){
                 error.message = 'It appears the request timed-out. Is the MongoDb server running?';
@@ -270,7 +269,7 @@
                     .trim()
                     .replace(/^\w/, function (c) { return c.toUpperCase(); });
             }
-        };
+        }
 
     }
 

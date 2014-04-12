@@ -29,7 +29,7 @@
             if (!isReady){ isReady = initialize();}
             if (success) { isReady = isReady.then(success);}
             if (fail)    { isReady = isReady.catch(fail);}
-            return isReady
+            return isReady;
         }
 
         function initialize(){
@@ -46,7 +46,7 @@
                 .using(manager).execute()
                 .then(function () {
                     logger.info("Lookups loaded from server.");
-                    extendService(manager)
+                    extendService(manager);
                 })
                 .catch(function (error) {
                     error = util.filterHttpError(error);

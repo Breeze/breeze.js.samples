@@ -79,7 +79,7 @@ describe('Jasmine async intro', function() {
         });
 
 
-        // WITHOUT Async syntax
+        // WITHOUT Async syntax (enable by changing 'xit'->'it' and watch it fail
         xit('exits spec too soon; spec before callback', function () {
             var specName = getSpecName();
             setTimeout(function () {  // the REAL setTimeout, not ng mock $timeout
