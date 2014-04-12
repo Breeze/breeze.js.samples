@@ -6,6 +6,7 @@ var express        = require('express')
     , bodyParser   = require('body-parser')
     , breezeRoutes = require('./breeze-routes')
     , compress     = require('compression')
+    , cors         = require('cors')
     , errorHandler = require('./errorHandler')
     , favicon      = require('static-favicon')
     , fileServer   = require('serve-static')
@@ -22,10 +23,8 @@ app.use( bodyParser()); // both json & urlencoded
 // Consider 'st' module for caching: https://github.com/isaacs/st
 app.use( fileServer( process.cwd() ));
 
-// Configure breeze-specific routes for REST API
-breezeRoutes.configure( app );
-
-
+app.use(cors());               // enable ALL CORS requests
+breezeRoutes.configure( app ); // Configure breeze-specific routes for REST API
 
 // a test POST endpoint ... for the demo
 if (isDev){
