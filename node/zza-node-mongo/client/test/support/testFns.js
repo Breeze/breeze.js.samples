@@ -28,7 +28,7 @@ var testFns = (function () {
         appStartMock: appStartMock,
         beforeEachApp: beforeEachApp,    // typical spec setup
         create_appEntityManager: create_appEntityManager,
-        create_okToRun: create_okToRun,
+        create_fastFailSpec: create_fastFailSpec,
         create_testAppModule: create_testAppModule,
         expectToFailFn: expectToFailFn,
         failed: failed,
@@ -152,7 +152,7 @@ var testFns = (function () {
      *
      * Todo: consider generating it, xit, iit
      ********************************************************/
-    function create_okToRun(isNotOkFn){
+    function create_fastFailSpec(doNotRunFn){
         return okToRun;
 
         function okToRun(specFn){
@@ -162,7 +162,7 @@ var testFns = (function () {
                 function()    { doit.bind(this)();};
 
             function doit(done){
-                var reason = isNotOkFn();
+                var reason = doNotRunFn();
                 if (reason){
                     expect.toFail('test aborted because '+reason);
                     if (done){done();}

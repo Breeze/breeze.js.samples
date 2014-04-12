@@ -12,14 +12,14 @@
  * That's why the sync test with $httpBackend mocked is preferred
  * and could disable/skip this test for most testing environments.
  */
-ddescribe("When testing lookups asynchronously", function () {
+describe("When testing lookups asynchronously", function () {
 
     var hasLoadFailed=false, lookups, tester;
 
     // Create this 'testApp' module once per file unless changing it
     testFns.create_testAppModule();
 
-    var okToRun = testFns.create_okToRun(function(){
+    var spec = testFns.create_fastFailSpec(function(){
         return hasLoadFailed ? 'load failed' : '';
     });
 
@@ -57,44 +57,44 @@ ddescribe("When testing lookups asynchronously", function () {
 
     /* specs */
 
-    it("doesn't bomb", okToRun(function () {
+    it("doesn't bomb", spec(function () {
         expect(true).toBe(true);
     }));
 
-    it("has OrderStatus", okToRun(function () {
+    it("has OrderStatus", spec(function () {
         expect(lookups.OrderStatus).toBeDefined();
         expect(Object.keys(lookups.OrderStatus).length).toBeGreaterThan(1);
     }));
 
-    it("has OrderStatus.Pending", okToRun(function () {
+    it("has OrderStatus.Pending", spec(function () {
         expect(lookups.OrderStatus && lookups.OrderStatus.Pending).toBeDefined();
     }));
 
-    it("has products", okToRun(function () {
+    it("has products", spec(function () {
         expect(lookups.products).toBeDefined();
         expect(lookups.products.length).toBeGreaterThan(1);
     }));
 
-    it("has pizza products",okToRun(function () {
+    it("has pizza products",spec(function () {
         expect(lookups.products).toBeDefined();
         var pizzas = lookups.products.byTag('pizza');
         expect(pizzas).toBeDefined();
         expect(pizzas.length).toBeGreaterThan(1);
     }));
 
-    it("has no spices (because not in test data)", okToRun(function () {
+    it("has no spices (because not in test data)", spec(function () {
         expect(lookups.products).toBeDefined();
         var pizzas = lookups.products.byTag('spice');
         expect(pizzas).toBeDefined();
         expect(pizzas.length).toEqual(0);
     }));
 
-    it("has productOptions", okToRun(function () {
+    it("has productOptions", spec(function () {
         expect(lookups.productOptions).toBeDefined();
         expect(lookups.productOptions.length).toBeGreaterThan(1);
     }));
 
-    it("has productSizes",okToRun(function () {
+    it("has productSizes",spec(function () {
         expect(lookups.productSizes).toBeDefined();
         expect(lookups.productSizes.length).toBeGreaterThan(1);
     }));
