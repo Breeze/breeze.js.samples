@@ -8,7 +8,7 @@ describe("OrderItemOptionVm: ", function () {
 
     var lookups, manager, model, optionVm;
 
-    testFns.beforeEachApp('emFactoryMock');
+    testFns.beforeEachApp('emFactoryMock'); //  MOCK EntityManagerFactory !!!
 
     beforeEach(inject(function(entityManagerFactory, _lookups_, _model_, orderItemOptionVm) {
         lookups = _lookups_;

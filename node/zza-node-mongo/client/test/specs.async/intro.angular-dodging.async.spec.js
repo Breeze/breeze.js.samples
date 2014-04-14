@@ -1,7 +1,7 @@
 /*
- * Intro to Jasmine/Ng async testing
+ * Intro to Angular async-dodging
  */
-describe('Jasmine async intro', function() {
+describe('angular async dodging', function() {
     'use strict';
 
     describe("angular-mocks are synchronous", function () {
