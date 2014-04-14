@@ -31,6 +31,7 @@
         /////////////////////
         dataservice.ready(getCustomers);
 
+        // filter for customers with first or last name starting with filter text
         function filteredCustomers(){
             var text = vm.customerFilterText.toLowerCase();
             customerState.customerFilterText = text;
@@ -38,7 +39,7 @@
                 vm.customers :
                 vm.customers.filter(function (c){
                     return c.firstName.toLowerCase().indexOf(text) == 0 ||
-                        c.lastName.toLowerCase().indexOf(text) == 0 ;
+                           c.lastName.toLowerCase().indexOf(text) == 0 ;
                 })
         }
 
@@ -71,7 +72,7 @@
         }
 
         function orderHeaders(){
-            return customerState.orderHeaders;
+            return customerState.orderHeaders || [];
         }
 
         // Keep 'vm.selectedCustomerId' in a 'customerState' ngValue object

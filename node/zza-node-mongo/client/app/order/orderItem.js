@@ -33,9 +33,10 @@
             }
         /////////////////////
             function addToCart() {
-                if (isDraftOrder) {
+                if (vm.isDraftOrder) {
                     draftOrder.removeItem(vm.orderItem);
                     cartOrder.addItem(vm.orderItem);
+                    vm.isDraftOrder = isDraftOrder = false;
                     util.logger.info("Added item to cart");
 
                     showMenu();
@@ -110,7 +111,7 @@
 
         function showMenu(){
             $state.go('app.menu', {productType : $stateParams.productType});
-        }
+    }
    }
 
 }( this.angular ));

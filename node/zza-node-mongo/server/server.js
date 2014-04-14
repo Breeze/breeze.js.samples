@@ -24,7 +24,7 @@ app.use( bodyParser()); // both json & urlencoded
 // Consider 'st' module for caching: https://github.com/isaacs/st
 app.use( fileServer( process.cwd() ));
 
-app.use(cors());               // enable ALL CORS requests
+app.use(cors());          // enable ALL CORS requests
 breezeRoutes.init( app ); // Configure breeze-specific routes for REST API
 
 // a test POST endpoint ... for the demo

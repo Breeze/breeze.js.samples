@@ -30,14 +30,14 @@ describe("Menu Controller: ", function () {
     describeStateParamSpec('pizza');
     describeStateParamSpec('salad');
 
-    describe("given non-existent product type, 'foo', treats as 'pizza' ",  function(){
+    describe("given non-existent product type, 'foo', treated as 'pizza' ",  function(){
         beforeEach(function () {
             createControllerForProductType('foo');
         });
         runStateParamSpecs('pizza');
     });
 
-    describe("given no product type, treats as 'pizza' ",  function(){
+    describe("given no product type, treated as 'pizza' ",  function(){
         beforeEach(function () {
             createControllerForProductType(undefined);
         });

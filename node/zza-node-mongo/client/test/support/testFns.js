@@ -29,6 +29,7 @@ var testFns = (function () {
         beforeEachApp: beforeEachApp,    // typical spec setup
         create_appEntityManager: create_appEntityManager,
         create_fastFailSpec: create_fastFailSpec,
+        create_flush$q: create_flush$q,
         create_testAppModule: create_testAppModule,
         expectToFailFn: expectToFailFn,
         failed: failed,
@@ -171,6 +172,17 @@ var testFns = (function () {
                 }
             }
         }
+    }
+    /*********************************************************
+     * make function to flush the Angular promise queue using angular-mock
+     * call ONLY in a beforeEach AFTER app module setup!
+     *********************************************************/
+    function create_flush$q()  {
+        var flush$q;
+        inject(function($rootScope){
+            flush$q = function(){$rootScope.$apply();};
+        });
+        return flush$q;
     }
     /*******************************************************
      * String extensions
