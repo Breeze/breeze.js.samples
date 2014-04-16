@@ -23,7 +23,7 @@
     }
 
     function getLookups(req, res, next) {
-        repository.getLookups(makeBreezeResponseHandler(res, next));
+        repository.getLookups(makeResponseHandler(res, next));
     }
 
     function getMetadata (req, res, next) {
@@ -39,7 +39,7 @@
         var query = repository['get'+resourceName.toLowerCase()];
 
         if ( !!query ) {
-            query(req.query, makeBreezeResponseHandler(res, next));
+            query(req.query, makeResponseHandler(res, next));
         } else {
             next({ // 404 if the request does not map to a registered query
                 statusCode: 404,
@@ -48,7 +48,7 @@
         }
     }
 
-    function makeBreezeResponseHandler(res, next) {
+    function makeResponseHandler(res, next) {
         // returns a function that handles response from a Breeze Mongo query or save
         return function(err, results) {
             if (err) {
@@ -63,7 +63,7 @@
     }
 
     function saveChanges( req, res, next ) {
-        repository.saveChanges(req.body, makeBreezeResponseHandler(res, next));
+        repository.saveChanges(req.body, makeResponseHandler(res, next));
     }
 
 })(module.exports);
