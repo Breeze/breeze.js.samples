@@ -1,5 +1,23 @@
 /**
  * Express application server handling all client requests
+ *
+ * RUN NOTES:
+ * -------------------------
+ * In this app, the server runs in one directory (server) and the client
+ * application's "static content" is served from a different directory (client)
+ * because we want to sandbox client access to the client directory and
+ * prevent clients from accessing the purely server assets (like server.js).
+ *
+ * The 'fileServer' that handles "static content" requests is configured
+ * to expect the client directory to be the current working directory;
+ * see below: 'fileServer( process.cwd() )'
+ *
+ * The node server is '../server/server.js' relative to that working directory.
+ *
+ * Thus, from terminal or console window, you might do the following:
+ * > cd <projectDir>/client
+ * > node ../server/server.js
+ *
  */
 var express        = require('express')
     , app          = express()
