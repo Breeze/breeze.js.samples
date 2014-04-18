@@ -46,12 +46,23 @@
 
         // Get all TodoItems from the server and cache combined
         function getAllTodoItems() {
+
+            // Create the query
             var query = breeze.EntityQuery.from('TodoItem');
-            return manager.executeQuery(query).then(success).catch(handleError);
+//                .orderBy('text');
+//                .where('text', 'startsWith', 'L');
+
+            // Execute the query
+            return manager.executeQuery(query)
+                .then(success).catch(queryFailed);
 
             function success(data){
+                // Interested in what server has then we are done.
                 var fetched = data.results;
                 $log.log('breeze query succeeded. fetched: '+ fetched.length);
+
+                // Blended results.
+                // This gets me all local changes and what the server game me.
                 return manager.getEntities(todoItemType);
 
                 // Normally would re-query the cache to combine cached and fetched
@@ -60,13 +71,6 @@
                 // Warning: the cache will accumulate entities that
                 // have been deleted by other users until it is entirely rebuilt via 'refresh'
             }
-        }
-
-        function handleError(error) {
-            error.message = prettifyErrorMessage(error.message);
-            var status = error.status ? error.status + ' - ' : '';
-            var err = status + (error.message ? error.message : 'unknown error; check console.log');
-            throw new Error(err); // so downstream listener gets it.
         }
 
         function hasChanges(){
@@ -93,6 +97,13 @@
             return message;
         }
 
+        function queryFailed(error) {
+            error.message = prettifyErrorMessage(error.message);
+            var status = error.status ? error.status + ' - ' : '';
+            var err = status + (error.message ? error.message : 'unknown error; check console.log');
+            throw new Error(err); // so downstream listener gets it.
+        }
+
         // Clear everything local and reload from server.
         function reset(){
             wip.stop();
@@ -109,7 +120,14 @@
                     wip.clear();
                     return getAllTodoItems();
                 })
-                .catch(handleError);
+                .catch(saveFailed);
+
+            function saveFailed(error) {
+                var msg = 'Save failed: ' +
+                    breeze.saveErrorMessageService.getErrorMessage(error);
+                error.message = msg;
+                throw error; // for downstream callers to see
+            }
         }
 
         function updateCounts() {

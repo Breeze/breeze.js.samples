@@ -1,4 +1,5 @@
-<div id="wrapper" data-ng-controller="pageController as vm">
+<div class="wrapper"
+     data-ng-controller="pageController as vm">
     <article>
         <header>
             <h2>Windows Azure</h2>
@@ -6,18 +7,22 @@
 
             <!-- Buttons and Checkboxes-->
             <p class="button-bar">
-                <input type="checkbox" data-ng-model="vm.showCompleted" > Show completed &nbsp;&nbsp;
-                <input type="checkbox" data-ng-model="vm.showDeleted" > Show deleted
+                <input type="checkbox"
+                       data-ng-model="vm.showCompleted" > Show completed &nbsp;&nbsp;
+                <input type="checkbox"
+                       data-ng-model="vm.showDeleted" > Show deleted
                 <button class="btn-sync" title="Sync changes with Azure."
-                        data-ng-disabled="vm.syncDisabled()" data-ng-click="vm.sync()" >Sync</button>
+                        data-ng-disabled="vm.syncDisabled()"
+                        data-ng-click="vm.sync()" >Sync</button>
                 <button class="btn-refresh" title="Refresh with changes from Azure but don't save."
                         data-ng-click="vm.refresh()" >Refresh</button>
                 <button class="btn-reset"  title="Discard changes and reload from Azure."
                         data-ng-click="vm.reset()">Reset</button>
             </p>
-            <form id="add-item" data-ng-submit="vm.addItem()">
+            <form class="add-item" data-ng-submit="vm.addItem()">
                 <div>
-                    <input id="new-item-text" data-ng-model="vm.newItemText" autofocus="true" placeholder="Enter new task" />
+                    <input class="new-item-text"
+                           data-ng-model="vm.newItemText" autofocus="true" placeholder="Enter new task" />
                 </div>
             </form>
         </header>
@@ -25,18 +30,24 @@
         <!-- Todo Items -->
         <!-- Uncomment next line for debugging -->
         <!-- <pre>{{vm.todos | json}}</pre> -->
-        <ul id="todo-items">
-            <li class="fader-animation" data-ng-repeat="item in vm.todos | filter:vm.itemsFilter">
+
+        <ul class="todo-items">
+            <li class="fader-animation"
+                data-ng-repeat="item in vm.todos | filter:vm.itemsFilter">
+
                 <button class="item-delete" title="delete {{item.id}}"
                         data-ng-click="vm.deleteItem(item)" >Delete</button>
-                <input type="checkbox" class="item-complete" data-ng-model="item.complete"/>
+
+                <input type="checkbox" class="item-complete"
+                       data-ng-model="item.complete"/>
                 <div>
-                    <input class="item-text {{item.entityStateName}}" data-ng-model="item.text"/>
+                    <input class="item-text {{item.entityAspect.entityState.name}}"
+                           data-ng-model="item.text"/>
                 </div>
             </li>
         </ul>
 
-        <p id="summary">
+        <p class="summary">
             <span data-ng-show="vm.isBusy">Loading ...</span>
             <span data-ng-hide="vm.isBusy">
                 <strong>{{vm.counts.all}} item(s)</strong>&nbsp;&nbsp; </span>
@@ -45,6 +56,7 @@
                 <span class="Deleted">Deleted: {{vm.counts.Deleted}}</span>
             </span>
         </p>
+
     </article>
 
     <footer>
@@ -54,12 +66,14 @@
             <a href="http://www.breezejs.com/" target="_blank">Breeze</a>
         </div>
         <!-- WIP Messages -->
-        <ul id="wip-messages" data-ng-show="vm.wipMessages.length" >
+        <ul class="wip-messages"
+            data-ng-show="vm.wipMessages.length" >
+
             <li data-ng-repeat="msg in vm.wipMessages">{{msg}}</li>
         </ul>
 
         <!-- Error Log -->
-        <div id="errorlog" data-ng-show="vm.errorLog.length">
+        <div class="errorlog" data-ng-show="vm.errorLog.length">
             <button data-ng-click="vm.clearErrorLog()">Clear error log</button>
             <ul>
                 <li data-ng-repeat="err in vm.errorLog">{{err}}</li>
