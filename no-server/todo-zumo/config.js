@@ -3,15 +3,12 @@
  */
 (function (){
     'use strict';
-    angular.module('app').value('config',config());
+    var config = {
+        // Ward's Todo Mobile Service
+        appUrl: 'https://wardtodomobileservice.azure-mobile.net/',
+        appKey: 'psChxvAmcXMcsgEhqqjmfTkoxzwuWG62'  //this is never a secret.
+    };
 
-    function config(){
-        return {
-            // Ward's Todo Mobile Service
-            appUrl: 'https://wardtodomobileservice.azure-mobile.net/',
-            appKey: 'psChxvAmcXMcsgEhqqjmfTkoxzwuWG62'  //this is never a secret.
-        };
-    }
-
+    angular.module('app').value('config', config);
 })();
 

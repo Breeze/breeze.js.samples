@@ -49,10 +49,21 @@
             }
         }
 
+
+
+
+
         function getAllTodoItems() {
             vm.isBusy = true;
-            return datacontext.getAllTodoItems().then(querySuccess, handleError);
+            // Controller has no knowledge of how data
+            // is retrieved nor that Breeze is involved.
+            return datacontext.getAllTodoItems()
+                .then(querySuccess, handleError);
         }
+
+
+
+
 
         function handleError(error) {
             vm.isBusy = false;
@@ -85,7 +96,7 @@
         function reportWipMessages(){
             $scope.$on(wip.eventName(), function(event, message){
                 vm.wipMessages.push((wipMsgCount+=1)+' - '+message);
-                $timeout(function(){vm.wipMessages.length=0;}, 4000);
+                $timeout(function(){vm.wipMessages.length=0;}, 8000);
             })
         }
 

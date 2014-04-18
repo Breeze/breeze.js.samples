@@ -14,11 +14,11 @@
             clear: clearWip,
             eventName: function() {return eventName;},
             initialize: initialize,
-            isEnabled: function(){return !disabled;},
-            isStopped: function(){return !!stopped;},
+            isEnabled: function() {return !disabled;},
+            isStopped: function() {return !!stopped;},
             restore: restore,
             resume: resume,
-            stashCount: function(){return stashCount;},
+            stashCount: function() {return stashCount;},
             start: resume, //alias
             stop: stop
         };
@@ -51,6 +51,8 @@
         function entityChanged(changeArgs){
             if (isRestoring || stopped) {return;} // ignore WIP service's own changes.
             var action = changeArgs.action;
+
+
             if (action === propChangeAction ){
                 $timeout.cancel(priorTimeout);
                 priorTimeout = $timeout(stash, delay, true);
@@ -67,7 +69,6 @@
                 $log.error("Browser does not support local storage; WIP disabled.")
             } else {
                 manager = entityManager;
-                setStashTypes(typesToStash);
                 listenForChanges();
                 disabled = false;
                 sendWipMessage('WIP enabled');
@@ -89,10 +90,13 @@
             try {
                 var changes = db.getItem(stashName);
                 if (changes){
-                    // should confirm that metadata and app version are still valid but this is a demo
+                    // should confirm that metadata and app version
+                    // are still valid but this is a demo
                     imports = manager.importEntities(changes).entities;
+
                     stashCount = imports.length;
                     sendWipMessage('Restored '+stashCount+' change(s) from stash');
+
                 } else {
                     sendWipMessage('Restore found no stashed changes');
                 }
@@ -119,27 +123,19 @@
             $rootScope.$broadcast(eventName, message);
         }
 
-        function setStashTypes(typesToStash){
-            var metadataStore = manager.metadataStore;
-            stashTypes = (Array.isArray(typesToStash) ? typesToStash : [typesToStash]).slice();
-            stashTypes.forEach(function(typeName, i){
-                if (typeof typeName === 'string'){
-                    var type = metadataStore.getEntityType(typeName, true);
-                    if (!type){
-                        throw new Error("Invalid typename passed to WIP.initialize: "+typeName)
-                    }
-                    stashTypes[i] = type;
-                }
-            })
-        }
-
         function stash(){
             if (manager.hasChanges()){
+
                 // export changes w/o metadata
-                var changes = manager.getChanges(stashTypes);
+                // Get only these entity types
+                // (which we only have 1 in this app)
+                var changes = manager.getChanges();
+
                 stashCount = changes.length;
                 sendWipMessage('Stashing '+ stashCount +' change(s)');
+
                 var exported = manager.exportEntities(changes, false);
+
                 // should stash with metadata and app version but this is a demo
                 db.setItem(stashName, exported);
             } else  if (stashCount !== 0){
@@ -147,7 +143,6 @@
                 db.removeItem(stashName);
                 stashCount = 0;
             }
-
         }
 
         function stop(){
