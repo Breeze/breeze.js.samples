@@ -9,12 +9,22 @@
     angular.module("app").factory( 'metadata',  ['breeze', factory] );
 
     function factory(breeze) {
-        setNamingConvention();
         return {
-            fillStore: fillStore
+            createMetadataStore: createMetadataStore
         };
         /////////////////////
-        function setNamingConvention() {
+        function createMetadataStore() {
+
+            var namingConvention = createNamingConvention();
+
+            var store = new breeze.MetadataStore({ namingConvention: namingConvention });
+
+            fillMetadataStore(store);
+
+            return store;
+        }
+
+        function createNamingConvention() {
             // Translate certain zza property names between MongoDb names and client names
             var convention = new breeze.NamingConvention({
                 serverPropertyNameToClient: function(serverPropertyName) {
@@ -40,11 +50,10 @@
                     }
                 }
             });
-            convention.setAsDefault();
+            return convention;
         }
 
-        function fillStore(store){
-
+        function fillMetadataStore(store) {
             // Using Breeze Labs: breeze.metadata.helper.js
             // https://github.com/IdeaBlade/Breeze/blob/master/Breeze.Client/Scripts/Labs/breeze.metadata-helper.js
             // The helper reduces data entry by applying common conventions

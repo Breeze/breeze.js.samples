@@ -18,7 +18,7 @@
     function factory(breeze, metadata, util) {
         var defineProperty = util.defineProperty;
         var model = {
-            addToMetadataStore:addToMetadataStore,
+            getMetadataStore: getMetadataStore,
             Customer: Customer,
             Order: Order
         };
@@ -38,13 +38,15 @@
         // with add/remove methods, property aliases, and sub-document navigation properties
         // that can't be represented (yet) in Breeze metadata.
         // See OrderItem.product for an example of such a "synthetic" navigation property
-        function addToMetadataStore(metadataStore) {
+        function getMetadataStore() {
 
             var orderItemType, orderItemOptionType;
             var getEntityById = util.getEntityByIdFromObj;
-            var registerType = metadataStore.registerEntityTypeCtor.bind(metadataStore);
+            var metadataStore =  metadata.createMetadataStore();
 
-            metadata.fillStore(metadataStore);
+            // convenience method for registering model types with the store
+            // these model types contain extensions to the type definitions from metadata.js
+            var registerType = metadataStore.registerEntityTypeCtor.bind(metadataStore);
 
             registerCustomer();
             registerOrder();
@@ -52,6 +54,9 @@
             registerOrderItemOption();
             registerProduct();
             registerProductOption();
+
+            return metadataStore;
+            ///////////////////////////////
 
             function registerCustomer() {
                 registerType('Customer', Customer);
