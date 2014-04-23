@@ -16,15 +16,48 @@
 
     function factory( breeze, emFactory, util ) {
         var isReady  = null,// becomes a promise, not a boolean
-            logger = util.logger,
+            logger   = util.logger,
             manager  = emFactory.getManager(); // get the master manager
 
-        var service = {
+        var lookups = {
             ready: ready
             // extended during initialization
         };
-        return service;
+        return lookups;
         /////////////////////
+        // extend this lookups service with lookup accessors from data presumed to be in cache
+        function extendlookups() {
+            // convenience variables
+            var lu = lookups,
+                u = util;
+
+            var statuses = manager.getEntities('OrderStatus');
+            var os       = lu.OrderStatus = {statuses: statuses};
+            os.byId      = u.filterById(statuses);
+            os.byName    = u.filterByName(statuses);
+
+            // OrderStatus enums
+            os.Ordered   = os.byName(/Ordered/i)[0];
+            os.PickedUp  = os.byName(/PickedUp/i)[0];
+            os.Delivered = os.byName(/Delivered/i)[0];
+            os.Cancelled = os.byName(/Cancelled/i)[0];
+            os.Pending   = os.byName(/Pending/i)[0];
+
+            var p        = lu.products = manager.getEntities('Product');
+            p.byId       = u.filterById(p);
+            p.byName     = u.filterByName(p);
+            p.byTag      = filterProductsByTag(p);
+
+            var po       = lu.productOptions = manager.getEntities('ProductOption');
+            po.byId      = u.filterById(po);
+            po.byTag     = filterOptionsByTag(po);
+            po.byProduct = filterOptionsByProduct(po);
+
+            var ps       = lu.productSizes = manager.getEntities('ProductSize');
+            ps.byId      = u.filterById(ps);
+            ps.byProduct = filterSizesByProduct(ps);
+        }
+
         function ready(success, fail) {
             if (!isReady){ isReady = initialize();}
             if (success) { isReady = isReady.then(success);}
@@ -34,7 +67,7 @@
 
         function initialize(){
             if (hasLookups(manager)){
-                extendService(manager);
+                extendlookups(manager);
                 return util.resolved;
             } else {
                 return fetchLookups();
@@ -46,7 +79,7 @@
                 .using(manager).execute()
                 .then(function () {
                     logger.info("Lookups loaded from server.");
-                    extendService(manager);
+                    extendlookups(manager);
                 })
                 .catch(function (error) {
                     error = util.filterHttpError(error);
@@ -61,60 +94,10 @@
            return manager.getEntities('OrderStatus').length > 0;
         }
 
-        // extend this lookups service with lookup accessors from data presumed to be in cache
-        function extendService() {
-            service.OrderStatus = {
-                statuses : manager.getEntities('OrderStatus')
-            };
-            service.products        = manager.getEntities('Product');
-            service.productOptions  = manager.getEntities('ProductOption');
-            service.productSizes    = manager.getEntities('ProductSize');
-            extendLookups();
-        }
-
-        function extendLookups() {
-            var u = util, s = service, os = s.OrderStatus; // for brevity
-
-            os.byId = u.filterById(os.statuses);
-            os.byName = u.filterByName(os.statuses);
-
-            // OrderStatus enums
-            os.Ordered = os.byName(/Ordered/i)[0];
-            os.PickedUp = os.byName(/PickedUp/i)[0];
-            os.Delivered = os.byName(/Delivered/i)[0];
-            os.Cancelled = os.byName(/Cancelled/i)[0];
-            os.Pending = os.byName(/Pending/i)[0];
-
-            s.products.byId = u.filterById(s.products);
-            s.products.byName = u.filterByName(s.products);
-            s.products.byTag = filterProductsByTag(s.products);
-
-            s.productSizes.byId = u.filterById(s.productSizes);
-            s.productSizes.byProduct = filterSizesByProduct(s.productSizes);
-
-            s.productOptions.byId = u.filterById(s.productOptions);
-            s.productOptions.byTag = filterOptionsByTag(s.productOptions);
-            s.productOptions.byProduct = filterOptionsByProduct(s.productOptions);
-
-        }
-
+        ///////////////////////////////////////////////
         function filterProductsByTag(products) {
             return function (tag) {
                 return products.filter(function (p) { return p.type === tag; });
-            };
-        }
-
-        function filterSizesByProduct(productSizes) {
-            return function (product) {
-                var sizeIds = product.productSizeIds;
-                var type = product.type;
-                if (sizeIds.length) {
-                    return productSizes.filter(function (ps) {
-                        return (ps.type == type) && (sizeIds.indexOf(ps.id) >= 0);
-                    });
-                } else {
-                    return productSizes.filter(function (ps) { return ps.type === type; });
-                }
             };
         }
 
@@ -145,6 +128,20 @@
                     return productOptions.filter(function(o) { return o.isSaladOption; });
                 }
                 return [];  // drink tag has no options
+            };
+        }
+
+        function filterSizesByProduct(productSizes) {
+            return function (product) {
+                var sizeIds = product.productSizeIds;
+                var type = product.type;
+                if (sizeIds.length) {
+                    return productSizes.filter(function (ps) {
+                        return (ps.type == type) && (sizeIds.indexOf(ps.id) >= 0);
+                    });
+                } else {
+                    return productSizes.filter(function (ps) { return ps.type === type; });
+                }
             };
         }
     }
