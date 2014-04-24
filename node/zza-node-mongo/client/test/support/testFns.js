@@ -120,19 +120,16 @@ var testFns = (function () {
      ********************************************************/
     function create_appEntityManager(injectFn){
         var breeze = injectFn('breeze');
+        var model = injectFn('model');
+        var metadataStore = model.getMetadataStore();
 
         var fullServiceName = testFns.serviceBase+testFns.serviceName;
-
         var dataService = new breeze.DataService({
-                hasServerMetadata: false,
-                serviceName: fullServiceName}
+            hasServerMetadata: false,
+            serviceName: fullServiceName}
         );
 
-        var metadataStore = new breeze.MetadataStore();
         metadataStore.addDataService(dataService);
-
-        var model = injectFn('model');
-        model.addToMetadataStore(metadataStore);
 
         var em = new breeze.EntityManager({
             dataService: dataService,

@@ -1,62 +1,46 @@
 #Zza Node Mongo
-The "Zza Node Mongo" sample app is a single page application (SPA) built with Breeze, Angular, Node, and MongoDB.
+The "Zza Node Mongo" sample app is a single page application (SPA) built with Breeze, Angular, Node, and MongoDB. Instructions to install and run follow.
 
 ## Prerequisites
 * Node.js >=0.10
 * <a href="http://blog.mongodb.org/post/82092813806/mongodb-2-6-our-biggest-release-ever"
   target="_blank" title="MongoDb release 2.6 announcement">MongoDb >= v.2.6</a>
 
-## Install and use
+##Download samples
 
-### Extract the database
+Download [ALL of the Breeze JavaScript samples from github](https://github.com/Breeze/breeze.js.samples "breeze.js.samples on github")
+as [a zip file](https://github.com/Breeze/breeze.js.samples/archive/master.zip "breeze.js.samples zip file").
 
-Extract the Zza application's MongoDB database in *zza-mongo-database.zip* to your MongoDB data directory.
+In this case we're interested in the "Zza" sample, located in the *node/zza-node-mongo* directory.
+These instructions assume this will be your current working directory.
 
->The default location per MongoDB installation instructions is *C:\data*. Your location may be different.
+##Install MongoDb database
 
-You only have to install this database once.
+Unzip *~/database/zza-mongo-database.zip* into that *database* directory, side-by-side with the zip itself.
 
-### Install dependent node modules
+Open a command / terminal window
 
-1. Open a command prompt window.
+Start mongodb server while pointing to this database directory. On my windows machine, from the project root directory, I enter:
 
-2. Navigate to the *Zza-Node-Mongo* directory.
+    c:/mongodb/bin/mongod --dbpath database
 
-3. Use npm to install the following three modules:
+Console output should indicate that MongoDb server started successfully and is listening on port 27017 (or adjust the `mongodbUrl` in `~\server\database.js` to the appropriate port).
 
+##Install server npm modules and launch app server
 
-     npm install mongodb
-     npm install express
-     npm install breeze-mongodb
+Open a second command / terminal window
 
-Confirm that all of them ran without error (warnings are ok). You can close this window when you're done.
+Navigate to the project root, *~/node/zza-node-mongo*
 
-You only install these modules once.
+Install the node modules: `npm install`
 
-### Start the servers
-*Every time you run the application* you must first launch **two** servers: the MongoDB server and the Zza application's node/express server.
+Launch the app server: `node server/server.js`
 
-1. Open a new command prompt window.
+Console output should indicate that app server started successfully and is listening on port 3000.
 
-2. Navigate to the *mongodb/bin* directory.
+##Launch Zza in a browser
 
-	>The default location per MongoDB installation instructions is *C:\mongodb\bin*. Your location may be different.
-
-3.	Type **mongod** to start MongoDB.
-
-	>Do not close this window. Closing the window will end the MongoDB process.
-
-4.	Open a new command prompt window.
-
-5.	Navigate to the *Zza-Node-Mongo* directory.
-
-6.	Type **node server** to start the Node.js/Express server.
-7.
-	>Do not close this window. Closing the window will end the Express process.
-
-### Run Zza
-
-Open **localhost:3000** in a web browser to run the Zza application.
+Start your browser with address **http://localhost:3000**
 
 ## Release 0.8.0
 * Initial release.
