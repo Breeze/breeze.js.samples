@@ -258,7 +258,8 @@
         XCOPY "$(ProjectDir)..\..\..\..\breeze.js\build\breeze.intellisense.js" "$(ProjectDir)Scripts" /Y 2>nul
         XCOPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.ajaxrestinterceptor.js" "$(ProjectDir)Scripts" /Y 2>nul
         XCOPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.metadata-helper.js" "$(ProjectDir)Scripts" /Y 2>nul
-        XCOPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.getEntityGraph.js" "$(ProjectDir)Scripts" /Y 2>nul      
+        XCOPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.getEntityGraph.js" "$(ProjectDir)Scripts" /Y 2>nul
+        XCOPY "$(ProjectDir)..\..\..\..\breeze.js.labs\breeze.savequeuing.js" "$(ProjectDir)Scripts" /Y 2>nul     
         :done</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -5,6 +5,7 @@
 
     /*********************************************************
     * Breeze configuration and module setup 
+    * Using the 'backingstore' model library, not Knockout!
     *********************************************************/
     var breeze = testFns.breeze;
     var EntityManager = breeze.EntityManager;
@@ -331,6 +332,29 @@
         throws(function() {
             var graph = getEntityGraph(order, 'OrderDetails');
         }, /detached/, "throws 'detached' error");
+    });
+
+    test("should succeed when a child entity has become detached via add/delete", 5, function () {
+        var order = orders.pop();
+        var newDetail = manager.createEntity('OrderDetail', {
+            OrderID: order.getProperty('OrderID'),
+            ProductID: 123456789
+        });
+        var aspect = newDetail.entityAspect;
+
+        equal(aspect.entityState.name, 'Added', "new detail should be in Added state");
+        var same = order === newDetail.Order;
+        ok(same, "new detail belongs to the expected parent Order");
+
+        // deleting a new entity detaches it
+        aspect.setDeleted();
+        equal(aspect.entityState.name, 'Detached', "new detail should be in Detached state");
+
+        var graph = getEntityGraph(order, 'OrderDetails');
+        var found = graph.filter(function (e) { return e === newDetail; })[0];
+        equal(found, undefined, "detached 'new detail' should not be in graph");
+        var nulls = graph.filter(function (e) { return e == null; });
+        equal(nulls.length, 0, "no graph member is null or undefined");
     });
 
     test("should error when root is created-and-deleted (detached)", 1, function () {
