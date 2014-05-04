@@ -23,6 +23,9 @@ module.exports = function(config) {
         './lib/breeze/breeze.dataservice.mongo.js',
         './lib/breeze/breeze.metadata-helper.js',
 
+        /* testing new-backingstore modelLibrary */
+        './lib/breeze/b00_breeze.modelLibrary.new-backingstore.js',
+
         './lib/jquery/jquery.min.js',
         './lib/toastr/toastr.js',
 

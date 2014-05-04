@@ -26,6 +26,8 @@
         /////////////////////
 
         function configureBreezeForThisApp() {
+            // testing the new-backingstore modelLibrary
+            breeze.config.initializeAdapterInstance("modelLibrary", "new-backingstore", true);
             breeze.config.initializeAdapterInstance("dataService", "mongo", true);
             initBreezeAjaxAdapter(config.userSessionId);
             dataService = new breeze.DataService({ serviceName: config.serviceName })
