@@ -92,6 +92,11 @@
         });
     /*********************************************************
    * 'all customers' query completes before custom timeout
+   * This timeout governs the callbacks. It doesn't stop
+   * the server from sending the data nor does it stop
+   * the Breeze EntityManager from processing a response
+   * that arrives after this promise is resolved.
+   * If you need that, see the jQueryAdapterTests.
    *********************************************************/
     test("'all customers' query completes before custom timeout", 1,
         function () {
@@ -427,6 +432,60 @@
             ok(len === brazil, "all of them should be in Brazil");
         }
     });
+
+    /*********************************************************
+    * Dealing with response order
+    * It's difficult to make the server flip the response order
+    * (run it enough times and the response order will flip)
+    * but the logic of this test manifestly deals with it
+    * because of the way it assigns results.
+    *********************************************************/
+    asyncTest("can sequence results that arrive out of order", 3, function() {
+        var nextRequestId = 0;
+        var em = newEm();
+        var promises = [];
+        var results = [];
+        var arrived = [];
+
+        promises.push(breeze.EntityQuery.from('Customers')
+            .where('CompanyName', 'startsWith', 'a')
+            .using(em).execute()
+            .then(makeSuccessFn()).catch(handleFail));
+
+        promises.push(breeze.EntityQuery.from('Customers')
+            .where('CompanyName', 'startsWith', 's')
+            .using(em).execute()
+            .then(makeSuccessFn()).catch(handleFail));
+
+        function makeSuccessFn() {
+            var requestId = nextRequestId++;
+            return function success(data) {
+                // Don't know which response arrived first?
+                // Sure you do. Just refer to the requestId which is a capture
+                arrived.push(requestId);
+                results[requestId] = data.results;
+                assertWhenDone();
+            }
+        }
+
+        function assertWhenDone() {
+            if (results[0] && results[1]) {
+                start(); // we're done
+                // Here we report the actual response order
+                ok(true, "Request #{0} arrived before #{1}".format(arrived[0], arrived[1]));
+                // no matter what the response order
+                // the 'a' companies go in results slot #0
+                // the 's' companies go in results slot #1
+                var aCompany = results[0][1].CompanyName();
+                var sCompany = results[1][1].CompanyName();
+                equal(aCompany[0].toLowerCase(), 'a',
+                    "company from first batch should be an 'a', was " + aCompany);
+                equal(sCompany[0].toLowerCase(), 's',
+                    "company from second batch should be an 's', was " + sCompany);
+            }
+        }
+    });
+
     /*** PREDICATES ***/
 
     module("queryTests (predicates)", testFns.getModuleOptions(newEm));
