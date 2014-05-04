@@ -7724,7 +7724,7 @@ var EntityType = (function () {
         // if merging from an import then raw will have an entityAspect or a complexAspect
         var rawAspect = raw.entityAspect || raw.complexAspect;
         if (rawAspect && rawAspect.originalValuesMap) {
-            targetAspect = target.entityAspect || target.complexAspect;
+            var targetAspect = target.entityAspect || target.complexAspect;
             targetAspect.originalValues = rawAspect.originalValuesMap;
         }
 
@@ -9990,7 +9990,7 @@ var EntityQuery = (function () {
             if (that[propName] === value) return that;
         }
         // copying QueryOptions is safe because they are are immutable; 
-        copy = __extend(new EntityQuery(), that, [
+        var copy = __extend(new EntityQuery(), that, [
             "resourceName",
             "entityType",
             "wherePredicate",
@@ -13984,7 +13984,7 @@ var EntityManager = (function () {
     proto.helper = {
         unwrapInstance: unwrapInstance,
         unwrapOriginalValues: unwrapOriginalValues,
-        unwrapChangedValues: unwrapChangedValues,
+        unwrapChangedValues: unwrapChangedValues
     };
     
    
@@ -14755,6 +14755,7 @@ breeze.SaveOptions= SaveOptions;
                     handleHttpError(deferred, httpResponse);
                 } else {
                     var saveResult = that._prepareSaveResult(saveContext, data);
+                    saveResult.httpResponse = httpResponse;
                     deferred.resolve(saveResult);
                 }
                 
@@ -14869,6 +14870,7 @@ breeze.SaveOptions= SaveOptions;
     var ctor = function () {
         this.name = "angular";
         this.defaultSettings = { };
+        this.requestInterceptor = null;
     };
 
     ctor.prototype.initialize = function () {
@@ -14921,7 +14923,29 @@ breeze.SaveOptions= SaveOptions;
             ngConfig.headers = core.extend(this.defaultSettings.headers, ngConfig.headers);
         }
 
-        httpService(ngConfig).success(function (data, status, headers, xconfig) {
+        var requestInfo = {
+            adapter: this,      // this adapter
+            config: ngConfig,   // angular's $http configuration object
+            zConfig: config,    // the config arg from the calling Breeze data service adapter
+            success: successFn, // adapter's success callback
+            error: errorFn      // adapter's error callback            
+        }
+
+        if (core.isFunction(this.requestInterceptor)){
+            this.requestInterceptor(requestInfo);
+            if (this.requestInterceptor.oneTime){
+                this.requestInterceptor = null;
+            }
+        }
+
+        if (requestInfo.config){
+            httpService(requestInfo.config)
+            .success(requestInfo.success)
+            .error(requestInfo.error);
+            rootScope && rootScope.$digest();           
+        }
+
+        function successFn(data, status, headers, xconfig, statusText) {
             // HACK: because $http returns a server side null as a string containing "null" - this is WRONG. 
             if (data === "null") data = null;
             var httpResponse = {
@@ -14931,7 +14955,14 @@ breeze.SaveOptions= SaveOptions;
                 config: config
             };
             config.success(httpResponse);
-        }).error( function (data, status, headers, xconfig) {
+        }
+
+        function errorFn(data, status, headers, xconfig, statusText) {
+            // Timeout appears as an error with status===0 and no data. 
+            // Make it better
+            if (status === 0 && data == null){
+                data = 'timeout';
+            }
             var httpResponse = {
                 data: data,
                 status: status,
@@ -14939,8 +14970,7 @@ breeze.SaveOptions= SaveOptions;
                 config: config
             };
             config.error(httpResponse);
-        });
-        rootScope && rootScope.$digest();
+        }
     };
 
     function encodeParams(obj) {
@@ -14973,12 +15003,12 @@ breeze.SaveOptions= SaveOptions;
 
         return query.length ? query.substr(0, query.length - 1) : query;
     }
-
     
     breeze.config.registerAdapter("ajax", ctor);
     
 }));
-;// needs JQuery
+;// needs JQuery v.>=1.5
+// see https://api.jquery.com/jQuery.ajax/
 (function(factory) {
     // Module systems magic dance.
     if (breeze) {
@@ -14998,11 +15028,11 @@ breeze.SaveOptions= SaveOptions;
     var ctor = function () {
         this.name = "jQuery";
         this.defaultSettings = { };
+        this.requestInterceptor = null; // s
     };
 
     ctor.prototype.initialize = function () {
-        // jQuery = core.requireLib("jQuery", "needed for 'ajax_jQuery' pluggin", true);
-        // for the time being don't fail if not found
+        // look for the jQuery lib but don't fail immediately if not found
         jQuery = core.requireLib("jQuery");
     };
 
@@ -15027,44 +15057,78 @@ breeze.SaveOptions= SaveOptions;
             jqConfig.headers = core.extend(this.defaultSettings.headers, jqConfig.headers);
         }
         
-        jqConfig.success = function (data, textStatus, XHR) {
+        var requestInfo = {
+            adapter: this,      // this adapter
+            config: jqConfig,   // jQuery's ajax 'settings' object
+            zConfig: config,    // the config arg from the calling Breeze data service adapter
+            success: successFn, // adapter's success callback
+            error: errorFn      // adapter's error callback
+        }
+
+        if (core.isFunction(this.requestInterceptor)){
+            this.requestInterceptor(requestInfo);
+            if (this.requestInterceptor.oneTime){
+                this.requestInterceptor = null;
+            }
+        }
+
+        if (requestInfo.config){
+            requestInfo.jqXHR = jQuery.ajax(requestInfo.config)
+            .done(requestInfo.success)
+            .fail(requestInfo.error); 
+        }
+
+        function successFn(data, textStatus, jqXHR) {
             var httpResponse = {
                 data: data,
-                status: XHR.status,
-                getHeaders: getHeadersFn(XHR),
+                status: jqXHR.status,
+                getHeaders: getHeadersFn(jqXHR ),
                 config: config
             };
             config.success(httpResponse);
-            XHR.onreadystatechange = null;
-            XHR.abort = null;
-        };
-        jqConfig.error = function (XHR, textStatus, errorThrown) {
+            jqXHR.onreadystatechange = null;
+            jqXHR.abort = null;               
+        }
+
+        function errorFn(jqXHR, textStatus, errorThrown) {
+            var responseText, status;
+            /* jqXHR could be in invalid state e.g., after timeout */
+            try {
+             responseText = jqXHR.responseText;
+             status = jqXHR.status;
+             jqXHR.onreadystatechange = null;
+             jqXHR.abort = null;               
+            } catch(e){ /* ignore errors */ }  
+
             var httpResponse = {
-                data: XHR.responseText,
-                status: XHR.status,
-                getHeaders: getHeadersFn(XHR),
+                data: responseText,
+                status: status,
+                getHeaders: getHeadersFn(jqXHR ),
                 error: errorThrown,
                 config: config
             };
             config.error(httpResponse);
-            XHR.onreadystatechange = null;
-            XHR.abort = null;
-        };
-        jQuery.ajax(jqConfig);
-
+        }
     };
-
     
-    function getHeadersFn(XHR) {
+    function getHeadersFn(jqXHR) {
         return function (headerName) {
+            // XHR can be bad so wrap in try/catch
             if (headerName && headerName.length > 0) {
-                return XHR.getResponseHeader(headerName);
+                try {
+                    return jqXHR.getResponseHeader(headerName);
+                } catch (e){
+                    return null;
+                }                
             } else {
-                return XHR.getAllResponseHeaders();
+                try {
+                    return jqXHR.getAllResponseHeaders();                    
+                } catch (e){
+                    return {}
+                }
             };
         };
     }
-    
 
     breeze.config.registerAdapter("ajax", ctor);
     
@@ -15333,7 +15397,13 @@ breeze.SaveOptions= SaveOptions;
         // OData errors can have the message buried very deeply - and nonobviously
         // this code is tricky so be careful changing the response.body parsing.
         var result = new Error();
-        var response = error.response;
+        var response = error && error.response;
+        if (!response) {
+            // in case DataJS returns "No handler for this data"
+            result.message = error;
+            result.statusText = error;
+            return result;
+        }
         result.message = response.statusText;
         result.statusText = response.statusText;
         result.status = response.statusCode;
@@ -15458,7 +15528,7 @@ breeze.SaveOptions= SaveOptions;
             var entityTypeName = MetadataStore.normalizeTypeName(km.EntityTypeName);
             return { entityTypeName: entityTypeName, tempValue: km.TempValue, realValue: km.RealValue };
         });
-        return { entities: data.Entities, keyMappings: keyMappings, httpResponse: data.httpResponse };
+        return { entities: data.Entities, keyMappings: keyMappings };
     };
     
     ctor.prototype.jsonResultsAdapter = new JsonResultsAdapter({
@@ -15954,7 +16024,7 @@ breeze.SaveOptions= SaveOptions;
             return pending.entity === instance;
         });
         if (pending) return pending.backingStore;
-        bs = {};
+        var bs = {};
         pendingStores.push({ entity: instance, backingStore: bs });
         return bs;
     }
@@ -16070,9 +16140,9 @@ breeze.SaveOptions= SaveOptions;
     function isolateES5Props(proto) {
         
         var stype = proto.entityType || proto.complexType;
-        es5Descriptors = {};
+        var es5Descriptors = {};
         stype.getProperties().forEach(function (prop) {
-            propDescr = getES5PropDescriptor(proto, prop.name);
+            var propDescr = getES5PropDescriptor(proto, prop.name);
             if (propDescr) {
                 es5Descriptors[prop.name] = propDescr;
             }
