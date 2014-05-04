@@ -113,7 +113,7 @@
          }
 
          function success() {
-             ok(false, "query should timeout but didn't");
+             ok(false, "query should cancel but didn't");
          }
          function expectedFail(error) {
              var emsg = error.message;
@@ -195,10 +195,8 @@
      // An example you might try in your app
      function Canceller() {
          var canceller = this;
-         var _canceled = false;
-         var deferred = Q.defer();
-         this.cancelled = function () { return _canceled; }
-         this.promise = deferred.promise;
+         var _cancelled = false;
+         this.cancelled = function () { return _cancelled; }
          this.requestInfo = null; // to be set by requestInterceptor
          this.cancel = function (reason) {
              var jqxhr = canceller.requestInfo && canceller.requestInfo.jqXHR;
@@ -206,8 +204,7 @@
                  throw new Error("Canceller lacks jQuery XHR so can't call abort()");
              }
              jqxhr.abort();
-             deferred.resolve(reason);
-             _canceled = true;
+             _cancelled = true;
          };
      }
 

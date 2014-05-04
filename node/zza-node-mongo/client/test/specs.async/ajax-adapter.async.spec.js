@@ -206,13 +206,13 @@ describe('ajax-adapter: ', function () {
 
     // An example you might try in your app
     function Canceller($q) {
-        var _canceled = false;
+        var _cancelled = false;
         var deferred = $q.defer();
-        this.cancelled = function() {return _canceled;}
+        this.cancelled = function() {return _cancelled;}
         this.promise = deferred.promise;
         this.cancel = function (reason) {
             deferred.resolve(reason);
-            _canceled = true;
+            _cancelled = true;
         };
     }
 
