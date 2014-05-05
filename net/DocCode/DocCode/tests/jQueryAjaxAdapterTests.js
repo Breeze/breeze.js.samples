@@ -121,6 +121,7 @@
              "query canceled as expected with msg='{0}'".format(emsg));
          }
          function fin() {
+             canceller.close();
              // the app shouldn't reuse the interceptor
              // because its canceller has been "spent"
              ajaxAdapter.requestInterceptor = null;
@@ -200,13 +201,17 @@
          this.requestInfo = null; // to be set by requestInterceptor
          this.cancel = function (reason) {
              var jqxhr = canceller.requestInfo && canceller.requestInfo.jqXHR;
-             if (!jqxhr) {
-                 throw new Error("Canceller lacks jQuery XHR so can't call abort()");
+             if (jqxhr) {
+                 jqxhr.abort();
+                 _cancelled = true;
              }
-             jqxhr.abort();
-             _cancelled = true;
+             canceller.close();             
+         };
+         this.close = function() { // release memory
+             canceller.requestInfo = null;
          };
      }
+    
 
      // successFn args as an array, grabbed from a real query for first 3 customers
      var customer3QuerySuccess = [
