@@ -26,7 +26,7 @@
  * Breeze is doing the right thing by patching the type ctor.
  * Too bad TypeScript makes the ctor global.
  * This model library keeps track of its changes to the ctor (and the prototype chain).
- * It adds a "__reset__" property to the ctor which you can call
+ * It adds a "__reset__" function to the ctor which you can call
  * between tests or whenever you recreate the MetadataStore and re-register the ctors.
  ******************************************************/
 (function (factory) {
@@ -159,18 +159,13 @@
         if (!ctor){
             throw new Error("No type constructor for EntityType = "+stype.name);
         }
-        var resetFn = ctor.__reset__ || addResetFn(ctor);
-        var propResets = resetFn.propResets;
-
+        addResetFn(ctor);
         stype.getProperties().forEach(function(prop) {
             var propName = prop.name;
-            // only wrap props that haven't already been wrapped
-            if (propResets[propName]) return;
-
             if (propName in proto) {
-                wrapPrototypeProperty(proto, prop, propResets);
+                wrapPrototypeProperty(proto, prop);
             } else {
-                wrapInstanceProperty(proto, prop, propResets);
+                wrapInstanceProperty(proto, prop);
             }
         });
     }
@@ -183,32 +178,49 @@
     // with different property characteristics for this type.
     // Remember: a type ctor can belong to at most one EntityType at a time.
     function addResetFn(ctor){
-        var resetFn = function (){
-            for (var key in resetFn.propResets){ resetFn.propResets[key]();}
-            resetFn.propResets = {};
+        if (ctor.__reset__) { return; } // already added
 
+        ctor.__reset__ =  function (){
             var proto = ctor.prototype;
-            proto._$interceptor = undefined;
-            proto._$typeName = undefined;
-            proto._pendingBackingStores = undefined;
-            proto.getProperty = undefined;
-            proto.setProperty = undefined;
-            if (proto.entityType){
-                proto.entityType = proto.entityType._ctor = undefined;
-            } else if (proto.complexType) {
-                proto.complexType = proto.complexType._ctor = undefined;
+            delete proto._$interceptor;
+            delete proto._$typeName;
+            delete proto._pendingBackingStores;
+            delete proto.getProperty;
+            delete proto.setProperty;
+            delete proto.entityType;
+            delete proto.complexType;
+            resetProto(proto);
+            delete ctor.__reset__;
+
+            function resetProto(proto){
+                if (Object.keys(proto).length !== 0) {
+                    var protoResets = proto.__resets__;
+                    if (protoResets){
+                        for (var key in protoResets ){
+                            protoResets[key]();
+                        }
+                        delete proto.__resets__;
+                    }
+                    resetProto(Object.getPrototypeOf(proto));
+                }
             }
         };
-        resetFn.propResets =  {};
-        ctor.__reset__ = resetFn;
-        return resetFn;
     }
 
-    function wrapInstanceProperty(proto, property, propResets) {
+    function wrapInstanceProperty(proto, property) {
         var propName = property.name;
+
+        var protoResets = proto.__resets__;
+        if (protoResets){
+            if (protoResets[propName]){ return; } // already re-written
+        } else {
+            protoResets = proto.__resets__ = {};
+        }
+
         if (!proto._pendingBackingStores) {
             proto._pendingBackingStores = [];
         }
+
         var descr = {
             get: function () {
                 var bs = this._backingStore || getBackingStore(this);
@@ -228,7 +240,7 @@
         Object.defineProperty(proto, propName, descr);
 
         // remember how to restore this property to pre-registration state
-        propResets[propName] = function(){delete proto[propName];};
+        protoResets[propName] = function(){ delete proto[propName]; };
 
         // A caching version of this 'getAccessorFn' was removed
         // as the perf gain is minimal or negative based on simple testing.
@@ -243,7 +255,7 @@
         }
     }
 
-    function wrapPrototypeProperty(proto, property, propResets) {
+    function wrapPrototypeProperty(proto, property) {
         var propName = property.name;
         if (!proto.hasOwnProperty(propName)) {
             var nextProto = Object.getPrototypeOf(proto);
@@ -251,13 +263,20 @@
             return;
         }
 
-        var propDescr = Object.getOwnPropertyDescriptor(proto, property.name);
+        var propDescr = Object.getOwnPropertyDescriptor(proto, propName);
         // if not configurable; we can't touch it - so leave.
         if (!propDescr.configurable) return;
         // if a data descriptor - don't change it - this is basically a static property - i.e. defined on every instance of the type with the same value.
         if (propDescr.value) return;
         // if a read only property descriptor - no need to change it.
         if (!propDescr.set) return;
+
+        var protoResets = proto.__resets__;
+        if (protoResets) {
+            if (protoResets[propName]) { return; } // already wrapped
+        } else {
+            proto.__resets__ = protoResets = {};
+        }
 
         var newDescr = {
             get: function () {
@@ -269,10 +288,11 @@
             enumerable: propDescr.enumerable,
             configurable: true
         };
+
         Object.defineProperty(proto, propName, newDescr);
 
         // remember how to restore this property to pre-registration state
-        propResets[propName] = function(){
+        protoResets[propName] = function(){
             Object.defineProperty(proto, propName, propDescr);
         };
 
