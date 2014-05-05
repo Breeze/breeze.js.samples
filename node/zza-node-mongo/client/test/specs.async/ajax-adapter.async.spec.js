@@ -20,7 +20,6 @@
  *
  * These tests explore some of these possibilities, using the 'angular' $http adapter
  ********************************/
-
 describe('ajax-adapter: ', function () {
     'use strict';
 
@@ -71,10 +70,9 @@ describe('ajax-adapter: ', function () {
             .then(success).catch(handleFail).finally(done);
 
         function interceptor(requestInfo) {
-            var config = customer3QuerySuccess.slice(); // copy
-            config[4] = requestInfo.config;
             requestInfo.config = null; // by-pass the real service
-            requestInfo.success.apply(null, config);
+            var cfg = customer3QuerySuccess;
+            requestInfo.success(cfg.data, cfg.statusText, cfg.headers, requestInfo.config);
         }
         function success(data) {
             // should be 3 faked customers
@@ -106,7 +104,10 @@ describe('ajax-adapter: ', function () {
     it("can create cancel option with interceptor", function(done) {
 
         var canceller = new Canceller($q); // Canceller defined among helpers
-        ajaxAdapter.requestInterceptor = interceptor(canceller);
+
+        ajaxAdapter.requestInterceptor = function (requestInfo) {
+            requestInfo.config.timeout = canceller.promise;
+        };
 
         EntityQuery.from("Customers")
             .using(em).execute()
@@ -116,13 +117,6 @@ describe('ajax-adapter: ', function () {
         // cancel immediately for purposes of this test
         canceller.cancel("testing");
 
-        // imagine an interceptor factory such as this
-        function interceptor(canceller){
-            return function (requestInfo) {
-                requestInfo.config.timeout = canceller.promise;
-            }
-        }
-
         function success() {
             expect.toFail("query should cancel but didn't");
         }
@@ -131,10 +125,14 @@ describe('ajax-adapter: ', function () {
             expect(emsg).toMatch(/timeout/);
         }
         function fin(){
+            canceller.close();
             // the app shouldn't reuse the interceptor
             // because its canceller has been "spent"
             ajaxAdapter.requestInterceptor = null;
-            done();
+            canceller.promise.then(function(reason) {
+                console.log("Cancel reason was: "+reason);
+                done();
+            })
         }
     });
 
@@ -203,28 +201,36 @@ describe('ajax-adapter: ', function () {
     });
 
     /*** Helpers ***/
+    function noop() {}
 
     // An example you might try in your app
     function Canceller($q) {
+        var canceller = this;
         var _cancelled = false;
         var deferred = $q.defer();
-        this.cancelled = function() {return _cancelled;}
-        this.promise = deferred.promise;
-        this.cancel = function (reason) {
+        canceller.cancelled = function() {return _cancelled;};
+        canceller.promise = deferred.promise;
+        canceller.cancel = function (reason) {
             deferred.resolve(reason);
+            canceller.cancel = noop;
             _cancelled = true;
         };
+        canceller.close = function(){
+            deferred.resolve('closed');
+            canceller.cancel = noop;
+        }
     }
 
     // successFn args as an array, grabbed from a real query for first 3 customers
-    var customer3QuerySuccess = [
-        /*data*/    [{"firstName":"Derek","lastName":"Puckett","phone":"(954) 594-9355","email":"derek.puckett@vulputate.net","address":{"street":"P.O. Box 914, 9990 Dapibus St.","city":"Quam","state":"OH","zip":"55154"},"_id":"51f06ded06a7baa417000001"},{"firstName":"Bernard","lastName":"Russell","phone":"(203) 652-0465","email":"bernard.russell@torquentper.com","address":{"street":"324-6843 Dolor Ave","city":"Quis","state":"FL","zip":"28034"},"_id":"51f06ded06a7baa417000002"},{"firstName":"Jordan","lastName":"Jimenez","phone":"(265) 520-8354","email":"jordan.jimenez@variusorciin.co.uk","address":{"street":"Ap #370-9242 Sed, Ave","city":"Lorem","state":"OR","zip":"88091"},"_id":"51f06ded06a7baa417000003"}],
-        /*status*/  200,
-        /*headers*/ getHeadersFn({
+    var customer3QuerySuccess = {
+        data:    [{"firstName":"Derek","lastName":"Puckett","phone":"(954) 594-9355","email":"derek.puckett@vulputate.net","address":{"street":"P.O. Box 914, 9990 Dapibus St.","city":"Quam","state":"OH","zip":"55154"},"_id":"51f06ded06a7baa417000001"},{"firstName":"Bernard","lastName":"Russell","phone":"(203) 652-0465","email":"bernard.russell@torquentper.com","address":{"street":"324-6843 Dolor Ave","city":"Quis","state":"FL","zip":"28034"},"_id":"51f06ded06a7baa417000002"},{"firstName":"Jordan","lastName":"Jimenez","phone":"(265) 520-8354","email":"jordan.jimenez@variusorciin.co.uk","address":{"street":"Ap #370-9242 Sed, Ave","city":"Lorem","state":"OR","zip":"88091"},"_id":"51f06ded06a7baa417000003"}],
+        status:  200,
+        headers: getHeadersFn({
             "Content-Type": "application/json, text/html; charset=utf-8",
             "Content-Length": 696,
             "etag": "-1072212393"
-        })];
+        })
+    };
 
     function getHeadersFn(headers) {
         return function (headerName) {

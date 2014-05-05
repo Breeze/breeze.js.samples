@@ -66,7 +66,8 @@
 
          function interceptor(requestInfo) {
              requestInfo.config = null; // by-pass the real service
-             requestInfo.success.apply(null, customer3QuerySuccess);
+             var cfg = customer3QuerySuccess;
+             requestInfo.success(cfg.data,cfg.statusText, cfg.jqXHR);
          }
          function success(data) {
              equal(data.results.length, 3, "faked customer query returned  customers.");
@@ -95,7 +96,10 @@
      asyncTest("can create cancel option with interceptor", 1, function () {
 
          var canceller = new Canceller(); // Canceller defined among helpers
-         ajaxAdapter.requestInterceptor = interceptor(canceller);
+
+         ajaxAdapter.requestInterceptor = function (requestInfo) {
+                 canceller.requestInfo = requestInfo;
+         };
 
          EntityQuery.from("Customers")
              .using(newEm()).execute()
@@ -104,13 +108,6 @@
 
          // cancel immediately for purposes of this test
          canceller.cancel("testing");
-
-         // imagine an interceptor factory such as this
-         function interceptor(canceller) {
-             return function (requestInfo) {
-                 canceller.requestInfo = requestInfo;
-             }
-         }
 
          function success() {
              ok(false, "query should cancel but didn't");
@@ -193,34 +190,38 @@
      });
 
      /*** Helpers ***/
+     function noop() { }
+
      // An example you might try in your app
      function Canceller() {
          var canceller = this;
          var _cancelled = false;
-         this.cancelled = function () { return _cancelled; }
-         this.requestInfo = null; // to be set by requestInterceptor
-         this.cancel = function (reason) {
+         canceller.cancelled = function() { return _cancelled; };
+         canceller.requestInfo = null; // to be set by requestInterceptor
+         canceller.cancel = function (/*reason*/) {
              var jqxhr = canceller.requestInfo && canceller.requestInfo.jqXHR;
-             if (jqxhr) {
+             if (jqxhr && jqxhr.abort) {
                  jqxhr.abort();
                  _cancelled = true;
              }
              canceller.close();             
          };
-         this.close = function() { // release memory
-             canceller.requestInfo = null;
+         this.close = function() { 
+             canceller.requestInfo = null; // release memory
+             canceller.cancel = noop;
          };
      }
     
 
-     // successFn args as an array, grabbed from a real query for first 3 customers
-     var customer3QuerySuccess = [
-         /*data*/       [{ "$id": "1", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "729de505-ea6d-4cdf-89f6-0360ad37bde7", "CompanyName": "Die Wandernde Kuh", "ContactName": "Rita Müller", "ContactTitle": "Sales Representative", "Address": "Adenauerallee 900", "City": "Stuttgart", "Region": null, "PostalCode": "70563", "Country": "Germany", "Phone": "0711-020361", "Fax": "0711-035428", "RowVersion": null, "Orders": null }, { "$id": "2", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "cd98057f-b5c2-49f4-a235-05d155e636df", "CompanyName": "Suprêmes délices", "ContactName": "Pascale Cartrain", "ContactTitle": "Accounting Manager", "Address": "Boulevard Tirou, 255", "City": "Charleroi", "Region": null, "PostalCode": "B-6000", "Country": "Belgium", "Phone": "(071) 23 67 22 20", "Fax": "(071) 23 67 22 21", "RowVersion": null, "Orders": null }, { "$id": "3", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "9d4d6598-b6c2-4b52-890b-0636b23ec85b", "CompanyName": "Franchi S.p.A.", "ContactName": "Paolo Accorti", "ContactTitle": "Sales Representative", "Address": "Via Monte Bianco 34", "City": "Torino", "Region": null, "PostalCode": "10100", "Country": "Italy", "Phone": "011-4988260", "Fax": "011-4988261", "RowVersion": null, "Orders": null }],
-         /*statusText*/ "200 OK",
-         /*jqXHR*/      new jqXHR(200, {
+     // successFn args, grabbed from a real query for first 3 customers
+     var customer3QuerySuccess = {
+         data:       [{ "$id": "1", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "729de505-ea6d-4cdf-89f6-0360ad37bde7", "CompanyName": "Die Wandernde Kuh", "ContactName": "Rita Müller", "ContactTitle": "Sales Representative", "Address": "Adenauerallee 900", "City": "Stuttgart", "Region": null, "PostalCode": "70563", "Country": "Germany", "Phone": "0711-020361", "Fax": "0711-035428", "RowVersion": null, "Orders": null }, { "$id": "2", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "cd98057f-b5c2-49f4-a235-05d155e636df", "CompanyName": "Suprêmes délices", "ContactName": "Pascale Cartrain", "ContactTitle": "Accounting Manager", "Address": "Boulevard Tirou, 255", "City": "Charleroi", "Region": null, "PostalCode": "B-6000", "Country": "Belgium", "Phone": "(071) 23 67 22 20", "Fax": "(071) 23 67 22 21", "RowVersion": null, "Orders": null }, { "$id": "3", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "9d4d6598-b6c2-4b52-890b-0636b23ec85b", "CompanyName": "Franchi S.p.A.", "ContactName": "Paolo Accorti", "ContactTitle": "Sales Representative", "Address": "Via Monte Bianco 34", "City": "Torino", "Region": null, "PostalCode": "10100", "Country": "Italy", "Phone": "011-4988260", "Fax": "011-4988261", "RowVersion": null, "Orders": null }],
+         statusText: "200 OK",
+         jqXHR:      new jqXHR(200, {
                             "Content-Type": "application/json; charset=utf-8",
                             "Content-Length": 1200
-                        })];
+         })
+     };
 
      function jqXHR(status, headers, responseText) {
          this.status = status;
