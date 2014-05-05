@@ -1,5 +1,5 @@
 /********************************************************
- * A Breeze Labs version of the "backingStore" model library called "new-backingStore"
+ * A Breeze Labs replacement for the "backingStore" model library
  * that facilitates testing by enabling reset of EntityType/ComplexType constructors.
  *
  * Based on b00_breeze.modelLibrary.backingstore.js
@@ -9,7 +9,7 @@
  * conditions of the IdeaBlade Breeze license, available at http://www.breezejs.com/license
  *
  * Author: Ward Bell
- * Version: 0.8.0
+ * Version: 0.8.1
  *
  * The Problem:
  * ------------
@@ -28,6 +28,16 @@
  * This model library keeps track of its changes to the ctor (and the prototype chain).
  * It adds a "__reset__" function to the ctor which you can call
  * between tests or whenever you recreate the MetadataStore and re-register the ctors.
+ *
+ * Install:
+ * ------------
+ * This adapter is a "drop in" replacement for the "backingStore" adapter
+ * in Breeze core. It has the same adapter name so it will
+ * silently replace the original "backingStore" adapter
+ * when you load it as a script AFTER the breeze library.
+ * To remove it, delete the file or rename the adapter
+ * (in case you wish to include it conditionally in code, e.g., with
+ *  breeze.config.initializeInstance('modelLibrary', 'new-backingStore', true);
  ******************************************************/
 (function (factory) {
     if (breeze) {
@@ -44,7 +54,7 @@
     var core = breeze.core;
 
     var ctor = function() {
-        this.name = "new-backingStore";
+        this.name = "backingStore"; // replaces the Breeze core adapter with this name
     };
     ctor.prototype.initialize = function() {  };
     ctor.prototype.initializeEntityPrototype = initializeEntityPrototype;
