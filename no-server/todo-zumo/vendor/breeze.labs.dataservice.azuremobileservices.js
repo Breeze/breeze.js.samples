@@ -1,7 +1,7 @@
 ﻿/*
  * Breeze Labs Azure Mobile Services DataServiceAdapter
  *
- *  v.0.5.0
+ *  v.0.5.1
  *
  * Registers an Azure Mobile Services DataServiceAdapter with Breeze
  *
@@ -43,13 +43,13 @@
         definition(window.breeze);
     } else if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
         // CommonJS or Node
-        var b = require('vendor');
+        var b = require('breeze');
         definition(b);
     } else if (typeof define === "function" && define["amd"] && !window.breeze) {
         // Requirejs / AMD
-        define(['vendor'], definition);
+        define(['breeze'], definition);
     } else {
-        throw new Error("Can't find vendor");
+        throw new Error("Can't find breeze");
     }
 }(function (breeze) {
     "use strict";
@@ -71,7 +71,6 @@
         fn._createSaveRequest = _createSaveRequest;
         fn._createUniqueInstallationId = _createUniqueInstallationId;
         fn._getZumoHeaders = _getZumoHeaders;
-        fn._processSavedEntity = _processSavedEntity;
 
         this.initialize(); // the revised initialize()
     }
@@ -196,13 +195,6 @@
             'X-ZUMO-INSTALLATION-ID': msInfo.installId,
             'X-ZUMO-Version': msInfo.zumoVersion
         };
-    }
-
-    function _processSavedEntity(savedEntity, saveContext, response, index){
-        // Set the savedEntity's $entityType if it's raw data (don't if it's an entity)
-        if (!savedEntity.entityAspect){
-            savedEntity.$entityType = saveContext.originalEntities[index].entityType;
-        }
     }
 
     function executeQuery(mappingContext) {
