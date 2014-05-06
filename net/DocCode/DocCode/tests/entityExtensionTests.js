@@ -105,16 +105,16 @@
     *********************************************************/
     test("add unmapped 'foo' property via constructor", 4, function () {
         var store = cloneModuleMetadataStore();
-        fooPropertyDefined(store);
-        
+        assertFooPropertyDefined(store);
+
         var Customer = function () {
             this.foo = 42; // doesn't have to be KO observable; will become observable
         };
         store.registerEntityTypeCtor('Customer', Customer);
-        fooPropertyDefined(store, true);
+        assertFooPropertyDefined(store, true);
 
         var cust = store.getEntityType('Customer').createEntity();
-        
+
         ok(cust["foo"],
             "should have 'foo' property via constructor");
 
@@ -122,7 +122,7 @@
             "'foo' should be a KO 'property' returning 42");
     });
 
-    function fooPropertyDefined(metadataStore, shouldBe) {
+    function assertFooPropertyDefined(metadataStore, shouldBe) {
         var custType = metadataStore.getEntityType("Customer");
         var fooProp = custType.getDataProperty('foo');
         if (shouldBe) {
@@ -133,18 +133,64 @@
         }
         return fooProp;
     }
+
+    /*********************************************************
+    * can query an unmapped property with cache query
+    *********************************************************/
+    test("can query an unmapped property with cache query", 3, function() {
+        // Add unmapped 'foo' property via its custom constructor
+        var store = cloneModuleMetadataStore();
+        var Customer = function() {
+            this.foo = 42; // doesn't have to be KO observable; will become observable
+        };
+        store.registerEntityTypeCtor('Customer', Customer);
+        assertFooPropertyDefined(store, true); // see previous test
+
+        var manager = newEm(store);
+
+        // Create a customer with the target foo value
+        var fooValue = 60;
+        var cust = manager.createEntity('Customer', {
+            CustomerID: testFns.newGuid(),
+            foo: fooValue,
+            CompanyName: 'Test'
+        });
+
+        // Create another customer with a different foo value
+        manager.createEntity('Customer', {
+            CustomerID: testFns.newGuid(),
+            foo: fooValue + 1 ,
+            CompanyName: 'Test'
+        });
+
+        // Now have 2 customers in cache; query for the one with target foo value
+        var results = manager.executeQueryLocally(
+            EntityQuery.from('Customers').where('foo', 'eq', fooValue));
+
+        equal(results.length, 1, "cache query returned exactly 1 result.");
+
+        var queriedCustomer = results[0];
+        if (queriedCustomer) {
+            ok(true, "cache query returned customer '{0}' with foo==={1}"
+                .format(queriedCustomer.CompanyName(), queriedCustomer.foo()));
+        } else {
+            ok(false, "cache query failed to return a Customer with foo===" + fooValue);
+
+        }
+    });
+
     /*********************************************************
     * unmapped 'foo' property is validated
     *********************************************************/
     test("unmapped 'foo' property is validated", 5, function () {
         var store = cloneModuleMetadataStore();
-        fooPropertyDefined(store);
+        assertFooPropertyDefined(store);
         // Arrange for 'foo' to be an unmapped Customer property
         var Customer = function () {
             this.foo = "";
         };
         store.registerEntityTypeCtor("Customer", Customer);
-        var fooProp = fooPropertyDefined(store, true);
+        var fooProp = assertFooPropertyDefined(store, true);
 
         var maxLengthValidator = breeze.Validator.maxLength({maxLength:5});
         fooProp.validators.push(maxLengthValidator);
@@ -169,8 +215,7 @@
             .format(errMsg));
 
     });
-
-    
+  
     /*********************************************************
     * Changes to properties within ctor do NOT change EntityState
     * Doesn't matter if they are mapped or unmapped
@@ -248,7 +293,7 @@
         };
         store.registerEntityTypeCtor("Customer", Customer);
 
-        fooPropertyDefined(store, true);
+        assertFooPropertyDefined(store, true);
         
         // Fake an existing customer
         var manager = newEm(store);
