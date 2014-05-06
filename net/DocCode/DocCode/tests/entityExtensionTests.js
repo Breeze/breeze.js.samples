@@ -100,12 +100,13 @@
             "'isBeingEdited' should be a KO 'property' returning false");
 
     });
+
     /*********************************************************
-    * add unmapped 'foo' property via constructor
+    * can add unmapped 'foo' property via constructor
     *********************************************************/
-    test("add unmapped 'foo' property via constructor", 4, function () {
+    test("can add unmapped 'foo' property via constructor", 4, function () {
         var store = cloneModuleMetadataStore();
-        assertFooPropertyDefined(store);
+        assertFooPropertyDefined(store, false);
 
         var Customer = function () {
             this.foo = 42; // doesn't have to be KO observable; will become observable
@@ -122,17 +123,31 @@
             "'foo' should be a KO 'property' returning 42");
     });
 
-    function assertFooPropertyDefined(metadataStore, shouldBe) {
-        var custType = metadataStore.getEntityType("Customer");
-        var fooProp = custType.getDataProperty('foo');
-        if (shouldBe) {
-            ok(fooProp && fooProp.isUnmapped,
-                "'foo' property should be defined as unmapped property after registration.");
-        } else {
-            ok(!fooProp, "'foo' property should NOT be defined before registration.");
-        }
-        return fooProp;
-    }
+    /*********************************************************
+    * can add unmapped 'foo' property directly to EntityType
+    *********************************************************/
+    test("can add unmapped 'foo' property directly to EntityType", 4, function () {
+        var store = cloneModuleMetadataStore();
+        assertFooPropertyDefined(store, false);
+
+        var customerType = store.getEntityType('Customer');
+        var fooProp = new breeze.DataProperty({
+            name: 'foo',
+            defaultValue: 42,
+            isUnmapped: true,  // !!!
+        });
+        customerType.addProperty(fooProp);
+
+        assertFooPropertyDefined(store, true);
+
+        var cust = store.getEntityType('Customer').createEntity();
+
+        ok(cust["foo"],
+            "should have 'foo' property via constructor");
+
+        equal(cust.foo(), 42,
+            "'foo' should be a KO 'property' returning 42");
+    });
 
     /*********************************************************
     * can query an unmapped property with cache query
@@ -144,7 +159,7 @@
             this.foo = 42; // doesn't have to be KO observable; will become observable
         };
         store.registerEntityTypeCtor('Customer', Customer);
-        assertFooPropertyDefined(store, true); // see previous test
+        assertFooPropertyDefined(store, true);
 
         var manager = newEm(store);
 
@@ -160,7 +175,7 @@
         manager.createEntity('Customer', {
             CustomerID: testFns.newGuid(),
             foo: fooValue + 1 ,
-            CompanyName: 'Test'
+            CompanyName: 'Test2'
         });
 
         // Now have 2 customers in cache; query for the one with target foo value
@@ -367,6 +382,7 @@
             "'lastTouched' unmapped property should be rolled back. Started as {0}; now is {1}"
             .format(originalTime, cust.lastTouched()));
     });
+
     /*********************************************************
     * unmapped properties are not persisted
     *********************************************************/
@@ -500,6 +516,7 @@
         }
 
     });
+
     /*********************************************************
     * add instance function via constructor
     *********************************************************/
@@ -566,6 +583,7 @@
         equal(cust.ContactName(), "Amy",
             "'ContactName' should be a KO 'property' returning 'Amy'");
     });
+
     /*********************************************************
     * add method to prototype via constructor
     *********************************************************/
@@ -625,6 +643,7 @@
             "'fullName' KO computed should return , '{0}'."
                 .format(expected));
     });
+
     /*********************************************************
     * knockout computed property based on collection navigation via constructor
     *********************************************************/
@@ -960,8 +979,7 @@
                 .fin(start);
     });
     /*********************************************************
-    * unmapped property (and only unmapped property) preserved
-    * after export/import
+    * unmapped property (and only unmapped property) preserved after export/import
     *********************************************************/
     test("unmapped property preserved after export/import", 3,
         function () {
@@ -1243,13 +1261,25 @@
         }
 
     });
+
     /*********************************************************
     * helpers
     *********************************************************/
+
+    function assertFooPropertyDefined(metadataStore, shouldBe) {
+        var custType = metadataStore.getEntityType("Customer");
+        var fooProp = custType.getDataProperty('foo');
+        if (shouldBe) {
+            ok(fooProp && fooProp.isUnmapped,
+                "'foo' property should be defined as unmapped property after registration.");
+        } else {
+            ok(!fooProp, "'foo' property should NOT be defined before registration.");
+        }
+        return fooProp;
+    }
     function cloneModuleMetadataStore() {
         return cloneStore(moduleMetadataStore);
     }
-
     function cloneStore(source) {
         var metaExport = source.exportMetadata();
         return new MetadataStore().importMetadata(metaExport);
