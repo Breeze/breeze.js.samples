@@ -276,7 +276,9 @@
         var propDescr = Object.getOwnPropertyDescriptor(proto, propName);
         // if not configurable; we can't touch it - so leave.
         if (!propDescr.configurable) return;
-        // if a data descriptor - don't change it - this is basically a static property - i.e. defined on every instance of the type with the same value.
+        // if a data descriptor - don't wrap it
+        // Treat it is a static ReadOnly property - i.e. defined on every instance of the type with the same value.
+        // No safe alternative even if writable as it could be made non-writable at any time.
         if (propDescr.value) return;
         // if a read only property descriptor - no need to change it.
         if (!propDescr.set) return;

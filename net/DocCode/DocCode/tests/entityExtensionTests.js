@@ -611,6 +611,49 @@
                 .format(expected));
     });
 
+
+    /*********************************************************
+    * can add unmapped readonly ES5 property via constructor
+    * add breeze exports/imports just fine
+    *********************************************************/
+    test("can add unmapped readonly ES5 property via constructor", 4, function () {
+        "use strict";
+        var store = cloneModuleMetadataStore();
+
+        var Customer = function () { };
+
+        Object.defineProperty(Customer.prototype, 'foo', {
+            get: function () { return 42; },
+            enumerable: true,
+            configurable: true
+        });
+
+        store.registerEntityTypeCtor('Customer', Customer);
+        assertFooPropertyDefined(store, true);
+
+        var em = newEm(store);
+        
+        var cust = em.createEntity('Customer', {
+            CustomerID: testFns.newGuid(),
+            CompanyName: "test cust"
+        });
+
+        equal(cust.foo(), 42, "'cust.foo' should return 42");
+
+        var exported = em.exportEntities([cust], false); // no metadata
+
+        // Change the exported the foo property value. It shouldn't matter
+        exported = exported.replace(/("foo":42)/, '"foo":100');
+
+        ok(/("foo":100)/.test(exported),
+            "replaced 42 with 100 in exported: exported is:\n" + exported);
+
+        var cust2 = em.importEntities(exported).entities[0];
+
+        equal(cust2.foo(), 42, "imported 'cust2.foo' should return 42 after import");
+    });
+
+
     /*********************************************************
     * knockout computed property via constructor
     *********************************************************/
