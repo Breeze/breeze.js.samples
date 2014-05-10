@@ -43,6 +43,11 @@ module.exports = function(grunt) {
   ];
   
   var sampleSolutionFileNames = grunt.file.expand('../../**/*.sln');
+  // exclude zza
+  sampleSolutionFileNames = sampleSolutionFileNames.filter(function(item) {
+     return item.indexOf('zza') == -1;
+  });
+  
   
   var sampleDirs = grunt.file.expand(['../../net/*/', '../../no-server/*/', '../../node/*/', '../../ruby/*/']);
  
@@ -175,7 +180,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('buildRelease', 
-   [ 'nugetSolutionUpdate:samples', 'msBuild:samples']);
+   [ 'clean', 'nugetSolutionUpdate:samples', 'msBuild:samples']);
   grunt.registerTask('packageRelease', 
    [ 'clean', 'copy', 'compress']);    
     
