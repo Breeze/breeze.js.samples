@@ -1,57 +1,58 @@
-﻿docCode.AjaxAdapterTestInterceptor = (function () {
-    /** 
-     A test 'ajax' adapter class whose instance can monitor a base ajax adapter
-     with 'before', 'afterSuccess', 'afterError' methods and 
-     synchronously return a canned response for a given request url.
+﻿/** 
+ A test 'ajax' adapter class whose instance can monitor a base ajax adapter
+ with 'before', 'afterSuccess', 'afterError' methods and 
+ synchronously return a canned response for a given request url.
 
-     You can supply any number of canned responses. Each has a url pattern which
-     is compared with the ajax request url. The first matching response becomes
-     the faked response of the ajax request.
+ You can supply any number of canned responses. Each has a url pattern which
+ is compared with the ajax request url. The first matching response becomes
+ the faked response of the ajax request.
 
-     If none of the response match but there is a default response, 
-     the default becomes the faked response of the ajax request.
+ If none of the response match but there is a default response, 
+ the default becomes the faked response of the ajax request.
 
-     If there still is no canned response, the request is forwarded to
-     the 'ajax' function of the base adapter.
- 
-     After instantiating a test adapter, call its enable() method to enable its injection into the
-     base ajax adapter. Call its disable() method to restore the pre-injection behavior.
+ If there still is no canned response, the request is forwarded to
+ the 'ajax' function of the base adapter.
 
-     Example:
-         var ajaxInterceptor = new AjaxAdapterTestInterceptor();
+ After instantiating a test adapter, call its enable() method to enable its injection into the
+ base ajax adapter. Call its disable() method to restore the pre-injection behavior.
 
-         module("AjaxAdapterTestInterceptor unit tests", {
-            setup: function () {
-                // unit tests should never attempt to reach the server
-                // the blockServerRequests switch ensures that the AjaxAdapterTestInterceptor
-                // doesn't accidentally go to the server during these module tests
-                ajaxInterceptor.blockServerRequests = true;
-            },
-                teardown: function () {
-                ajaxInterceptor.blockServerRequests = false; // restore default
-                ajaxInterceptor.disable();
-            }
-        });
+ Example:
+     var ajaxInterceptor = new AjaxAdapterTestInterceptor();
 
-        // the config.blockServerRequests switch ensures that 
-        // this particular request cannot accidentally go to the server
-        // even if the test adapter would allow it otherwise.
-        test("server requests are blocked for THIS module's tests by default.", 1, function () {
-            ajaxInterceptor.enable();
-        
-            var ajaxConfig = makeAjaxConfig({ success: success, error: error });
+     module("AjaxAdapterTestInterceptor unit tests", {
+        setup: function () {
+            // unit tests should never attempt to reach the server
+            // the blockServerRequests switch ensures that the AjaxAdapterTestInterceptor
+            // doesn't accidentally go to the server during these module tests
+            ajaxInterceptor.blockServerRequests = true;
+        },
+            teardown: function () {
+            ajaxInterceptor.blockServerRequests = false; // restore default
+            ajaxInterceptor.disable();
+        }
+    });
 
-            ajaxInterceptor.ajax(ajaxConfig);
+    // the config.blockServerRequests switch ensures that 
+    // this particular request cannot accidentally go to the server
+    // even if the test adapter would allow it otherwise.
+    test("server requests are blocked for THIS module's tests by default.", 1, function () {
+        ajaxInterceptor.enable();
+    
+        var ajaxConfig = makeAjaxConfig({ success: success, error: error });
 
-            function success(httpResponse) {
-                ok(false, "request should have been blocked and failed");
-            }
-            function error(httpResponse) {
-                ok(/server requests are blocked/i.test(httpResponse.data),
-                    serverRequestBlockMessage(httpResponse));
-            }
-        });
-    **/ 
+        ajaxInterceptor.ajax(ajaxConfig);
+
+        function success(httpResponse) {
+            ok(false, "request should have been blocked and failed");
+        }
+        function error(httpResponse) {
+            ok(/server requests are blocked/i.test(httpResponse.data),
+                serverRequestBlockMessage(httpResponse));
+        }
+    });
+**/
+docCode.AjaxAdapterTestInterceptor = (function () {
+    "use strict";
     var extend = breeze.core.extend;
     var clone = function (thing) { return extend({}, thing); };
     
@@ -158,8 +159,9 @@
         this.blockServerRequests = false;
         
         var origAjaxFn = adapter.ajax;
+        var callableOrigAjaxFn = function(settings) { return origAjaxFn.call(adapter, settings); };
         var getAdapterConfig = createGetAdapterConfigFn(this);
-        var fakeAjaxFn = createFakeAjaxFn(getAdapterConfig, origAjaxFn);       
+        var fakeAjaxFn = createFakeAjaxFn(getAdapterConfig, callableOrigAjaxFn);
 
         /**
         Delegate to the adapter's current ajax function
@@ -167,7 +169,7 @@
         @param ajaxSettings {Object} parameter to adapter's ajax method. 
         See breeze documentation for {@link http://www.breezejs.com/documentation/customizing-ajax ajaxadapter}
         **/
-        this.ajax = function (ajaxSettings) { adapter.ajax(ajaxSettings); };
+        this.ajax = function (ajaxSettings) { return adapter.ajax(ajaxSettings); };
 
     };
 
