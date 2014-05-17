@@ -13,6 +13,7 @@ header { background-color: #71BCFA; padding: 20px; border-top-left-radius: 10px;
 header h1 { text-transform: uppercase; font-weight: normal; color: #545353; font-size: 28px; }
 header h2 { text-transform: uppercase; font-weight: normal; color: white; font-size: 20px; }
 .summary { text-align: center; padding: 8px 0; }
+.loading {text-align: center; font-size: 28px;}
 
 /* "Button Bar" */
 .button-bar {margin:10px 0 0 0;}
@@ -44,9 +45,9 @@ header h2 { text-transform: uppercase; font-weight: normal; color: white; font-s
 
 
 /* Entity State Coloring Happens Here */
-.Added {color: darkmagenta; font-weight: bold}
-.Modified {color: darkcyan; font-weight: bold}
-.Deleted {color: grey; text-decoration: line-through;}
+.Added {color: darkmagenta; font-weight: bold; margin-left: 8px;}
+.Modified {color: darkcyan; font-weight: bold; margin-left: 8px;}
+.Deleted {color: grey; text-decoration: line-through; margin-left: 8px;}
 
 
 

@@ -4,31 +4,39 @@
 (function() {
     'use strict';
     angular.module('app').controller('pageController',
-        ['$scope', '$timeout', 'datacontext', 'wip-service', controller]);
+        ['$scope', '$timeout', 'config', 'datacontext', 'wip-service', controller]);
 
-    function controller($scope, $timeout, datacontext, wip) {
-        var wipMsgCount = 0;
-
+    function controller($scope, $timeout, config, datacontext, wip) {
         var vm = this;
-        vm.addItem = addItem;
+        vm.appTitle = config.appTitle;
         vm.clearErrorLog = clearErrorLog;
-        vm.counts = datacontext.counts;
-        vm.deleteItem = deleteItem;
-        vm.isBusy = false;
-        vm.itemsFilter = itemsFilter;
         vm.errorLog = [];
+        vm.isBusy = true;
         vm.newItemText = '';
-        vm.refresh = refresh;
-        vm.reset = reset;
-        vm.sync = sync;
+        vm.serverTitle = config.serverTitle;
         vm.syncDisabled = syncDisabled;
         vm.showCompleted = false;
         vm.showDeleted = false;
         vm.todos = [];
         vm.wipMessages = [];
 
+        var wipMsgCount = 0;
         reportWipMessages();
-        loadTodoItems(); // initial load
+        datacontext.ready().then(onReady).catch(handleError);
+        ////////////////////
+        function onReady(){
+            // members that depend on a ready datacontext
+            vm.addItem = addItem;
+            vm.counts = datacontext.counts;
+            vm.deleteItem = deleteItem;
+            vm.itemsFilter = itemsFilter;
+            vm.refresh = refresh;
+            vm.reset = reset;
+            vm.sync = sync;
+
+            loadTodoItems(); // initial data load          
+        }
+
         ////////////////////////////
         function addItem() {
             if (vm.newItemText !== '') {
@@ -63,11 +71,11 @@
 
 
 
-
-
         function handleError(error) {
-            vm.isBusy = false;
-            vm.errorLog.push((vm.errorLog.length+1) + ': ' + (error && error.message || 'unknown error'));
+            vm.isBusy = false;  
+            var err = typeof error === 'string'? error : error.message;
+            vm.errorLog.push((vm.errorLog.length+1) + ': ' + 
+                (err || 'unknown error'));
         }
 
         function itemsFilter(todoItem) {
@@ -80,11 +88,12 @@
 
         function loadTodoItems(){
             vm.isBusy = true;
-            return datacontext.loadTodoItems().then(querySuccess, handleError);
+            return datacontext.loadTodoItems()
+            .then(querySuccess, handleError);
         }
 
         function querySuccess(todoItems){
-            vm.isBusy = false;
+            vm.isBusy = false;   
             vm.todos = todoItems;
         }
 
@@ -101,6 +110,7 @@
         }
 
         function reset(){
+            vm.isBusy = true;
             vm.newItemText='';
             return datacontext.reset().then(querySuccess, handleError);
         }

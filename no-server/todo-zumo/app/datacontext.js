@@ -4,14 +4,13 @@
 (function (){
     'use strict';
     angular.module('app').factory('datacontext',
-        ['$log', 'breeze', 'entityManagerFactory', 'wip-service', service]);
+        ['$log','$q', 'breeze', 'entityManagerFactory', 'wip-service', service]);
 
-    function service($log, breeze, entityManagerFactory, wip){
+    function service($log, $q, breeze, entityManagerFactory, wip){
         var addedState = breeze.EntityState.Added;
         var deletedState = breeze.EntityState.Deleted;
-        var manager = entityManagerFactory.getEntityManager();
-        manager.entityChanged.subscribe(entityCountsChanged);
-        var todoItemType =manager.metadataStore.getEntityType('TodoItem');
+        var manager;
+        var todoItemType;
 
         var datacontext = {
             addTodoItem:      addTodoItem,
@@ -20,12 +19,24 @@
             getAllTodoItems:  getAllTodoItems,
             hasChanges:       hasChanges,
             loadTodoItems:    loadTodoItems,
+            ready:            ready,
             reset:            reset,
             sync:             sync
         };
-        updateCounts();
+
         return datacontext;
         /////////////////////////////
+        function ready(){
+            return entityManagerFactory.getEntityManager().then(haveEntityManager);
+
+            function haveEntityManager(em){
+                manager = em;
+                manager.entityChanged.subscribe(entityCountsChanged);
+                todoItemType = manager.metadataStore.getEntityType('TodoItem');
+                updateCounts();
+            }
+        }
+
         function addTodoItem(initialValues){
             return manager.createEntity(todoItemType, initialValues);
         }
@@ -43,6 +54,10 @@
                 updateCounts();
             }
         }
+
+
+
+
 
         // Get all TodoItems from the server and cache combined
         function getAllTodoItems() {
@@ -71,7 +86,14 @@
                 // Warning: the cache will accumulate entities that
                 // have been deleted by other users until it is entirely rebuilt via 'refresh'
             }
+
         }
+
+
+
+
+
+
 
         function hasChanges(){
             return manager.hasChanges();
@@ -100,8 +122,9 @@
         function queryFailed(error) {
             error.message = prettifyErrorMessage(error.message);
             var status = error.status ? error.status + ' - ' : '';
-            var err = status + (error.message ? error.message : 'unknown error; check console.log');
-            throw new Error(err); // so downstream listener gets it.
+            var err = status + (error.message ? error.message : 'Unknown error; check console.log.');
+            err += '\nIs the server running?';
+            return $q.reject(err); // so downstream listener gets it.
         }
 
         // Clear everything local and reload from server.

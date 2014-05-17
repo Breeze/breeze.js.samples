@@ -1,7 +1,7 @@
 ﻿/*
  * Breeze Labs Abstract REST DataServiceAdapter
  *
- *  v.0.2.5
+ *  v.0.2.4
  *
  * Extends Breeze with a REST DataService Adapter abstract type
  *
@@ -159,7 +159,7 @@
 
         try {
             if (adapter.saveOnlyOne && saveBundle.entities.length > 1) {
-                return Q.reject(new Error("Only one entity may be saved at a time."));
+                throw new Error("Only one entity may be saved at a time.");
             }
             saveContext.adapter = adapter;
             adapter._addToSaveContext(saveContext);
@@ -223,13 +223,15 @@
     }
 
     function _createJsonResultsAdapter(/*dataServiceAdapter*/) {
-        return new breeze.JsonResultsAdapter({
+        var jsonResultsAdapter = new breeze.JsonResultsAdapter({
             name: "noop",
+
             visitNode: function (/*node, mappingContext, nodeContext*/) {
                 return {};
             }
 
         });
+        return jsonResultsAdapter;
     }
 
     function _createSaveRequest(/* saveContext, entity, index */) {
@@ -281,9 +283,7 @@
         return response.data;
     }
 
-    function _processSavedEntity(/*savedEntity, saveContext, response, index*/){
-        // Virtual method. Override in concrete adapter if needed.
-    }
+    function _processSavedEntity(/*savedEntity, saveContext, response, index*/) { }
 
     function _serializeToJson(rawEntityData) {
         // Serialize raw entity data to JSON during save
@@ -407,21 +407,9 @@
 
     function saveRequestSucceeded(saveContext, response, index) {
         var saved = saveContext.adapter._getResponseData(response);
-        if (saved && typeof saved === 'object') {
-            // Have "saved entity" data; add its type (for JsonResultsAdapter) & KeyMapping
-            saved.$entityType = saveContext.originalEntities[index].entityType;
-            addKeyMapping();
-        } else {
-            // No "saved entity" data; return the original entity
-            saved = saveContext.originalEntities[index];
-        }
-        saveContext.saveResult.entities.push(saved);
-        return saved;
-
-        function addKeyMapping(){
+        if (saved) {
             var tempKey = saveContext.tempKeys[index];
             if (tempKey) {
-                // entity had a temporary key; add a temp-to-perm key mapping
                 var entityType = tempKey.entityType;
                 var tempValue = tempKey.values[0];
                 var realKey = getRealKey(entityType, saved);
@@ -432,7 +420,11 @@
                 };
                 saveContext.saveResult.keyMappings.push(keyMapping);
             }
+        } else {
+            saved = saveContext.originalEntities[index];
         }
+        saveContext.saveResult.entities.push(saved);
+        return saved;
     }
 
 }, this));

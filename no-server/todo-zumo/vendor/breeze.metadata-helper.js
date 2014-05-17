@@ -9,7 +9,7 @@
  * --------------------------------------------------------------------------------
  * Adds metadataHelper extensions to Breeze
  * Source:
- * https://github.com/IdeaBlade/Breeze/blob/master/Breeze.Client/Scripts/Labs/vendor.metadata-helper.js
+ *   https://github.com/Breeze/breeze.js.labs/blob/master/breeze.metadata-helper.js
  *
  * Depends on Breeze which it patches
  *
@@ -21,7 +21,7 @@
  * Use these helpers "as is" or use for inspiration in creating your own.
  *
  * For example usage, see:
- * https://github.com/IdeaBlade/Breeze/blob/master/Samples/DocCode/DocCode/tests/helpers/metadataOnClient.js
+ * https://github.com/Breeze/breeze.js.samples/blob/master/net/DocCode/DocCode/tests/helpers/metadataOnClient.js
  *
  * For a discussion of how they work and why, see:
  * http://www.breezejs.com/documentation/metadata-by-hand#addTypeToStore
@@ -34,13 +34,13 @@
         definition(window.breeze);
     } else if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
         // CommonJS or Node
-        var b = require('vendor');
+        var b = require('breeze');
         definition(b);
     } else if (typeof define === "function" && define["amd"] && !window.breeze) {
         // Requirejs / AMD
-        define(['vendor'], definition);
+        define(['breeze'], definition);
     } else {
-        throw new Error("Can't find vendor");
+        throw new Error("Can't find breeze");
     }
 }(function (breeze) {
     'use strict';
@@ -102,7 +102,7 @@
     // This function adds the type's 'shortName' as one of the resource names for the type.
     // Theoretically two types in different models could have the same 'shortName'
     // and thus we would associate the same resource name with the two different types.
-    // While unlikely, vendor should offer a way to remove a resource name for a type.
+    // While unlikely, breeze should offer a way to remove a resource name for a type.
     function addTypeNameAsResource(store, type) {
         if (!type.isComplexType) {
             store.setEntityTypeForResourceName(type.shortName, type);
@@ -210,7 +210,7 @@
     }
 
     // Patch some defaults in the type definition object
-    // Todo: consider moving some of these patches into vendor itself
+    // Todo: consider moving some of these patches into breeze itself
     function patch(typeDef) {
         var key, prop;
         if (typeDef.name) { // 'name' -> 'shortName' property
