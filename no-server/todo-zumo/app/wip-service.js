@@ -48,6 +48,9 @@
             } catch(e) { stashCount= undefined; /* err doesn't matter */}
         }
 
+
+
+
         function entityChanged(changeArgs){
             if (isRestoring || stopped) {return;} // ignore WIP service's own changes.
             var action = changeArgs.action;
@@ -59,7 +62,10 @@
             }
         }
 
-        function initialize(entityManager, typesToStash){
+
+
+
+        function initialize(entityManager){
             if (typeof disabled === 'boolean') {
                 throw new Error("WIP already enabled, can't enable twice.");
             }
@@ -90,13 +96,16 @@
             try {
                 var changes = db.getItem(stashName);
                 if (changes){
+
+
                     // should confirm that metadata and app version
                     // are still valid but this is a demo
                     imports = manager.importEntities(changes).entities;
 
+
+
                     stashCount = imports.length;
                     sendWipMessage('Restored '+stashCount+' change(s) from stash');
-
                 } else {
                     sendWipMessage('Restore found no stashed changes');
                 }
@@ -126,15 +135,21 @@
         function stash(){
             if (manager.hasChanges()){
 
+
                 // export changes w/o metadata
                 // Get only these entity types
                 // (which we only have 1 in this app)
                 var changes = manager.getChanges();
 
+
                 stashCount = changes.length;
                 sendWipMessage('Stashing '+ stashCount +' change(s)');
 
+
+
                 var exported = manager.exportEntities(changes, false);
+
+
 
                 // should stash with metadata and app version but this is a demo
                 db.setItem(stashName, exported);
@@ -143,6 +158,7 @@
                 db.removeItem(stashName);
                 stashCount = 0;
             }
+
         }
 
         function stop(){

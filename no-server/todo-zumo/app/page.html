@@ -2,8 +2,8 @@
      data-ng-controller="pageController as vm">
     <article>
         <header>
-            <h2>Windows Azure</h2>
-            <h1>Breeze Mobile Services</h1>
+            <h2>{{vm.serverTitle}}</h2>
+            <h1>{{vm.appTitle}}</h1>
 
             <!-- Buttons and Checkboxes-->
             <p class="button-bar">
@@ -11,12 +11,12 @@
                        data-ng-model="vm.showCompleted" > Show completed &nbsp;&nbsp;
                 <input type="checkbox"
                        data-ng-model="vm.showDeleted" > Show deleted
-                <button class="btn-sync" title="Sync changes with Azure."
+                <button class="btn-sync" title="Save changes and refresh with data from the server."
                         data-ng-disabled="vm.syncDisabled()"
                         data-ng-click="vm.sync()" >Sync</button>
-                <button class="btn-refresh" title="Refresh with changes from Azure but don't save."
+                <button class="btn-refresh" title="Refresh with changes from the server but don't save."
                         data-ng-click="vm.refresh()" >Refresh</button>
-                <button class="btn-reset"  title="Discard changes and reload from Azure."
+                <button class="btn-reset"  title="Discard changes and reload from the server."
                         data-ng-click="vm.reset()">Reset</button>
             </p>
             <form class="add-item" data-ng-submit="vm.addItem()">
@@ -48,11 +48,11 @@
         </ul>
 
         <p class="summary">
-            <span data-ng-show="vm.isBusy">Loading ...</span>
+            <span data-ng-show="vm.isBusy" class="loading">Loading ...</span>
             <span data-ng-hide="vm.isBusy">
-                <strong>{{vm.counts.all}} item(s)</strong>&nbsp;&nbsp; </span>
-                <span class="Added">Added: {{vm.counts.Added}}&nbsp;&nbsp; </span>
-                <span class="Modified">Modified: {{vm.counts.Modified}}&nbsp;&nbsp; </span>
+                <strong>{{vm.counts.all}} item(s)</strong>
+                <span class="Added">Added: {{vm.counts.Added}}</span>
+                <span class="Modified">Modified: {{vm.counts.Modified}}</span>
                 <span class="Deleted">Deleted: {{vm.counts.Deleted}}</span>
             </span>
         </p>
