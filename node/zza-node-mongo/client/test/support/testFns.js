@@ -40,16 +40,7 @@ var testFns = (function () {
 
     return fns;
     ////////////
-    /*******************************************************
-     * Ensure that 'appStart' service doesn't do anything
-     ********************************************************/
-    function appStartMock($provide) {
-        // appStart service spy ... to see that start was called ... if you care
-        var appStart = {
-            start: jasmine.createSpy('start')
-        };
-        $provide.value('appStart', appStart);
-    }
+
     /*******************************************************
      * Adjusts config.js values for the test environment
      *
@@ -69,6 +60,19 @@ var testFns = (function () {
             return $delegate;
         }
     }
+
+    /*******************************************************
+     * Ensure that 'appStart' service doesn't do anything
+     * by replacing the production 'appStart' with a mock
+     ********************************************************/
+    function appStartMock($provide) {
+        // appStart service spy ... to see that start was called ... if you care
+        var appStart = {
+            start: jasmine.createSpy('start')
+        };
+        $provide.value('appStart', appStart);
+    }
+
     /*******************************************************
      * A Jasmine 'beforeEach' block that establishes the 'App' module
      * with 'appStart' disabled so it doesn't immediately start running.
