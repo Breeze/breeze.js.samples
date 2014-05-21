@@ -22,7 +22,7 @@
         vm.customerFilterText = customerState.customerFilterText || '';
         vm.customers = [];
         vm.filteredCustomers = filteredCustomers;
-        vm.isLoadingCustomers = false;
+        vm.isLoadingCustomers = true;
         vm.isLoadingOrders = false;
         vm.isSelected =isSelected;
         vm.orderHeaders = orderHeaders;
