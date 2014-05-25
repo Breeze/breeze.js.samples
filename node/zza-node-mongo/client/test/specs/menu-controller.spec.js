@@ -12,18 +12,17 @@ describe("Menu Controller: ", function () {
     var controller,
         controllerFactory,
         controllerName='menu',
-        dataservice,
+        dataserviceMock,
         expectedProducts,
+        flush$q,
         $state;
 
-    testFns.beforeEachApp( function($provide){
-        dataservice = new DataServiceMock();
-        $provide.value('dataservice', dataservice);
-    });
+    testFns.beforeEachApp();
 
-    beforeEach(inject(function($controller, _$state_) {
+    beforeEach(inject(function($controller, $q) {
         controllerFactory = $controller;
-        $state = _$state_;
+        flush$q = testFns.create_flush$q();
+        dataserviceMock = new DataserviceMock($q);
     }));
 
     describeStateParamSpec('drink');
@@ -50,32 +49,25 @@ describe("Menu Controller: ", function () {
             createControllerForProductType('pizza');
         });
 
-        it("creates correct link for the product", function () {
+        it("asks the router for a link to display the right product in the right view", function () {
             var ref = controller.productRef(product);
-            expect(ref).toBe('#/menu/pizza/42')
+
+            expect($state.href.calls.count()).toBe(1); // called once
+
+            var goArgs = $state.href.calls.argsFor(0); // called with the right arguments
+            expect(goArgs[0]).toBe('app.order.product'); // the right state
+            expect(goArgs[1]).toEqual({productType : 'pizza', productId: 42}); // the right product
         });
 
-        it("calling 'go' goes to the right location for the product", function () {
-            // not very testable because we have to know all of the view templates,
-            // top to bottom, for the target state
-            // so we can fake them in $templateCache
-            inject( function($location, $rootScope, $templateCache){
-                // fakes of the views that would be loaded to get to this state
-                $templateCache.put('app/shell/header.html','');
-                $templateCache.put('app/shell/footer.html','');
-                $templateCache.put('app/shell/home.html','');
-                $templateCache.put('app/order/order.html','');
-                $templateCache.put('app/order/orderSidebar.html','');
-                $templateCache.put('app/order/orderItem.html','');
-
+        it("calls the router with the right state and params for this product", function () {
                 controller.go(product);
-                $rootScope.$digest(); // flush the route change
+                expect($state.go.calls.count()).toBe(1); // called once
 
-                expect($location.$$path).toBe('/menu/pizza/42')
+                var goArgs = $state.go.calls.argsFor(0); // called with the right arguments
+                expect(goArgs[0]).toBe('app.order.product'); // the right state
+                expect(goArgs[1]).toEqual({productType : 'pizza', productId: 42}); // the right product
             });
         });
-
-    });
 
     /* spec helpers */
     function describeStateParamSpec(productType){
@@ -89,14 +81,37 @@ describe("Menu Controller: ", function () {
     }
 
     function createControllerForProductType(productType){
+        $state = new $stateMock();
         var  ctorArgs ={
-            "$stateParams": {productType: productType },
-            "dataservice" :  dataservice
+            $state: $state,
+            $stateParams: {productType: productType },
+            dataservice: dataserviceMock
         };
         expectedProducts = [new ProductMock(productType)];
-        dataservice.lookups.products.byTag.and.returnValue(expectedProducts);
+        dataserviceMock.lookups.products.byTag.and.returnValue(expectedProducts);
 
         controller = controllerFactory(controllerName, ctorArgs);
+        flush$q();
+    }
+
+    function $stateMock(){
+        this.go = jasmine.createSpy('go');
+        this.href = jasmine.createSpy('href');
+    }
+
+    function DataserviceMock($q){
+        // dataservice.lookups.products.byTag
+        this.lookups = {
+                products:{
+                    byTag: jasmine.createSpy('byTag')
+                }
+            };
+        this.ready =  function (){ return $q.when();}
+    }
+
+    function ProductMock(type, id){
+        this.type = type;
+        this.id = id || 42;
     }
 
     function runStateParamSpecs(productType){
@@ -110,20 +125,5 @@ describe("Menu Controller: ", function () {
             var re = new RegExp(productType + ".html");
             expect(template).toMatch(re);
         });
-    }
-
-    function DataServiceMock(){
-        // dataservice.lookups.products.byTag
-        this.lookups = {
-                products:{
-                    byTag: jasmine.createSpy('byTag')
-                }
-            };
-        this.ready =  function (success){ return (success) ? success() : undefined;}
-    }
-
-    function ProductMock(type, id){
-        this.type = type;
-        this.id = id || 42;
     }
 });

@@ -17,27 +17,26 @@ describe("Customer Controller: ", function () {
         $q;
 
     testFns.beforeEachApp( function($provide){
-        dataserviceMock = new DataServiceMock();
-        $provide.value('dataservice', dataserviceMock);
+        $provide.service('dataservice', DataserviceMock);
     });
 
-    beforeEach(inject(function($controller, _$q_) {
+    beforeEach(inject(function($controller, _$q_, dataservice) {
         controllerFactory = $controller;
         $q = _$q_;
+        dataserviceMock = dataservice;
         flush$q = testFns.create_flush$q();
     }));
 
     describe("when created but not ready", function () {
         beforeEach(function(){
             var  ctorArgs = {
-                "customer.state": {},
-                "dataservice" :  dataserviceMock
+                "customer.state": {}
             };
             controller = controllerFactory(controllerName, ctorArgs);
         });
 
-        it("'getCustomers' was called", function () {
-            expect(dataserviceMock.getCustomers).toHaveBeenCalled();
+        it("'getCustomers' was not called", function () {
+            expect(dataserviceMock.getCustomers).not.toHaveBeenCalled();
         });
 
         it("has no customers yet", function () {
@@ -54,11 +53,14 @@ describe("Customer Controller: ", function () {
     describe("when ready and no previous customer.state", function () {
         beforeEach(function(){
             var  ctorArgs ={
-                "customer.state": {},
-                "dataservice" :  dataserviceMock
+                "customer.state": {}
             };
             controller = controllerFactory(controllerName, ctorArgs);
             flush$q(); // triggers autoload.
+        });
+
+        it("'getCustomers' was called", function () {
+            expect(dataserviceMock.getCustomers).toHaveBeenCalled();
         });
 
         it("has customers after customer auto-load completes", function () {
@@ -78,7 +80,7 @@ describe("Customer Controller: ", function () {
         describe("when select a customer", function () {
             var cust;
             beforeEach(function () {
-                cust = controller.customers[2]
+                cust = controller.customers[2];
                 controller.select(cust);
             });
 
@@ -95,7 +97,7 @@ describe("Customer Controller: ", function () {
                 var orderHeaders = controller.orderHeaders();// note fn call, not property
                 expect(orderHeaders.length).toBe(0);
 
-                var cust = controller.customers[1]
+                var cust = controller.customers[1];
                 controller.select(cust);
                 flush$q(); // it gets the orderHeaders
 
@@ -117,8 +119,7 @@ describe("Customer Controller: ", function () {
             };
 
             var ctorArgs = {
-                "customer.state": customerState,
-                "dataservice": dataserviceMock
+                "customer.state": customerState
             };
             controller = controllerFactory(controllerName, ctorArgs);
             flush$q(); // triggers autoload.
@@ -132,7 +133,6 @@ describe("Customer Controller: ", function () {
 
         it("has expected filtered customers", function () {
             var filteredCusts = controller.filteredCustomers(); // Note function call, not property
-            var re = new RegExp( customerState.customerFilterText);
             var allMatch = filteredCusts.every(function(c){
                 return c.firstName[0] === 'S' || c.lastName[0] === 'S';
             });
@@ -153,14 +153,15 @@ describe("Customer Controller: ", function () {
     });
 
     /* helpers */
-    function DataServiceMock(){
+    function DataserviceMock(){
         this.getCustomers =
             jasmine.createSpy('getCustomers').and.callFake(getCustomers);
 
         this.getOrderHeadersForCustomer =
             jasmine.createSpy('getOrderHeadersForCustomer').and.callFake(getOrderHeadersForCustomer);
 
-        this.ready =  function (onReady){ return (onReady) ? onReady() : undefined;}
+        this.ready =
+            jasmine.createSpy('ready').and.callFake(function (){ return $q.when();});
     }
 
     function getCustomers(){
