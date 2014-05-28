@@ -1,7 +1,7 @@
 {
   "name": "Zza-Node-Mongo",
   "description": "A demonstration of Breeze, MongoDb, Express, Angular, and Node.js (BMEAN)",
-  "version": "0.6.0",
+  "version": "0.8.0",
   "private": true,
   "dependencies": {
     "body-parser": "~1.0.0",

@@ -5,15 +5,17 @@
     <title>Zza-Node-Mongo with AngularJs</title>
 
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+
     <link rel="shortcut icon" type="image/png" href="images/logo.png">
 
-    <link href="./css/ie10mobile.css" rel="stylesheet" />
-    <link href="./css/bootstrap.css" rel="stylesheet" />
-    <link href="./css/bootstrap-responsive.css" rel="stylesheet" />
-    <link href="lib/toastr/toastr.css" rel="stylesheet" />
-    <link href="./css/styles.css" rel="stylesheet" />
+    <link href="css/ie10mobile.css" rel="stylesheet" />
+    <!--<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />-->
+    <link href="css/bootstrap.css" rel="stylesheet" />
+    <link href="css/bootstrap-responsive.css" rel="stylesheet" />
+    <link href="bower_components/toastr/toastr.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
 
 </head>
 
@@ -26,22 +28,25 @@
 
     <div data-ui-view="footer"></div>
 
-    <!-- *** Vendor scripts  *** -->
-    <script src="lib/angular/angular.js"></script>
-    <script src="lib/angular-sanitize/angular-sanitize.js"></script>
-    <script src="lib/angular-ui-router/angular-ui-router.js"></script>
-    <script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 
-    <script src="lib/breeze/breeze.debug.js"></script>
-    <script src="lib/breeze/breeze.angular.js"></script>
-    <script src="lib/breeze/breeze.dataservice.mongo.js"></script>
-    <script src="lib/breeze/breeze.metadata-helper.js"></script>
+    <!-- *** Vendor Scripts *** -->
+    <!-- toastr requires jQuery, not required by breeze or this app -->
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+    <script src="bower_components/toastr/toastr.js"></script>
+    <script src="bower_components/breezejs/breeze.debug.js"></script>
 
-    <script src="lib/breeze/b00_breeze.modelLibrary.new-backingstore.js"></script>
+    <!-- testing this alternative to the core backingstore adapter -->
+    <script src="lib/b00_breeze.modelLibrary.new-backingstore.js"></script>
 
-    <!-- toastr requires jQuery, not breeze or this app -->
-    <script src="lib/jquery/jquery.min.js"></script>
-    <script src="lib/toastr/toastr.js"></script>
+    <script src="bower_components/breezejs/adapters/breeze.dataService.mongo.js"></script>
+    <script src="bower_components/breezejs/labs/breeze.angular.js"></script>
+    <script src="bower_components/breezejs/labs/breeze.metadata-helper.js"></script>
+    <script src="bower_components/breezejs/labs/breeze.saveErrorExtensions.js"></script>
+    <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.min.js"></script>
 
     <!-- *** Application scripts *** -->
     <script src="app/app.js"></script>  <!-- must load first -->

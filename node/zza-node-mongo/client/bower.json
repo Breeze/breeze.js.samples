@@ -1,0 +1,28 @@
+{
+  "name": "Zza-Node-Mongo client",
+  "version": "0.8.0",
+  "description": "A demonstration of Breeze, MongoDb, Express, Angular, and Node.js (BMEAN)",
+  "authors": [
+    "Ward Bell"
+  ],
+  "license": "MIT",
+  "homepage": "http://www.breezejs.com/samples/zza",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.2.16",
+    "angular-animate": "~1.2.16",
+    "angular-mocks": "~1.2.16",
+    "angular-sanitize": "~1.2.16",
+    "angular-ui-bootstrap-bower": "~0.10.0",
+    "angular-ui-router": "~0.2.10",
+    "breezejs": "~1.4.12",
+    "jquery": "~2.1.0",
+    "toastr": "~2.0.1"
+  }
+}

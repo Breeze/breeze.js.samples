@@ -12,26 +12,28 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-        /* vendor libraries */
-        './lib/angular/angular.js',
-        './lib/angular-sanitize/angular-sanitize.js',
-        './lib/angular-ui-router/angular-ui-router.js',
-        './lib/angular-bootstrap/ui-bootstrap-tpls.js',
+        <!-- *** Vendor Libraries *** -->
+        <!-- toastr requires jQuery, not required by breeze or this app -->
+        './bower_components/jquery/dist/jquery.min.js',
+        './bower_components/angular/angular.js',
+        './bower_components/angular-animate/angular-animate.js',
+        './bower_components/angular-sanitize/angular-sanitize.js',
+        './bower_components/angular-ui-router/release/angular-ui-router.js',
+        './bower_components/toastr/toastr.js',
+        './bower_components/breezejs/breeze.debug.js',
 
-        './lib/breeze/breeze.debug.js',
-        './lib/breeze/breeze.angular.js',
-        './lib/breeze/breeze.dataservice.mongo.js',
-        './lib/breeze/breeze.metadata-helper.js',
+        <!-- testing this alternative to the core backingstore adapter -->
+        './lib/b00_breeze.modelLibrary.new-backingstore.js',
 
-        /* testing new-backingstore modelLibrary */
-        './lib/breeze/b00_breeze.modelLibrary.new-backingstore.js',
-
-        './lib/jquery/jquery.min.js',
-        './lib/toastr/toastr.js',
+        './bower_components/breezejs/adapters/breeze.dataService.mongo.js',
+        './bower_components/breezejs/labs/breeze.angular.js',
+        './bower_components/breezejs/labs/breeze.metadata-helper.js',
+        './bower_components/breezejs/labs/breeze.saveErrorExtensions.js',
+        './bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.min.js',
 
         /* test libraries */
-        './test/lib/angular-mocks.js',
-        './test/lib/ngMidwayTester.js',
+        './bower_components/angular-mocks/angular-mocks.js',
+        './bower_components/breezejs/labs//ngMidwayTester.js',
         './test/lib/bind-polyfill.js', // Needed for phantomJS
 
         /* application scripts */

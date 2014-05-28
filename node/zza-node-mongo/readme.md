@@ -26,11 +26,15 @@ Start mongodb server while pointing to this database directory. On my windows ma
 
 Console output should indicate that MongoDb server started successfully and is listening on port 27017 (or adjust the `mongodbUrl` in `~\server\database.js` to the appropriate port).
 
-##Install server npm modules and launch app server
+##Install dependencies and launch app server
 
 Open a second command / terminal window
 
-Navigate to the project root, *~/node/zza-node-mongo*
+Navigate to the client folder, *~/node/zza-node-mongo/client*
+
+Install the bower packages: `bower install`
+
+Navigate to the server folder, *~/node/zza-node-mongo/server*
 
 Install the node modules: `npm install`
 

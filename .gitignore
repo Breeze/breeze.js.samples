@@ -17,6 +17,7 @@ breeze*.css
 #Same with the Breeze Labs EdmBuilder
 EdmBuilder.cs
 
+bower_components
 node_modules
 bin
 obj
