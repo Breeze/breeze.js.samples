@@ -32,11 +32,18 @@ The **Breeze** features of particular interest are:
 
 #Installation
 
-All client-side assets are included in the project. 
+The breeze scripts are not included directly in this sample. You must copy them into the sample before you run it.
 
-No installation is required to run the app against the Microsoft Azure Mobile Service because that server is "in the cloud".
+Windows users can simply execute the ***getLibs.cmd*** command file which copies the files from a source directory in the samples repository into the *scripts*  folder.
 
-**Continue with installation only if you're interested in the Web API server.**
+Not a Windows user? It's pretty simple.
+
+* Open the ***getLibs.cmd*** command file in a text editor.
+* Notice that it copies a small number of source files, starting from  <em>..\..\build\libs\</em>,  into the  *vendors*  folder.
+* Create a "vendors" folder (if one doesn't exist) as a sibling of the *app* folder 
+* Copy the files manually as described in *getLibs.cmd*.
+
+**Continue with these installation instructions only if you're interested in the Web API server.**
 
 <a name="buildWebAPI"></a>
 You'll have to build ASP.NET Web API server first before re-targeting the application to that server. Here's how:
@@ -97,9 +104,13 @@ Now we'll reconfigure the application to target the Web API
 
 1. Open *config.js*
 
-1. Change line #10 to `useZumo=false`
+1. Change line #10 to `useZumo=false` and save
 
-1. Save and refresh the browser
+1. Launch the *web server* if it isn't already running by double-clicking ***launch-windows*** which opens the Web application server in a console window. Confirm that this server is running on **localhost:8000**.
+
+    >At this point you have two command windows open: the Web API data server on port 58066 and the web app server on port 8000.
+
+1. Open or refresh the browser at **localhost:8000**.
 
 It should look something like this:
 

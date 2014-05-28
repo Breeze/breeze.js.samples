@@ -65,7 +65,17 @@ The rails **server** is running on port **3000**
 
 #Start the client application server
 
-The client application assets - html, css, JavaScript - are in the *~/ccjs_ruby/client* directory.
+Most of the client application assets - html, css, JavaScript - are in the *~/ccjs_ruby/client* directory.
+
+The breeze scripts are *not included* directly. You must copy them into the sample before you run it.
+
+Windows users can simply execute the ***getLibs.cmd*** command file which copies the files from a source directory in the samples repository into the *client/scripts*  folder.
+
+Not a Windows user? It's really simple.
+
+* Open the ***getLibs.cmd*** command file in a text editor.
+* Notice that it copies a small number of source files, starting from  <em>..\..\build\libs\</em>,  into the  *scripts*  folder.
+* Do the same manually.
 
 Open a **second** terminal or command window, navigate to that directory, and launch your web server of choice. 
 Here is an example running in Python.
