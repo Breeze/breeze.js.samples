@@ -4,7 +4,7 @@
 
 To keep your attention squarely on client development, this app can run without defining a server on your machine. By default it queries and saves data to a **Microsoft Azure Mobile Services** (AKA "Zumo") back-end that is waiting for your call.
 
->The Zumo aspect alone may be interesting to you. Alternatively, if you're developing in a Windows environment, you can reconfigure the app to talk to an ASP.NET Web API back-end running on localhost. That server is included in this project in the *todo.WebAPI* folder as [discussed below](#buildWebAPI).
+>The Zumo aspect alone may be interesting to you. Alternatively, if you're developing in a Windows environment, you can reconfigure the app to talk to an ASP.NET Web API back-end running on localhost. That server is included in this project in the *todo.WebAPI* folder as [discussed below](#WebAPI).
 
 The **Breeze** features of particular interest are:
 
@@ -36,6 +36,8 @@ The breeze scripts are not included directly in this sample. You must copy them 
 
 Windows users can simply execute the ***getLibs.cmd*** command file which copies the files from a source directory in the samples repository into the *scripts*  folder.
 
+>Windows may ask you to approve running this script; please do so.
+
 Not a Windows user? It's pretty simple.
 
 * Open the ***getLibs.cmd*** command file in a text editor.
@@ -43,16 +45,7 @@ Not a Windows user? It's pretty simple.
 * Create a "vendors" folder (if one doesn't exist) as a sibling of the *app* folder 
 * Copy the files manually as described in *getLibs.cmd*.
 
-**Continue with these installation instructions only if you're interested in the Web API server.**
-
-<a name="buildWebAPI"></a>
-You'll have to build ASP.NET Web API server first before re-targeting the application to that server. Here's how:
-
-1. Go to the *todo.WebAPI* folder
-2. Launch the *todo.sln* in Visual Studio
-3. Build it (ctrl-shift-B); it should download the requisite nuget packages during the build process.
-
-You can run this server in Visual Studio, either with or without debug. But you don't have to. Once built, you can close Visual Studio and you needn't open it again. See [Web API run instructions below](#runWebAPI)
+>If you want to run the *Web API server* variation, continue with the Web API server installation instructions [below](#WebAPI). 
 
 #Run
 
@@ -61,6 +54,9 @@ You'll need to launch a web application server to host the client-side assets (H
 1. Open the *launchers* folder.
 
 1. Pick the launch option appropriate to your OS and double-click to launch. For example, Windows users should choose *launch-windows*. The launcher opens the web server in a console/terminal window. Confirm that the server is running.
+
+
+    >Windows may ask you to approve running this script; please do so.
 
 1. Open a browser to **http://localhost:8000/**
 
@@ -82,13 +78,21 @@ Notice that
 
 * <span style="color:red;">Red error messages</span> (not shown) appear below the blue WIP messages when something goes wrong ... such as trying to save a TodoItem that has no description.
 
-<a name="runWebAPI"></a>
+<a name="WebAPI"></a>
 #The Web API Option
 
 If you're on a Windows .NET 4.5 machine you can reconfigure the app to talk to a local ASP.NET Web API service.
 
->Make sure you've built the Web API server as [described above](#buildWebAPI).
-You can run the server in Visual Studio ... but you don't have to.
+##Install the Web API server
+
+You'll have to build ASP.NET Web API server first before re-targeting the application to that server. Here's how:
+
+1. Go to the *todo.WebAPI* folder
+2. Launch the *todo.sln* in Visual Studio
+3. Build it (ctrl-shift-B); it should download the requisite nuget packages during the build process.
+
+##Run with a Web API server
+You can run this server in Visual Studio, either with or without debug. But you don't have to. Once built, you can close Visual Studio and you needn't open it again. Instead, do as follows:
 
 1. Open the *launchers* folder.
 
