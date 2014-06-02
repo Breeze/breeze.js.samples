@@ -112,11 +112,11 @@ module.exports = function(grunt) {
         })
       },  
       
-      samples: {
-        files: sampleDirs.map(function(dir) {
-            return buildSampleCopyCmd(dir, tempDir);
-          })
-      },
+      // samples: {
+      //  files: sampleDirs.map(function(dir) {
+      //      return buildSampleCopyCmd(dir, tempDir);
+      //    })
+      // },
       
       readMe: {
         files: [{ expand: true, src: ['readme.txt'], dest: tempDir }],
@@ -129,13 +129,13 @@ module.exports = function(grunt) {
         files: [ 
           { expand: true, cwd: tempDir, src: [ '**/**', '!Samples/**/*' ], dest: '/' } 
         ]
-      },
-      baseWithSamples: {
-        options: { archive:  zipPlusFileName, mode: 'zip', level: 9  },
-        files: [ 
-          { expand: true, dot: true, cwd: tempDir, src: [ '**/*' ], dest: '/' } 
-        ]
       }
+      // baseWithSamples: {
+      //  options: { archive:  zipPlusFileName, mode: 'zip', level: 9  },
+      //  files: [ 
+      //    { expand: true, dot: true, cwd: tempDir, src: [ '**/*' ], dest: '/' } 
+      //  ]
+      // }
     },
    
   });
