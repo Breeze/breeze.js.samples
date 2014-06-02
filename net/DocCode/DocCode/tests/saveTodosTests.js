@@ -233,7 +233,46 @@
            .fail(handleSaveFailed)
            .fin(start);
     });
-    
+
+    /*********************************************************
+    * propertyChanged raised when merged save result changes a property
+    *********************************************************/
+    asyncTest("propertyChanged raised when merged save result changes a property", 3, function () {
+        var em = newTodosEm(); 
+        var todo = em.createEntity('TodoItem', {Description: "Saved description" });
+
+        em.saveChanges().then(saveSucceeded).catch(handleFail).finally(start);
+
+        ok(todo.entityAspect.isBeingSaved, "new todo is in the act of being saved");
+
+        // This change should be overwritten with the server value when the save result is returned
+        // even though the entity is in an Added state and the MergeStrategy is PreserveChanges
+        // because save expects to merge server values into an entity it is saving
+        todo.Description("Changed on client before save returns");
+
+        var descriptionChanged = false;
+        todo.entityAspect.propertyChanged.subscribe(function (changeArgs) {
+            // bug: subscription called twice during merge
+            // 1) propertyName === "Id" (assigned with permanent ID)
+            // 2) propertyName === null (huh?)
+            // and not called with propertyName === "Description" as it should be
+            if (changeArgs.propertyName === 'Description') {
+                descriptionChanged = true;
+            }
+        });
+
+        function saveSucceeded(saveResult) {
+            var saved = saveResult.entities[0];
+            // passes
+            equal(saved && saved.Description(), "Saved description",
+                "the merge after save should have restored the saved description");
+
+            // fails
+            ok(descriptionChanged,
+                "should have raised propertyChanged after merge/update of 'Description' property");
+        }
+    });
+
     /*********************************************************
     * can save entity with an unmapped property
     * The unmapped property is sent to the server where it is unknown to the Todo class
