@@ -920,7 +920,53 @@
                 
             }
         });
-    
+
+    /*********************************************************
+    * Can make three separate queries for Order, Customer, Employee
+    * in parallel and Breeze will wire up their relationships.
+    *********************************************************/
+    asyncTest("Can make parallel queries and breeze will wire relationships", 6, function() {
+
+        var em = newEm();
+        var oQuery = EntityQuery.from("Orders").where(alfredsPredicate);
+        var eQuery = EntityQuery.from("Employees");
+        var cQuery = EntityQuery.from("Customers").where(alfredsPredicate);
+        var all = [
+            oQuery.using(em).execute(),
+            eQuery.using(em).execute(),
+            cQuery.using(em).execute()
+        ];
+        Q.all(all).then(success).catch(handleFail).finally(start);
+
+        function success(allResults) {
+            var orders = allResults[0].results;
+            var emps = allResults[1].results;
+            var custs = allResults[2].results;
+
+            notEqual(orders.length, 0, "should have orders");
+            notEqual(emps.length, 0, "should have orders");
+            equal(custs.length, 1, "should have one customer");
+
+            var alfreds = custs[0];
+            equal(alfreds.CompanyName(), "Alfreds Futterkiste", "that customer is 'Alfreds'");
+            equal(alfreds.Orders().length, orders.length,
+              "'Alfreds' has same number of orders (assume 'the same orders') as we retrieved by query");
+
+            var ordersWithoutEmps = [];
+            orders.forEach(function(o) {
+                var emp =  o.Employee();
+                if (!emp) {
+                    ordersWithoutEmps.push({ ID: o.OrderID(), ShipName: o.ShipName() });
+                }
+            });
+            if (ordersWithoutEmps.length) {
+                ok(false, "some orders didn't have emps in cache: ", JSON.stringify());
+            } else {
+                ok(true, "all orders should have emps in cache");
+            }
+        };
+    });
+
     /*** ORDERING AND PAGING ***/
 
     module("queryTests (ordering & paging)", testFns.getModuleOptions(newEm));
