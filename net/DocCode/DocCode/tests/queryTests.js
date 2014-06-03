@@ -928,9 +928,9 @@
     asyncTest("Can make parallel queries and breeze will wire relationships", 6, function() {
 
         var em = newEm();
-        var oQuery = EntityQuery.from("Orders").where(alfredsPredicate);
-        var eQuery = EntityQuery.from("Employees");
-        var cQuery = EntityQuery.from("Customers").where(alfredsPredicate);
+        var oQuery = EntityQuery.from("Orders").where(alfredsPredicate); // all 'Alfreds' orders
+        var eQuery = EntityQuery.from("Employees"); // all employees
+        var cQuery = EntityQuery.from("Customers").where(alfredsPredicate); // the 'Alfreds' company
         var all = [
             oQuery.using(em).execute(),
             eQuery.using(em).execute(),
@@ -944,7 +944,7 @@
             var custs = allResults[2].results;
 
             notEqual(orders.length, 0, "should have orders");
-            notEqual(emps.length, 0, "should have orders");
+            notEqual(emps.length, 0, "should have employees");
             equal(custs.length, 1, "should have one customer");
 
             var alfreds = custs[0];
