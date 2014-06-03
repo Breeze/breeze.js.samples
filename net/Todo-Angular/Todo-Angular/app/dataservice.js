@@ -7,9 +7,9 @@
 (function() {
 
     angular.module('app').factory('dataservice',
-    ['$timeout', 'breeze', 'logger', dataservice]);
+    ['$http', '$q', '$timeout', 'breeze', 'logger', dataservice]);
 
-    function dataservice($timeout, breeze, logger) {
+    function dataservice($http, $q, $timeout, breeze, logger) {
 
         var serviceName = 'breeze/todos'; // route to the same origin Web Api controller
 
@@ -69,7 +69,7 @@
 
             function queryFailed(error) {
                 logger.error(error.message, "Query failed");
-                throw error; // so downstream promise users know it failed
+                return $q.reject(error); // so downstream promise users know it failed
             }
         }
 
@@ -86,29 +86,9 @@
             return message;
         }
 
-        function purge(callback) {
-            // Todo: breeze should support commands to the controller
-            // Simplified: fails silently
-            $.post(serviceName + '/purge', function() {
-                logger.success("database purged.");
-                manager.clear();
-                if (callback) callback();
-            });
-        }
-
         function removePropertyChangeHandler(handler) {
             // Actually removes any 'entityChanged' event handler
             return manager.entityChanged.unsubscribe(handler);
-        }
-
-        function reset(callback) {
-            // Todo: breeze should support commands to the controller
-            // Simplified: fails silently
-            $.post(serviceName + '/reset', function() {
-                logger.success("database reset.");
-                manager.clear();
-                if (callback) callback();
-            });
         }
 
         function saveChanges() {
@@ -145,10 +125,37 @@
                 $timeout(function() {
                     manager.rejectChanges();
                 }, 1000);
-                throw error; // so downstream promise users know it failed
+                return $q.reject(error); // so downstream promise users know it failed
             }
 
         }
-    }
 
+        //#region demo operations
+        function purge(callback) {
+            return $http.post(serviceName + '/purge')
+            .then(function () {
+                logger.success("database purged.");
+                manager.clear();
+                if (callback) callback();
+            })
+            .catch(function (error) {
+                logger.error("database purge failed: " + error);
+                return $q.reject(error); // so downstream promise users know it failed
+            });
+        }
+
+        function reset(callback) {
+            return $http.post(serviceName + '/reset')
+            .then(function () {
+                logger.success("database reset.");
+                manager.clear();
+                if (callback) callback();
+            })
+            .catch(function (error) {
+                logger.error("database reset failed: " + error);
+                return $q.reject(error); // so downstream promise users know it failed
+            });
+        }
+        //#endregion
+    }
 })();

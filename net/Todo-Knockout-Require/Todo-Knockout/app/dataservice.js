@@ -125,22 +125,26 @@ define(['jquery', 'ko', 'breeze', 'logger', 'breeze.savequeuing'], function ($, 
 
     //#region demo operations
     function purge(callback) {
-        // Todo: breeze should support commands to the controller
-        // Simplified: fails silently
-        $.post(serviceName + '/purge', function () {
+        return $.post(serviceName + '/purge')
+        .then(function () {
             logger.success("database purged.");
             manager.clear();
             if (callback) callback();
+        })
+        .fail(function (error) {
+            logger.error("database purge failed: " + error);
         });
     }
 
     function reset(callback) {
-        // Todo: breeze should support commands to the controller
-        // Simplified: fails silently
-        $.post(serviceName + '/reset', function () {
+        return $.post(serviceName + '/reset')
+        .then(function () {
             logger.success("database reset.");
             manager.clear();
             if (callback) callback();
+        })
+        .fail(function (error) {
+            logger.error("database reset failed: " + error);
         });
     }
     //#endregion
