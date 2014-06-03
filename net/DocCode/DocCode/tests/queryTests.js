@@ -922,55 +922,76 @@
         });
 
     /*********************************************************
-    * Can make three separate queries for Order, Customer, Employee
-    * in parallel and Breeze will wire up their relationships.
+    * When run separate queries for Employee, Orders, EmployeeTerritories.
+    * Breeze will wire up their relationships.
+    * 
+    * These next tests are a response to the SO question
+    * http://stackoverflow.com/questions/24001496/breeze-js-priming-loading-and-caching-data-via-asynchronous-requests
+    *
+    * The tests verify the entity wiring after all queries have finished.
+    *
+    * Note that Employee has many Orders and many EmployeeTerritories
+    * which matches the SO question's model structure
     *********************************************************/
-    asyncTest("Can make parallel queries and breeze will wire relationships", 6, function() {
-
+    asyncTest("Can run parallel queries and breeze will wire relationships", 5, function () {
         var em = newEm();
-        var oQuery = EntityQuery.from("Orders")   .using(em).where(alfredsPredicate); // all 'Alfreds' orders
-        var eQuery = EntityQuery.from("Employees").using(em); // all employees
-        var cQuery = EntityQuery.from("Customers").using(em).where(alfredsPredicate); // the 'Alfreds' company
+        var queries = make_Emp_Orders_EmpTerritories_Queries(em);
         var all = [
-            oQuery.execute(),
-            eQuery.execute(),
-            cQuery.execute()
+            queries.eQuery.execute(),
+            queries.etQuery.execute(),
+            queries.oQuery.execute()
         ];
-        Q.all(all).then(success).catch(handleFail).finally(start);
-
-        function success(allResults) {
-            var orders = allResults[0].results;
-            var emps = allResults[1].results;
-            var custs = allResults[2].results;
-
-            // could have done this instead if I wasn't sure that results are in cache
-            //var orders = oQuery.executeLocally();
-            //var emps   = eQuery.executeLocally();
-            //var custs  = cQuery.executeLocally();
-
-            notEqual(orders.length, 0, "should have orders");
-            notEqual(emps.length, 0, "should have employees");
-            equal(custs.length, 1, "should have one customer");
-
-            var alfreds = custs[0];
-            equal(alfreds.CompanyName(), "Alfreds Futterkiste", "that customer is 'Alfreds'");
-            equal(alfreds.Orders().length, orders.length,
-              "'Alfreds' has same number of orders (assume 'the same orders') as we retrieved by query");
-
-            var ordersWithoutEmps = [];
-            orders.forEach(function(o) {
-                var emp =  o.Employee();
-                if (!emp) {
-                    ordersWithoutEmps.push({ ID: o.OrderID(), ShipName: o.ShipName() });
-                }
-            });
-            if (ordersWithoutEmps.length) {
-                ok(false, "some orders didn't have emps in cache: ", JSON.stringify());
-            } else {
-                ok(true, "all orders should have emps in cache");
-            }
-        };
+        Q.all(all)
+        .then(function () { check_Emp_Orders_EmpTerritories(queries); })
+        .catch(handleFail).finally(start);
     });
+
+    asyncTest("Can chain queries, dependent first, and breeze will wire relationships", 5, function () {
+        var em = newEm();
+        var queries = make_Emp_Orders_EmpTerritories_Queries(em);
+        // Run dependent entity queries first starting with Orders
+        queries.oQuery.execute()
+        // then EmployeeTerritories
+        .then(function () { return queries.etQuery.execute(); })
+        // lastly the principal (Employee) query
+        .then(function () { return queries.eQuery.execute(); })
+        // now assert that everything is wired up
+        .then(function () { check_Emp_Orders_EmpTerritories(queries); })
+        .catch(handleFail).finally(start);
+    });
+
+    function make_Emp_Orders_EmpTerritories_Queries(em) {
+        var eQuery = EntityQuery.from("Employees").using(em)
+                .where('EmployeeID', '==', 1); // trim to just Nancy
+        var etQuery = EntityQuery.from("EmployeeTerritories").using(em);
+        var oQuery = EntityQuery.from("Orders").using(em)
+                 .where('EmployeeID', '==', 1); // trim to just Nancy's orders 
+        return {
+            eQuery: eQuery,
+            etQuery: etQuery,
+            oQuery: oQuery
+        };
+    }
+
+    function check_Emp_Orders_EmpTerritories(queries) {
+        var emps           = queries.eQuery.executeLocally();
+        var empTerritories = queries.etQuery.executeLocally();
+        var orders         = queries.oQuery.executeLocally();
+
+        equal(emps.length, 1, "should have one Employee (Nancy)");
+        notEqual(orders.length, 0, "should have Orders");
+        notEqual(empTerritories.length, 0, "should have EmployeeTerritories");
+
+        var e1 = emps[0];
+        var e1Name = e1.FirstName();
+        var e1OrdersLen = e1.Orders().length;
+        var e1EmpTerritoriesLen = e1.EmployeeTerritories().length;
+
+        notEqual(e1OrdersLen, 0,
+            "'{0}' has {1} Orders".format(e1Name, e1OrdersLen));
+        notEqual(e1EmpTerritoriesLen, 0,
+            "'{0}' has {1} EmployeeTerritories".format(e1Name, e1EmpTerritoriesLen));
+    };
 
     /*** ORDERING AND PAGING ***/
 
