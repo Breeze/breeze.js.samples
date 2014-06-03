@@ -27,6 +27,7 @@ docCode.testFns = (function () {
         assertIsSorted: assertIsSorted,
         breeze: breeze,
         ensureIsEm: ensureIsEm,
+        foosMetadataServiceName: "breeze/FoosMetadata",
         getModuleOptions: getModuleOptions,
         getNextIntId: getNextIntId,
         getParserForUrl: getParserForUrl,

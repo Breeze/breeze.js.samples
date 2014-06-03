@@ -17,7 +17,7 @@
     var customerType;
 
     //#region Basic metadata tests
-    module("metadataTests (EntityType inspection)");
+    module("metadataTests (fetched metadata)");
 
     /*********************************************************
     * Can identify FK property name for child (dependent) EntityType
@@ -68,6 +68,35 @@
             ok(false, "query failed: " + error.message);
         }
     });
+    /*********************************************************
+    * Can can get enum types from raw EF-generated metadata
+    * Related to feature request #2271: Extract enum values from server metadata
+    *************************************************************/
+    asyncTest("can get enum type from raw EF-generated metadata", function() {
+
+        var serviceName = testFns.foosMetadataServiceName;
+        var store = new breeze.MetadataStore();
+        store.fetchMetadata(serviceName)
+            .then(metaSuccess, metaFail).fail(handleFail).fin(start);
+
+        function metaSuccess(rawMetadata) {
+            ok(true, "foos metadata fetched");
+            var enumType = rawMetadata.schema && rawMetadata.schema.enumType;
+            if (enumType && enumType.name ==='Color') {
+                var members = enumType.member;
+                ok(members.length,
+                    "should have several members; members are: " + JSON.stringify(members));
+            } else {
+                ok(false, "metadata should have had one enumType, 'Color'.");
+            }
+        }
+
+        function metaFail(error) {
+            ok(false, "foos metadata fetch failed: " + error.message);
+        }
+
+    });
+
 
     module("metadataTests", { setup: northwindMetadataStoreSetup });
 

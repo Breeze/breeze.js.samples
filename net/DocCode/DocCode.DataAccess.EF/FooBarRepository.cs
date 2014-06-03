@@ -112,12 +112,12 @@ namespace DocCode.DataAccess
             {
                 return new List<Foo>
                 {
-                  new Foo {ID = _idSeed++, Name = "Foo A", SomethingVeryBig = "Wow that's a lot of data."},
-                  new Foo {ID = _idSeed++, Name = "Foo C", SomethingVeryBig = "Wow that's even more data."},
-                  new Foo {ID = _idSeed++, Name = "Foo B", SomethingVeryBig = "Cut it out already."},
-                  new Foo {ID = _idSeed++, Name = "Foo D", SomethingVeryBig = "When will this end?"},
-                  new Foo {ID = _idSeed++, Name = "Foo F", SomethingVeryBig = "OMG! You've got to be kidding."},
-                  new Foo {ID = _idSeed++, Name = "Foo E", SomethingVeryBig = "We've got to get a grip on all this data."},
+                  new Foo {ID = _idSeed++, Name = "Foo A", Color = Color.Violet, SomethingVeryBig = "Wow that's a lot of data."},
+                  new Foo {ID = _idSeed++, Name = "Foo C", Color = Color.Red,    SomethingVeryBig = "Wow that's even more data."},
+                  new Foo {ID = _idSeed++, Name = "Foo B", Color = Color.Green,  SomethingVeryBig = "Cut it out already."},
+                  new Foo {ID = _idSeed++, Name = "Foo D", Color = Color.Blue,   SomethingVeryBig = "When will this end?"},
+                  new Foo {ID = _idSeed++, Name = "Foo F", Color = Color.Yellow, SomethingVeryBig = "OMG! You've got to be kidding."},
+                  new Foo {ID = _idSeed++, Name = "Foo E", Color = Color.Violet, SomethingVeryBig = "We've got to get a grip on all this data."},
                 }; 
             }
         }

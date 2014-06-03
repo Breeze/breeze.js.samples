@@ -21,7 +21,7 @@
     "angular-sanitize": "~1.2.16",
     "angular-ui-bootstrap-bower": "~0.10.0",
     "angular-ui-router": "~0.2.10",
-    "breezejs": "~1.4.12",
+    "breezejs": "~1.4.13",
     "jquery": "~2.1.0",
     "toastr": "~2.0.1"
   }
