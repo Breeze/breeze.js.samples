@@ -622,8 +622,13 @@
         // Get the predicate and show what it looks like in OData
         var pred = getOrderedIn1996Predicate();
         var em = newEm();
-        var nullEntityType = new EntityType(em.metadataStore);
-        ok(true, "OData predicate: " + pred.toODataFragment(nullEntityType));
+
+        // DISPLAY generated OData query clause
+        // Need a type. Any type will work, even a dummy type
+        //   var dummyType = new EntityType(em.metadataStore); 
+        // But we'll use the Order type in this example which is more accurate
+        var orderType = em.metadataStore.getEntityType('Order');
+        ok(true, "OData predicate: " + pred.toODataFragment(orderType));
 
         var query = new EntityQuery("Orders").where(pred);
 
@@ -632,6 +637,7 @@
 
 
     function getOrderedIn1996Predicate() {
+
         var pred = breeze.Predicate
             .create('OrderDate', '>=', new Date(Date.UTC(1996, 0, 1))) // Jan===0 in JavaScript
             .or(    'OrderDate', '<',  new Date(Date.UTC(1997, 0, 1)))
@@ -650,7 +656,7 @@
              b) The `or` call returns a predicate which is the OR of the 1st predicate and 
                 the 2nd date condition. This is the OR predicate
           
-             c) The third `and` call returns the AND of the OR-predicate and the name-test.
+             c) The third `and` call returns the AND of the OR-predicate and the Freight condition.
 
           2) This predicate isn't associated with Order.
              Could apply to any query for a type with 'OrderDate' and 'Freight' properties.
