@@ -632,17 +632,49 @@
 
 
     function getOrderedIn1996Predicate() {
-        // Notice this predicate isn't associated with Order.
-        // Could apply to any query on a conforming type.
+        var pred = breeze.Predicate
+            .create('OrderDate', '>=', new Date(Date.UTC(1996, 0, 1))) // Jan===0 in JavaScript
+            .or(    'OrderDate', '<',  new Date(Date.UTC(1997, 0, 1)))
+            .and(   'Freight',   '>',  100);
+        return pred;
 
-        // var p1 = new Predicate("year(OrderDate)", FilterQueryOp.Equals, 1996); // will work someday
+        /*
+          See also http://stackoverflow.com/questions/24053168/how-do-i-write-a-breeze-predicate-equivalent-to-the-following-sql/24068591#24068591
 
-        var p1 = Predicate.create(
-             "OrderDate", ">=", new Date(1996, 0, 1)) // Jan=01 in JavaScript
-        .and("OrderDate", "<", new Date(1997, 0, 1));
+          Noteworthy:
+          
+          1) The **left-to-right composition of the predicates**.
+          
+             a) The `create` call predicate creates the date-gte predicate
+          
+             b) The `or` call returns a predicate which is the OR of the 1st predicate and 
+                the 2nd date condition. This is the OR predicate
+          
+             c) The third `and` call returns the AND of the OR-predicate and the name-test.
 
-        var p2 = new Predicate("Freight", ">", 100);
-        return p1.and(p2);
+          2) This predicate isn't associated with Order.
+             Could apply to any query for a type with 'OrderDate' and 'Freight' properties.
+          
+          3) Using `new Date(Date.UTC(...))` to specify dates that are
+             a) unambiguous in the face of international differences for date literals
+             b) have no time values (and we hope the db doesn't have them either)
+             c) are created as UTC dates to avoid timezone issues
+          
+          4) This is the verbose alternative:
+
+            var p1 = breeze.Predicate
+                     .create("OrderDate", ">=", new Date(Date.UTC(1996, 0, 1))) // Jan===0 in JavaScript
+                     .and("OrderDate", "<", new Date(Date.UTC(1997, 0, 1)));
+          
+            var p2 = new breeze.Predicate("Freight", ">", 100);
+
+            return p1.and(p2);
+
+          5) Someday, when we have date function support, we could write this version of p1
+
+             var p1 = new breeze.Predicate("year(OrderDate)", FilterQueryOp.Equals, 1996); 
+
+        */
     }
     
     /***  RELATED PROPERTY / NESTED QUERY ***/
