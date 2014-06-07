@@ -32,72 +32,104 @@
     }
 
     /*********************************************************
-    * add property directly to customer instance
+    * add untracked property directly to customer instance
     *********************************************************/
-    test("add property directly to customer instance", 2, function () {
-        var customerType = moduleMetadataStore.getEntityType("Customer");
-        var cust = customerType.createEntity();
-        cust.isBeingEdited = ko.observable(false);
-        ok(typeof cust["isBeingEdited"] === "function",
-            "should have 'isBeingEdited' KO property after adding directly to instance");
-        
-        var propInfo = customerType.getProperty("isBeingEdited");
+    test("add untracked 'isPartial' property directly to customer instance", 1, function () {
+
+        var em = newEm();
+        var cust = em.createEntity('Customer', {
+            CustomerID: testFns.newGuidComb()
+        });
+
+        // property added to instance
+        cust.isPartial = ko.observable(false);
+
+        // can get the type from the entity instance
+        var custType = cust.entityType;
+        var propInfo = custType.getProperty("isPartial");
+
         // The Breeze customerType knows nothing about it.
-        ok(propInfo === null, "'isBeingEdited' should be unknown to the customer type");
+        ok(propInfo === null, "'isPartial' should be unknown to the customer type");
     });
     
     /*********************************************************
     * add unmapped property via constructor
     *********************************************************/
-    test("add unmapped 'isBeingEdited' property via constructor", 3, function () {
+    test("add unmapped 'isPartial' property via constructor", 6, function () {
         var store = cloneModuleMetadataStore();
         
-        var Customer = function() {
-            this.isBeingEdited = false; // notice it is not a KO property here
+        var Customer = function () {
+            // These are simple 'field' properties.
+            // Breeze converts them to the right kind of properties  
+            // for the prevailing modelLibrary adapter
+            // such as KO observable properties.
+            this.CustomerID = testFns.newGuidComb();
+            this.isPartial = true;
         };
         
-        store.registerEntityTypeCtor("Customer", Customer);
-        
-        var customerType = store.getEntityType("Customer");
-        var unmapped = customerType.unmappedProperties;
+        store.registerEntityTypeCtor('Customer', Customer);
 
-        // Breeze identified the property as "unmapped"
-        ok(unmapped.length === 1 && unmapped[0].name === "isBeingEdited",
-            "'isBeingEdited' should be the lone unmapped property");
+        var em = newEm(store);
+        var cust = em.createEntity('Customer'); 
 
-        var cust = customerType.createEntity();
-
-        ok(typeof cust["isBeingEdited"] === "function",
-            "should have 'isBeingEdited' KO property via constructor");
-        
-        // Breeze converted it into a KO property and initialized it
-        equal(cust.isBeingEdited(), false,
-            "'isBeingEdited' should be a KO 'property' returning false");
+        assertExpectedCustomerCtorProperties(cust);
     });
+
+    function assertExpectedCustomerCtorProperties(cust) {
+        // can get the type from the entity instance
+        var custType = cust.entityType;
+        ok(custType, "'cust' is now an entity");
+
+        // Breeze converted both into KO observables
+        ok(typeof cust.CustomerID === 'function',
+            "'CustomerID' should be a KO observable");
+
+        ok(typeof cust.isPartial === 'function',
+            "'isPartial' should be a KO observable");
+
+        if (!custType) {return;} // no remaining tests would pass
+        
+        var propInfo = custType.getProperty('CustomerID');
+        ok(propInfo && !propInfo.isUnmapped && propInfo.isPartOfKey,
+            "'CustomerID' should be detected as a mapped property");
+
+        propInfo = custType.getProperty('isPartial');
+        ok(propInfo && propInfo.isUnmapped,
+            "'isPartial' should be an unmapped property");
+
+        var unmapped = custType.unmappedProperties;
+        ok(unmapped.length === 1,
+            "'isPartial' should be the lone unmapped property");
+    }
 
     /*********************************************************
     * can 'new' the ctor .. but not a full entity until added to manager
     * not recommended; prefer CreateEntity approach
     *********************************************************/
-    test("can 'new' an entity via custom ctor and add to manager", 1, function () {
+    test("can 'new' an entity via custom ctor and add to manager", 8, function () {
         var store = cloneModuleMetadataStore();
 
         var Customer = function () {
-            // notice these are not defined as KO properties
             this.CustomerID = testFns.newGuidComb();
-            this.isBeingEdited = false; 
+            this.isPartial = true; 
         };
 
-        store.registerEntityTypeCtor("Customer", Customer);
+        store.registerEntityTypeCtor('Customer', Customer);
 
-        var cust = new Customer(); // not recommended;
+        var cust = new Customer(); // not recommended!!
+
+        // they aren't observables until they're added to the manager
+        ok(typeof cust.CustomerID !== 'function',
+            "'CustomerID' should NOT be a KO observable before adding to em");
+
+        ok(typeof cust.isPartial !== 'function',
+            "'isPartial' should NOT be a KO observable before adding to em");
 
         var em = newEm(store);
         em.addEntity(cust);
 
-        // Breeze converted it into a KO property and initialized it
-        equal(cust.isBeingEdited(), false,
-            "'isBeingEdited' should be a KO 'property' returning false");
+        // now they are observables
+        assertExpectedCustomerCtorProperties(cust);
 
     });
 
