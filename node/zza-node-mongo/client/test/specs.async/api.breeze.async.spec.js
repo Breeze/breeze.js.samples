@@ -1,8 +1,8 @@
 /************************
- * Test the Zza LIVE SERVER with asynchronous specs using BreezeJS
+ * Test the API of a Zza LIVE SERVER with asynchronous specs using raw BreezeJS
  * requires the ngMidwayTester
  *******************************/
-ddescribe('When querying Zza LIVE SERVER with BreezeJS', function () {
+describe('When raw BreezeJS talks to a live Zza server', function () {
     var breeze, em, tester;
     var testFns = window.testFns,
         failed = testFns.failed;
@@ -23,136 +23,140 @@ ddescribe('When querying Zza LIVE SERVER with BreezeJS', function () {
         tester.destroy();
         tester = null;
     });
+    describe('queries', function () {
+        it('can fetch all OrderStatus entities', function (done) {
+            breeze.EntityQuery.from('OrderStatuses')
+                .using(em).execute()
+                .then(success)
+                .catch(failed)
+                .finally(done);
 
-    it('can fetch all OrderStatus entities', function (done) {
-        breeze.EntityQuery.from('OrderStatuses')
-            .using(em).execute()
-            .then(success)
-            .catch(failed)
-            .finally(done);
+            function success(data) {
+                var orderStatuses = data.results;
+                expect(orderStatuses).toBeDefined();
+                expect(orderStatuses.length).toBeGreaterThan(0);
+                console.log("OrderStatuses query returned " + orderStatuses.length);
+            }
+        });
 
-        function success(data) {
-            var orderStatuses = data.results;
-            expect(orderStatuses).toBeDefined();
-            expect(orderStatuses.length).toBeGreaterThan(0);
-            console.log("OrderStatuses query returned " + orderStatuses.length);
-        }
+        it('can fetch Lookups', function (done) {
+            breeze.EntityQuery.from('Lookups')
+                .using(em).execute()
+                .then(success).catch(failed).finally(done);
+
+            function success(data) {
+                // Usually a bad idea to have a lot of expectations in a single spec
+                // but we'd like to minimize trips to the server.
+
+                var results = data.results[0];
+                expect(results).toBeDefined();
+                console.log("Lookups query returned an object with " +
+                    Object.keys(results).length + " properties");
+
+                var orderStatuses = results.OrderStatus;
+                expect(orderStatuses.length).toBeGreaterThan(0);
+                console.log("    orderStatuses: " + orderStatuses.length);
+
+                var products = results.Product;
+                expect(products.length).toBeGreaterThan(0);
+                console.log("    products: " + products.length);
+
+                var productOptions = results.ProductOption;
+                expect(productOptions.length).toBeGreaterThan(0);
+                console.log("    productOptions: " + productOptions.length);
+
+                var productSizes = results.ProductSize;
+                expect(productSizes.length).toBeGreaterThan(0);
+                console.log("    productSizes: " + productSizes.length);
+            }
+        });
+
+        it('can fetch some Product entities', function (done) {
+            breeze.EntityQuery.from('Products')
+                .take(3)              // no more than 3
+                .using(em).execute()
+                .then(success).catch(failed).finally(done);
+
+            function success(data) {
+                var products = data.results;
+                expect(products).toBeDefined();
+                expect(products.length).toBeGreaterThan(0);
+                expect(products.length).toBeLessThan(4);
+                console.log("Product 'take(3)' query returned " + products.length);
+            }
+        });
+
+        it('can fetch a Customer named "Derek"', function (done) {
+            //http://localhost:3000/breeze/zza/Customers/?$filter=firstName eq  'Derek'
+            breeze.EntityQuery.from('Customers')
+                .where('firstName', 'eq', 'Derek')
+                .using(em).execute()
+                .then(success).catch(failed).finally(done);
+
+            function success(data) {
+                var derek = data.results[0];
+                expect(derek).toBeDefined();
+                expect(derek.fullName).toMatch(/derek/i);
+                console.log("The first 'Derek' Customer's full name is " + derek.fullName);
+            }
+        });
+
+        it("can fetch the 'order headers' projection of 'Alexa Butler' orders", function (done) {
+            // Customer 'Alex Butler' has customerId = '51f06ded06a7baa417000058'
+            //
+            // THIS IS A BRITTLE TEST BECAUSE THE DATA COULD EASILY CHANGE
+            // breaking the test while revealing nothing about the api or our code
+            //
+            //http://localhost:3000/breeze/zza/Orders?$filter=
+            // customerId eq '51f06ded06a7baa417000058'
+            // &$orderby=ordered desc&
+            // $select=_id,statusId,status,ordered,delivered,deliveryCharge,itemsTotal
+            breeze.EntityQuery.from('Orders')
+                .where('customerId', 'eq', '51f06ded06a7baa417000058')
+                .select('id,name,statusId,status,ordered,delivered,deliveryCharge,itemsTotal')
+                .using(em).execute()
+                .then(success).catch(failed).finally(done);
+
+            function success(data) {
+                var orderHeaders = data.results;
+                expect(orderHeaders).toBeDefined();
+                expect(orderHeaders[0].name).toEqual('Alexa Butler');
+                expect(orderHeaders.length).toBeGreaterThan(0);
+                console.log("projected 'Alex Butler' orders into 'order headers': " + orderHeaders.length);
+            }
+        });
     });
 
-    it('can fetch Lookups', function (done) {
-        breeze.EntityQuery.from('Lookups')
-            .using(em).execute()
-            .then(success).catch(failed).finally(done);
+    describe('saveChanges', function () {
+        it('can modify a Customer named "Derek"', function (done) {
+            var derek;
+            breeze.EntityQuery.from('Customers')
+                .where('firstName', 'eq', 'Derek')
+                .using(em).execute()
+                .then(querySuccess)
+                .then(saveSuccess)
+                .catch(failed).finally(done);
 
-        function success(data) {
-            // Usually a bad idea to have a lot of expectations in a single spec
-            // but we'd like to minimize trips to the server.
+            function querySuccess(data) {
+                derek = data.results[0];
+                tweakCustomer(derek);
+                return em.saveChanges();
+            }
 
-            var results = data.results[0];
-            expect(results).toBeDefined();
-            console.log("Lookups query returned an object with " +
-                Object.keys(results).length + " properties");
+            function saveSuccess(result) {
+                expect(result.entities.length).toEqual(1);
+                expect(result.entities[0]).toBe(derek);
+                var state = derek.entityAspect.entityState;
+                expect(state).toBe(breeze.EntityState.Unchanged);
+                return result;
+            }
+        });
 
-            var orderStatuses = results.OrderStatus;
-            expect(orderStatuses.length).toBeGreaterThan(0);
-            console.log("    orderStatuses: " + orderStatuses.length);
-
-            var products = results.Product;
-            expect(products.length).toBeGreaterThan(0);
-            console.log("    products: " + products.length);
-
-            var productOptions = results.ProductOption;
-            expect(productOptions.length).toBeGreaterThan(0);
-            console.log("    productOptions: " + productOptions.length);
-
-            var productSizes = results.ProductSize;
-            expect(productSizes.length).toBeGreaterThan(0);
-            console.log("    productSizes: " + productSizes.length);
+        function tweakCustomer(customer, baseCity) {
+            // toggles an innocuous property
+            baseCity = baseCity || 'Quam';
+            var city = customer.address.city;
+            customer.address.city = city == baseCity ? "Quark" : baseCity;
         }
     });
-
-    it('can fetch some Product entities', function (done) {
-        breeze.EntityQuery.from('Products')
-            .take(3)              // no more than 3
-            .using(em).execute()
-            .then(success).catch(failed).finally(done);
-
-        function success(data) {
-            var products = data.results;
-            expect(products).toBeDefined();
-            expect(products.length).toBeGreaterThan(0);
-            expect(products.length).toBeLessThan(4);
-            console.log("Product 'take(3)' query returned " + products.length);
-        }
-    });
-
-    it('can fetch a Customer named "Derek"', function (done) {
-        //http://localhost:3000/breeze/zza/Customers/?$filter=firstName eq  'Derek'
-        breeze.EntityQuery.from('Customers')
-            .where('firstName', 'eq', 'Derek')
-            .using(em).execute()
-            .then(success).catch(failed).finally(done);
-
-        function success(data) {
-            var derek = data.results[0];
-            expect(derek).toBeDefined();
-            expect(derek.fullName).toMatch(/derek/i);
-            console.log("The first 'Derek' Customer's full name is " + derek.fullName);
-        }
-    });
-
-    it("can fetch the 'order headers' projection of 'Alexa Butler' orders", function (done) {
-        // Customer 'Alex Butler' has customerId = '51f06ded06a7baa417000058'
-        //
-        // THIS IS A BRITTLE TEST BECAUSE THE DATA COULD EASILY CHANGE
-        // breaking the test while revealing nothing about the api or our code
-        //
-        //http://localhost:3000/breeze/zza/Orders?$filter=
-        // customerId eq '51f06ded06a7baa417000058'
-        // &$orderby=ordered desc&
-        // $select=_id,statusId,status,ordered,delivered,deliveryCharge,itemsTotal
-        breeze.EntityQuery.from('Orders')
-            .where('customerId', 'eq', '51f06ded06a7baa417000058')
-            .select('id,name,statusId,status,ordered,delivered,deliveryCharge,itemsTotal')
-            .using(em).execute()
-            .then(success).catch(failed).finally(done);
-
-        function success(data) {
-            var orderHeaders = data.results;
-            expect(orderHeaders).toBeDefined();
-            expect(orderHeaders[0].name).toEqual('Alexa Butler');
-            expect(orderHeaders.length).toBeGreaterThan(0);
-            console.log("projected 'Alex Butler' orders into 'order headers': " + orderHeaders.length);
-        }
-    });
-
-    iit('can modify a Customer named "Derek"', function (done) {
-        var derek;
-        breeze.EntityQuery.from('Customers')
-            .where('firstName', 'eq', 'Derek')
-            .using(em).execute()
-            .then(querySuccess)
-            .then(saveSuccess)
-            .catch(failed).finally(done);
-
-        function querySuccess(data) {
-            derek = data.results[0];
-            tweakCustomer(derek);
-            return em.saveChanges();
-        }
-        function saveSuccess(result){
-            expect(result.entities.length).toEqual(1);
-            expect(result.entities[0]).toBe(derek);
-            var state = derek.entityAspect.entityState;
-            expect(state).toBe(breeze.EntityState.Unchanged);
-            return result;
-        }
-    });
-
-    function tweakCustomer(customer, baseCity){
-        // toggles an innocuous property
-        baseCity = baseCity || 'Quam';
-        var city = customer.address.city;
-        customer.address.city = city == baseCity ? "Quark" : baseCity;
-    }
 });
