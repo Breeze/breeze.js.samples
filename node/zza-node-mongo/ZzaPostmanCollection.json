@@ -1,1 +1,170 @@
-{"id":"cf2ba9dd-e180-20dc-b63c-b9e525947ce9","name":"Zza","timestamp":1397073503496,"requests":[{"collectionId":"cf2ba9dd-e180-20dc-b63c-b9e525947ce9","id":"19b2214b-7195-65bd-1748-e6a675632fd2","name":"Get 'Alexa Butler' order headers (projection)","description":"","url":"http://localhost:3000/breeze/zza/Orders?$filter=customerId eq '51f06ded06a7baa417000058'&$orderby=ordered desc&$select=_id,statusId,status,ordered,delivered,deliveryCharge,itemsTotal","method":"GET","headers":"Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n","data":[],"dataMode":"params","timestamp":0,"responses":[],"version":2},{"collectionId":"cf2ba9dd-e180-20dc-b63c-b9e525947ce9","id":"24ecb074-123f-9412-1de8-d631c7e70b3f","name":"Get Lookups","description":"","url":"http://localhost:3000/breeze/zza/Lookups","method":"GET","headers":"Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n","data":"{\"text\":\"Sally\",\"complete\":false}","dataMode":"raw","timestamp":0,"version":2,"time":1397293125282},{"collectionId":"cf2ba9dd-e180-20dc-b63c-b9e525947ce9","id":"89d3f8ce-8e7b-5efa-7a74-ac6f41330967","name":"Get Metadata (fails)","description":"","url":"http://localhost:3000/breeze/zza/Metadata","method":"GET","headers":"Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n","data":"{\"text\":\"Sally\",\"complete\":false}","dataMode":"raw","timestamp":0,"responses":[],"version":2},{"collectionId":"cf2ba9dd-e180-20dc-b63c-b9e525947ce9","id":"bce0ebd3-149c-54dd-787c-22a5051d04a6","name":"Get OrderStatuses","description":"","url":"http://localhost:3000/breeze/zza/OrderStatuses","method":"GET","headers":"Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n","data":[],"dataMode":"params","timestamp":0,"responses":[],"version":2},{"collectionId":"cf2ba9dd-e180-20dc-b63c-b9e525947ce9","id":"ce5333be-8685-e9d2-fc13-0964912d7fab","name":"Get 'Derek' Customer(s)","description":"","url":"http://localhost:3000/breeze/zza/Customers/?$filter=firstName eq  'Derek'","method":"GET","headers":"Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n","data":[],"dataMode":"params","timestamp":0,"responses":[],"version":2},{"collectionId":"cf2ba9dd-e180-20dc-b63c-b9e525947ce9","id":"f39c953e-026a-79c7-5613-04277bc7188f","name":"Ping! - json","description":"","url":"http://localhost:3000/ping","method":"POST","headers":"Accept-Encoding: gzip,deflate,sdch\n","data":[{"key":"text","value":"\"pinging you\"","type":"text"}],"dataMode":"urlencoded","timestamp":0,"version":2},{"collectionId":"cf2ba9dd-e180-20dc-b63c-b9e525947ce9","id":"f54535bd-0c00-9afc-a0d4-e78a2e21e210","name":"Ping! - urlencoded","description":"","url":"http://localhost:3000/ping","method":"POST","headers":"Accept-Encoding: gzip,deflate,sdch\n","data":[{"key":"text","value":"\"pinging you\"","type":"text"}],"dataMode":"urlencoded","timestamp":0,"responses":[],"version":2},{"collectionId":"cf2ba9dd-e180-20dc-b63c-b9e525947ce9","id":"fdc35eb6-a3b7-e3bf-7204-8f046c4ed36e","name":"Get Products","description":"","url":"http://localhost:3000/breeze/zza/products","method":"GET","headers":"Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n","data":[],"dataMode":"params","timestamp":0,"responses":[],"version":2}],"order":["19b2214b-7195-65bd-1748-e6a675632fd2","ce5333be-8685-e9d2-fc13-0964912d7fab","24ecb074-123f-9412-1de8-d631c7e70b3f","bce0ebd3-149c-54dd-787c-22a5051d04a6","fdc35eb6-a3b7-e3bf-7204-8f046c4ed36e","89d3f8ce-8e7b-5efa-7a74-ac6f41330967","f39c953e-026a-79c7-5613-04277bc7188f","f54535bd-0c00-9afc-a0d4-e78a2e21e210"]}
+{
+	"id": "8cc8f3b6-f936-ab69-5745-63f086451f02",
+	"name": "Zza",
+	"description": "",
+	"order": [
+		"73328c97-4655-6068-7304-cb653456e74c",
+		"225dfb8e-bc62-d545-26ab-4f4260cac8a3",
+		"c663e100-7850-050c-5f18-b180dc0363a0",
+		"426ab4f8-6c7c-b171-b110-b8891c479b5b",
+		"946c3c6c-024e-9267-0aab-a09d6976dc7e",
+		"5cf81dbf-584b-49b6-8094-d8a1dfda8400",
+		"55bfae50-5438-a1d2-a60d-b30b12773203",
+		"cd49159a-1e97-7e3d-c8a4-a556b7872940",
+		"0707afaa-b75f-04f9-247a-a99dd9a83ff2"
+	],
+	"folders": [],
+	"timestamp": 1397073503496,
+	"synced": false,
+	"requests": [
+		{
+            "name": "Save Change to 'Derek'",
+			"id": "0707afaa-b75f-04f9-247a-a99dd9a83ff2",
+			"headers": "Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n",
+			"url": "http://localhost:3000/breeze/zza/SaveChanges",
+			"pathVariables": {},
+			"method": "POST",
+			"data": "{\"entities\":[{\"_id\":\"51f06ded06a7baa417000001\",\"firstName\":\"Derek\",\"lastName\":\"Puckett\",\"phone\":\"(954) 594-9355\",\"email\":\"derek.puckett@vulputate.net\",\"address\":{\"street\":\"P.O. Box 914, 9990 Dapibus St.\",\"city\":\"Quark\",\"state\":\"OH\",\"zip\":\"55154\"},\"entityAspect\":{\"entityTypeName\":\"Customer:#Zza.Model\",\"entityState\":\"Modified\",\"originalValuesMap\":{\"address\":{\"city\":\"Quam\"}}}}],\"saveOptions\":{},\"metadata\":{\"Customer:#Zza.Model\":{\"entityTypeName\":\"Customer:#Zza.Model\",\"defaultResourceName\":\"Customers\",\"autoGeneratedKeyType\":\"None\",\"dataProperties\":[{\"name\":\"_id\",\"dataType\":\"MongoObjectId\"},{\"name\":\"firstName\",\"dataType\":\"String\"},{\"name\":\"lastName\",\"dataType\":\"String\"},{\"name\":\"phone\",\"dataType\":\"String\"},{\"name\":\"email\",\"dataType\":\"String\"},{\"name\":\"address\",\"dataType\":\"Address:#Zza.Model\"}]},\"defaultNamespace\":\"Zza.Model\"}}",
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1402207991391,
+			"description": "",
+			"collectionId": "8cc8f3b6-f936-ab69-5745-63f086451f02",
+			"responses": [],
+			"synced": false
+		},
+		{
+            "name": "Get 'Derek' Customer(s)",
+			"collectionId": "8cc8f3b6-f936-ab69-5745-63f086451f02",
+			"id": "225dfb8e-bc62-d545-26ab-4f4260cac8a3",
+			"description": "",
+			"url": "http://localhost:3000/breeze/zza/Customers/?$filter=firstName eq  'Derek'",
+			"method": "GET",
+			"headers": "Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n",
+			"data": [],
+			"dataMode": "params",
+			"timestamp": 0,
+			"responses": [],
+			"version": 2,
+			"synced": false
+		},
+		{
+            "name": "Get OrderStatuses",
+			"collectionId": "8cc8f3b6-f936-ab69-5745-63f086451f02",
+			"id": "426ab4f8-6c7c-b171-b110-b8891c479b5b",
+			"description": "",
+			"url": "http://localhost:3000/breeze/zza/OrderStatuses",
+			"method": "GET",
+			"headers": "Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n",
+			"data": [],
+			"dataMode": "params",
+			"timestamp": 0,
+			"responses": [],
+			"version": 2,
+			"synced": false
+		},
+		{
+            "name": "Ping! - json",
+			"collectionId": "8cc8f3b6-f936-ab69-5745-63f086451f02",
+			"id": "55bfae50-5438-a1d2-a60d-b30b12773203",
+			"description": "",
+			"url": "http://localhost:3000/ping",
+			"method": "POST",
+			"headers": "Accept-Encoding: gzip,deflate,sdch\n",
+			"data": [
+				{
+					"key": "text",
+					"value": "\"pinging you\"",
+					"type": "text"
+				}
+			],
+			"dataMode": "urlencoded",
+			"timestamp": 0,
+			"version": 2,
+			"synced": false
+		},
+		{
+            "name": "Get Metadata (fails)",
+			"collectionId": "8cc8f3b6-f936-ab69-5745-63f086451f02",
+			"id": "5cf81dbf-584b-49b6-8094-d8a1dfda8400",
+			"description": "",
+			"url": "http://localhost:3000/breeze/zza/Metadata",
+			"method": "GET",
+			"headers": "Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n",
+			"data": "{\"text\":\"Sally\",\"complete\":false}",
+			"dataMode": "raw",
+			"timestamp": 0,
+			"responses": [],
+			"version": 2,
+			"synced": false
+		},
+		{
+            "name": "Get 'Alexa Butler' order headers (projection)",
+			"collectionId": "8cc8f3b6-f936-ab69-5745-63f086451f02",
+			"id": "73328c97-4655-6068-7304-cb653456e74c",
+			"description": "",
+			"url": "http://localhost:3000/breeze/zza/Orders?$filter=customerId eq '51f06ded06a7baa417000058'&$orderby=ordered desc&$select=_id,statusId,status,ordered,delivered,deliveryCharge,itemsTotal",
+			"method": "GET",
+			"headers": "Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n",
+			"data": [],
+			"dataMode": "params",
+			"timestamp": 0,
+			"responses": [],
+			"version": 2,
+			"synced": false
+		},
+		{
+            "name": "Get Products",
+			"collectionId": "8cc8f3b6-f936-ab69-5745-63f086451f02",
+			"id": "946c3c6c-024e-9267-0aab-a09d6976dc7e",
+			"description": "",
+			"url": "http://localhost:3000/breeze/zza/products",
+			"method": "GET",
+			"headers": "Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n",
+			"data": [],
+			"dataMode": "params",
+			"timestamp": 0,
+			"responses": [],
+			"version": 2,
+			"synced": false
+		},
+		{
+            "name": "Get Lookups",
+			"id": "c663e100-7850-050c-5f18-b180dc0363a0",
+			"headers": "Accept: application/json\nAccept-Encoding: gzip,deflate,sdch\nContent-Type: application/json\n",
+			"url": "http://localhost:3000/breeze/zza/Lookups",
+			"pathVariables": {},
+			"method": "GET",
+			"data": [],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"time": 1402179640168,
+			"description": "",
+			"collectionId": "8cc8f3b6-f936-ab69-5745-63f086451f02",
+			"synced": false
+		},
+		{
+            "name": "Ping! - urlencoded",
+			"collectionId": "8cc8f3b6-f936-ab69-5745-63f086451f02",
+			"id": "cd49159a-1e97-7e3d-c8a4-a556b7872940",
+			"description": "",
+			"url": "http://localhost:3000/ping",
+			"method": "POST",
+			"headers": "Accept-Encoding: gzip,deflate,sdch\n",
+			"data": [
+				{
+					"key": "text",
+					"value": "\"pinging you\"",
+					"type": "text"
+				}
+			],
+			"dataMode": "urlencoded",
+			"timestamp": 0,
+			"responses": [],
+			"version": 2,
+			"synced": false
+		}
+	]
+}
