@@ -63,7 +63,8 @@
     }
 
     function saveChanges( req, res, next ) {
-        repository.saveChanges(req.body, makeResponseHandler(res, next));
+        var saveResponseHandler = makeResponseHandler(res, next);
+        repository.saveChanges(req.body, saveResponseHandler);
     }
 
 })(module.exports);

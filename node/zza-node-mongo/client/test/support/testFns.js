@@ -31,6 +31,7 @@ var testFns = (function () {
         create_fastFailSpec: create_fastFailSpec,
         create_flush$q: create_flush$q,
         create_testAppModule: create_testAppModule,
+        dataServiceAdapterName: 'mongo',        // MUST CORRESPOND TO THE SERVER WE'RE TESTING
         expectToFailFn: expectToFailFn,
         failed: failed,
         serviceBase: 'http://localhost:3000/',  // MAKE SURE THIS IS RIGHT AND THE SERVER IS RUNNING
@@ -45,7 +46,7 @@ var testFns = (function () {
      * Adjusts config.js values for the test environment
      *
      * Most important are the service names which must
-     * go to a different origin than the karma
+     * go to a different origin than the karma server
      ********************************************************/
     function appConfigDecorator($provide){
 
@@ -121,18 +122,31 @@ var testFns = (function () {
      * Create a BreezeJS 'EntityManager'
      * with the app's dataservice and metadata and model
      * given an injector function with access to the necessary app services
+     * 'dataServiceAdapterName' param enables overriding the default adapter for the tests
+     * which is fns.dataServiceAdapterName
      ********************************************************/
-    function create_appEntityManager(injectFn){
+    function create_appEntityManager(injectFn, dataServiceAdapterName){
         var breeze = injectFn('breeze');
         var model = injectFn('model');
-        var metadataStore = model.getMetadataStore();
 
+        dataServiceAdapterName = dataServiceAdapterName || fns.dataServiceAdapterName || 'mongo';
+
+        // get the current default dataservice adapter (which will have been initialized)
+        var dsAdapter = breeze.config.getAdapterInstance('dataService');
+        if (dsAdapter.name !== dataServiceAdapterName){
+            // switch to the target adapter
+            dsAdapter = breeze.config.initializeAdapterInstance('dataService',dataServiceAdapterName);
+        }
+
+        // create the dataService for these tests
         var fullServiceName = testFns.serviceBase+testFns.serviceName;
         var dataService = new breeze.DataService({
+            adapterName: dataServiceAdapterName,
             hasServerMetadata: false,
             serviceName: fullServiceName}
         );
 
+        var metadataStore = model.getMetadataStore();
         metadataStore.addDataService(dataService);
 
         var em = new breeze.EntityManager({

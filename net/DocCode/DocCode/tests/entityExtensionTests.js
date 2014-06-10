@@ -91,7 +91,7 @@
         
         var propInfo = custType.getProperty('CustomerID');
         ok(propInfo && !propInfo.isUnmapped && propInfo.isPartOfKey,
-            "'CustomerID' should be detected as a mapped property");
+            "'CustomerID' should be detected as a mapped key property");
 
         propInfo = custType.getProperty('isPartial');
         ok(propInfo && propInfo.isUnmapped,

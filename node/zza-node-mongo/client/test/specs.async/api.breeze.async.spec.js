@@ -1,8 +1,8 @@
 /************************
- * Test the Zza web api of the LIVE SERVER with asynchronous specs using BreezeJS
+ * Test the Zza LIVE SERVER with asynchronous specs using BreezeJS
  * requires the ngMidwayTester
  *******************************/
-describe('When querying Zza web api with BreezeJS', function () {
+ddescribe('When querying Zza LIVE SERVER with BreezeJS', function () {
     var breeze, em, tester;
     var testFns = window.testFns,
         failed = testFns.failed;
@@ -126,4 +126,33 @@ describe('When querying Zza web api with BreezeJS', function () {
         }
     });
 
+    iit('can modify a Customer named "Derek"', function (done) {
+        var derek;
+        breeze.EntityQuery.from('Customers')
+            .where('firstName', 'eq', 'Derek')
+            .using(em).execute()
+            .then(querySuccess)
+            .then(saveSuccess)
+            .catch(failed).finally(done);
+
+        function querySuccess(data) {
+            derek = data.results[0];
+            tweakCustomer(derek);
+            return em.saveChanges();
+        }
+        function saveSuccess(result){
+            expect(result.entities.length).toEqual(1);
+            expect(result.entities[0]).toBe(derek);
+            var state = derek.entityAspect.entityState;
+            expect(state).toBe(breeze.EntityState.Unchanged);
+            return result;
+        }
+    });
+
+    function tweakCustomer(customer, baseCity){
+        // toggles an innocuous property
+        baseCity = baseCity || 'Quam';
+        var city = customer.address.city;
+        customer.address.city = city == baseCity ? "Quark" : baseCity;
+    }
 });

@@ -168,10 +168,59 @@
         getDb(save, next);
         function save(db){
             var saveProcessor = new bmongo.MongoSaveHandler( db, saveBundle, next);
-            saveProcessor.beforeSaveEntity   = function () { return true; };
-            saveProcessor.beforeSaveEntities = function (callback) { callback();  };
+            setSaveMetadata(saveProcessor.metadata);
+            addSaveInterceptors(saveProcessor);
             saveProcessor.save();
         }
+    }
+
+    // TODO: ignore client metadata and set saveProcessor's metadata on the server
+    // Until then, we assume client does it "right" and just fix the collection names for each type
+    function setSaveMetadata(saveMetadata) {
+        for (var key in saveMetadata){
+            var entityType = saveMetadata[key];
+            // entityTypes have collection names
+            // presence of the defaultResourceName indicates it is an entityType, not a complexType
+            if (entityType.defaultResourceName){
+                var name = entityType.entityTypeName;
+                var len = name.indexOf(':');
+                entityType.collectionName = len > -1 ? name.substr(0,len) : name;
+            }
+        }
+    }
+
+    // If we needed interception, here's how we could wire it up:
+    function addSaveInterceptors(saveProcessor){
+
+         saveProcessor.beforeSaveEntity = function (entity) {
+             // do stuff
+             console.log("repository: beforeSaveEntity called for "+JSON.stringify(entity));
+             return true; // if we want to keep this one
+         };
+
+         saveProcessor.beforeSaveEntities = function (continueSave) {
+             // do stuff
+             var saveMap = this.saveMap;
+             var count = 0;
+             for(var t in saveMap){
+                 count += saveMap[t].length;
+             }
+             console.log("repository: beforeSaveEntities called for "+count+" entities");
+             continueSave();
+         };
+
+         saveProcessor.afterSaveEntities = function (success) {
+             // do stuff
+             console.log('repository: afterSaveEntities called');
+             var sr = this.saveResult;
+             var msg=["  inserted: "+sr.insertedKeys.length];
+             msg.push("  updated: "+sr.updatedKeys.length);
+             msg.push("  deleted: "+sr.deletedKeys.length);
+             msg.push("  keyMappings: "+sr.keyMappings.length);
+             console.log("repository: afterSaveEntities saveResult counts:\n"+msg.join('\n'));
+             success();
+         };
+        /**/
     }
 
 })(module.exports);
