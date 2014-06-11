@@ -9,6 +9,7 @@
  * If no statusCode, statusCode = 500
  * If err.message, the message is the body
  * If no err.message, the err itself is the body.
+ * If err.saveResult, send that too (tells client how many were saved before the error)
  * If in development environment
  *    - logs the error to console
  *    - if err.stack, logs the stack trace to console
@@ -20,7 +21,8 @@ module.exports = errorHandler;
 
 function errorHandler(err, req, res, next) {
     if (err) {
-        var body =  err.message || err;
+        var body = err.message ? {message: err.message} : err;
+        if (err.saveResult){ body.saveResult = err.saveResult; }
         var status = err.statusCode || 500;
         res.send(status, body);
         logError(err, status, body);
@@ -32,7 +34,8 @@ function logError(err, status, body){
     setTimeout(log,0); // let response write to console, then error
     function log(){
         var stack = '';
-        var msg = '--------------\n'+status + ' ' + body;
+        var msg = '--------------\nStatus: '+status + ' ' +
+            (typeof body === 'string' ? body : ('\n'+JSON.stringify(body, null, 2)));
         // log all inner errors too
         while(err) {
             stack = err.stack || stack; // get deepest stack

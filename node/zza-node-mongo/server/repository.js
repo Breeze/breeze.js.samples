@@ -209,7 +209,7 @@
              continueSave();
          };
 
-         saveProcessor.afterSaveEntities = function (success) {
+         saveProcessor.afterSaveEntities = function (done) {
              // do stuff
              console.log('repository: afterSaveEntities called');
              var sr = this.saveResult;
@@ -217,8 +217,9 @@
              msg.push("  updated: "+sr.updatedKeys.length);
              msg.push("  deleted: "+sr.deletedKeys.length);
              msg.push("  keyMappings: "+sr.keyMappings.length);
+             msg.push("  errors: "+sr.errors.length);
              console.log("repository: afterSaveEntities saveResult counts:\n"+msg.join('\n'));
-             success();
+             done();
          };
         /**/
     }
