@@ -168,6 +168,48 @@
 
     //#endregion
 
+    //#region Client-defined Employee metadata Tests
+
+    module("metadataTests (client defined Employee metadata)", { setup: clientDefinedEmployeeMetadataSetup });
+
+    function clientDefinedEmployeeMetadataSetup() {
+        serviceName = '<no_server>';
+        clientStore = testFns.metadataOnClient.createEmployeeMetadataStore(serviceName);
+    }
+
+    /*********************************************************
+     * Compare individual types in client and server metadata
+     *********************************************************/
+
+    test("Create Employee, DaySchedule and AttendanceDay", function () {
+        var dayScheduleEntityName = 'DaySchedule';
+        var employeeEntityName = 'Employee';
+        var attendanceDayEntityName = 'AttendanceDay';
+
+        var manager = createManagerWithClientMetadata();
+        createSomeMockData(manager);
+
+        var query = breeze.EntityQuery.from('Employees');
+
+        var data = manager.executeQueryLocally(query);
+        var emp = data[0];
+        equal(emp.attendanceDays().length, emp.schedules().length, 'should have both related entities');
+        console.log(emp.attendanceDays().length);
+        console.log(emp.schedules().length);
+
+        function createSomeMockData(mgr) {
+            var employeeId = 20;
+            
+            //test will pass if employee is created first
+            //mgr.createEntity(employeeEntityName, { id: employeeId });
+            mgr.createEntity(attendanceDayEntityName, { employeeId: employeeId });
+            mgr.createEntity(dayScheduleEntityName, { employeeId: employeeId });
+            mgr.createEntity(employeeEntityName, { id: employeeId });
+        }
+    });
+
+    //#endregion
+
     //#region Client-defined Metadata Test Helpers
 
     /* ----- Client-defined Metadata helpers -------*/
