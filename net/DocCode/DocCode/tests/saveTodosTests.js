@@ -252,11 +252,15 @@
 
         var descriptionChanged = false;
         todo.entityAspect.propertyChanged.subscribe(function (changeArgs) {
-            // bug: subscription called twice during merge
+            // Watch carefully! The subscription is called twice during merge
             // 1) propertyName === "Id" (assigned with permanent ID)
-            // 2) propertyName === null (huh?)
-            // and not called with propertyName === "Description" as it should be
-            if (changeArgs.propertyName === 'Description') {
+            // 2) propertyName === null (WAT?)  
+            // and not called with propertyName === "Description" as you might have thought.
+            // Actually 'null' means "merged a lot of properties"
+            // Documented: http://www.breezejs.com/sites/all/apidocs/classes/EntityAspect.html#event_propertyChanged
+            // The reason for this: don't want to fire a ton of events on whole entity load
+            // especially when merging many entities at the same time.
+            if (changeArgs.propertyName === null || changeArgs.propertyName === 'Description') {
                 descriptionChanged = true;
             }
         });
