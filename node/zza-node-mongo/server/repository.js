@@ -217,7 +217,7 @@
              msg.push("  updated: "+sr.updatedKeys.length);
              msg.push("  deleted: "+sr.deletedKeys.length);
              msg.push("  keyMappings: "+sr.keyMappings.length);
-             msg.push("  errors: "+sr.errors.length);
+             if (sr.errors){ msg.push("  errors: "+sr.errors.length);}
              console.log("repository: afterSaveEntities saveResult counts:\n"+msg.join('\n'));
              done();
          };
