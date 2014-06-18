@@ -68,7 +68,7 @@
         saveChanges: saveChanges,
 
         // Configuration API
-        ChangeRequestInterceptor: abstractDsaProto.ChangeRequestInterceptor, // default, no-op ctor
+        ChangeRequestInterceptor: abstractDsaProto.changeRequestInterceptor, // default, no-op ctor
         checkForRecomposition: checkForRecomposition,
         saveOnlyOne: false, // true if may only save one entity at a time.
         ignoreDeleteNotFound: true, // true if should ignore a 404 error from a delete
