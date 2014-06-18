@@ -178,10 +178,15 @@
     }
 
     /*********************************************************
-     * Compare individual types in client and server metadata
+     * Populates 2 child navigations when the parent is created last
+     * Creates a child entity for each navigation property and then
+     * creates the parent. Breeze should add both entities to the navigation properties
+     * Defect #2611
+     * In failing test, only one of the nav props is set
+     * Test passes if the parent is created first
      *********************************************************/
 
-    test("Create Employee, DaySchedule and AttendanceDay", function () {
+    test("Populates 2 child navigations when the parent is created last", function () {
         var dayScheduleEntityName = 'DaySchedule';
         var employeeEntityName = 'Employee';
         var attendanceDayEntityName = 'AttendanceDay';
