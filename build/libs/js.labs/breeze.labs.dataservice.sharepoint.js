@@ -1,11 +1,11 @@
 ﻿/*
  * Breeze Labs SharePoint 2013 OData DataServiceAdapter
  *
- *  v.0.2.3
+ *  v.0.6.0
  *
  * Registers a SharePoint 2013 OData DataServiceAdapter with Breeze
  * 
- * REQUIRES breeze.labs.dataservice.abstractrest.js
+ * REQUIRES breeze.labs.dataservice.abstractrest.js v.0.6.0+
  * 
  * This adapter cannot get metadata from the server and in general one should
  * not do so because such metadata cover much more of than you want and are huge (>1MB)
@@ -15,10 +15,7 @@
  *
  * Typical usage in Angular
  *    // configure breeze to use SharePoint OData service
- *    var dsAdapter = breeze.config.initializeAdapterInstance('dataService', 'SharePointOData', true);
- *
- *    // if using $q for promises ...
- *    dsAdapter.Q = $q; 
+ *    var dsAdapter = breeze.config.initializeAdapterInstance('dataService', 'SharePointOData', true); 
  *
  *    // provide method returning value for the SP OData 'X-RequestDigest' header
  *    dsAdapter.getRequestDigest = function(){return securityService.requestDigest}
@@ -69,15 +66,15 @@
 
     function typeInitialize() {
         // Delay setting the prototype until we're sure AbstractRestDataServiceAdapter is loaded
-        var fn = breeze.AbstractRestDataServiceAdapter.prototype;
-        fn = breeze.core.extend(ctor.prototype, fn);
-        fn.executeQuery = executeQuery;
-        fn._addToSaveContext = _addToSaveContext;
-        fn._createErrorFromResponse = _createErrorFromResponse;
-        fn._createJsonResultsAdapter = _createJsonResultsAdapter;
-        fn._createSaveRequest = _createSaveRequest;
-        fn._getResponseData = _getResponseData;
-        fn._processSavedEntity = _processSavedEntity;
+        var proto = breeze.AbstractRestDataServiceAdapter.prototype;
+        proto = breeze.core.extend(ctor.prototype, proto);
+        proto.executeQuery = executeQuery;
+        proto._addToSaveContext = _addToSaveContext;
+        proto._createChangeRequest = _createChangeRequest;
+        proto._createErrorFromResponse = _createErrorFromResponse;
+        proto._createJsonResultsAdapter = _createJsonResultsAdapter;
+        proto._getResponseData = _getResponseData;
+        proto._processSavedEntity = _processSavedEntity;
 
         this.initialize(); // the revised initialize()
     }
@@ -106,114 +103,7 @@
         return 'SP.Data.' + clientTypeName + 'sListItem';
     }
 
-    function _createErrorFromResponse(response, url) {
-        // OData errors can have the message buried very deeply - and nonobviously
-        // this code is tricky so be careful changing the response.body parsing.
-        var result = new Error();
-        result.response = response;
-        if (url) { result.url = url; }
-        result.message = response.message || response.error || response.statusText;
-        result.statusText = response.statusText;
-        result.status = response.status;
-
-        var data = result.data = response.data;
-        if (data) {
-            var msg = "", nextErr;
-            try {
-                if (typeof (data) === "string") {
-                    data = result.data = JSON.parse(data);
-                }
-                do {
-                    nextErr = data.error || data.innererror;
-                    if (!nextErr) { msg = msg + getMessage(data); }
-                    nextErr = nextErr || data.internalexception;
-                    data = nextErr;
-                } while (nextErr);
-                if (msg.length > 0) {
-                    result.message = msg;
-                }
-            } catch (e) { /* carry on */ }
-        }
-        return result;
-
-        function getMessage() {
-            var m = data.message || "";
-            return ((typeof (m) === "string") ? m : m.value) + "; ";
-        }
-
-    }
-
-    function _createJsonResultsAdapter() {
-
-        var dataServiceAdapter = this;
-        var jsonResultsAdapter = new breeze.JsonResultsAdapter({
-            name: dataServiceAdapter.name + "_default",
-            visitNode: visitNode
-        });
-
-        jsonResultsAdapter.clientTypeNameToServer = clientTypeNameToServerDefault;
-        jsonResultsAdapter.serverTypeNameToClient = serverTypeNameToClientDefault;
-
-        return jsonResultsAdapter;
-
-        function visitNode(node, mappingContext, nodeContext) {
-            var result = { ignore: true };
-            if (!node) { return result; }
-
-            var propertyName = nodeContext.propertyName;
-            var ignore = node.__deferred != null || propertyName === "__metadata" ||
-                // EntityKey properties can be produced by EDMX models
-                (propertyName === "EntityKey" && node.$type && core.stringStartsWith(node.$type, "System.Data"));
-
-            if (!ignore) {
-                result = {};
-                updateEntityNode(node, mappingContext, result);
-
-                // OData v3 - projection arrays will be enclosed in a results array
-                if (node.results) {
-                    result.node = node.results;
-                }
-            }
-            return result;
-        }
-
-        // Determine if this is an Entity node and update the node appropriately if so
-        function updateEntityNode(node, mappingContext, result) {
-            var metadata = node.__metadata;
-            if (!metadata) { return; } // every SharePoint entity node has __metadata
-
-            var entityType = node.$entityType; 
-            if (entityType){
-                // save result node
-                result.entityType = entityType;
-                result.extra = metadata;
-                return;
-            }            
-
-            // query node
-
-            var typeName = dataServiceAdapter._serverTypeNameToClient(mappingContext, metadata.type);
-            entityType = dataServiceAdapter._getNodeEntityType(mappingContext, typeName);
-
-            if (entityType) {
-                // ASSUME if #-of-properties on node is >= #-of-props for the type 
-                // that this is the full entity and not a partial projection. 
-                // Therefore we declare that we've received an entity 
-                if (entityType._mappedPropertiesCount <= Object.keys(node).length - 1) {
-                    result.entityType = entityType;
-                    result.extra = metadata;
-
-                    // Delete node properties that look like nested navigation paths
-                    // Breeze gets confused into thinking such properties contain actual entities. 
-                    // Todo: rethink this if/when can include related entities through expand
-                    var navPropNames = entityType.navigationProperties.map(function (p) { return p.name; });
-                    navPropNames.forEach(function (n) { if (node[n]) { delete node[n]; } });
-                }
-            }
-        }
-    }
-
-    function _createSaveRequest(saveContext, entity, index) {
+    function _createChangeRequest(saveContext, entity, index) {
         var adapter = saveContext.adapter;
         var data, rawEntity, request;
         var entityManager = saveContext.entityManager;
@@ -291,6 +181,126 @@
         }
     }
 
+    // Create error object for both query and save responses.
+    // 'context' can help differentiate query and save
+    // 'errorEntity' only defined for save response
+    function _createErrorFromResponse(response, url, context, errorEntity) {
+        // OData errors can have the message buried very deeply - and nonobviously
+        // this code is tricky so be careful changing the response.body parsing.
+        var err = new Error();
+        err.response = response;
+        if (url) { err.url = url; }
+        err.message = response.message || response.error || response.statusText;
+        err.statusText = response.statusText;
+        err.status = response.status;
+
+        setSPODataErrorMessage(err);
+        proto._catchNoConnectionError(err);
+        return err;
+    }
+
+    // TODO: relocate where re-usable?
+    function setSPODataErrorMessage(err){
+        // OData errors can have the message buried very deeply - and nonobviously
+        // Normal MS OData responses have a response.body
+        // SharePoint OData responses have a response.data instead
+        // this code is tricky so be careful changing the response.data parsing.
+        var data = err.data = err.response.data,
+            m, 
+            msg = [], 
+            nextErr;
+
+        if (data) {
+            try {
+                if (typeof data === "string") {
+                    data = err.data = JSON.parse(data);
+                }
+                do {
+                    nextErr = data.error || data.innererror;
+                    if (!nextErr) { 
+                        m = data.message || "";
+                        msg.push((typeof m === "string") ? m : m.value); 
+                    }
+                    nextErr = nextErr || data.internalexception;
+                    data = nextErr;
+                } while (nextErr);
+                if (msg.length > 0) {
+                    err.message = msg.join('; ')+'.';
+                }
+            } catch (e) { /* carry on */ }
+        }
+    }
+
+    function _createJsonResultsAdapter() {
+
+        var dataServiceAdapter = this;
+        var jsonResultsAdapter = new breeze.JsonResultsAdapter({
+            name: dataServiceAdapter.name + "_default",
+            visitNode: visitNode
+        });
+
+        jsonResultsAdapter.clientTypeNameToServer = clientTypeNameToServerDefault;
+        jsonResultsAdapter.serverTypeNameToClient = serverTypeNameToClientDefault;
+
+        return jsonResultsAdapter;
+
+        function visitNode(node, mappingContext, nodeContext) {
+            var result = { ignore: true };
+            if (!node) { return result; }
+
+            var propertyName = nodeContext.propertyName;
+            var ignore = node.__deferred != null || propertyName === "__metadata" ||
+                // EntityKey properties can be produced by EDMX models
+                (propertyName === "EntityKey" && node.$type && core.stringStartsWith(node.$type, "System.Data"));
+
+            if (!ignore) {
+                result = {};
+                updateEntityNode(node, mappingContext, result);
+
+                // OData v3 - projection arrays will be enclosed in a results array
+                if (node.results) {
+                    result.node = node.results;
+                }
+            }
+            return result;
+        }
+
+        // Determine if this is an Entity node and update the node appropriately if so
+        function updateEntityNode(node, mappingContext, result) {
+            var metadata = node.__metadata;
+            if (!metadata) { return; } // every SharePoint entity node has __metadata
+
+            var entityType = node.$entityType; 
+            if (entityType){
+                // save result node
+                result.entityType = entityType;
+                result.extraMetadata = metadata;
+                return;
+            }            
+
+            // query node
+
+            var typeName = dataServiceAdapter._serverTypeNameToClient(mappingContext, metadata.type);
+            entityType = dataServiceAdapter._getNodeEntityType(mappingContext, typeName);
+
+            if (entityType) {
+                // ASSUME if #-of-properties on node is >= #-of-props for the type 
+                // that this is the full entity and not a partial projection. 
+                // Therefore we declare that we've received an entity 
+                if (entityType._mappedPropertiesCount <= Object.keys(node).length - 1) {
+                    result.entityType = entityType;
+                    result.extraMetadata = metadata;
+
+                    // Delete node properties that look like nested navigation paths
+                    // Breeze gets confused into thinking such properties contain actual entities. 
+                    // Todo: rethink this if/when can include related entities through expand
+                    var navPropNames = entityType.navigationProperties.map(function (p) { return p.name; });
+                    navPropNames.forEach(function (n) { if (node[n]) { delete node[n]; } });
+                }
+            }
+        }
+    }
+
     function executeQuery(mappingContext) {
         var adapter = this;
         mappingContext.entityType = adapter._getEntityTypeFromMappingContext(mappingContext);
@@ -299,7 +309,7 @@
         var url = mappingContext.getUrl();
         var headers = {
             'Accept': 'application/json;odata=verbose',
-            'DataServiceVersion': '2.0', // seems to work w/o this but just in case
+            'DataServiceVersion': '2.0' // seems to work w/o this but just in case
         };
 
         adapter._ajaxImpl.ajax({
@@ -335,7 +345,7 @@
         return response.data && response.data.d; // sharepoint adds a 'd' !?!
     }
 
-    function _processSavedEntity(savedEntity, saveContext, response /*, index*/) {
+    function _processSavedEntity(savedEntity, response /*, saveContext, index*/) {
         var etag = savedEntity && savedEntity.entityAspect && response.getHeaders('ETag');
         if (etag) {
             savedEntity.entityAspect.extraMetadata.etag = etag;
