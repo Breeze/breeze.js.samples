@@ -541,9 +541,9 @@
 
         var query = baseQuery.where(pred);
         var em = newEm();
-        var nullEntityType = new EntityType(em.metadataStore);
-        ok(true, "OData predicate: " + pred.toODataFragment(nullEntityType));
-
+        var orderEntityType = em.metadataStore.getEntityType("Order");
+        ok(true, "OData predicate: " + pred.toODataFragment(orderEntityType));
+        
         stop();
 
         // all should return exactly 15 orders

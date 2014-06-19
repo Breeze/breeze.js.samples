@@ -23,7 +23,7 @@
 })(this, function (global) {
     "use strict"; 
     var breeze = {
-        version: "1.4.13",
+        version: "1.4.14",
         metadataVersion: "1.0.5"
     };
     ;/**
@@ -5253,11 +5253,16 @@ var DataType = (function () {
         // default
     };
 
-    var constants = {
-        stringPrefix: "K_",
-        nextNumber: -1,
-        nextNumberIncrement: -1
+    var constants;
+    var resetConstants = function () {
+        constants = {
+            stringPrefix: "K_",
+            nextNumber: -1,
+            nextNumberIncrement: -1
+        };
     };
+
+    resetConstants();
 
     var getNextString = function () {
         return constants.stringPrefix + getNextNumber().toString();
@@ -5592,7 +5597,7 @@ var DataType = (function () {
             case "boolean":
                 return DataType.Boolean;
             case "number":
-                return DataType.Int32;
+                return DataType.Double;
         }
         return DataType.Undefined;
     };
@@ -5654,6 +5659,8 @@ var DataType = (function () {
     }
 
     DataType.constants = constants;
+    // for internal testing only
+    DataType._resetConstants = resetConstants;
 
     DataType.getSymbols().forEach(function (sym) {
         sym.validatorCtor = getValidatorCtor(sym);
@@ -6892,8 +6899,8 @@ var CsdlMetadataParser = (function () {
         var maxLength = csdlProperty.maxLength;
         maxLength = (maxLength == null || maxLength === "Max") ? null : parseInt(maxLength,10);
         // can't set the name until we go thru namingConventions and these need the dp.
-        
-            
+
+
         var dp = new DataProperty({
             nameOnServer: csdlProperty.name,
             dataType: dataType,
@@ -6903,7 +6910,7 @@ var CsdlMetadataParser = (function () {
             defaultValue: csdlProperty.defaultValue,
             // fixedLength: fixedLength,
             concurrencyMode: csdlProperty.concurrencyMode
-        })
+        });
 
         if (dataType === DataType.Undefined) {
             dp.rawTypeName = csdlProperty.type;
@@ -7429,14 +7436,19 @@ var EntityType = (function () {
             }
         }
         property.parentType = this;
+        var ms = this.metadataStore;
         if (property.isDataProperty) {
             this._addDataProperty(property);
         } else {
             this._addNavigationProperty(property);
             // metadataStore can be undefined if this entityType has not yet been added to a MetadataStore.
-            if (shouldResolve && this.metadataStore) {
-                resolveNp(property, this.metadataStore);
+            if (shouldResolve && ms) {
+                resolveNp(property, ms);
             }
+        }
+        // unmapped properties can be added AFTER entityType has already resolved all property names.
+        if (ms && !(property.name && property.nameOnServer)) {
+            updateClientServerNames(ms.namingConvention, property, "name");
         }
         return this;
     };
@@ -7868,7 +7880,7 @@ var EntityType = (function () {
         var serverPropName = clientPropName + "OnServer";
         var clientName = parent[clientPropName];
         if (clientName && clientName.length) {
-            if (parent.isUnmapped) return;
+            // if (parent.isUnmapped) return;
             var serverNames = __toArray(clientName).map(function (cName) {
                 var sName = nc.clientPropertyNameToServer(cName, parent);
                 var testName = nc.serverPropertyNameToClient(sName, parent);
@@ -10459,7 +10471,6 @@ var FnNode = (function() {
     proto._validate = function(entityType) {
         // will throw if not found;
         if (this.isValidated) return;            
-        this.isValidated = true;
         if (this.propertyPath) {
             if (entityType.isAnonymous) return;
             var prop = entityType.getProperty(this.propertyPath, true);
@@ -10477,6 +10488,7 @@ var FnNode = (function() {
                 node._validate(entityType);
             });
         }
+        this.isValidated = true;
     };
         
     function createPropFunction(propertyPath) {
@@ -13464,7 +13476,7 @@ var EntityManager = (function () {
             // attach any unattachedChildren
             var tuples = unattachedMap.getTuples(entityKey);
             if (tuples) {
-                tuples.forEach(function (tpl) {
+                tuples.slice(0).forEach(function (tpl) {
 
                     var unattachedChildren = tpl.children.filter(function (e) {
                         return e.entityAspect.entityState !== EntityState.Detached;
@@ -13790,7 +13802,8 @@ var EntityManager = (function () {
             } else {
                 targetEntity = entityType._createInstanceCore();
                 entityType._updateTargetFromRaw(targetEntity, rawEntity, rawValueFn);
-                if (newTempKey !== undefined) {
+                if (newTempKey != null) {
+                    targetEntity.entityAspect.hasTempKey = true;
                     // fixup pk
                     targetEntity.setProperty(entityType.keyProperties[0].name, newTempKey.values[0]);
 

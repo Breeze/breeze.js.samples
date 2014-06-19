@@ -1,6 +1,6 @@
 using System.Web.Http;
 
-[assembly: WebActivator.PreApplicationStartMethod(
+[assembly: WebActivatorEx.PreApplicationStartMethod(
     typeof(DocCode.App_Start.BreezeWebApiConfig), "RegisterBreezePreStart")]
 namespace DocCode.App_Start {
   ///<summary>

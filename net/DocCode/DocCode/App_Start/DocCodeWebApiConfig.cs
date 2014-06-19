@@ -2,7 +2,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
 
-[assembly: WebActivator.PreApplicationStartMethod(
+[assembly: WebActivatorEx.PreApplicationStartMethod(
     typeof(DocCode.App_Start.DocCodeWebApiConfig), "PreStart")]
 namespace DocCode.App_Start {
   ///<summary>
