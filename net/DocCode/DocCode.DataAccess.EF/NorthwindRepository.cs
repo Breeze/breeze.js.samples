@@ -92,7 +92,10 @@ namespace DocCode.DataAccess
         {
             get { return ForCurrentUser(Context.Employees); }
         }
-
+        public IQueryable<EmployeeTerritory> EmployeeTerritories
+        {
+          get { return Context.EmployeeTerritories; }
+        }
         public IQueryable<OrderDetail> OrderDetails
         {
             get { return ForCurrentUser(Context.OrderDetails); }

@@ -113,6 +113,12 @@ namespace DocCode.Controllers
         }
 
         [HttpGet]
+        public IQueryable<EmployeeTerritory> EmployeeTerritories()
+        {
+          return _repository.EmployeeTerritories;
+        }
+
+        [HttpGet]
         public IQueryable<OrderDetail> OrderDetails() {
             return _repository.OrderDetails;
         }

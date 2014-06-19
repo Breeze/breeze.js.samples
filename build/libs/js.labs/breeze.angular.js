@@ -1,7 +1,7 @@
 ﻿/*
  * Breeze Angular Module and "breeze service"
  *
- * v.0.8.4
+ * v.0.9.0
  *
  * The beginnings of a "breeze service" that tells Breeze to
  * - use $q for its promises rather than Q.js
@@ -122,9 +122,6 @@
             }
 
             function useNgPromises() {
-                // Todo: use promise adapter after Breeze makes it available
-                breeze.Q = $q; // HACK ... until dependencies can get it another way
-
                 if (breeze.config.setQ) {
                     breeze.config.setQ($q);
                     // add class methods that Breeze wants that $q lacks 
@@ -132,6 +129,10 @@
                 } else {
                     throw new Error(
                         'Cannot use the breeze angular service with breeze.version=' + breeze.version);
+                }
+                // Todo: deprecate once we're sure how Breeze exposes promises
+                if (!breeze.Q){
+                    breeze.Q = $q; // HACK ... until dependencies can get it another way                   
                 }
             }
         }
