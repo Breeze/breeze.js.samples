@@ -15,7 +15,7 @@
 
         // *** Cross origin service example  ***
         // When data server and application server are in different origins
-        //var serviceName = 'http://todo.breezejs.com/breeze/todos'; 
+        //var serviceName = 'http://sampleservice.breezejs.com/api/todos/';
 
         var manager = new breeze.EntityManager(serviceName);
         manager.enableSaveQueuing(true);

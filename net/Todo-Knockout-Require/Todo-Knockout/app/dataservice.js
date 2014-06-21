@@ -11,7 +11,8 @@ define(['jquery', 'ko', 'breeze', 'logger', 'breeze.savequeuing'], function ($, 
     var serviceName = 'breeze/todos'; // route to the same origin Web Api controller
 
     // *** Cross origin service example  ***
-    //var serviceName = 'http://todo.breezejs.com/breeze/todos'; // controller in different origin
+    // When data server and application server are in different origins
+    //var serviceName = 'http://sampleservice.breezejs.com/api/todos/';
 
     var manager = new breeze.EntityManager(serviceName);
     manager.enableSaveQueuing(true);
