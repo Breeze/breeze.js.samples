@@ -17,7 +17,6 @@
     var dsAdapter = breeze.config.getAdapterInstance("dataservice", 'webApi');
     var ajaxAdapter = breeze.config.getAdapterInstance("ajax");
     if (!ajaxAdapter) { throw new Error("No existing ajax adapter to fake."); }
-    var origAjaxFn = ajaxAdapter.ajax.bind(ajaxAdapter);
     var fakeAjaxErr = 'All requests are "errors" in changeRequestInterceptor tests';
 
     /************************** UNIT TESTS *************************/
@@ -25,8 +24,8 @@
     module("changeRequestInterceptor unit tests", {
         setup: function () { ajaxAdapter.ajax = fakeAjaxFn; },
         teardown: function() {
-            ajaxAdapter.ajax = origAjaxFn;
-            dsAdapter.changeRequestInterceptor = null;
+            delete ajaxAdapter.ajax; // restore the prototype's fn
+            delete dsAdapter.changeRequestInterceptor; // ditto
             window.OData = origOData;
         }
     });
