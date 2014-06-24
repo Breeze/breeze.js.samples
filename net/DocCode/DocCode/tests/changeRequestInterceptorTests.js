@@ -1,5 +1,6 @@
 /**************************************************************
- * Demonstrate the data source adapter "changeRequestInterceptor' 
+ * Demonstrate the data source adapter "changeRequestInterceptor'
+ * New as of v.1.4.14
  *************************************************************/
 
 (function (testFns, metadata) {
