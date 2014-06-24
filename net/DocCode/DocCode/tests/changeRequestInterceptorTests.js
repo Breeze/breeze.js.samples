@@ -67,7 +67,13 @@
 
         dsAdapter.changeRequestInterceptor = function (/*saveContext, saveBundle*/) {
             this.getRequest = function (request/*, entity, index*/) {
-                request.entityAspect.originalValuesMap.Notes = null;
+                var map = request.entityAspect.originalValuesMap;
+                if (map.Notes) {
+                    // Null the original value but KEEP the property name.
+                    // The existence of this property name tells the server you want to update it
+                    // with the current value in the request body.              
+                    map.Notes = null;
+                }
                 return request;
             };
             this.done = function (/*requests*/) {};
@@ -83,6 +89,7 @@
             equal(empData.entityAspect.originalValuesMap.Notes, null, "should send null for 'Notes' in orig values");
         }
     });
+
     asyncTest("Web API adapter's changeRequestInterceptor.done can clear original values", 4, function () {
 
         dsAdapter.changeRequestInterceptor = function (/*saveContext, saveBundle*/) {
@@ -120,6 +127,40 @@
             });
         }
     });
+
+    asyncTest("Web API adapter's changeRequestInterceptor.getRequest can discard a changed property", 3, function () {
+
+        dsAdapter.changeRequestInterceptor = function (/*saveContext, saveBundle*/) {
+            this.getRequest = function (request/*, entity, index*/) {
+                var map = request.entityAspect.originalValuesMap;
+                if (request.Notes) {
+                    delete request.Notes; // don't send this property
+                }
+                if (map.Notes) {
+                    // Deleting the original value property name tells server not to update it              
+                    delete map.Notes;
+                }
+                return request;
+            };
+            this.done = function (/*requests*/) { };
+        }
+
+        var stuff = prepareCachedData();
+        var newNotes = 'An alternative note that will never get to the server.';
+        stuff.employee.setProperty('Notes', newNotes);
+        stuff.em.saveChanges().then(successGuard).fail(inspect).fin(start);
+
+        function inspect(error) {
+            var data = getSaveData(error);
+            var empData = data.entities[0];
+            ok(empData.Notes === undefined, "'Notes' should not be in current values to save");
+            ok(empData.entityAspect.originalValuesMap.Notes === undefined,
+                "'Notes' should not be in orig values");
+            equal(stuff.employee.getProperty('Notes'), newNotes,
+                "changed 'Notes' are still on the client.");
+        }
+    });
+
     asyncTest("OData adapter's changeRequestInterceptor.getRequest can add request header", 2, function () {
         useFakeOData();
         var funHeader = "ha ha ha";
@@ -275,6 +316,7 @@
     function getSaveData(error) {
         if (!error.message === fakeAjaxErr) {
             ok(false, "Unexpected saveChanges error: " + error.message);
+            return {};
         } else {
             return JSON.parse(error.httpResponse.config.data);
         }
