@@ -1,6 +1,9 @@
 /**************************************************************
  * Demonstrate the data source adapter "changeRequestInterceptor'
  * New as of v.1.4.14
+ * These tests don't need a real server - we don't care what the server does
+ * - so they fake the AJAX call which always responds with an error
+ * that contains the request data, exactly as it would have been.
  *************************************************************/
 
 (function (testFns, metadata) {
@@ -32,7 +35,7 @@
         var stuff = prepareCachedData();
         var origNote = stuff.employee.getProperty('Notes');
         stuff.employee.setProperty('Notes', 'An alternative note.');
-        stuff.em.saveChanges().then(successGuard).fail(inspect).fin(start);
+        stuff.em.saveChanges().then(successGuard).catch(inspect).fin(start);
 
         function inspect(error) {
             var data = getSaveData(error);
@@ -68,7 +71,7 @@
         dsAdapter.changeRequestInterceptor = function (/*saveContext, saveBundle*/) {
             this.getRequest = function (request/*, entity, index*/) {
                 var map = request.entityAspect.originalValuesMap;
-                if (map.Notes) {
+                if (map && map.Notes) {
                     // Null the original value but KEEP the property name.
                     // The existence of this property name tells the server you want to update it
                     // with the current value in the request body.              
@@ -81,7 +84,7 @@
 
         var stuff = prepareCachedData();
         stuff.employee.setProperty('Notes', 'An alternative note.');
-        stuff.em.saveChanges().then(successGuard).fail(inspect).fin(start);
+        stuff.em.saveChanges().then(successGuard).catch(inspect).fin(start);
 
         function inspect(error) {
             var data = getSaveData(error);
@@ -110,7 +113,7 @@
         stuff.employee.setProperty('Notes', 'An alternative note.');
         stuff.employee.setProperty('LastName', 'Gonzo');
         stuff.customer.setProperty('CompanyName', 'Fifi');
-        stuff.em.saveChanges().then(successGuard).fail(inspect).fin(start);
+        stuff.em.saveChanges().then(successGuard).catch(inspect).fin(start);
 
         function inspect(error) {
             var data = getSaveData(error);
@@ -128,17 +131,17 @@
         }
     });
 
-    asyncTest("Web API adapter's changeRequestInterceptor.getRequest can discard a changed property", 3, function () {
+    asyncTest("Web API adapter's changeRequestInterceptor.getRequest can discard a changed property", 5, function () {
 
         dsAdapter.changeRequestInterceptor = function (/*saveContext, saveBundle*/) {
             this.getRequest = function (request/*, entity, index*/) {
                 var map = request.entityAspect.originalValuesMap;
-                if (request.Notes) {
-                    delete request.Notes; // don't send this property
+                if (request.__unmapped.Foo) {
+                    delete request.__unmapped.Foo; // don't send this unmapped property
                 }
-                if (map.Notes) {
-                    // Deleting the original value property name tells server not to update it              
-                    delete map.Notes;
+                if (map.Foo) {
+                    // Delete the original value property name too              
+                    delete map.Foo;
                 }
                 return request;
             };
@@ -146,18 +149,28 @@
         }
 
         var stuff = prepareCachedData();
-        var newNotes = 'An alternative note that will never get to the server.';
-        stuff.employee.setProperty('Notes', newNotes);
-        stuff.em.saveChanges().then(successGuard).fail(inspect).fin(start);
+        var newFoo = 'bar, bar, bar, bar bar ba-ran.';
+        // update these unmapped properties
+        stuff.employee.setProperty('Foo', newFoo);
+        stuff.employee.setProperty('Zig', 'Zag');
+        // updating a mapped property triggers EntityState change (so will save)
+        stuff.employee.setProperty('LastName', 'Hiss'); 
+        stuff.em.saveChanges().then(successGuard).catch(inspect).fin(start);
 
         function inspect(error) {
             var data = getSaveData(error);
             var empData = data.entities[0];
-            ok(empData.Notes === undefined, "'Notes' should not be in current values to save");
-            ok(empData.entityAspect.originalValuesMap.Notes === undefined,
-                "'Notes' should not be in orig values");
-            equal(stuff.employee.getProperty('Notes'), newNotes,
-                "changed 'Notes' are still on the client.");
+            ok(empData.__unmapped.Foo === undefined,
+                "'Foo' should NOT be in unmapped values sent to server after stripping from request");
+
+            var map = empData.entityAspect.originalValuesMap;
+            ok(map.Foo === undefined, "'Foo' should NOT be in orig values");
+            equal(stuff.employee.getProperty('Foo'), newFoo,
+                "changed 'Foo' value is still on the client entity.");
+
+            ok(empData.__unmapped.Zig !== undefined,
+                "'Zig' should remain in unmapped values sent to server because not removed");
+            ok(map.Zig !== undefined, "'Zig' should remain in orig values");
         }
     });
 
@@ -175,7 +188,7 @@
         var stuff = prepareCachedData();
         stuff.employee.setProperty('Notes', 'An alternative note.');
         stuff.customer.setProperty('CompanyName', 'Fifi');
-        stuff.em.saveChanges().then(successGuard).fail(inspect).fin(start);
+        stuff.em.saveChanges().then(successGuard).catch(inspect).fin(start);
 
         function inspect(error) {
             var requests = error.body.__batchRequests[0].__changeRequests;
@@ -200,7 +213,7 @@
         var stuff = prepareCachedData();
         stuff.employee.setProperty('Notes', 'An alternative note.');
         stuff.customer.setProperty('CompanyName', 'Fifi');
-        stuff.em.saveChanges().then(successGuard).fail(inspect).fin(start);
+        stuff.em.saveChanges().then(successGuard).catch(inspect).fin(start);
 
         function inspect(error) {
             var requests = error.body.__batchRequests[0].__changeRequests;
@@ -223,22 +236,14 @@
         };
         config.error(httpResponse);
     }
-        
-    function useFakeOData() {
-        window.OData = {
-            jsonHandler: {},
-            request: function (config, success, fail) {
-                var err = {
-                    response: {
-                        body: config.data,
-                        statusText: fakeAjaxErr,
-                        statusCode: '400'
-                    }
-                };
-                fail(err);
-            }
+
+    function getSaveData(error) {
+        if (!error.message === fakeAjaxErr) {
+            ok(false, "Unexpected saveChanges error: " + error.message);
+            return {};
+        } else {
+            return JSON.parse(error.httpResponse.config.data);
         }
-        dsAdapter = breeze.config.initializeAdapterInstance('dataService', 'odata', false);
     }
 
     function newEm() {
@@ -250,7 +255,12 @@
         });
 
         var em = new breeze.EntityManager({ dataService: testDataService });
-        em.metadataStore.importMetadata(metadata);
+        var store = em.metadataStore;
+        store.importMetadata(metadata);
+        store.registerEntityTypeCtor('Employee', function() {
+            this.Foo = "Foo"; // an unmapped property
+            this.Zig = "Zig"; // another unmapped property
+        });
         return em;
     }
 
@@ -262,7 +272,7 @@
             CustomerID: testFns.wellKnownData.alfredsID,
             CompanyName: 'Alfreds Futter..blah blah',
             RowVersion: 1
-        }, breeze.EntityState.Unchanged);
+        }, breeze.EntityState.Unchanged); // unchanged
 
         // for OData tests
         cust.entityAspect.extraMetadata = {
@@ -275,7 +285,7 @@
             FirstName: 'Boo',
             LastName: 'Hoo',
             Notes:"Imagine a really long note here about Boo"
-        }, breeze.EntityState.Unchanged);
+        }, breeze.EntityState.Unchanged); // unchanged
 
         // for OData tests
         emp.entityAspect.extraMetadata = {
@@ -288,12 +298,14 @@
             EmployeeID: emp.getProperty("EmployeeID"),
             CustomerID: cust.getProperty("CustomerID")
         }, breeze.EntityState.Unchanged);
+
         em.createEntity('OrderDetail', {
             OrderID: order.getProperty("OrderID"),
             ProductID: 1,
             Quantity: 1,
             UnitPrice: 100,
         }, breeze.EntityState.Unchanged);
+
         em.createEntity('OrderDetail', {
             OrderID: order.getProperty("OrderID"),
             ProductID: 2,
@@ -313,13 +325,21 @@
         ok(false, "No request should succeed; how is this possible?");
     }
 
-    function getSaveData(error) {
-        if (!error.message === fakeAjaxErr) {
-            ok(false, "Unexpected saveChanges error: " + error.message);
-            return {};
-        } else {
-            return JSON.parse(error.httpResponse.config.data);
+    function useFakeOData() {
+        window.OData = {
+            jsonHandler: {},
+            request: function (config, success, fail) {
+                var err = {
+                    response: {
+                        body: config.data,
+                        statusText: fakeAjaxErr,
+                        statusCode: '400'
+                    }
+                };
+                fail(err);
+            }
         }
+        dsAdapter = breeze.config.initializeAdapterInstance('dataService', 'odata', false);
     }
 
 })(docCode.testFns, docCode.northwindMetadata);
