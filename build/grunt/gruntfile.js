@@ -188,7 +188,7 @@ module.exports = function(grunt) {
     
   function getBreezeVersion() {
      var versionFile = grunt.file.read( jsSrcDir + '_head.jsfrag');    
-     var regex = /\s+version:\s*"(\d.\d\d*.?\d*)"/
+     var regex = /\s+version:\s*"(\d.\d\d*.?\d*.?\d*)"/
      var matches = regex.exec(versionFile);
      
      if (matches == null) {
@@ -229,8 +229,8 @@ module.exports = function(grunt) {
 
     var cmd = { 
       expand: true, 
-      cwd: serverNetDir + dllName,
-      src: [ dllName + '.dll' ],
+      cwd: serverNetDir + dllName + '/bin/release',
+      src: [ dllName + '.dll', dllName + '.pdb' ],
       dest: tempDir + 'NetDlls',
     }
     return cmd;
