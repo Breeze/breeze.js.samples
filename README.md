@@ -12,8 +12,6 @@ Learn more about these [samples on the Breeze website](http://www.breezejs.com/s
 
 The sample code is maintained in the [breeze.js.samples repository on github](https://github.com/Breeze/breeze.js.samples "breeze.js.samples on GitHub") where it is maintained continuously between releases of BreezeJS itself.
 
-For the current release, [**download the v.1.4.13 zip**](https://github.com/Breeze/breeze.js.samples/archive/1.4.13.zip).
-
 For the current build, [**download a zip of the master branch**](https://github.com/Breeze/breeze.js.samples/archive/master.zip).
 
 >For earlier releases, [visit the **github releases page**](https://github.com/Breeze/breeze.js.samples/releases) and select the version of interest.
