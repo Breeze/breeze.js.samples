@@ -467,7 +467,7 @@
     // Assert can navigate to the related AccountType
     function NavToAccountType(data) {
         var entity = data.results[0];
-        var type = data.query.entityType.shortName;
+        var type = data.query.fromEntityType.shortName;
 
         if (!entity) {
             ok(false, "a query failed to return a single " + type);
@@ -553,7 +553,7 @@
         // Assert can load the related AccountType on-demand
         function NavToAccountTypeOnDemand(data) {
             var entity = data.results[0];
-            var type = data.query.entityType.shortName;
+            var type = data.query.fromEntityType.shortName;
 
             if (!entity) {
                 ok(false, "a query failed to return a single " + type);
@@ -610,7 +610,7 @@
     // Assert can navigate from Status to the related BillingDetails
     function NavFromStatus(data) {
         var status = data.results[0];
-        var type = data.query.entityType.shortName;
+        var type = data.query.fromEntityType.shortName;
 
         if (!status) {
             ok(false, "a query failed to return a single " + type);
@@ -662,7 +662,7 @@
     // Assert can navigate to the related BankAccount Deposits
     function NavToDeposits(data) {
         var account = data.results[0];
-        var type = data.query.entityType.shortName;
+        var type = data.query.fromEntityType.shortName;
 
         if (!account) {
             ok(false, "a query failed to return a single " + type);

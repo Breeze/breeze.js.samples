@@ -5,13 +5,15 @@
  * conditions of the IdeaBlade Breeze license, available at http://www.breezejs.com/license
  *
  * Author: Ward Bell
- * Version: 1.0.4
+ * Version: 1.1.0
  * --------------------------------------------------------------------------------
  * Adds "Save Queuing" capability to new EntityManagers
  * "Save Queuing" automatically queues and defers an EntityManager.saveChanges call
  * when another save is in progress for that manager.
  *
- * Depends on Breeze (which it patches) and Q.js (not for use in Angular ... yet)
+ * Depends on Breeze (which it patches)
+ *     Prior to Breeze v.1.4.14 for use only with apps that rely on Q.js
+ *     Should work for Angular apps as of 1.4.14 
  *
  * Without "Save Queuing", an EntityManager will throw an exception when
  * saveChanges is called while another save is in progress.
@@ -101,7 +103,8 @@
 
     SaveQueuing.prototype.queueSaveChanges = function (args) {
         var self = this;
-        var deferredSave = Q.defer();
+        var promises = breeze.Q || Q; // breeze.Q should be what Breeze is using
+        var deferredSave = promises.defer();
         self.saveQueue.push(deferredSave);
 
         // clone saveOptions because may change later, before this save is dequeued
