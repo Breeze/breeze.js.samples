@@ -23,7 +23,7 @@
 })(this, function (global) {
     "use strict"; 
     var breeze = {
-        version: "1.4.16",
+        version: "1.4.17",
         metadataVersion: "1.0.5"
     };
     ;/**
@@ -2355,8 +2355,12 @@ var Validator = (function () {
         var regionProperty - custType.getProperty("Region");
         // Makes "Region" on Customer a required property.
         regionProperty.validators.push(Validator.required());
+        // or to allow empty strings
+        regionProperty.validators.push(Validator.required({ allowEmptyStrings: true }););
     @method required
     @static
+    @param context {Object} 
+    @param [context.allowEmptyStrings] {Boolean} If this parameter is omitted or false then empty strings do NOT pass validation.
     @return {Validator} A new Validator
     **/
     ctor.required = function (context) {
@@ -3859,7 +3863,8 @@ var EntityAspect = (function() {
         
         stype.getProperties().forEach(function (p) {
             var value = target.getProperty(p.name);
-            if (p.validators.length > 0) {
+            var validators = p.getAllValidators();
+            if (validators.length > 0) {
                 context.property = p;
                 context.propertyName = aspect.getPropertyPath(p.name);
                 ok = entityAspect._validateProperty(value, context) && ok;
@@ -3877,7 +3882,7 @@ var EntityAspect = (function() {
             
 
         // then target level
-        stype.validators.forEach(function (validator) {
+        stype.getAllValidators().forEach(function (validator) {
             ok = validate(entityAspect, validator, target) && ok;
         });
         return ok;
@@ -4052,7 +4057,7 @@ var EntityAspect = (function() {
     proto._validateProperty = function (value, context) {
         var ok = true;
         this._processValidationOpAndPublish(function (that) {
-            context.property.validators.forEach(function (validator) {
+            context.property.getAllValidators().forEach(function (validator) {
                 ok = validate(that, validator, value, context) && ok;
             });
         });
@@ -6117,6 +6122,23 @@ var MetadataStore = (function () {
     ctor.ANONTYPE_PREFIX = "_IB_";
 
     /**
+   An {{#crossLink "Event"}}{{/crossLink}} that fires after a MetadataStore has completed fetching metadata from a remote service. 
+
+       var ms = myEntityManager.metadataStore;
+       ms.metadataFetched.subscribe(function(args) {
+           var metadataStore = args.metadataStore;
+           var dataService = args.dataService;
+       });
+   });
+     
+   @event metadataFetched
+   @param metadataStore {MetadataStore} The MetadataStore into which the metadata was fetched.
+   @param dataService {DataService} The DataService that metadata was fetched from.
+   @param rawMetadata {Object} The raw metadata returned from the service. (It will have already been processed by this point).
+   @readOnly
+   **/
+
+    /**
     General purpose property set method
     @example
         // assume em1 is an EntityManager containing a number of existing entities.
@@ -6180,6 +6202,10 @@ var MetadataStore = (function () {
         }
 
         if (!structuralType.isComplexType) {
+            if (structuralType.baseTypeName && !structuralType.baseEntityType) {
+                var baseEntityType = this._getEntityType(structuralType.baseTypeName, true);
+                structuralType._updateFromBase(baseEntityType);
+            }
             if (structuralType.keyProperties.length === 0 && !structuralType.isAbstract) {
                 throw new Error("Unable to add " + structuralType.name +
                     " to this MetadataStore.  An EntityType must have at least one property designated as a key property - See the 'DataProperty.isPartOfKey' property.");
@@ -6218,9 +6244,6 @@ var MetadataStore = (function () {
             structuralType.getEntityCtor();
         } 
 
-        if (structuralType.baseEntityType) {
-            structuralType.baseEntityType.subtypes.push(structuralType);
-        }
     };
         
     /**
@@ -6686,7 +6709,7 @@ var MetadataStore = (function () {
                 
             }
         } else {
-            completeStructuralTypeFromJson(metadataStore, json, stype, null);
+            completeStructuralTypeFromJson(metadataStore, json, stype);
         }
 
         // stype may or may not have been added to the metadataStore at this point.
@@ -6721,28 +6744,14 @@ var MetadataStore = (function () {
         });
     }
 
-    function completeStructuralTypeFromJson(metadataStore, json, stype, baseEntityType) {
+    function completeStructuralTypeFromJson(metadataStore, json, stype) {
 
         // TODO: should validators from baseType appear on subtypes.
         if (json.validators) {
             stype.validators = json.validators.map(Validator.fromJSON);
         }
 
-        if (baseEntityType) {
-            stype.baseEntityType = baseEntityType;
-            
-            baseEntityType.dataProperties.forEach(function (dp) {
-                var newDp = new DataProperty(dp);
-                newDp.isInherited = true;
-                stype._addPropertyCore(newDp);
-            });
-            baseEntityType.navigationProperties.forEach(function (np) {
-                var newNp = new NavigationProperty(np);
-                newNp.isInherited = true;
-                stype._addPropertyCore(newNp);
-            });
-        }
-        
+       
         json.dataProperties.forEach(function(dp) {
             stype._addPropertyCore(DataProperty.fromJSON(dp));
         });
@@ -6762,7 +6771,7 @@ var MetadataStore = (function () {
         var deferrals = deferredTypes[stype.name];
         if (deferrals) {
             deferrals.forEach(function (d) {
-                completeStructuralTypeFromJson(metadataStore, d.json, d.stype, stype);
+                completeStructuralTypeFromJson(metadataStore, d.json, d.stype);
             });
             delete deferredTypes[stype.name];
         }
@@ -6846,7 +6855,7 @@ var CsdlMetadataParser = (function () {
             entityType.baseTypeName = baseTypeName;
             var baseEntityType = metadataStore._getEntityType(baseTypeName, true);
             if (baseEntityType) {
-                completeParseCsdlEntityType(entityType, csdlEntityType, schema, metadataStore, baseEntityType);
+                completeParseCsdlEntityType(entityType, csdlEntityType, schema, metadataStore);
             } else {
                 var deferrals = metadataStore._deferredTypes[baseTypeName];
                 if (!deferrals) {
@@ -6856,33 +6865,15 @@ var CsdlMetadataParser = (function () {
                 deferrals.push({ entityType: entityType, csdlEntityType: csdlEntityType });
             }
         } else {
-            completeParseCsdlEntityType(entityType, csdlEntityType, schema, metadataStore, null);
+            completeParseCsdlEntityType(entityType, csdlEntityType, schema, metadataStore);
         }
         // entityType may or may not have been added to the metadataStore at this point.
         return entityType;
 
     }
 
-    function completeParseCsdlEntityType(entityType, csdlEntityType, schema, metadataStore, baseEntityType) {
-        var baseKeyNamesOnServer = [];
-        if (baseEntityType) {
-            entityType.baseEntityType = baseEntityType;
-            entityType.autoGeneratedKeyType = baseEntityType.autoGeneratedKeyType;
-            baseKeyNamesOnServer = baseEntityType.keyProperties.map(__pluck("name"));
-            baseEntityType.dataProperties.forEach(function (dp) {
-                var newDp = new DataProperty(dp);
-                newDp.isInherited = true;
-                entityType._addPropertyCore(newDp);
-            });
-            baseEntityType.navigationProperties.forEach(function (np) {
-                var newNp = new NavigationProperty(np);
-                newNp.isInherited = true;
-                entityType._addPropertyCore(newNp);
-            });
-        }
-
+    function completeParseCsdlEntityType(entityType, csdlEntityType, schema, metadataStore ) {
         var keyNamesOnServer = csdlEntityType.key ? __toArray(csdlEntityType.key.propertyRef).map(__pluck("name")) : [];
-        keyNamesOnServer = baseKeyNamesOnServer.concat(keyNamesOnServer);
 
         __toArray(csdlEntityType.property).forEach(function (prop) {
             parseCsdlDataProperty(entityType, prop, schema, keyNamesOnServer);
@@ -6899,7 +6890,7 @@ var CsdlMetadataParser = (function () {
         var deferrals = deferredTypes[entityType.name];
         if (deferrals) {
             deferrals.forEach(function (d) {
-                completeParseCsdlEntityType(d.entityType, d.csdlEntityType, schema, metadataStore, entityType);
+                completeParseCsdlEntityType(d.entityType, d.csdlEntityType, schema, metadataStore );
             });
             delete deferredTypes[entityType.name];
         }
@@ -7292,6 +7283,7 @@ var EntityType = (function () {
     var proto = ctor.prototype;
     var parseRawValue = DataType.parseRawValue;
     proto._$typeName = "EntityType";
+    ctor.qualifyTypeName = qualifyTypeName;
 
     /**
     The {{#crossLink "MetadataStore"}}{{/crossLink}} that contains this EntityType
@@ -7475,6 +7467,16 @@ var EntityType = (function () {
         return result;
     };
 
+    proto.getAllValidators = function() {
+        var result = this.validators;
+        var bt = this.baseEntityType;
+        while (bt) {
+            result.push.apply(result, bt.validators);
+            bt = bt.baseEntityType;
+        };
+        return result;
+    }
+
     /**
     Adds a  {{#crossLink "DataProperty"}}{{/crossLink}} or a {{#crossLink "NavigationProperty"}}{{/crossLink}} to this EntityType.
     @example
@@ -7491,6 +7493,29 @@ var EntityType = (function () {
         // true is 2nd arg to force resolve of any navigation properties.
         return this._addPropertyCore(property, true);
     };
+
+    proto._updateFromBase = function (baseEntityType) {
+        this.baseEntityType = baseEntityType;
+        if (this.autoGeneratedKeyType === AutoGeneratedKeyType.None) {
+            this.autoGeneratedKeyType = baseEntityType.autoGeneratedKeyType;
+        }
+        
+        baseEntityType.dataProperties.forEach(function (dp) {
+            var newDp = new DataProperty(dp);
+            // don't need to copy validators becaue we will walk the hierarchy to find them
+            newDp.validators = [];
+            newDp.baseProperty = dp;
+            this._addPropertyCore(newDp);
+        }, this);
+        baseEntityType.navigationProperties.forEach(function (np) {
+            var newNp = new NavigationProperty(np);
+            // don't need to copy validators becaue we will walk the hierarchy to find them
+            newNp.validators = [];
+            newNp.baseProperty = np;
+            this._addPropertyCore(newNp);
+        }, this);
+        baseEntityType.subtypes.push(this);
+    }
 
     proto._addPropertyCore = function(property, shouldResolve) {
         if (this.isFrozen) {
@@ -7913,7 +7938,7 @@ var EntityType = (function () {
     };
 
     function localPropsOnly(props) {
-        return props.filter(function (prop) { return !prop.isInherited; });
+        return props.filter(function (prop) { return prop.baseProperty == null; });
     }
 
     // fromJSON is handled by structuralTypeFromJson function.
@@ -8237,6 +8262,11 @@ var ComplexType = (function () {
             .applyAll(this);
     };
 
+    proto.getAllValidators = function () {
+        // ComplexType inheritance is not YET supported.
+        return this.validators;
+    }
+
     /**
     Creates a new non-attached instance of this ComplexType.
     @method createInstance
@@ -8495,10 +8525,10 @@ var DataProperty = (function () {
     **/
 
     /**
-    Whether this property is inherited from a base class. 
+    Property on the base type that this property is inherited from. Will be null if the property is not on the base type.
 
     __readOnly__
-    @property isInherited {Boolean}
+    @property baseProperty {DataProperty}
     **/
 
     /**
@@ -8600,6 +8630,16 @@ var DataProperty = (function () {
             .whereParam("custom").isOptional()
             .applyAll(this);
     };
+
+    proto.getAllValidators = function () {
+        var validators = this.validators;
+        var baseProp = this.baseProperty;
+        while (baseProp) {
+            validators.push.apply(validators, baseProp.validators);
+            baseProp = baseProp.baseProperty;
+        }
+        return validators;
+    }
 
     proto.toJSON = function () {
         // do not serialize dataTypes that are complexTypes
@@ -8736,12 +8776,12 @@ var NavigationProperty = (function () {
     **/
 
     /**
-    Whether this property is inherited from a base class. 
+    Property on the base type that this property is inherited from. Will be null if the property is not on the base type.
 
     __readOnly__
-    @property isInherited {Boolean}
+    @property baseProperty {NavigationProperty}
     **/
-
+    
     /**
     The name of the association to which that this property belongs.  This associationName will be shared with this 
     properties 'inverse'.
@@ -8809,7 +8849,7 @@ var NavigationProperty = (function () {
     proto.isNavigationProperty = true;
 
     __extend(proto, DataProperty.prototype, [
-        "formatName"
+        "formatName", "getAllValidators"
     ]);
 
     /**
@@ -14390,7 +14430,7 @@ var EntityManager = (function () {
     };
 
     UnattachedChildrenMap.prototype.removeChildren = function (parentEntityKey, navigationProperty) {
-        var tuples = this.map[parentEntityKey.toString()];
+        var tuples = this.getTuples(parentEntityKey);
         if (!tuples) return;
         __arrayRemoveItem(tuples, function (t) {
             return t.navigationProperty === navigationProperty;
@@ -14413,7 +14453,7 @@ var EntityManager = (function () {
     };
 
     UnattachedChildrenMap.prototype.getTuple = function (parentEntityKey, navigationProperty) {
-        var tuples = this.map[parentEntityKey.toString()];
+        var tuples = this.getTuples(parentEntityKey);
         if (!tuples) return null;
         var tuple = __arrayFirst(tuples, function (t) {
             return t.navigationProperty === navigationProperty;
@@ -14421,8 +14461,16 @@ var EntityManager = (function () {
         return tuple;
     };
 
+    
     UnattachedChildrenMap.prototype.getTuples = function (parentEntityKey) {
-        return this.map[parentEntityKey.toString()];
+        var tuples = this.map[parentEntityKey.toString()];
+        var entityType = parentEntityKey.entityType;
+        while (!tuples && entityType.baseEntityType) {
+            entityType = entityType.baseEntityType;
+            var baseKey = parentEntityKey.toString(entityType);
+            tuples = this.map[baseKey];
+        }
+        return tuples;
     };
 
     return ctor;

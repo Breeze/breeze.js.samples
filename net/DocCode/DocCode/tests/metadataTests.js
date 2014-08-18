@@ -331,6 +331,27 @@
 
     function defineEmployeePartialType(metadataStore) {
         var empType = metadataStore.getEntityType('Employee');
+        // Get the navigation property from Employee to Orders
+        var assoc = empType.getNavigationProperty('Orders');
+        var DataType = breeze.DataType;
+        var type = new breeze.EntityType({
+            shortName: 'EmployeePartial',
+            namespace: empType.namespace,
+            dataProperties: {
+                EmployeeID: { dataType: DataType.Int32, isPartOfKey: true },
+                FirstName: { },
+                LastName: { }
+            },
+            navigationProperties: {
+                Orders: { entityTypeName: "Order", isScalar: false, foreignKeyNames: assoc.inverse.foreignKeyNames, associationName: assoc.associationName }
+            }
+        });
+        metadataStore.addEntityType(type);
+        return type;
+    }
+
+    function defineEmployeePartialTypeOld(metadataStore) {
+        var empType = metadataStore.getEntityType('Employee');
 
         var type = new breeze.EntityType({
             shortName: 'EmployeePartial',
@@ -348,15 +369,15 @@
 
         // Get the navigation property from Employee to Orders
         var assoc = empType.getNavigationProperty('Orders');
-        
+
         type.addProperty(new breeze.NavigationProperty({
-              nameOnServer: 'Orders'
+            nameOnServer: 'Orders'
             , isScalar: false  // it's a collection
             , entityTypeName: assoc.entityType.name
             , foreignKeyNames: assoc.inverse.foreignKeyNames
             , associationName: assoc.associationName
         }));
-        
+
         metadataStore.addEntityType(type);
         return type;
     }
