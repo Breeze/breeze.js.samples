@@ -1,7 +1,7 @@
 ﻿/*
  * Breeze Labs: Breeze Directives for Angular Apps
  *
- *  v.1.3.5
+ *  v.1.3.7
  *
  *  Usage:
  *     Make this module a dependency of your app module:

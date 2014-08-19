@@ -89,13 +89,13 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Breeze.ContextProvider">
-      <HintPath>..\packages\Breeze.Server.ContextProvider.1.4.16\lib\Breeze.ContextProvider.dll</HintPath>
+      <HintPath>..\packages\Breeze.Server.ContextProvider.1.4.17\lib\Breeze.ContextProvider.dll</HintPath>
     </Reference>
     <Reference Include="Breeze.ContextProvider.NH">
-      <HintPath>..\packages\Breeze.Server.ContextProvider.NH.1.4.16\lib\Breeze.ContextProvider.NH.dll</HintPath>
+      <HintPath>..\packages\Breeze.Server.ContextProvider.NH.1.4.17\lib\Breeze.ContextProvider.NH.dll</HintPath>
     </Reference>
     <Reference Include="Breeze.WebApi2">
-      <HintPath>..\packages\Breeze.Server.WebApi2.1.4.16\lib\Breeze.WebApi2.dll</HintPath>
+      <HintPath>..\packages\Breeze.Server.WebApi2.1.4.17\lib\Breeze.WebApi2.dll</HintPath>
     </Reference>
     <Reference Include="Iesi.Collections">
       <HintPath>..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll</HintPath>

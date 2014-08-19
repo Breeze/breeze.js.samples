@@ -22,7 +22,7 @@ module.exports = function(grunt) {
   ];
   
   var nugetPackageNames = [
-     'Breeze.WebApi', 
+     // 'Breeze.WebApi', 
 	   'Breeze.WebApi2.EF6',
      'Breeze.WebApi2.NH',
 	   'Breeze.Client',
@@ -33,9 +33,9 @@ module.exports = function(grunt) {
 	];
   
   var breezeDlls = [
-    'Breeze.WebApi', 
-    'Breeze.WebApi.EF', 
-    'Breeze.WebApi.NH',
+    // 'Breeze.WebApi', 
+    // 'Breeze.WebApi.EF', 
+    // 'Breeze.WebApi.NH',
     'Breeze.ContextProvider', 
     'Breeze.ContextProvider.EF6',
     'Breeze.ContextProvider.NH',
@@ -53,9 +53,8 @@ module.exports = function(grunt) {
  
   var versionNum = getBreezeVersion();
   var zipFileName = '../breeze-runtime-' + versionNum + '.zip';
-  var zipPlusFileName = '../breeze-runtime-plus-' + versionNum + '.zip';
-
-  grunt.log.writeln('zipName: ' + zipPlusFileName);
+  
+  grunt.log.writeln('zipName: ' + zipFileName);
   grunt.file.write(tempDir + 'version.txt', 'Version: ' + versionNum);
   grunt.log.writeln('localAppData: ' + process.env.LOCALAPPDATA);
   grunt.log.writeln('SolutionFileNames ');
@@ -112,12 +111,6 @@ module.exports = function(grunt) {
         })
       },  
       
-      // samples: {
-      //  files: sampleDirs.map(function(dir) {
-      //      return buildSampleCopyCmd(dir, tempDir);
-      //    })
-      // },
-      
       readMe: {
         files: [{ expand: true, src: ['readme.txt'], dest: tempDir }],
       }
@@ -130,12 +123,6 @@ module.exports = function(grunt) {
           { expand: true, cwd: tempDir, src: [ '**/**', '!Samples/**/*' ], dest: '/' } 
         ]
       }
-      // baseWithSamples: {
-      //  options: { archive:  zipPlusFileName, mode: 'zip', level: 9  },
-      //  files: [ 
-      //    { expand: true, dot: true, cwd: tempDir, src: [ '**/*' ], dest: '/' } 
-      //  ]
-      // }
     },
    
   });
@@ -208,21 +195,6 @@ module.exports = function(grunt) {
       });
     });
     return result;
-  }
-  
- 
-  function buildSampleCopyCmd(srcRoot, destRoot) {
-    // var baseName = path.basename(srcRoot);
-    var destPath = path.relative('../../', srcRoot);
-    var files = ['**/*', '**/.nuget/*'];
-
-    var cmd = { 
-      expand: true, 
-      cwd: srcRoot , 
-      src: files,
-      dest: destRoot + "Samples/" + destPath,
-    }
-    return cmd;
   }
   
   function buildDllCopyCmd(dllName) {

@@ -141,24 +141,25 @@
                 data: data
             };
 
-        } else if (state.isModified()) {
-            rawEntity = helper.unwrapChangedValues(
-                entity, entityManager.metadataStore, adapter._transformSaveValue);
-            rawEntity.__metadata = { 'type': aspect.extraMetadata.type };
-            data = adapter._serializeToJson(rawEntity);
-            headers['X-HTTP-Method'] = 'MERGE';
-            request = {
-                method: "POST",
-                data: data
-            };
-            adjustUpdateDeleteRequest();
-
         } else if (state.isDeleted()) {
             request = {
                 method: "DELETE",
                 data: null
             };
             adjustUpdateDeleteRequest();
+
+        } else if (state.isModified()) {
+            request = {
+                method: "POST"
+            };
+            adjustUpdateDeleteRequest();
+            headers['X-HTTP-Method'] = 'MERGE';
+            rawEntity = helper.unwrapChangedValues(
+                entity, entityManager.metadataStore, adapter._transformSaveValue);
+            // Todo: determine if SharePoint really wants this __metadata
+            rawEntity.__metadata = { 'type': aspect.extraMetadata.type };
+            request.data = adapter._serializeToJson(rawEntity);
+
         } else {
             throw new Error("Cannot save an entity whose EntityState is " + state.name);
         }
