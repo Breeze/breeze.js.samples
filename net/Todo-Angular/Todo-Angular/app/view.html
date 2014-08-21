@@ -37,7 +37,7 @@
                            data-ng-class="{done: item.IsDone, archived: item.IsArchived}">
                         {{item.Description}}
                     </label>
-                    <a href="#" data-ng-click="vm.deleteItem(item)">X</a>
+                    <a href="" data-ng-click="vm.deleteItem(item)">X</a>
                 </div>
 
                 <!-- Editing View -->
@@ -54,14 +54,14 @@
         </ul>
 
         <div class="controlLinks">
-            <a href="#" data-ng-click="vm.purge()">Purge</a>&nbsp;&nbsp;
-            <a href="#" data-ng-click="vm.reset()">Reset</a>
+            <a href="" data-ng-click="vm.purge()">Purge</a>&nbsp;&nbsp;
+            <a href="" data-ng-click="vm.reset()">Reset</a>
         </div>
     </section>
 
     <footer>
         <div data-ng-show="vm.itemsLeftMessage()">{{vm.itemsLeftMessage()}}</div>
-        <a href="#"
+        <a href=""
            data-ng-show="vm.archiveCompletedMessage()"
            data-ng-click="vm.archiveCompletedItems()">{{vm.archiveCompletedMessage()}}</a>
     </footer>
