@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" output="target/NorthBreeze/WEB-INF/classes" path="src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="target/NorthBreeze/WEB-INF/lib/breezejs-hibernate-0.1a.jar"/>
 	<classpathentry kind="lib" path="target/NorthBreeze/WEB-INF/lib/antlr-2.7.7.jar"/>
 	<classpathentry kind="lib" path="target/NorthBreeze/WEB-INF/lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="target/NorthBreeze/WEB-INF/lib/hibernate-commons-annotations-4.0.4.Final.jar"/>
@@ -32,5 +31,6 @@
 	<classpathentry kind="lib" path="target/NorthBreeze/WEB-INF/lib/xml-apis-1.0.b2.jar"/>
 	<classpathentry kind="lib" path="C:/Java/apache-tomcat-7.0.47/lib/mysql-connector-java-5.1.30-bin.jar"/>
 	<classpathentry kind="lib" path="C:/Java/apache-tomcat-7.0.47/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="target/NorthBreeze/WEB-INF/lib/breezejs-hibernate-0.1a1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

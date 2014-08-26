@@ -1,0 +1,16 @@
+<assembly>
+  <!-- makes a 'lib' directory with all the dependent jars -->
+  <id>lib</id>
+  <formats>
+    <format>dir</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>WEB-INF/lib</outputDirectory>
+      <useProjectArtifact>true</useProjectArtifact>
+      <unpack>false</unpack>
+      <scope>test</scope>
+    </dependencySet>
+  </dependencySets>
+</assembly>

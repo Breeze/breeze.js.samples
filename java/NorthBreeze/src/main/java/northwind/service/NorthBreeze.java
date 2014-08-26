@@ -17,7 +17,7 @@ import northwind.model.Customer;
 import northwind.model.Order;
 
 import com.breezejs.OdataParameters;
-import com.breezejs.hib.Metadata;
+import com.breezejs.Metadata;
 import com.breezejs.hib.MetadataBuilder;
 import com.breezejs.hib.QueryService;
 import com.breezejs.hib.SaveService;

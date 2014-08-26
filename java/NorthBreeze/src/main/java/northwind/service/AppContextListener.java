@@ -8,7 +8,7 @@ import javax.servlet.annotation.WebListener;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-import com.breezejs.hib.Metadata;
+import com.breezejs.Metadata;
 import com.breezejs.hib.MetadataBuilder;
 
 @WebListener
