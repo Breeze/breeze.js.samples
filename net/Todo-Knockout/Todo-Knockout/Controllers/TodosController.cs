@@ -2,10 +2,12 @@ namespace Todo.Controllers {
     using System;
     using System.Linq;
     using System.Web.Http;
-    using Breeze.WebApi;
-    using Breeze.WebApi.EF;
+    
     using Models;
     using Newtonsoft.Json.Linq;
+  using Breeze.WebApi2;
+  using Breeze.ContextProvider.EF6;
+  using Breeze.ContextProvider;
 
     [BreezeController]
     public class TodosController : ApiController {
