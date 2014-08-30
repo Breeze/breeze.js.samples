@@ -1,4 +1,4 @@
-<img src="http://www.breezejs.com/sites/all/images/BreezeZumo.png" alt="Todo App with Azure" style="float:left; height:70px; margin-right: 8px;"/><h1>The Breeze/Angular Todo-Zumo App</h1>
+<img src="http://www.breezejs.com/sites/default/files/styles/sample_thumbnail/public/samples/BreezeZumo.png" alt="Todo App with Azure" style="float:left; height:70px; margin-right: 8px;"/><h1>The Breeze/Angular Todo-Zumo App</h1>
 
 "**todo-zumo**" is a simple **one-screen Angular Todo app**  that demonstrates features of a Breeze + Angular.
 
