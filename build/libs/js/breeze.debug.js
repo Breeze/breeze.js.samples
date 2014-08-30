@@ -23,7 +23,7 @@
 })(this, function (global) {
     "use strict"; 
     var breeze = {
-        version: "1.4.17",
+        version: "1.5.0",
         metadataVersion: "1.0.5"
     };
     ;/**
@@ -3706,7 +3706,7 @@ var EntityAspect = (function() {
     }
 
     /**
-    Sets the entity to the specified EntityState. 
+    Sets the entity to the specified EntityState. See also 'setUnchanged', 'setModified', 'setDetached', etc. 
     @example
        // assume order is an order entity attached to an EntityManager.
        order.entityAspect.setEntityState(EntityState.Unchanged);
@@ -8889,7 +8889,7 @@ var NavigationProperty = (function () {
     proto.isNavigationProperty = true;
 
     __extend(proto, DataProperty.prototype, [
-        "formatName", "getAllValidators"
+        "formatName", "getAllValidators", "resolveProperty"
     ]);
 
     /**
@@ -12051,7 +12051,10 @@ var EntityGroup = (function () {
             } else if (mergeStrategy === MergeStrategy.Disallowed) {
                 throw new Error("A MergeStrategy of 'Disallowed' does not allow you to attach an entity when an entity with the same key is already attached: " + aspect.getKey());
             } else if (mergeStrategy === MergeStrategy.OverwriteChanges || (mergeStrategy === MergeStrategy.PreserveChanges && wasUnchanged)) {
-                this.entityType._updateTargetFromRaw(targetEntity, entity, DataProperty.getRawValueFromClient);
+                // unwrapInstance returns an entity with server side property names - so we need to use DataProperty.getRawValueFromServer these when we apply
+                // the property values back to the target.
+                var rawServerEntity = this.entityManager.helper.unwrapInstance(entity);
+                this.entityType._updateTargetFromRaw(targetEntity, rawServerEntity, DataProperty.getRawValueFromServer);
                 targetEntity.entityAspect.setEntityState(entityState);
             }
             return targetEntity;
@@ -14218,7 +14221,8 @@ var EntityManager = (function () {
                     mappingContext.processDeferred();
                     // if query has expand clauses walk each of the 'results' and mark the expanded props as loaded.
                     markLoadedNavProps(results, query);
-                    return { results: results, query: query, entityManager: em, httpResponse: data.httpResponse, inlineCount: data.inlineCount };
+                    var retrievedEntities = __objectMapToArray(mappingContext.refMap);
+                    return { results: results, query: query, entityManager: em, httpResponse: data.httpResponse, inlineCount: data.inlineCount, retrievedEntities: retrievedEntities };
                 });
                 return Q.resolve(result);
             }, function (e) {
@@ -14351,7 +14355,8 @@ var EntityManager = (function () {
                 val = serializerFn ? serializerFn(dp, val) : val;
                 if (val !== undefined) {
                     if (dp.isUnmapped) {
-                        unmapped[dp.name] = __toJSONSafe(val);
+                        // unmapped[dp.name] = __toJSONSafe(val);
+                        unmapped[dp.nameOnServer] = __toJSONSafe(val);
                     } else {
                         rawObject[dp.nameOnServer] = val;
                     }
@@ -15779,10 +15784,12 @@ breeze.SaveOptions= SaveOptions;
                 if (et && et._mappedPropertiesCount <= Object.keys(node).length - 1) {
                 // if (et && et._mappedPropertiesCount === Object.keys(node).length - 1) { // OLD
                     result.entityType = et;
-                    var baseUri = mappingContext.dataService.serviceName;
                     var uriKey = metadata.uri || metadata.id;
-                    if (core.stringStartsWith(uriKey, baseUri)) {
-                        uriKey = uriKey.substring(baseUri.length);
+                    if (uriKey) {
+                        // Strip baseUri to make uriKey a relative uri
+                        // Todo: why is this necessary when absolute works for every OData source tested?
+                        var re = new RegExp('^'+mappingContext.dataService.serviceName, 'i')
+                        uriKey = uriKey.replace(re,'');
                     }
                     result.extraMetadata = {
                         uriKey: uriKey,
