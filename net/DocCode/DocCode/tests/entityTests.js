@@ -892,7 +892,49 @@
         deepEqual(customer.entityType, customerType,
             "an entity's entityType should be the type that created it");
     });
-    
+
+    /*********************************************************
+    * EntityStateChange is raised each time some entity changes its state
+    * D#2635 TEST FAILS: Only the first state change is raised.
+    *********************************************************/
+    test("EntityStateChange is raised each time some entity changes its state", 5, function () {
+
+        var em = newEm();
+
+        // Add some "Unchanged" fake Employees
+        var uc = breeze.EntityState.Unchanged;
+        var emp1 = em.createEntity('Employee', { EmployeeID: 1, FirstName: 'One' }, uc);
+        var emp2 = em.createEntity('Employee', { EmployeeID: 2, FirstName: 'Two' }, uc);
+        var emp3 = em.createEntity('Employee', { EmployeeID: 3, FirstName: 'Three' }, uc);
+        var emp4 = em.createEntity('Employee', { EmployeeID: 4, FirstName: 'Four' }, uc);
+
+        // Listen for state changes
+        var stateChangeCount = 0;
+        em.entityChanged.subscribe(entityStateChanged);
+
+        emp1.LastName('Change 1');
+        equal(stateChangeCount, 1, 'first emp1 change ->stateChangeCount incremented');
+
+        emp1.LastName('Change 2');
+        equal(stateChangeCount, 1, 'second emp1 change ->stateChangeCount NOT incremented');
+
+        emp2.LastName('Change 3');
+        equal(stateChangeCount, 2, 'emp2 change ->stateChangeCount incremented');
+
+        emp3.entityAspect.setDeleted();
+        equal(stateChangeCount, 3, 'emp3 deleted ->stateChangeCount incremented');
+
+        emp4.entityAspect.setDeleted();
+        equal(stateChangeCount, 4, 'emp4 deleted ->stateChangeCount incremented');
+
+        function entityStateChanged(changeArgs) {
+            var action = changeArgs.entityAction;
+            if (action === breeze.EntityAction.EntityStateChange) {
+                stateChangeCount +=1;
+            }
+        }
+    });
+
     /*********************************************************
     * can control custom ko entityState property via entityManager.entityChanged event
     * Illustrate how one can control a custom Knockout observable 
