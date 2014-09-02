@@ -236,6 +236,29 @@
         }
 
     });
+    /*********************************************************/
+    test("orders shipped to California (via ComplexType) WITH PROJECTION", 2, function () {
+
+        var query = EntityQuery.from("Orders")
+            .where("ShipTo.Region", "==", "CA")
+            .expand("Customer")
+            .select("OrderID, Customer.CompanyName, ShipTo.Region");
+
+        verifyQuery(newEm, query, "orders query", showOrdersShippedToCA);
+
+        function showOrdersShippedToCA(data) {
+            if (data.results.length == 0) return;
+            var ords = data.results.map(function (o) {
+                return "({0}) '{1}' is in '{2}'".format(
+                    // Notice that breeze creates projected property names by
+                    // flattening the navigation paths using "_" as a separator 
+                    // (whether path is baded on EntityType or ComplexType)
+                    o.OrderID, o.Customer_CompanyName, o.ShipTo_Region);
+            });
+            ok(true, "Got " + ords.join(", "));
+        }
+
+    });
     /*********************************************************
     * customers from nowhere (testing for null)
     *********************************************************/
