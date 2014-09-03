@@ -5,15 +5,14 @@
  * conditions of the IdeaBlade Breeze license, available at http://www.breezejs.com/license
  *
  * Author: Ward Bell
- * Version: 1.1.0
+ * Version: 1.2.0
  * --------------------------------------------------------------------------------
  * Adds "Save Queuing" capability to new EntityManagers
  * "Save Queuing" automatically queues and defers an EntityManager.saveChanges call
  * when another save is in progress for that manager.
  *
- * Depends on Breeze (which it patches)
- *     Prior to Breeze v.1.4.14 for use only with apps that rely on Q.js
- *     Should work for Angular apps as of 1.4.14 
+ * This version now depends on Breeze v.1.4.14 or later (which it patches)
+ * Should work for Angular apps that use $q instead of Q.js 
  *
  * Without "Save Queuing", an EntityManager will throw an exception when
  * saveChanges is called while another save is in progress.
@@ -40,20 +39,19 @@
  */
 //#endregion
 (function (definition, window) {
-    if (window.breeze && window.Q) {
-        definition(window.breeze, window.Q);
+    if (window.breeze) {
+        definition(window.breeze);
     } else if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
         // CommonJS or Node
         var b = require('breeze');
-        var q = require('Q');
-        definition(b, q);
+        definition(b);
     } else if (typeof define === "function" && define["amd"] && !window.breeze) {
         // Requirejs / AMD 
-        define(['breeze', 'Q'], definition);
+        define(['breeze'], definition);
     } else {
-        throw new Error("Can't find breeze and/or Q");
+        throw new Error("Can't find breeze");
     }
-}(function (breeze, Q) {
+}(function (breeze) {
     'use strict';
     var EntityManager = breeze.EntityManager;
 
@@ -103,7 +101,7 @@
 
     SaveQueuing.prototype.queueSaveChanges = function (args) {
         var self = this;
-        var promises = breeze.Q || Q; // breeze.Q should be what Breeze is using
+        var promises = breeze.Q; // breeze.Q should be what Breeze is using
         var deferredSave = promises.defer();
         self.saveQueue.push(deferredSave);
 

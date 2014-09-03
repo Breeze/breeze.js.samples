@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Web.Http;
+using System.Web.Http.OData;
 using DocCode.DataAccess;
 using FooBar.Models;
 
@@ -12,7 +13,7 @@ namespace DocCode.Controllers
     {
        readonly FooBarRepository _repository = new FooBarRepository();
 
-       [Queryable]
+       [EnableQuery]
        public IQueryable<Foo> Get()
        {
            return _repository.Foos.AsQueryable();
