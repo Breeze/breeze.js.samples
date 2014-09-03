@@ -189,7 +189,8 @@
     *********************************************************/
     test("orders placed on or after 1/1/1998", 1, function () {
 
-        var testDate = new Date(1998, 0, 1); // month starts at zero!
+        // Make sure date is in UTC (like the datetimes in the database)
+        var testDate = new Date(Date.UTC(1998, 0, 1)); // month counts from zero!
 
         var query = EntityQuery.from("Orders")
             .where("OrderDate", FilterQueryOp.GreaterThanOrEqual, testDate);
@@ -199,11 +200,12 @@
     });
 
     /*********************************************************
-    * orders placed on 1/1/1998.
+    * no orders placed exactly on 1/1/1998 at 9am GMT.
     *********************************************************/
-    test("orders placed on 1/1/1998", 1, function () {
+    test("orders placed on 1/1/1998 at 9am GMT", 1, function () {
 
-        var testDate = new Date(1998, 0, 1); // month starts at zero!
+        // Make sure date is in UTC (like the datetimes in the database)
+        var testDate = new Date(Date.UTC(1998, 0, 1, 9)); // month counts from zero!
 
         var query = EntityQuery.from("Orders")
             .where("OrderDate", FilterQueryOp.Equals, testDate);
@@ -546,7 +548,9 @@
     test("orders ordered after April '98 AND with freight > 100", 2, function () {
 
         var pred;
-        var testDate = new Date(1998, 3, 1); // month counts from zero!
+        // Make sure date is in UTC (like the datetimes in the database)
+        var testDate = new Date(Date.UTC(1998, 3, 1)); // month counts from zero!
+
         var baseQuery = EntityQuery.from("Orders");
         var p1 = new Predicate("Freight", ">", 100);
         var p2 = new Predicate("OrderDate", ">", testDate);
@@ -581,7 +585,9 @@
     test("orders ordered after April '98 OR with freight > 100", 2, function () {
 
         var pred;
-        var testDate = new Date(1998, 3, 1); // month counts from zero!
+        // Make sure date is in UTC (like the datetimes in the database)
+        var testDate = new Date(Date.UTC(1998, 3, 1)); // month counts from zero!
+
         var baseQuery = EntityQuery.from("Orders");
         var p1 = new Predicate("Freight", ">", 100);
         var p2 = new Predicate("OrderDate", ">", testDate);
