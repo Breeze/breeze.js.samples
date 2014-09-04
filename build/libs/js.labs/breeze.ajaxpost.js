@@ -58,6 +58,8 @@
         }
 
         var ajaxFunction = ajaxAdapter.ajax;
+        // Grab the custom headers set on the ajax adapter
+        var customHeaders = ajaxAdapter.defaultSettings.headers;
         if (ajaxFunction) {
             ajaxAdapter.ajax = function (settings) {
                 processSettings(settings);
@@ -94,6 +96,14 @@
                     settings.params = null; 
                 }
             }
+        }
+        // If there are custom headers,
+        if (customHeaders) {
+            settings.headers = {  };
+            // Create each one on the headers object
+            $.each(customHeaders, function (index, item) {
+                settings.headers[index]= item;
+            });
         }
 
         return settings;

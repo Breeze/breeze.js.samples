@@ -1,7 +1,7 @@
 ﻿/*
  * Breeze Labs Abstract REST DataServiceAdapter
  *
- *  v.0.6.0
+ *  v.0.6.1
  *
  * Extends Breeze with a REST DataService Adapter abstract type
  *
@@ -77,6 +77,7 @@
         _addToSaveContext: _addToSaveContext,
         _ajaxImpl: undefined, // see initialize()
         _catchNoConnectionError: abstractDsaProto._catchNoConnectionError,
+        _changeRequestSucceeded: _changeRequestSucceeded,
         _createErrorFromResponse: _createErrorFromResponse,
         _createChangeRequest: _createChangeRequest,
         _createJsonResultsAdapter: _createJsonResultsAdapter,
@@ -322,6 +323,21 @@
     }
 
     /*** private members ***/
+    function addKeyMapping(saveContext, index, saved){
+        var tempKey = saveContext.tempKeys[index];
+        if (tempKey) {
+            // entity had a temporary key; add a temp-to-perm key mapping
+            var entityType = tempKey.entityType;
+            var tempValue = tempKey.values[0];
+            var realKey = getRealKey(entityType, saved);
+            var keyMapping = {
+                entityTypeName: entityType.name,
+                tempValue: tempValue,
+                realValue: realKey.values[0]
+            };
+            saveContext.saveResult.keyMappings.push(keyMapping);
+        }
+    }
 
     function createChangeRequests(saveContext, saveBundle) {
         var adapter = saveContext.adapter;
@@ -382,7 +398,7 @@
                 if ((!status) || status >= 400) {
                     tryRequestFailed(response);
                 } else {
-                    var savedEntity = changeRequestSucceeded(saveContext, response, index);
+                    var savedEntity = adapter._changeRequestSucceeded(saveContext, response, index);
                     adapter._processSavedEntity(savedEntity, response, saveContext, index);
                     deferred.resolve(true);
                 }
@@ -418,12 +434,12 @@
         }
     }
 
-    function changeRequestSucceeded(saveContext, response, index) {
+    function _changeRequestSucceeded(saveContext, response, index) {
         var saved = saveContext.adapter._getResponseData(response);
         if (saved && typeof saved === 'object') {
             // Have "saved entity" data; add its type (for JsonResultsAdapter) & KeyMapping
             saved.$entityType = saveContext.originalEntities[index].entityType;
-            addKeyMapping();
+            addKeyMapping(saveContext, index, saved);
         } else {
             // No "saved entity" data; return the original entity
             saved = saveContext.originalEntities[index];
@@ -431,21 +447,7 @@
         saveContext.saveResult.entities.push(saved);
         return saved;
 
-        function addKeyMapping(){
-            var tempKey = saveContext.tempKeys[index];
-            if (tempKey) {
-                // entity had a temporary key; add a temp-to-perm key mapping
-                var entityType = tempKey.entityType;
-                var tempValue = tempKey.values[0];
-                var realKey = getRealKey(entityType, saved);
-                var keyMapping = {
-                    entityTypeName: entityType.name,
-                    tempValue: tempValue,
-                    realValue: realKey.values[0]
-                };
-                saveContext.saveResult.keyMappings.push(keyMapping);
-            }
-        }
+
     }
 
 }, this));

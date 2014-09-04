@@ -1,7 +1,7 @@
 ﻿/*
  * Breeze Labs: Breeze Directives for Angular Apps
  *
- *  v.1.3.7
+ *  v.1.3.8
  *
  *  Usage:
  *     Make this module a dependency of your app module:
@@ -108,7 +108,7 @@
                 attrs.ngModel,
                 attrs.zValidate);
 
-            if (!info.getValErrs) { return; } // can't do anything
+            if (!info.getValErrs) { return; } // can't do anything w/o this method
 
             // Use only features defined in Angular's jqLite
             var domEl = element[0];
@@ -130,14 +130,15 @@
                 scope.$watch(info.getValErrs, valErrsChanged);
 
                 // update the message in the validation template
-                // when a validation error changes on an input control 
+                // when a validation error changes on an input control
+                // newValue is either a string or null (null when no bound entity) 
                 function valErrsChanged(newValue) {
 
                     // HTML5 custom validity
                     // http://dev.w3.org/html5/spec-preview/constraints.html#the-constraint-validation-api
                     if (domEl.setCustomValidity) {
                         /* only works in HTML 5. Maybe should throw if not available. */
-                        domEl.setCustomValidity(newValue);
+                        domEl.setCustomValidity(newValue || '');
                     }
 
                     var errorHtml = newValue ? valTemplate.replace(/%error%/, newValue) : "";
@@ -191,8 +192,6 @@
             this.scope = scope;
 
             setEntityAndPropertyPaths(this, modelPath, validationPath);
-            // this.entityPath
-            // this.propertyPath 
 
             this.getEntityAspect = this.entityPath ?
                     getEntityAspectFromEntityPath(this) :
