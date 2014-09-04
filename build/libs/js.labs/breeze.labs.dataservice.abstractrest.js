@@ -1,7 +1,7 @@
 ﻿/*
  * Breeze Labs Abstract REST DataServiceAdapter
  *
- *  v.0.6.1
+ *  v.0.6.2
  *
  * Extends Breeze with a REST DataService Adapter abstract type
  *
@@ -75,6 +75,7 @@
 
         // "protected" members available to derived concrete dataservice adapter types
         _addToSaveContext: _addToSaveContext,
+        _addKeyMapping: _addKeyMapping,
         _ajaxImpl: undefined, // see initialize()
         _catchNoConnectionError: abstractDsaProto._catchNoConnectionError,
         _changeRequestSucceeded: _changeRequestSucceeded,
@@ -210,6 +211,22 @@
 
     function _addToSaveContext(/* saveContext */) { }
 
+    function _addKeyMapping(saveContext, index, saved){
+        var tempKey = saveContext.tempKeys[index];
+        if (tempKey) {
+            // entity had a temporary key; add a temp-to-perm key mapping
+            var entityType = tempKey.entityType;
+            var tempValue = tempKey.values[0];
+            var realKey = getRealKey(entityType, saved);
+            var keyMapping = {
+                entityTypeName: entityType.name,
+                tempValue: tempValue,
+                realValue: realKey.values[0]
+            };
+            saveContext.saveResult.keyMappings.push(keyMapping);
+        }
+    }
+
     function _clientTypeNameToServer(typeName) {
         var jrAdapter = this.jsonResultsAdapter;
         return jrAdapter.clientTypeNameToServer ?
@@ -323,21 +340,6 @@
     }
 
     /*** private members ***/
-    function addKeyMapping(saveContext, index, saved){
-        var tempKey = saveContext.tempKeys[index];
-        if (tempKey) {
-            // entity had a temporary key; add a temp-to-perm key mapping
-            var entityType = tempKey.entityType;
-            var tempValue = tempKey.values[0];
-            var realKey = getRealKey(entityType, saved);
-            var keyMapping = {
-                entityTypeName: entityType.name,
-                tempValue: tempValue,
-                realValue: realKey.values[0]
-            };
-            saveContext.saveResult.keyMappings.push(keyMapping);
-        }
-    }
 
     function createChangeRequests(saveContext, saveBundle) {
         var adapter = saveContext.adapter;
@@ -439,15 +441,13 @@
         if (saved && typeof saved === 'object') {
             // Have "saved entity" data; add its type (for JsonResultsAdapter) & KeyMapping
             saved.$entityType = saveContext.originalEntities[index].entityType;
-            addKeyMapping(saveContext, index, saved);
+            saveContext.adapter._addKeyMapping(saveContext, index, saved);
         } else {
             // No "saved entity" data; return the original entity
             saved = saveContext.originalEntities[index];
         }
         saveContext.saveResult.entities.push(saved);
         return saved;
-
-
     }
 
 }, this));
