@@ -14,8 +14,9 @@
 
     // We'll use this "alfred's predicate" a lot
     // e.g. to find Orders that belong to the Alfred's customer
+    var alfredsID = testFns.wellKnownData.alfredsID;
     var alfredsPredicate =
-        Predicate.create("CustomerID", "==", testFns.wellKnownData.alfredsID);
+        Predicate.create("CustomerID", "==", alfredsID);
     
     var verifyQuery = testFns.verifyQuery;
 
@@ -334,7 +335,7 @@
         var customerType =
             em.metadataStore.getEntityType("Customer");
 
-        var key = new breeze.EntityKey(customerType, testFns.wellKnownData.alfredsID);
+        var key = new breeze.EntityKey(customerType, alfredsID);
 
         var query = EntityQuery.fromEntityKey(key);
 
@@ -346,7 +347,67 @@
         .fail(handleFail)
         .fin(start);
     });
+    /*********************************************************
+    * Remote query does NOT return deleted entities (by default)
+    *********************************************************/
+    asyncTest("Remote query does NOT return deleted entities (by default)", 1, function() {
 
+        var em = newEm();
+        // fake alfreds customer in cache in a deleted state
+        em.createEntity('Customer', {
+            CustomerID: alfredsID,
+            CompanyName: "Alfreds"
+        }, breeze.EntityState.Deleted);
+
+        EntityQuery.from("Customers")
+        .where(alfredsPredicate)
+        .using(em).execute()
+        .then(function (data) { // back from query
+            var cust = data.results[0];
+            if (cust == null) {
+                ok(true, "Deleted Customer not found (presumably because deleted)");
+            } else {
+                ok(false, "Returned {0} Customer whose name is {1}.".
+                    format(cust.entityAspect.entityState.name, cust.CompanyName()));
+            }
+        })
+        .fail(handleFail).fin(start);
+    });
+    /*********************************************************
+    * Remote query CAN return deleted entities with 'includeDeleted' option
+    *********************************************************/
+    asyncTest("Remote query CAN return deleted entities with 'includeDeleted' option", 1, function () {
+
+        var em = newEm();
+        // fake alfreds customer in cache in a deleted state
+        em.createEntity('Customer', {
+            CustomerID: alfredsID,
+            CompanyName: "Alfreds"
+        }, breeze.EntityState.Deleted);
+
+        // Base on this manager's default QueryOptions
+        var queryOption = em.queryOptions.using({ includeDeleted: true });
+
+        /*
+        // Base on the QueryOptions class default
+        var queryOption = new breeze.QueryOptions({ includeDeleted: true });
+        */
+
+        EntityQuery.from("Customers")
+        .where(alfredsPredicate)
+        .using(queryOption)
+        .using(em).execute()
+        .then(function (data) { // back from query
+            var cust = data.results[0];
+            if (cust == null) {
+                ok(false, "Deleted Customer not found or not returned");
+            } else {
+                ok(true, "Returned {0} Customer whose name is {1}.".
+                    format(cust.entityAspect.entityState.name, cust.CompanyName()));
+            }
+        })
+        .fail(handleFail).fin(start);
+    });
     /*****************************************************************
     * Nancy's orders  (compare nullable int)
     ******************************************************************/
@@ -973,7 +1034,7 @@
 
             var em = newEm();
             var query = new EntityQuery.from('CustomersAsHRM')
-                .where("CustomerID", "eq", testFns.wellKnownData.alfredsID)
+                .where("CustomerID", "eq", alfredsID)
                 .select('CustomerID, CompanyName');
 
             em.executeQuery(query)
@@ -1563,6 +1624,67 @@
         .fail(handleFail)
         .fin(start);
     });
+
+    /*********************************************************
+    * Local query does NOT return deleted entities (by default)
+    *********************************************************/
+    asyncTest("Local query does NOT return deleted entities (by default)", 1, function () {
+
+        var em = newEm();
+        // fake alfreds customer in cache in a deleted state
+        em.createEntity('Customer', {
+            CustomerID: alfredsID,
+            CompanyName: "Alfreds"
+        }, breeze.EntityState.Deleted);
+
+        EntityQuery.from("Customers")
+        .where(alfredsPredicate)
+        .using(breeze.FetchStrategy.FromLocalCache)
+        .using(em).execute()
+        .then(function (data) {
+            var cust = data.results[0];
+            if (cust == null) {
+                ok(true, "Deleted customer not found (presumably because deleted)");
+            } else {
+                ok(false, "Returned {0} Customer whose name is {1}.".
+                    format(cust.entityAspect.entityState.name, cust.CompanyName()));
+            }
+        })
+        .fail(handleFail).fin(start);
+    });
+
+    /*********************************************************
+    * Local query CAN return deleted entities with includeDeleted option
+    *********************************************************/
+    asyncTest("Local query CAN return deleted entities with includeDeleted option", 1, function () {
+
+        var em = newEm();
+        // fake alfreds customer in cache in a deleted state
+        em.createEntity('Customer', {
+            CustomerID: alfredsID,
+            CompanyName: "Alfreds"
+        }, breeze.EntityState.Deleted);
+
+        var queryOptions = new breeze.QueryOptions({
+            includeDeleted: true, // false by default
+            fetchStrategy: breeze.FetchStrategy.FromLocalCache
+        });
+
+        EntityQuery.from("Customers")
+        .where(alfredsPredicate)
+        .using(queryOptions)
+        .using(em).execute()
+        .then(function (data) {
+            var cust = data.results[0];
+            if (cust == null) {
+                ok(false, "Deleted Customer not found or not returned");
+            } else {
+                ok(true, "Returned {0} Customer whose name is {1}.".
+                    format(cust.entityAspect.entityState.name, cust.CompanyName()));
+            }
+        })
+        .fail(handleFail).fin(start);
+    });
     /*********************************************************
     * Combine remote and local query to get all customers 
     * including new, unsaved customers
@@ -1822,10 +1944,9 @@
         function () {
 
             var em = newEm(); // empty manager
-            var id = testFns.wellKnownData.alfredsID;
 
             stop(); // should go async
-            em.fetchEntityByKey("Customer", id,
+            em.fetchEntityByKey("Customer", alfredsID,
                 // Look in cache first; it won't be there
                /* checkLocalCacheFirst */ true) 
               .then(fetchSucceeded)
@@ -1967,6 +2088,13 @@
         var customer = attachCustomer(em, id);
         customer.entityAspect.setDeleted();
 
+        /*
+        // but if we included deletes like this, the manager would return the deleted entity
+        em.setProperties({
+            queryOptions: em.queryOptions.using({ includeDeleted: true })  
+        });
+       */
+
         stop(); // actually won't go async
         em.fetchEntityByKey("Customer", id,
            /* checkLocalCacheFirst */ true)
@@ -2048,11 +2176,10 @@
         function () {
 
             var em = newEm(); // empty manager
-            var id = testFns.wellKnownData.alfredsID;
             var queryResult = { };
 
             stop(); // might go async
-            getByIdCacheOrRemote(em, "Customer", id, queryResult)
+            getByIdCacheOrRemote(em, "Customer", alfredsID, queryResult)
             .then(querySucceeded).fail(handleFail).fin(start);
 
             function querySucceeded(customer) {
@@ -2069,12 +2196,11 @@
         function () {
 
             var em = newEm(); // empty manager
-            var id = testFns.wellKnownData.alfredsID;
             var queryResult = {};
-            attachCustomer(em, id);
+            attachCustomer(em, alfredsID);
 
             stop(); // might go async
-            getByIdCacheOrRemote(em, "Customer", id, queryResult)
+            getByIdCacheOrRemote(em, "Customer", alfredsID, queryResult)
             .then(querySucceeded).fail(handleFail).fin(start);
 
             function querySucceeded(customer) {
@@ -2091,13 +2217,12 @@
         function () {
 
             var em = newEm(); // empty manager
-            var id = testFns.wellKnownData.alfredsID;
             var queryResult = {};
-            var cust = attachCustomer(em, id);
+            var cust = attachCustomer(em, alfredsID);
             cust.entityAspect.setDeleted();
 
             stop(); // might go async
-            getByIdCacheOrRemote(em, "Customer", id, queryResult)
+            getByIdCacheOrRemote(em, "Customer", alfredsID, queryResult)
             .then(querySucceeded).fail(handleFail).fin(start);
 
             function querySucceeded(customer) {
