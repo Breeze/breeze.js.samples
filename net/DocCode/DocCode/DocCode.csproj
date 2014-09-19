@@ -176,6 +176,8 @@
     <Compile Include="App_Start\DocCodeWebApiConfig.cs" />
     <Compile Include="App_Start\WriteMetadataScriptFiles.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\CustomBreezeConfig.cs" />
+    <Compile Include="Controllers\DynamicTypeRenamingSerializationBinder.cs" />
     <Compile Include="Controllers\FoosController.cs" />
     <Compile Include="Controllers\FoosMetadataController.cs" />
     <Compile Include="Controllers\InheritanceController.cs" />
