@@ -4,7 +4,7 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
     var handleFail = testFns.handleFail;
     var EntityQuery = breeze.EntityQuery;
@@ -17,7 +17,7 @@
     var alfredsID = testFns.wellKnownData.alfredsID;
     var alfredsPredicate =
         Predicate.create("CustomerID", "==", alfredsID);
-    
+
     var verifyQuery = testFns.verifyQuery;
 
     var runQuery = testFns.runQuery;
@@ -108,7 +108,7 @@
 
         var expectTimeoutMsg = shouldTimeout ?
             " when should timeout." : " when should not timeout.";
-        
+
         var em = newEm();
         var query = new EntityQuery().from("Customers").using(em); 
 
@@ -118,7 +118,7 @@
             .then(queryFinishedBeforeTimeout)
             .fail(queryTimedout)
             .fin(start);
-        
+
         function queryFinishedBeforeTimeout(data) {
             var count = data.results.length;
             ok(!shouldTimeout,
@@ -130,7 +130,7 @@
             var expect = /timed out/i;
             var emsg = error.message;
             if (expect.test(emsg)) {
-                ok(shouldTimeout, 
+                ok(shouldTimeout,
                     ("Query timed out w/ message '{0}' " + expectTimeoutMsg)
                     .format(emsg));
             } else {
@@ -172,7 +172,7 @@
         verifyQuery(newEm, query, "customers starting w/ 'A'",
             showCustomerResults);
     });
-  
+
     /*********************************************************
     * orders with freight cost over 100.
     *********************************************************/
@@ -217,6 +217,18 @@
         .fail(handleFail)
         .fin(start);
     });
+    /*********************************************************
+    * orders shipped after they were required.
+    * Demonstrates comparison of two fields in the same record
+    *********************************************************/
+    test("orders shipped after they were required", 1, function () {
+
+        var query = EntityQuery.from("Orders")
+            .where("ShippedDate", ">", "RequiredDate");
+
+        verifyQuery(newEm, query, "shipped > required query");
+    });
+
     /*********************************************************
     * orders shipped to California (via ComplexType).
     *********************************************************/
