@@ -14,26 +14,42 @@ describe("Customer Controller: ", function () {
         controllerName='customer',
         dataserviceMock,
         flush$q,
-        $q;
+        $q,
+        $rootScope;
 
     testFns.beforeEachApp( function($provide){
         $provide.service('dataservice', DataserviceMock);
     });
 
-    beforeEach(inject(function($controller, _$q_, dataservice) {
+    beforeEach(inject(function($controller, _$q_, _$rootScope_, dataservice) {
         controllerFactory = $controller;
         $q = _$q_;
+        $rootScope = _$rootScope_;
         dataserviceMock = dataservice;
-        flush$q = testFns.create_flush$q();
+        flush$q = function(){$rootScope.$apply();};
     }));
 
     describe("when created but not ready", function () {
         beforeEach(function(){
             var  ctorArgs = {
-                "customer.state": {}
+                'customer.state': {} // use the registered name, 'customer.state', not the parameter name
             };
+            // Create controller, injecting its customer state constructor parameter
             controller = controllerFactory(controllerName, ctorArgs);
         });
+
+        /* "Controller As" variation
+        beforeEach(function(){
+            var  ctorArgs = {
+                '$scope' : $rootScope, // although not a controller parm, required by  "Controller As"
+                'customer.state': {}   // use the registered name, 'customer.state', not the parameter name
+            };
+            // Create with "controller as" syntax
+            controller = controllerFactory(controllerName + ' as vm', ctorArgs);
+            // Can access the scope and the controller (vm) during test e.g.:
+            //    $rootScope.vm.customerFilterText
+        });
+        */
 
         it("'getCustomers' was not called", function () {
             expect(dataserviceMock.getCustomers).not.toHaveBeenCalled();
