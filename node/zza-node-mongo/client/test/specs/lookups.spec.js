@@ -110,7 +110,7 @@ describe("lookups service with faked http response:", function () {
 
         beforeEach(function () {
             failSpy = jasmine.createSpy('fail').and.callFake(fail);
-            $httpBackend.expectGET(lookupsUrlRe).respond(500, serverFailMessage);
+            $httpBackend.expectGET(lookupsUrlRe).respond(500, {message: serverFailMessage});
         });
 
         it("'ready()' invokes fail callback", function () {
