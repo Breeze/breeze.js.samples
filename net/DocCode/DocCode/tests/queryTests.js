@@ -110,7 +110,7 @@
             " when should timeout." : " when should not timeout.";
 
         var em = newEm();
-        var query = new EntityQuery().from("Customers").using(em); 
+        var query = new EntityQuery().from("Customers").using(em);
 
         stop(); // going async ... tell testrunner to wait
 
@@ -163,7 +163,7 @@
     *********************************************************/
     test("customers starting w/ 'A' ", 2, function () {
 
-        // query for customer starting with 'A', sorted by name 
+        // query for customer starting with 'A', sorted by name
         var query = EntityQuery.from("Customers")
             .where("CompanyName", FilterQueryOp.StartsWith, "A")
         //  .where("CompanyName", "startsWith", "A") // alternative to FilterQueryOp
@@ -230,6 +230,37 @@
     });
 
     /*********************************************************
+    * No employee whose FirstName and LastName are the same.
+    * Demonstrates comparison of two fields in the same record
+    * (compare with next test)
+    *********************************************************/
+    asyncTest("No employee whose FirstName and LastName are the same", 1, function () {
+
+        var query = EntityQuery.from("Employees")
+            .where("FirstName", "==", "LastName");
+
+        queryForNone(newEm, query, "FirstName === LastName")
+        .catch(handleFail).finally(start);
+    });
+
+    /*********************************************************
+    * No employee whose FirstName === 'LastName' .
+    * Removing ambiguity of string value comparison with object value
+    * (compare with previous test)
+    *********************************************************/
+    asyncTest("No employee whose FirstName === 'LastName' (using value object)", 1, function () {
+
+        var query = EntityQuery.from("Employees")
+            .where("FirstName", "==",
+                   // Search value is potentially the name of a property (as in this example)
+                   // eliminate chance of breeze treating it as a property name
+                   // by explicitly declaring the true nature of the comparison value
+                   { value: "LastName", isLiteral: true, dataType: breeze.DataType.String });
+
+        queryForNone(newEm, query, "FirstName === 'LastName'")
+        .catch(handleFail).finally(start);
+    });
+    /*********************************************************
     * orders shipped to California (via ComplexType).
     *********************************************************/
     test("orders shipped to California (via ComplexType)", 2, function () {
@@ -266,7 +297,7 @@
             var ords = data.results.map(function (o) {
                 return "({0}) '{1}' is in '{2}'".format(
                     // Notice that breeze creates projected property names by
-                    // flattening the navigation paths using "_" as a separator 
+                    // flattening the navigation paths using "_" as a separator
                     // (whether path is baded on EntityType or ComplexType)
                     o.OrderID, o.Customer_CompanyName, o.ShipTo_Region);
             });
@@ -320,7 +351,7 @@
     });
 
     /*********************************************************
-    * The Alfreds customer by id 
+    * The Alfreds customer by id
     *********************************************************/
     test("Alfreds customer by id", 2, function () {
 
@@ -337,7 +368,7 @@
     });
 
     /*********************************************************
-    * The Alfreds customer by key 
+    * The Alfreds customer by key
     * Let metadata say what is the EntityKey
     * Make query from the key-and-value
     *********************************************************/
@@ -478,7 +509,7 @@
     test("customers whose name contains 'market'", 2, function () {
 
         var query = EntityQuery.from("Customers")
-            .where("CompanyName", FilterQueryOp.Contains, 'market');           
+            .where("CompanyName", FilterQueryOp.Contains, 'market');
         //.where("CompanyName", "contains", 'market'); // Alternative to FilterQueryOp
         //.where("substringof(CompanyName,'market')", "eq", true); // becomes in OData
         //.where("indexOf(toLower(CompanyName),'market')", "ne", -1); // equivalent to
@@ -643,7 +674,7 @@
         var em = newEm();
         var orderEntityType = em.metadataStore.getEntityType("Order");
         ok(true, "OData predicate: " + pred.toODataFragment(orderEntityType));
-        
+
         stop();
 
         // all should return exactly 15 orders
@@ -727,7 +758,7 @@
 
         // DISPLAY generated OData query clause
         // Need a type. Any type will work, even a dummy type
-        //   var dummyType = new EntityType(em.metadataStore); 
+        //   var dummyType = new EntityType(em.metadataStore);
         // But we'll use the Order type in this example which is more accurate
         var orderType = em.metadataStore.getEntityType('Order');
         ok(true, "OData predicate: " + pred.toODataFragment(orderType));
@@ -750,30 +781,30 @@
           See also http://stackoverflow.com/questions/24053168/how-do-i-write-a-breeze-predicate-equivalent-to-the-following-sql/24068591#24068591
 
           Noteworthy:
-          
+
           1) The **left-to-right composition of the predicates**.
-          
+
              a) The `create` call predicate creates the date-gte predicate
-          
+
              b) The `or` call returns a predicate which is the OR of the 1st predicate and 
                 the 2nd date condition. This is the OR predicate
-          
+
              c) The third `and` call returns the AND of the OR-predicate and the Freight condition.
 
           2) This predicate isn't associated with Order.
              Could apply to any query for a type with 'OrderDate' and 'Freight' properties.
-          
+
           3) Using `new Date(Date.UTC(...))` to specify dates that are
              a) unambiguous in the face of international differences for date literals
              b) have no time values (and we hope the db doesn't have them either)
              c) are created as UTC dates to avoid timezone issues
-          
+
           4) This is the verbose alternative:
 
             var p1 = breeze.Predicate
                      .create("OrderDate", ">=", new Date(Date.UTC(1996, 0, 1))) // Jan===0 in JavaScript
                      .and("OrderDate", "<", new Date(Date.UTC(1997, 0, 1)));
-          
+
             var p2 = new breeze.Predicate("Freight", ">", 100);
 
             return p1.and(p2);
@@ -784,7 +815,7 @@
 
         */
     }
-    
+
     /***  RELATED PROPERTY / NESTED QUERY ***/
 
     module("queryTests (related property conditions)", testFns.getModuleOptions(newEm));
@@ -888,11 +919,11 @@
         });
         ok(true, "Got " + prods.join(", "));
     }
-    
+
     /*********************************************************
      * Orders with an OrderDetail for a specific product
      * Demonstrates "nested query" filtering on a collection navigation
-     * You can't really do this clientside. 
+     * You can't really do this clientside.
      * But you can call a controller method to do it
      *********************************************************/
     test("orders for Chai", 2, function () {
@@ -908,19 +939,19 @@
             .then(showChaiOrders)
             .fail(handleFail)
             .fin(start);
-        
+
         function showChaiOrders(data) {
             ok(data.results.length, "should have orders");
             var prods = data.results.map(function (o) {
                 var customer = o.Customer();
-                
+
                 var customerName = customer ? customer.CompanyName() : "<unknown customer>";
-                
+
                 var chaiItems = o.OrderDetails().filter(
                     function (od) { return od.ProductID() === chaiProductID; });
-                
+
                 var quantity = (chaiItems.length) ? chaiItems[0].Quantity() : "some";
-                
+
                 return "({0}) '{1}' ordered {2} boxes of Chai".format(
                     o.OrderID(), customerName, quantity);
             });
@@ -951,7 +982,7 @@
 
     /*********************************************************
     * Alfreds orders, expanded with their parent Customers and
-    * child OrderDetails 
+    * child OrderDetails
     *********************************************************/
     test("Alfreds orders expanded with parent Customer and their child details ", 4,
         function () {
@@ -968,8 +999,8 @@
         });
 
     /*********************************************************
-    * Alfreds orders, including their OrderDetails, 
-    * and the Products of those details, 
+    * Alfreds orders, including their OrderDetails,
+    * and the Products of those details,
     * using property path: "OrderDetails.Product"
     *********************************************************/
     test("Alfreds orders expanded with their OrderDetails and Products", 4,
@@ -1002,7 +1033,7 @@
         ok(odsByNav.length > 0, "can navigate to first order's OrderDetails");
 
         // To manually confirm these results, run this SQL:
-        // select count(*) from OrderDetail where OrderID in 
+        // select count(*) from OrderDetail where OrderID in
         //   (select OrderID from [Order] where CustomerID = '785efa04-cbf2-4dd7-a7de-083ee17b6ad2')
     }
 
@@ -1019,7 +1050,6 @@
 
         ok(firstProduct !== null, "can navigate to first order's first detail's product");
     }
-    
 
     asyncTest("can query for products and get related Supplier entity with complex type", 2, function () {
         var em = newEm();
@@ -1035,10 +1065,10 @@
             ok(product && product.Supplier() !== null, "product should have a supplier");
         }
     });
-    
+
     /*********************************************************
     * When API method returns an HttpResponseMessage (HRM)
-    * can filter, select, and expand 
+    * can filter, select, and expand
     *********************************************************/
     asyncTest("Can filter and select using API method " +
               "that returns an HttpResponseMessage", 2,
@@ -1057,14 +1087,13 @@
                 equal(results.length, 1, "should have returned one customer");
                 var first = results[0];
                 ok(!first.entityAspect, 'should be a projection, not an entity');
-                
             }
         });
 
     /*********************************************************
     * When run separate queries for Employee, Orders, EmployeeTerritories.
     * Breeze will wire up their relationships.
-    * 
+    *
     * These next tests are a response to the SO question
     * http://stackoverflow.com/questions/24001496/breeze-js-priming-loading-and-caching-data-via-asynchronous-requests
     *
@@ -1176,7 +1205,7 @@
         verifyQuery(newEm, query, "products query",
             showProductResults);
         // look in results for ...
-        //    (27) 'Schoggi Schokolade' at $43.9 in 'Confections', 
+        //    (27) 'Schoggi Schokolade' at $43.9 in 'Confections',
         //    (63) 'Vegie-spread' at $43.9 in 'Condiments',...
     });
 
@@ -1252,22 +1281,22 @@
     * inlineCount of paged products
     *********************************************************/
     test("inlineCount of paged products", 2, function () {
-        
+
         // Filtered query
         var productQuery = EntityQuery.from("Products")
             .where("ProductName", "startsWith", "C");
-        
+
         // Paging of that filtered query ... with inlineCount
         var pagedQuery = productQuery
             .orderBy("ProductName")
             .skip(5)
             .take(5)
             .inlineCount();
-     
+
         var productCount, pagedCount, inlineCount;
         var em = newEm();
         stop(); // going async
-        
+
         // run both queries in parallel
         var promiseProduct =
             em.executeQuery(productQuery)
@@ -1281,7 +1310,7 @@
                     pagedCount = data.results.length;
                     inlineCount = data.inlineCount;
                 });
-        
+
         Q.all([promiseProduct, promisePaged])
             .then(function() {
                 ok(inlineCount,
@@ -1445,13 +1474,13 @@
     test("query a lookup array of entity lists", 5, function () {
 
         var em = newEm();
-        stop(); // going async .. 
+        stop(); // going async ..
         EntityQuery.from('LookupsArray')
             .using(em).execute()
-            .then(querySucceeded)      
+            .then(querySucceeded)
             .fail(handleFail)
             .fin(start);
-        
+
         function querySucceeded(data) {
             var lookups = data.results;
             ok(lookups.length === 3, "should have 3 lookup items");
@@ -1477,7 +1506,7 @@
     test("query a lookup object w/ entity list properties", 5, function () {
 
         var em = newEm();
-        stop(); // going async .. 
+        stop(); // going async ..
         EntityQuery.from('Lookups')
             .using(em).execute()
             .then(querySucceeded)
@@ -1495,7 +1524,7 @@
                 "first lookups.category should be unchanged entity in cache");
         }
     });
-    
+
     /*********************************************************
     * PROJECTION: Populate a combobox with a list from a lookup
     * Also demonstrates QUnit testing of Knockout binding
@@ -1504,9 +1533,9 @@
         var view = setupCombobox();
         var vm = getComboboxTestVm();
         ko.applyBindings(vm, view);
-        
+
         var em = newEm();
-        stop(); // going async .. 
+        stop(); // going async ..
         EntityQuery.from('Lookups')
             .using(em).execute()
             .then(querySucceeded)
@@ -1523,7 +1552,7 @@
             equal(selectedText, expectedText,
                 "Should have bound to combobox and selected option should be " + expectedText);
         }
-        
+
         function setupCombobox() {
             var fixtureNode = $('#qunit-fixture').append(
                 '<div id="vm" data-bind="with: item"> '+
@@ -1534,11 +1563,11 @@
                     '</select></div>').get(0);
             return $("#vm", fixtureNode).get(0);
         }
-        
+
         function getComboboxTestVm() {
             var testItem = {
                 Name: ko.observable("Test Item"),
-                Category: ko.observable()           
+                Category: ko.observable()
             };
             return {
                 categories: ko.observableArray(),
@@ -1549,7 +1578,7 @@
     });
 
     /*********************************************************
-    * PROJECTION: 
+    * PROJECTION:
     * The next set of tests demo serverside projection for "security".
     * The Users query on the server actually projects into the
     * 'UserPartial' class which only has "safe" properties of the User type.
@@ -1559,16 +1588,16 @@
     * See also metadataTests for example of adding 'UserPartial'
     * to client metadataStore ... and then querying them into cache
     *********************************************************/
-    
+
     /*********************************************************/
     test("'Users' query returns objects of type 'UserPartial'", 3, function () {
 
         var query = EntityQuery.from("UserPartials").top(1);
         var em = newEm();
-        
+
         verifyQuery(em, query,"userPartials",
             assertUserPartialIsNotAnEntity);
-        
+
     });
     function assertUserPartialIsNotAnEntity(data) {
         var user = data.results[0];
@@ -1583,20 +1612,20 @@
         var query = EntityQuery
             .from("GetUserById")
             .withParameters({ Id: 3 }); // id=3 has two UserRoles
-        
+
         var em = newEm();
 
         verifyQuery(em, query, "GetUserById",
             assertUserPartialIsNotAnEntity,
             assertResultHasRoleNames);
-        
+
         function assertResultHasRoleNames(data) {
             var user = data.results[0];
             ok(user.RoleNames.length > 0,
                 "'user' result has role names: "+user.RoleNames);
         }
     });
-    
+
 
     /*** LOCAL QUERY EXECUTION ***/
 
@@ -1604,15 +1633,15 @@
 
     /*********************************************************
     * customers starting w/ 'A' (query the cache)
-    * Demonstrates that the same query works 
+    * Demonstrates that the same query works
     * for both server and cache.
     *********************************************************/
     test("customers starting w/ 'A' (cache)", 4, function () {
 
-        // query for customer starting with 'A', sorted by name 
+        // query for customer starting with 'A', sorted by name
         // will be used BOTH on server AND on client.
         // The "expand will be ignored locally but will run remotely
-        var query = getQueryForCustomerA().expand("Orders"); 
+        var query = getQueryForCustomerA().expand("Orders");
 
         // query cache (synchronous)
         var em = newEm();
@@ -1698,7 +1727,7 @@
         .fail(handleFail).fin(start);
     });
     /*********************************************************
-    * Combine remote and local query to get all customers 
+    * Combine remote and local query to get all customers
     * including new, unsaved customers
     * v1 - Using FetchStrategy
     *********************************************************/
@@ -1724,7 +1753,7 @@
                 newCustomer.CompanyName());
 
             // re-do both queries as a comboQuery
-            return executeComboQueryWithFetchStrategy(em, query); 
+            return executeComboQueryWithFetchStrategy(em, query);
 
         })
 
@@ -1744,7 +1773,7 @@
         .fin(start);
     });
     /*********************************************************
-    * Combine remote and local query to get all customers 
+    * Combine remote and local query to get all customers
     * including new, unsaved customers
     * v1=using FetchStrategy.FromLocalCache
     *********************************************************/
@@ -1768,9 +1797,9 @@
 
         .fail(handleFail)
         .fin(start);
-    }); 
+    });
     /*********************************************************
-    * Combine remote and local query to get all customers 
+    * Combine remote and local query to get all customers
     * including new, unsaved customers
     * v2=using ExecuteLocally()
     *********************************************************/
@@ -1795,10 +1824,10 @@
         .fail(handleFail)
         .fin(start);
     });
-    
+
     test("combined remote & local query gets all Employees w/ 'A' (v2- ExecuteLocally) ", 1, function () {
         var em = newEm();
-        
+
         // create an 'Alice' employee
         em.createEntity('Employee', { FirstName: 'Alice' });
 
@@ -1806,9 +1835,9 @@
         var query = EntityQuery.from('Employees')
                                .where('FirstName', 'startsWith', 'A')
                                .using(em);
-        
+
         stop(); // going async ...
-        
+
         // chain remote and local query execution
         var promise = query.execute()
             .then(function () { // ignore remote query results and chain to local query
@@ -1823,7 +1852,7 @@
         .fail(handleFail)
         .fin(start);
     });
-    
+
     test("combined remote & local query for 'A' Employees ignores changed 'Anne'.", 3, function () {
         var em = newEm();
         var anne;
@@ -1843,7 +1872,7 @@
             anne = data.results[0];
             anne.FirstName("Charlene");
         })
-        
+
         // chain remote and local query execution
         .then(function () {
             return query.execute()
@@ -1865,27 +1894,27 @@
         .fin(start);
     });
     /*********************************************************
-    * Combined query that pours results into a list 
+    * Combined query that pours results into a list
     * Caller doesn't have to wait for results
     * Useful in data binding scenarios
     *********************************************************/
     test("query customers w/ 'A' into a list", 3, function () {
-        
+
         // list could be an observable array bound to the UI
-        var customerList = []; 
-        
+        var customerList = [];
+
         var query = getQueryForCustomerA();
 
         // new 'A' customer in cache ... not saved
         var em = newEm();
         var newCustomer = addCustomer(em, "Acme");
-        
+
         stop(); // going async ..
-        
+
         var promise = queryIntoList(em, query, customerList);
-        
-        // Application could ignore promise and 
-        // let observable array update the UI when customers arrive.      
+
+        // Application could ignore promise and
+        // let observable array update the UI when customers arrive.
         // Our test waits to check that the list was filled
         promise.then(function() {
             var count = customerList.length;
@@ -1911,18 +1940,18 @@
                 return list;
             });
     }
-    
+
     /*********************************************************
     * "Query Local" module helpers
     *********************************************************/
-    
+
     // a query for customers starting with 'A', sorted by name
     function getQueryForCustomerA() {
         return new EntityQuery("Customers")
             .where("CompanyName", "startsWith", "A")
             .orderBy("CompanyName");
     }
-  
+
     // Execute any query remotely, then execute locally
     // returning the same shaped promise as the remote query
     // Recommended for your "DataService" class
@@ -1933,7 +1962,7 @@
                 return query.using(breeze.FetchStrategy.FromLocalCache).execute();
             });
     }
-    
+
     // executeQueryLocally, wrapped in a promise, is the more tedious alternative
     function executeComboQueryWithExecuteLocally(em, query) {
         query = query.using(em);
@@ -1944,7 +1973,7 @@
                 );
             });
     }
-    
+
     /*** Query By Id (cache or remote) ***/
 
     module("queryTests (by id)", testFns.getModuleOptions(newEm));
@@ -1960,7 +1989,7 @@
             stop(); // should go async
             em.fetchEntityByKey("Customer", alfredsID,
                 // Look in cache first; it won't be there
-               /* checkLocalCacheFirst */ true) 
+               /* checkLocalCacheFirst */ true)
               .then(fetchSucceeded)
               .fail(handleFail)
               .fin(start);
@@ -2059,7 +2088,7 @@
 
             function fetchSucceeded(data) {
                 var orderDetail = data.entity;
-                ok(orderDetail, "should have found OrderDetail for " + 
+                ok(orderDetail, "should have found OrderDetail for " +
                     JSON.stringify(orderDetailKey));
                 ok(!data.fromCache, "should have queried the service");
             }
@@ -2103,7 +2132,7 @@
         /*
         // but if we included deletes like this, the manager would return the deleted entity
         em.setProperties({
-            queryOptions: em.queryOptions.using({ includeDeleted: true })  
+            queryOptions: em.queryOptions.using({ includeDeleted: true })
         });
        */
 
@@ -2135,26 +2164,26 @@
         customer.entityAspect.setDeleted();
 
         var entity = em.getEntityByKey("Customer", id);
-        
+
         ok(entity == customer, "should find deleted customer with id " + id);
         equal(entity.entityAspect.entityState.name, "Deleted",
             "customer should be in 'Deleted' state.");
     });
     /*********************************************************************
-     * This portion of the "queryTests (by id)" module  
-     * tests a hand-built async getById utility that was the way to do it 
+     * This portion of the "queryTests (by id)" module
+     * tests a hand-built async getById utility that was the way to do it
      * before EntityManager.fetchEntityByKey
      * A curiosity now.
      ********************************************************************/
-    
+
     // This hand-built async getById utility method returns a promise.
-    // A successful promise returns the entity if found in cache 
+    // A successful promise returns the entity if found in cache
     // or if found remotely.
     // Returns null if not found or if found in cache but is marked deleted.
     // Caller should check for query failure.
-    // 'queryResult' reports if queried the remote service 
+    // 'queryResult' reports if queried the remote service
     // and holds a found entity even if it is marked for deletion.
-    // 
+    //
     // This fnc has been largely replaced by EntityManager.fetchEntityByKey.
     function getByIdCacheOrRemote(manager, typeName, id, queryResult) {
         // get key for entity of specified type and id
@@ -2180,7 +2209,7 @@
                 return queryResult.entity = entity;
             });
     }
-    
+
     /*********************************************************
      * [obsolete] Get unchanged customer by id from cache from server
      *********************************************************/
@@ -2202,7 +2231,7 @@
             }
         });
     /*********************************************************
-    * Get unchanged customer by id from cache 
+    * Get unchanged customer by id from cache
     *********************************************************/
     test("getById of unchanged customer from cache [obsolete]", 2,
         function () {
@@ -2267,11 +2296,11 @@
                 ok(queryResult.queriedRemotely, "should have queried the server");
             }
         });
-    
+
     /*********************************************************
     * Test helpers
     *********************************************************/
-    
+
      // create a new Customer and add to the EntityManager
      function addCustomer(em, name) {
          var cust = em.createEntity('Customer', {
@@ -2280,8 +2309,8 @@
          });
          return cust;
      }
- 
-    // create a Customer and attache to manager 
+
+    // create a Customer and attache to manager
     // as if queried and unchanged from server
      function attachCustomer(manager, id) {
          var customer = manager.createEntity('Customer', {
