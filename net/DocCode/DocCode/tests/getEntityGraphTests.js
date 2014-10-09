@@ -4,7 +4,7 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     * Using the 'backingstore' model library, not Knockout!
     *********************************************************/
     var breeze = testFns.breeze;
@@ -124,6 +124,26 @@
         assertAllInNoDups(graph, orderdetails, " order details");
         equal(order.getProperty('OrderDetails').length, orderdetails.length - 1,
              "'order.OrderDetails' returns one fewer because of deletion");
+    });
+
+    test("get order graph of changes only (ready for save)", 1,
+    function () {
+        var order = orders.pop();
+        var orderdetails = order.getProperty('OrderDetails').slice();
+
+        // Make three changes: the parent order and two of its details
+        order.entityAspect.setModified();
+        orderdetails[0].entityAspect.setDeleted();
+        orderdetails[1].entityAspect.setModified();
+
+        var changes =
+            // getEntityGraph(order, 'OrderDetails')       // this works
+            manager.getEntityGraph(order, 'OrderDetails')  // so does this
+                   .filter(function (entity) {
+                       return !entity.entityAspect.entityState.isUnchanged();
+                   });
+
+        assertCount(changes, 3);
     });
 
     test("last order returns customer and details with expand='Customer,OrderDetails'", 4,
@@ -462,9 +482,9 @@
             ShipName: 'ShipName ' + 118,
             CustomsDescription: "Look at me; I'm global!"
         }, UNCHGD);
-        // make internationalOrder the 2nd order; 
+        // make internationalOrder the 2nd order;
         // 1st and last should be plain Orders
-        orders.splice(1, 0, internationalOrder); 
+        orders.splice(1, 0, internationalOrder);
         ordIds.push(118);
 
         // Create as many products as orders (actually need one fewer)
@@ -475,7 +495,7 @@
             }, UNCHGD);
         });
 
-        orderDetails = [];        
+        orderDetails = [];
         for (var ordIx = 0, ordLen = orders.length; ordIx < ordLen; ordIx++) {
             for (var prodIx = 0; prodIx < ordIx; prodIx++)
                 orderDetails.push( manager.createEntity('OrderDetail', {
@@ -513,7 +533,7 @@
         if (!moduleMetadataStore.isEmpty()) { // got it already
             callback();
             return;
-        } 
+        }
 
         stop(); // going async for metadata ...
         moduleMetadataStore.fetchMetadata(northwindService)
