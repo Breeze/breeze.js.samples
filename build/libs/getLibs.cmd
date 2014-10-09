@@ -25,5 +25,6 @@ XCOPY "%1..\..\..\breeze.server.labs\*.cs" "%1server.labs" /Y
 
 REM Exclude certain files
 DEL "%1js.labs\breeze.to$q.shim.js" 2>nul
+DEL "%1js\gulpfile.js" 2>nul
 
 pause  
