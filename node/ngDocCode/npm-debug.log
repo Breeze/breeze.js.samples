@@ -1,0 +1,176 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'i',
+1 verbose cli   '-g',
+1 verbose cli   'plato' ]
+2 info using npm@2.0.2
+3 info using node@v0.10.31
+4 verbose node symlink C:\Program Files\nodejs\\node.exe
+5 verbose cache add [ 'plato', null ]
+6 verbose cache add spec="plato" args=["plato",null]
+7 verbose parsed spec { raw: 'plato',
+7 verbose parsed spec   scope: null,
+7 verbose parsed spec   name: 'plato',
+7 verbose parsed spec   rawSpec: '',
+7 verbose parsed spec   spec: '*',
+7 verbose parsed spec   type: 'range' }
+8 verbose parsed spec { raw: 'plato',
+8 verbose parsed spec   scope: null,
+8 verbose parsed spec   name: 'plato',
+8 verbose parsed spec   rawSpec: '',
+8 verbose parsed spec   spec: '*',
+8 verbose parsed spec   type: 'range' }
+9 verbose addNamed [ 'plato', '*' ]
+10 verbose addNamed [ null, '*' ]
+11 silly lockFile 6979badd-plato plato@*
+12 verbose lock plato@* C:\Users\Ward\AppData\Roaming\npm-cache\6979badd-plato.lock
+13 silly addNameRange { name: 'plato', range: '*', hasData: false }
+14 verbose mapToRegistry name plato
+15 verbose mapToRegistry uri https://registry.npmjs.org/plato
+16 verbose request on initialization, where is /plato
+17 verbose request after pass 1, where is /plato
+18 verbose request url raw /plato
+19 verbose request resolving registry [ 'https://registry.npmjs.org/', './plato' ]
+20 verbose request after pass 2, where is https://registry.npmjs.org/plato
+21 verbose request no auth needed
+22 info attempt registry request try #1 at 14:42:12
+23 verbose request id e516f3ef2b780d6d
+24 verbose etag "C7U4HKA79Q7D7A15K4TB9SU9W"
+25 http request GET https://registry.npmjs.org/plato
+26 http 304 https://registry.npmjs.org/plato
+27 silly registry.get cb [ 304,
+27 silly registry.get   { date: 'Tue, 14 Oct 2014 21:41:48 GMT',
+27 silly registry.get     server: 'Apache',
+27 silly registry.get     via: '1.1 varnish',
+27 silly registry.get     'last-modified': 'Tue, 14 Oct 2014 21:41:48 GMT',
+27 silly registry.get     'cache-control': 'max-age=60',
+27 silly registry.get     etag: '"C7U4HKA79Q7D7A15K4TB9SU9W"',
+27 silly registry.get     age: '0',
+27 silly registry.get     'x-served-by': 'cache-sjc3120-SJC',
+27 silly registry.get     'x-cache': 'HIT',
+27 silly registry.get     'x-cache-hits': '1',
+27 silly registry.get     'x-timer': 'S1413322908.576860,VS0,VE352',
+27 silly registry.get     vary: 'Accept',
+27 silly registry.get     'content-length': '0',
+27 silly registry.get     'keep-alive': 'timeout=10, max=50',
+27 silly registry.get     connection: 'Keep-Alive' } ]
+28 verbose etag https://registry.npmjs.org/plato from cache
+29 silly addNameRange number 2 { name: 'plato', range: '*', hasData: true }
+30 silly addNameRange versions [ 'plato',
+30 silly addNameRange   [ '0.1.0',
+30 silly addNameRange     '0.2.0',
+30 silly addNameRange     '0.3.0',
+30 silly addNameRange     '0.3.1',
+30 silly addNameRange     '0.4.0',
+30 silly addNameRange     '0.4.1',
+30 silly addNameRange     '0.4.2',
+30 silly addNameRange     '0.4.3',
+30 silly addNameRange     '0.4.4',
+30 silly addNameRange     '0.4.5',
+30 silly addNameRange     '0.4.6',
+30 silly addNameRange     '0.4.7',
+30 silly addNameRange     '0.5.0',
+30 silly addNameRange     '0.6.1',
+30 silly addNameRange     '0.6.2',
+30 silly addNameRange     '1.0.0',
+30 silly addNameRange     '1.0.1',
+30 silly addNameRange     '1.1.0',
+30 silly addNameRange     '1.2.0' ] ]
+31 verbose addNamed [ 'plato', '1.2.0' ]
+32 verbose addNamed [ '1.2.0', '1.2.0' ]
+33 silly lockFile ad387499-plato-1-2-0 plato@1.2.0
+34 verbose lock plato@1.2.0 C:\Users\Ward\AppData\Roaming\npm-cache\ad387499-plato-1-2-0.lock
+35 silly lockFile ad387499-plato-1-2-0 plato@1.2.0
+36 silly lockFile ad387499-plato-1-2-0 plato@1.2.0
+37 silly lockFile 6979badd-plato plato@*
+38 silly lockFile 6979badd-plato plato@*
+39 silly resolved [ { name: 'plato',
+39 silly resolved     description: 'JavaScript source analysis and visualizer',
+39 silly resolved     version: '1.2.0',
+39 silly resolved     homepage: 'https://github.com/es-analysis/plato',
+39 silly resolved     author:
+39 silly resolved      { name: 'Jarrod Overson',
+39 silly resolved        email: 'jsoverson@gmail.com',
+39 silly resolved        url: 'http://jarrodoverson.com/' },
+39 silly resolved     repository: { type: 'git', url: 'git://github.com/es-analysis/plato.git' },
+39 silly resolved     bugs: { url: 'https://github.com/es-analysis/plato/issues' },
+39 silly resolved     bin: { plato: 'bin/plato' },
+39 silly resolved     licenses: [ [Object] ],
+39 silly resolved     main: 'lib/plato',
+39 silly resolved     engines: { node: '>= 0.10.0' },
+39 silly resolved     scripts: { test: 'grunt test' },
+39 silly resolved     devDependencies:
+39 silly resolved      { grunt: '~0.4.1',
+39 silly resolved        'grunt-contrib-jshint': '~0.5.4',
+39 silly resolved        'grunt-contrib-nodeunit': '~0.1.2',
+39 silly resolved        'grunt-contrib-uglify': '~0.2.0',
+39 silly resolved        'grunt-casper': 'git+https://github.com/jsoverson/grunt-casper',
+39 silly resolved        'grunt-contrib-watch': '~0.6.1' },
+39 silly resolved     keywords:
+39 silly resolved      [ 'halstead',
+39 silly resolved        'visualize',
+39 silly resolved        'cyclomatic',
+39 silly resolved        'complexity',
+39 silly resolved        'report',
+39 silly resolved        'analysis',
+39 silly resolved        'analyze' ],
+39 silly resolved     dependencies:
+39 silly resolved      { 'complexity-report': '~0.10.3',
+39 silly resolved        'posix-getopt': '~1.0.0',
+39 silly resolved        lodash: '~1.0.1',
+39 silly resolved        'fs-extra': '~0.3.2',
+39 silly resolved        jshint: '~2.5.1' },
+39 silly resolved     gitHead: '930c0e59c384e9894674085cd472859a71249b72',
+39 silly resolved     _id: 'plato@1.2.0',
+39 silly resolved     _shasum: 'be3c69acdf2d93f9b82cce00671da17c42e27736',
+39 silly resolved     _from: 'plato@*',
+39 silly resolved     _npmVersion: '1.4.20',
+39 silly resolved     _npmUser: { name: 'jsoverson', email: 'jsoverson@gmail.com' },
+39 silly resolved     maintainers: [ [Object], [Object] ],
+39 silly resolved     dist:
+39 silly resolved      { shasum: 'be3c69acdf2d93f9b82cce00671da17c42e27736',
+39 silly resolved        tarball: 'http://registry.npmjs.org/plato/-/plato-1.2.0.tgz' },
+39 silly resolved     directories: {},
+39 silly resolved     _resolved: 'https://registry.npmjs.org/plato/-/plato-1.2.0.tgz',
+39 silly resolved     readme: 'ERROR: No README data found!' } ]
+40 info install plato@1.2.0 into C:\Program Files\nodejs
+41 info installOne plato@1.2.0
+42 verbose node_modules\plato unbuild
+43 verbose gentlyRm vacuuming C:\Program Files\nodejs\node_modules\plato
+44 verbose tar unpack C:\Users\Ward\AppData\Roaming\npm-cache\plato\1.2.0\package.tgz
+45 silly lockFile 414d6933--Files-nodejs-node-modules-plato tar://C:\Program Files\nodejs\node_modules\plato
+46 verbose lock tar://C:\Program Files\nodejs\node_modules\plato C:\Users\Ward\AppData\Roaming\npm-cache\414d6933--Files-nodejs-node-modules-plato.lock
+47 silly lockFile 39d784df-pm-cache-plato-1-2-0-package-tgz tar://C:\Users\Ward\AppData\Roaming\npm-cache\plato\1.2.0\package.tgz
+48 verbose lock tar://C:\Users\Ward\AppData\Roaming\npm-cache\plato\1.2.0\package.tgz C:\Users\Ward\AppData\Roaming\npm-cache\39d784df-pm-cache-plato-1-2-0-package-tgz.lock
+49 verbose gentlyRm vacuuming C:\Program Files\nodejs\node_modules\plato
+50 silly gunzTarPerm modes [ '777', '666' ]
+51 verbose fstream_path C:\Program Files\nodejs\node_modules\plato
+52 verbose fstream_type Directory
+53 verbose fstream_class DirWriter
+54 verbose stack Error: EPERM, mkdir 'C:\Program Files\nodejs\node_modules\plato'
+55 verbose fstream_stack C:\Program Files\nodejs\node_modules\npm\node_modules\fstream\lib\dir-writer.js:36:23
+55 verbose fstream_stack C:\Program Files\nodejs\node_modules\npm\node_modules\mkdirp\index.js:46:53
+55 verbose fstream_stack Object.oncomplete (fs.js:107:15)
+56 verbose cwd C:\Users\Ward\Documents\GitHub\Breeze\breeze.js.samples\node\ngDocCode
+57 error Windows_NT 6.2.9200
+58 error argv "C:\\Program Files\\nodejs\\\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "i" "-g" "plato"
+59 error node v0.10.31
+60 error npm  v2.0.2
+61 error path C:\Program Files\nodejs\node_modules\plato
+62 error code EPERM
+63 error errno 50
+64 error Error: EPERM, mkdir 'C:\Program Files\nodejs\node_modules\plato'
+64 error  { [Error: EPERM, mkdir 'C:\Program Files\nodejs\node_modules\plato']
+64 error   errno: 50,
+64 error   code: 'EPERM',
+64 error   path: 'C:\\Program Files\\nodejs\\node_modules\\plato',
+64 error   fstream_type: 'Directory',
+64 error   fstream_path: 'C:\\Program Files\\nodejs\\node_modules\\plato',
+64 error   fstream_class: 'DirWriter',
+64 error   fstream_stack:
+64 error    [ 'C:\\Program Files\\nodejs\\node_modules\\npm\\node_modules\\fstream\\lib\\dir-writer.js:36:23',
+64 error      'C:\\Program Files\\nodejs\\node_modules\\npm\\node_modules\\mkdirp\\index.js:46:53',
+64 error      'Object.oncomplete (fs.js:107:15)' ] }
+65 error Please try running this command again as root/Administrator.
+66 verbose exit [ 50, true ]

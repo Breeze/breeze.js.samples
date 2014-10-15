@@ -1,0 +1,38 @@
+{
+    "client": "./public/",
+    "server": "./",
+    "htmltemplates": "./public/**/*.html",
+    "css": [
+        "./public/stylesheets/styles.css"
+    ],
+    "js": [
+        "app/**/*.module.js",
+        "app/**/*.js"
+    ],
+    "specs": [
+        "./public/test/**/*.spec.js"
+    ],
+    "nodejs": [
+        "./*.js",
+        "./routes/**/*.js",
+        "!./gulpfile.js",
+        "!./karma.conf.js"
+    ],
+    "fonts": [
+    ],
+    "images": [
+        "./public/images/**/*"
+    ],
+    "build": "./build/",
+    "report": "./report/",
+    "vendorjs": [
+        "./bower_components/angular/angular.min.js",
+        "./bower_components/angular-animate/angular-animate.min.js",
+        "./bower_components/angular-route/angular-route.min.js",
+        "./bower_components/angular-sanitize/angular-sanitize.min.js",
+
+        "./bower_components/breezejs/breeze.min.js"
+    ],
+    "vendorcss": [
+    ]
+}
