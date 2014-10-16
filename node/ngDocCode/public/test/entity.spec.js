@@ -12,8 +12,6 @@ describe("entity:", function () {
     var dummyEmpID = 42;
     var UNCHGD = EntityState.Unchanged;
 
-    beforeEach(module('testApp'));
-
     beforeEach(function () {
         em = new breeze.EntityManager(testFns.northwindServiceName);
         testFns.importNorthwindMetadata(em);
@@ -27,7 +25,7 @@ describe("entity:", function () {
     });
 
     it("can add Customer using the EntityType", function() {
-        var customerType = em.metadataStore.getEntityType("Customer");
+        var customerType = em.metadataStore.getEntityType('Customer');
         cust = customerType.createEntity();
         cust.CustomerID = dummyCustID;
         em.addEntity(cust);

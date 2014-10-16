@@ -6,7 +6,7 @@
  *********************************************************/
 // ReSharper disable InconsistentNaming
 
-(function (docCode) {
+(function (docCode, specHelper) {
     'use strict';
 
     // extend native String with format, startsWith, endsWith
@@ -28,17 +28,20 @@
     /*********************************************************
      * testFns - the module object
      *********************************************************/
+    var serverRoot = 'http://localhost:58066/' // DocCode Web API server
+
     var testFns = {
         assertIsSorted: assertIsSorted,
         breeze: breeze,
         customerResultsToStringArray: customerResultsToStringArray,
         ensureIsEm: ensureIsEm,
-        foosMetadataServiceName: 'breeze/FoosMetadata',
+        foosMetadataServiceName: serverRoot + 'breeze/FoosMetadata',
         getNextIntId: getNextIntId,
         getParserForUrl: getParserForUrl,
         getValidationErrMsgs: getValidationErrMsgs,
-        handleFail: handleFail,
-        handleSaveFailed: handleSaveFailed,
+        promiseFail: specHelper.promiseFail,
+        promiseSaveFailed: promiseSaveFailed,
+        promiseSuccess: specHelper.promiseSuccess,
         importMetadata: importMetadata,
         importNorthwindMetadata: importNorthwindMetadata,
         inheritancePurge: inheritancePurge, // empty the Inheritance Model db completely
@@ -49,18 +52,19 @@
         newEmFactory: newEmFactory,
         newGuid: newGuid,
         newGuidComb: newGuidComb,
-        northwindDtoServiceName: 'breeze/NorthwindDto',
+        northwindDtoServiceName: serverRoot + 'breeze/NorthwindDto',
         northwindDtoNamespace: 'Northwind.DtoModels',
         northwindNamespace: 'Northwind.Models',
         northwindReset: northwindReset, // reset Northwind db to known state
-        northwindServiceName: 'breeze/Northwind',
+        northwindServiceName: serverRoot + 'breeze/Northwind',
         output: output,
         populateMetadataStore: populateMetadataStore,
         reportRejectedPromises: reportRejectedPromises,
         rootUri: getRootUri(),
+        serverRoot: serverRoot,
         todosPurge: todosPurge, // empty the Todos db completely
         todosReset: todosReset, // reset to known state
-        todosServiceName: 'breeze/todos',
+        todosServiceName: serverRoot + 'breeze/todos',
         userSessionId: newGuidComb(),
         wellKnownData: wellKnownData
     };
@@ -96,6 +100,24 @@
         }
     }
 
+    function createTestAppModule(){
+        return angular.module('testApp',['breeze.angular'])
+            // ensure breeze is configured for angular
+            .run(function(breeze){
+                initAjaxAdapter();
+            });
+
+        function initAjaxAdapter() {
+            // get the current default Breeze AJAX adapter
+            var ajaxAdapter = breeze.config.getAdapterInstance('ajax');
+            ajaxAdapter.defaultSettings = {
+                headers: {
+                    'X-UserSessionId': testFns.userSessionId
+                }
+            };
+        }
+    }
+
     function customerResultsToStringArray(data, limit) {
         var count = data.results.length;
         var results = (limit) ? data.results.slice(0, limit) : data.results;
@@ -111,24 +133,6 @@
     //        var results = customerResultsToStringArray(data, limit).join('</li><li>');
     //        return (results.length) ? '<ol><li>' + results + '</li></ol>' : '[none]';
     //    }
-
-    function createTestAppModule(){
-        return angular.module('testApp',['breeze.angular'])
-            // ensure breeze is configured for angular
-            .config(function(breeze){
-                initAjaxAdapter();
-            });
-
-        function initAjaxAdapter() {
-            // get the current default Breeze AJAX adapter
-            var ajaxAdapter = breeze.config.getAdapterInstance('ajax');
-            ajaxAdapter.defaultSettings = {
-                headers: {
-                    'X-UserSessionId': testFns.userSessionId
-                }
-            };
-        }
-    }
 
     /*********************************************************
      * Get or Create an EntityManager
@@ -261,21 +265,15 @@
     }
 
     /*********************************************************
-     * Callback for promise failures.
-     * Gets the error message into the testrunner report
+     * Callback for promise success and failures in Mocha
+     * NASTY. See https://github.com/mad-eye/meteor-mocha-web/issues/70
      *********************************************************/
-     // Usage:  .catch(handleFail)
-    function handleFail(error) {
-        if (error.handled === true) { return; }
-
-        var msg = error.message ? error.message : error.toString();
-        expect('Spec failed').to.be(msg);
-    }
-
-    // Usage:  manager.saveChanges.catch(handleSaveFailed)
-    function handleSaveFailed(error) {
-        error.message = 'Save failed: ' + getSaveErrorMessages(error);
-        handleFail(error);
+    // Usage:  manager.saveChanges.catch(promiseSaveFailed(done))
+    function promiseSaveFailed(done) {
+        return function(error){
+            error.message = 'Save failed: ' + getSaveErrorMessages(error);
+            done(error);
+        }
     }
 
     // Import metadata into an entityManager or metadataStore
@@ -464,4 +462,4 @@
         return $http.post(testFns.todosServiceName + '/reset',{});
     }
 
-})(window.docCode || (window.docCode={}));
+})( window.docCode || (window.docCode={}), window.specHelper);

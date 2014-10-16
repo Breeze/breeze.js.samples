@@ -4,6 +4,8 @@ window.specHelper = (function() {
     return {
         fakeRouteProvider: fakeRouteProvider,
         injector: injector,
+        promiseFail: promiseFail,
+        promiseSuccess: promiseSuccess,
         verifyNoOutstandingHttpRequests: verifyNoOutstandingHttpRequests
     };
 
@@ -121,6 +123,31 @@ window.specHelper = (function() {
         //
         // Then caller must say something like:
         //     eval(specHelper.injector('$log', 'foo'));
+    }
+
+    /*********************************************************
+     * Callback for promise success and failures in Mocha
+     * NASTY. See https://github.com/mad-eye/meteor-mocha-web/issues/70
+     *********************************************************/
+    // Usage:  .catch(promiseFail(done))
+    //         .catch(promiseFail(done, errorFn))
+    function promiseFail(done, errorFn) {
+        return function(error){
+            var newErr;
+            if (errorFn){newErr = errorFn(error);}
+            done((newErr === undefined) ? error : newErr);
+        }
+    }
+    // Usage:  .then(promiseSuccess(done, successFn))
+    function promiseSuccess(done, successFn) {
+        return function(data){
+            try{
+                if (successFn){successFn(data);}
+                done();
+            } catch (error){
+                done(error);
+            }
+        }
     }
 
     function verifyNoOutstandingHttpRequests () {

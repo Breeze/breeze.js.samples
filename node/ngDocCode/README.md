@@ -31,6 +31,12 @@ Testing uses karma, mocha, chai, sinon, ngMidwayTester libraries.
 ## How It Works
 
 TBD
+## Disable ng-inspector!
+**The ng-inspector chrome plug-in interferes with debugging of tests in chrome.**
+
+You know you've hit the problem when the test fails in a "before hook" and the stack trace mentions "ng-inspector".
+
+Please disable it or remove it from your Chrome extensions.
 
 ## Starting the DocCode WebAPI server
 

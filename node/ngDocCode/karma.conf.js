@@ -34,14 +34,18 @@ module.exports = function (config) {
             './public/test/lib/*.js',
 
             /* Specs */
-            './public/test/**/*.spec.js'
+            './public/test/*.spec.js',
+
+            // These "midway" specs require a running server
+            './public/test/server_specs/isServerRunning.spec.js',
+            './public/test/server_specs/**/*.spec.js'
 
         ],
 
         // list of files to exclude
         exclude: [
-            // Excluding midway tests for now; comment this line out when you want to run them
-            './public/test/midway/**/*.spec.js'
+            // Excluding tests that require a server for now; comment this line out when you want to run them
+            //'./public/test/server_specs/**/*.spec.js'
         ],
 
         proxies: {
