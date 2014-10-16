@@ -12,6 +12,9 @@
     "specs": [
         "./public/test/**/*.spec.js"
     ],
+    "specHelpers": [
+        "./public/test/lib/**/*.js"
+    ],
     "nodejs": [
         "./*.js",
         "./routes/**/*.js",

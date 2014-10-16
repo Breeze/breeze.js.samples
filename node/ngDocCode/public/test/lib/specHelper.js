@@ -1,11 +1,11 @@
 /*jshint -W079 */
-var specHelper = (function() {
-    var service = {
+/* globals afterEach, inject, sinon */
+window.specHelper = (function() {
+    return {
         fakeRouteProvider: fakeRouteProvider,
         injector: injector,
         verifyNoOutstandingHttpRequests: verifyNoOutstandingHttpRequests
     };
-    return service;
 
     function fakeRouteProvider($provide) {
         /**

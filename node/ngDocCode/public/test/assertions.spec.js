@@ -1,4 +1,4 @@
-/* jshint -W117, -W030 */
+/* jshint -W117, -W030, -W109 */
 /*
  *  Using chai BDD (expect) assertions: http://chaijs.com/api/bdd/
  */

@@ -27,7 +27,12 @@ gulp.task('help', plug.taskListing);
 gulp.task('analyze', function() {
     log('Analyzing source with JSHint, JSCS'); // , and Plato');
 
-    var jshint = analyzejshint([].concat(paths.js, paths.specs, paths.nodejs));
+    var jshSources = [].concat(paths.js, paths.specs, paths.specHelpers, paths.nodejs, [
+         '!./public/test/lib/northwindDtoMetadata.js',
+         '!./public/test/lib/northwindMetadata.js'
+        ]);
+
+    var jshint = analyzejshint(jshSources);
     var jscs = analyzejscs([].concat(paths.js, paths.nodejs));
 
     return merge(jshint, jscs);
@@ -331,7 +336,7 @@ function analyzejshint(sources, overrideRcFile) {
     return gulp
         .src(sources)
         .pipe(plug.jshint(jshintrcFile))
-        .pipe(plug.jshint.reporter('jshint-stylish'));
+        .pipe(plug.jshint.reporter('jshint-stylish',{verbose: true}));
 }
 
 /**
