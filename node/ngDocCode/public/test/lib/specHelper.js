@@ -4,10 +4,9 @@ window.specHelper = (function() {
     return {
         fakeRouteProvider: fakeRouteProvider,
         injector: injector,
-        promiseFail: promiseFail,
-        promiseSuccess: promiseSuccess,
         verifyNoOutstandingHttpRequests: verifyNoOutstandingHttpRequests
     };
+    ////////////////////////
 
     function fakeRouteProvider($provide) {
         /**
@@ -112,42 +111,8 @@ window.specHelper = (function() {
         var exp = 'inject(' + fn + ');' +
             'afterEach(function(){' + cleanupBody + '});'; // remove from window.
 
-        //Function(exp)(); // the assigned vars will be global. `afterEach` will remove them
         /* jshint evil:true */
-        new Function(exp)();
-
-        // Alternative that would not touch window but would require eval()!!
-        // Don't do `Function(exp)()` and don't do afterEach cleanup
-        // Instead do ..
-        //     return exp;
-        //
-        // Then caller must say something like:
-        //     eval(specHelper.injector('$log', 'foo'));
-    }
-
-    /*********************************************************
-     * Callback for promise success and failures in Mocha
-     * NASTY. See https://github.com/mad-eye/meteor-mocha-web/issues/70
-     *********************************************************/
-    // Usage:  .catch(promiseFail(done))
-    //         .catch(promiseFail(done, errorFn))
-    function promiseFail(done, errorFn) {
-        return function(error){
-            var newErr;
-            if (errorFn){newErr = errorFn(error);}
-            done((newErr === undefined) ? error : newErr);
-        }
-    }
-    // Usage:  .then(promiseSuccess(done, successFn))
-    function promiseSuccess(done, successFn) {
-        return function(data){
-            try{
-                if (successFn){successFn(data);}
-                done();
-            } catch (error){
-                done(error);
-            }
-        }
+        new Function(exp)(); // the assigned vars will be global. `afterEach` will remove them
     }
 
     function verifyNoOutstandingHttpRequests () {

@@ -30,6 +30,7 @@ describe("isServerRunning:", function () {
             $rootScope.$apply();
         }]);
     });
+
     it(serviceName+" should be running", function(){
         expect(testFns.isServerRunning).to.be.true;
     })

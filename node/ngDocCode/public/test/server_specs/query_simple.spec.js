@@ -36,8 +36,8 @@ describe("query_simple:", function () {
     it("can query all customers with executeQuery", function (done) {
         var query = new EntityQuery('Customers');
             newEm().executeQuery(query)
-                .then(pSuccess(done, assertGotCustomers))
-                .catch(pFail(done));
+                .then(assertGotCustomers)
+                .then(done, done);
     });
 
     function assertGotCustomers(data) {

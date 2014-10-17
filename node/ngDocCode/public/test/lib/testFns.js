@@ -39,9 +39,7 @@
         getNextIntId: getNextIntId,
         getParserForUrl: getParserForUrl,
         getValidationErrMsgs: getValidationErrMsgs,
-        promiseFail: specHelper.promiseFail,
         promiseSaveFailed: promiseSaveFailed,
-        promiseSuccess: specHelper.promiseSuccess,
         importMetadata: importMetadata,
         importNorthwindMetadata: importNorthwindMetadata,
         inheritancePurge: inheritancePurge, // empty the Inheritance Model db completely
