@@ -59,6 +59,7 @@
         populateMetadataStore: populateMetadataStore,
         reportRejectedPromises: reportRejectedPromises,
         rootUri: getRootUri(),
+        serverIsRunningPrecondition: serverIsRunningPrecondition,
         serverRoot: serverRoot,
         todosPurge: todosPurge, // empty the Todos db completely
         todosReset: todosReset, // reset to known state
@@ -444,6 +445,16 @@
     function reportRejectedPromises(promises) {
         // No equivalent in $q
         throw new Error('\'reportRejectedPromises\' not implemented');
+    }
+
+    function serverIsRunningPrecondition(){
+        before(function(done){
+            if (testFns.isServerRunning){
+                done();
+            } else {
+                done(new Error("Server is not running; can't run these specs"));
+            }
+        });
     }
 
     /**************************************************

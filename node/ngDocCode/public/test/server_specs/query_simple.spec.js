@@ -17,14 +17,7 @@ describe("query_simple:", function () {
         pSuccess = testFns.promiseSuccess;
     var tester;
 
-    // TODO: Move to TestFns
-    before(function(done){
-        if (testFns.isServerRunning){
-            done();
-        } else {
-            done(new Error("Server is not running; can't run these specs"));
-        }
-    });
+    testFns.serverIsRunningPrecondition();
 
     beforeEach(function() {
         tester = ngMidwayTester('testApp');
