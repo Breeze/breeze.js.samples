@@ -417,10 +417,10 @@
     /*********************************************************
      * Populate an EntityManager factory's metadataStore
      *********************************************************/
-        // Keep a single copy of the metadataStore in this module
-        // and reuse it with each new EntityManager
-        // so we don't make repeated requests for metadata
-        // every time we create a new EntityManager
+    // Keep a single copy of the metadataStore in this module
+    // and reuse it with each new EntityManager
+    // so we don't make repeated requests for metadata
+    // every time we create a new EntityManager
     function populateMetadataStore(newEm, metadataSetupFn) {
 
         var metadataStore = newEm.options.metadataStore;
@@ -447,12 +447,51 @@
         throw new Error('\'reportRejectedPromises\' not implemented');
     }
 
+    /*********************************************************
+     * Determine if the server is running so that midway tests can run.
+     * No point in running them if the server is not up.
+     * Place the following near the top of each midway spec file
+     *     testFns.serverIsRunningPrecondition();
+     * Calls a mocha `before` hook that pings the server
+     * Caches the result of the ping so that subsequent midway spec files don't re-ping
+     * @method serverIsRunningPrecondition {String}
+     *********************************************************/
     function serverIsRunningPrecondition(){
+        //Todo: allow the server to vary
+        var serviceName = testFns.northwindServiceName;
+        var notRunningError = new Error('Server '+serviceName+' is NOT running; can\'t run these specs');
+
         before(function(done){
-            if (testFns.isServerRunning){
+            if (testFns.isServerRunning === undefined){
+                this.timeout(32000);
+                var $injector = angular.injector(['ng']);
+                $injector.invoke(['$http', '$rootScope', function ($http, $rootScope) {
+                    var url = serviceName+'/employees?$top=0';
+                    // fire one in to kick the server... not sure why this is necessary
+                    $http.get(url);
+                    // Now we really test this one
+                    $http.get(url, {timeout: 30000})// just looking for a response
+                        .then(function(){
+                            testFns.isServerRunning = true;
+                            console.log('Server '+serviceName+' is running');
+                            done();
+                        })
+                        .catch(function(res){
+                            if (res.status === 0 ){
+                                testFns.isServerRunning = false;
+                                done(notRunningError);
+                            } else {
+                                // something else is wrong but the server is up and that's all we care about here
+                                testFns.isServerRunning = true;
+                                console.error("Unexpected error while looking for server: "+res.data);
+                            }
+                        });
+                    $rootScope.$apply();
+                }])
+            } else if (testFns.isServerRunning){
                 done();
             } else {
-                done(new Error("Server is not running; can't run these specs"));
+                done(notRunningError);
             }
         });
     }

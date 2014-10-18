@@ -37,7 +37,6 @@ module.exports = function (config) {
             './public/test/*.spec.js',
 
             // These "midway" specs require a running server
-            './public/test/server_specs/isServerRunning.spec.js',
             './public/test/server_specs/**/*.spec.js'
 
         ],
