@@ -27,7 +27,8 @@
         // Key values of a Northwind 'Alfreds Futterkiste''s OrderDetail
         alfredsOrderDetailKey: { OrderID: 10643, ProductID: 28 /*Rössle Sauerkraut*/ },
         // ID of Chai product
-        chaiProductID: 1
+        chaiProductID: 1,
+        emptyGuid: '00000000-0000-0000-0000-000000000000'
     };
     /*********************************************************
      * testFns - the module object

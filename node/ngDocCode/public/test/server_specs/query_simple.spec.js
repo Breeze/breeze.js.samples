@@ -13,16 +13,16 @@ describe("query_simple:", function () {
     var em;
     var newEm = testFns.newEmFactory(testFns.northwindServiceName);
 
-    var alfredsID = testFns.wellKnownData.alfredsID;
-    var alfredsPredicate = // filter by the Alfreds Customer
-            breeze.Predicate.create("CustomerID", "==", alfredsID);
+    var gotResults = function (data) {
+        expect(data.results).is.not.empty;
+    };
 
     beforeEach(function () {
         em = newEm(); // fresh EntityManager before each test
     });
     ///////////////////////////
 
-    describe("query for all customers", function () {
+    describe("query for customers", function () {
 
         it("using EntityManager.executeQuery - style #1", function (done) {
             var query = EntityQuery.from('Customers'); // create query style #1 ... our favorite
@@ -32,24 +32,19 @@ describe("query_simple:", function () {
             var em = new breeze.EntityManager(testFns.northwindServiceName);
 
             em.executeQuery(query)
-                .then(assertGotCustomers)
+                .then(gotResults)
                 .then(done, done);
         });
 
-        function assertGotCustomers(data) {
-            var count = data.results.length;
-            expect(count).to.be.above(0, 'customer query returned ' + count);
-        }
-
         /********************************************************************
-         * We'll use the `em` set in the beforeEach hook from this point forward
-         * so that we don't keep making server calls for metadata
+         * Use the `em` (reset in the beforeEach hook) from this point forward
+         * so that we don't keep asking the server for metadata
          ********************************************************************/
 
         it("using EntityManager.executeQuery - style #2", function (done) {
             var query = new EntityQuery('Customers'); // Create query style #2
             em.executeQuery(query)
-                .then(assertGotCustomers)
+                .then(gotResults)
                 .then(done, done);
         });
 
@@ -58,7 +53,7 @@ describe("query_simple:", function () {
             var query = new EntityQuery.from("Customers"); // Create query style #3
             em.executeQuery(query,
                 function (data) {   // success callback
-                    assertGotCustomers(data);
+                    gotResults(data);
                     done();        // resume test runner
                 },
                 done       // failure callback (mocha takes the exception and reports it
@@ -72,9 +67,10 @@ describe("query_simple:", function () {
             // in a single statement
             EntityQuery.from('Customers')
                 .using(em).execute()
-                .then(assertGotCustomers)
+                .then(gotResults)
                 .then(done, done);
         });
+
     });
 
     describe("when write a callback timeout", function () {
@@ -139,6 +135,30 @@ describe("query_simple:", function () {
                 done()
             }
         }
+    });
+
+    describe("query for one supplier", function () {
+
+        var query = EntityQuery.from('Suppliers').top(1);
+
+        it("should return exactly one supplier", function (done) {
+            query.using(em).execute()
+                .then( function (data) {
+                    expect(data.results).has.length(1);
+                })
+                .then(done, done);
+        });
+
+        it("should have a complex Location.Address", function (done) {
+
+            query.using(em).execute()
+                .then( function (data) {
+                    expect(data.results[0] || {})
+                        .has.deep.property('Location.Address')
+                        .that.is.not.empty;
+                })
+                .then(done, done);
+        });
     });
 
 });
