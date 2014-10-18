@@ -21,7 +21,7 @@
  *
  * These tests explore some of these possibilities, using the $http ajax adapter
  ********************************/
-describe("$httpAjaxAdapter:", function () {
+describe("ngAjaxAdapter:", function () {
     'use strict';
 
     var testFns = window.docCode.testFns;

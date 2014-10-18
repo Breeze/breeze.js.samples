@@ -88,7 +88,7 @@ describe("query_simple:", function () {
          * nor does it stop the Breeze EntityManager from processing a response
          * that arrives after the promise is resolved.
          *
-         * If you want that behavior, AND YOU PROBABLY DO, see the $httpAjaxAdapter.spec
+         * If you want that behavior, AND YOU PROBABLY DO, see the ngAjaxAdapter.spec
          *********************************************************/
 
         it("short timeout cancels 'all customers' query callback", function (done) {
