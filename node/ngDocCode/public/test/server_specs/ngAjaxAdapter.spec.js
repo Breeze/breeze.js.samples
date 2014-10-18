@@ -55,17 +55,19 @@ describe("ngAjaxAdapter:", function () {
     });
 
     it("can get faked customer response with interceptor", function (done) {
-        ajaxAdapter.requestInterceptor = interceptor;
+
+        ajaxAdapter.requestInterceptor = function (requestInfo) {
+            // skip the real Angular ajax call and
+            // immediately invoke the breeze success callback with mock response data
+            var ngConfig = requestInfo.config;
+            var res = mockCustomerQueryResponse;
+            requestInfo.success(res.data, res.status, res.headers, ngConfig, res.statusText);
+            requestInfo.config = null; // causes by-pass of the real Angular ajax call
+        };
+
         EntityQuery.from("Customers")
             .using(em).execute()
             .then(success).then(done, done);
-
-        function interceptor(requestInfo) {
-            var ngConfig = requestInfo.config;
-            requestInfo.config = null; // causes by-pass of the Angular ajax call
-            var cfg = customer3QuerySuccess; // mock data
-            requestInfo.success(cfg.data, cfg.status, cfg.headers, ngConfig, cfg.statusText);
-        }
 
         function success(data) {
             var count = data.results.length;
@@ -80,7 +82,7 @@ describe("ngAjaxAdapter:", function () {
 
         EntityQuery.from("Customers")
             .using(em).execute()
-            .then(queryShouldHaveTimedOut, expectedTimeoutFail)
+            .then(queryShouldNotSucceed, queryShouldTimeout)
             .then(done, done);
 
     });
@@ -93,7 +95,7 @@ describe("ngAjaxAdapter:", function () {
 
         EntityQuery.from("Customers")
             .using(em).execute()
-            .then(queryDidNotTimeout, queryTimedOutUnexpectedly)
+            .then(queryShouldSucceed, queryShouldNotFail)
             .then(done, done);
     });
 
@@ -108,9 +110,9 @@ describe("ngAjaxAdapter:", function () {
 
         EntityQuery.from("Customers")
             .using(em).execute()
-            .then(queryShouldHaveTimedOut, expectedTimeoutFail)
+            // cancel looks like a timeout
+            .then(queryShouldNotSucceed, queryShouldTimeout)
             .then(done, done);
-
 
         if (canceller) {
             // cancel immediately for purposes of this test
@@ -132,7 +134,7 @@ describe("ngAjaxAdapter:", function () {
 
         EntityQuery.from("Customers")
             .using(em).execute()
-            .then(queryDidNotTimeout, queryTimedOutUnexpectedly)
+            .then(queryShouldSucceed, queryShouldNotFail)
             .then(done, done);
 
 
@@ -155,7 +157,7 @@ describe("ngAjaxAdapter:", function () {
         var query = EntityQuery.from("Customers").using(em);
 
         query.execute()
-            .then(queryShouldHaveTimedOut, expectedQuery1Fail)
+            .then(queryShouldNotSucceed, expectedQuery1Fail)
             // try query again; the interceptor should be gone
             .then(requery)
             .then(query2Success, query2Fail)
@@ -165,9 +167,10 @@ describe("ngAjaxAdapter:", function () {
             var response = error.httpResponse;
             var status = response.status;
             var data = response.data;
-            if (status !== 0 || !/timeout/.test(data)){
-                // some error other than the expected timeout
-                throw error;
+            if (status === 0 && /timeout/.test(data)) {
+                return; // hooray
+            } else {
+                throw error; // some error other than the expected timeout
             }
         }
 
@@ -224,7 +227,7 @@ describe("ngAjaxAdapter:", function () {
                 .using(em).execute()
                 .then(unexpectedSuccess, expectedFailure)
                 .then(done, done)
-                .finally(function(){ajaxAdapter.ajax = origAjax;});
+                .finally(restoreAjaxMethod);
 
             function unexpectedSuccess(data){
                 expect(true).to.equal(false, 'query should have failed because of adapter exception');
@@ -233,12 +236,16 @@ describe("ngAjaxAdapter:", function () {
             function expectedFailure(error) {
                 expect(error.message).to.match(/ajax method/, 'query failed w/ msg='+error.message);
             }
+            function restoreAjaxMethod(){
+                ajaxAdapter.ajax = origAjax;
+            }
         });
 
         it("exception in interceptor should be caught in promise", function(done) {
 
             // Make the ajaxAdapter.requestInterceptor throw
             ajaxAdapter.requestInterceptor = function() { throw new Error('some error in the requestInterceptor'); };
+            ajaxAdapter.requestInterceptor.oneTime = true;
 
             EntityQuery.from('Customers')
                 .using(em).execute()
@@ -257,7 +264,11 @@ describe("ngAjaxAdapter:", function () {
 
     /*** Helpers ***/
 
-    function expectedTimeoutFail(error) {
+    function queryShouldSucceed(data) {
+        expect(true).to.equal(true, 'query did not timeout');
+    }
+
+    function queryShouldTimeout(error) {
         var response = error.httpResponse;
         var status = response.status;
         var data = response.data;
@@ -266,15 +277,11 @@ describe("ngAjaxAdapter:", function () {
                 .format(status, data));
     }
 
-    function queryDidNotTimeout() {
-        expect(true).to.equal(true, 'query did not timeout');
-    }
-
-    function queryShouldHaveTimedOut() {
+    function queryShouldNotSucceed(data) {
         expect(false).to.equal(true,"query should have timed-out but didn't");
     }
 
-    function queryTimedOutUnexpectedly(error) {
+    function queryShouldNotFail(error) {
         var response = error.httpResponse;
         var status = response.status;
         var data = response.data;
@@ -286,7 +293,7 @@ describe("ngAjaxAdapter:", function () {
     }
 
     // fake ajax adapter success object, grabbed from a real query for 3 customers
-    var customer3QuerySuccess = {
+    var mockCustomerQueryResponse = {
         data:       [{ "$id": "1", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "729de505-ea6d-4cdf-89f6-0360ad37bde7", "CompanyName": "Die Wandernde Kuh", "ContactName": "Rita Müller", "ContactTitle": "Sales Representative", "Address": "Adenauerallee 900", "City": "Stuttgart", "Region": null, "PostalCode": "70563", "Country": "Germany", "Phone": "0711-020361", "Fax": "0711-035428", "RowVersion": null, "Orders": null }, { "$id": "2", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "cd98057f-b5c2-49f4-a235-05d155e636df", "CompanyName": "Suprêmes délices", "ContactName": "Pascale Cartrain", "ContactTitle": "Accounting Manager", "Address": "Boulevard Tirou, 255", "City": "Charleroi", "Region": null, "PostalCode": "B-6000", "Country": "Belgium", "Phone": "(071) 23 67 22 20", "Fax": "(071) 23 67 22 21", "RowVersion": null, "Orders": null }, { "$id": "3", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "9d4d6598-b6c2-4b52-890b-0636b23ec85b", "CompanyName": "Franchi S.p.A.", "ContactName": "Paolo Accorti", "ContactTitle": "Sales Representative", "Address": "Via Monte Bianco 34", "City": "Torino", "Region": null, "PostalCode": "10100", "Country": "Italy", "Phone": "011-4988260", "Fax": "011-4988261", "RowVersion": null, "Orders": null }],
         headers:    getSuccessHeaders,
         status:     200,
