@@ -13,7 +13,11 @@
     // Ex: '{0} returned {1} item(s)'.format(queryName, count));
     extendString();
 
+
     var _nextIntId = 10000; // seed for getNextIntId()
+    var $injector;  // for testFns exclusive use; not the one used by a local test
+
+    useAngularAdapters();
 
     var wellKnownData = {
         // ID of the Northwind 'Alfreds Futterkiste' customer
@@ -29,6 +33,7 @@
      * testFns - the module object
      *********************************************************/
     var serverRoot = 'http://localhost:58066/' // DocCode Web API server
+    var serverMetadata = {} // server-side metadata retrieved during current test session
 
     var testFns = {
         assertIsSorted: assertIsSorted,
@@ -56,11 +61,13 @@
         northwindReset: northwindReset, // reset Northwind db to known state
         northwindServiceName: serverRoot + 'breeze/Northwind',
         output: output,
-        populateMetadataStore: populateMetadataStore,
+        preFetchMetadataStore: preFetchMetadataStore,
         reportRejectedPromises: reportRejectedPromises,
         rootUri: getRootUri(),
         serverIsRunningPrecondition: serverIsRunningPrecondition,
         serverRoot: serverRoot,
+        serverMetadata: serverMetadata,
+        setupNgMidwayTester: setupNgMidwayTester,
         todosPurge: todosPurge, // empty the Todos db completely
         todosReset: todosReset, // reset to known state
         todosServiceName: serverRoot + 'breeze/todos',
@@ -69,6 +76,7 @@
     };
 
     createTestAppModule();
+
 
     docCode.testFns = testFns;
 
@@ -263,18 +271,6 @@
         }
     }
 
-    /*********************************************************
-     * Callback for promise success and failures in Mocha
-     * NASTY. See https://github.com/mad-eye/meteor-mocha-web/issues/70
-     *********************************************************/
-    // Usage:  manager.saveChanges.catch(promiseSaveFailed(done))
-    function promiseSaveFailed(done) {
-        return function(error){
-            error.message = 'Save failed: ' + getSaveErrorMessages(error);
-            done(error);
-        }
-    }
-
     // Import metadata into an entityManager or metadataStore
     // and optionally set the store's dataService
     // Usage:
@@ -344,24 +340,23 @@
     }
 
     /*********************************************************
-     * Factory of EntityManager factories (newEm functions)
+     * returns an EntityManager factory for a given serviceName
+     * The manager created by that factory will be populated with metadata for that service
+     * Might invoke an async `before` hook if has to get the metadata from the server
+     *
+     * Usage:
+     *    // Called inside a `describe`, typically the file's outermost `describe`
+     *    var serviceName = testFns.northwindServiceName,
+     *        newEm = testFns.newEmFactory(serviceName); // the factory
+     *    ...
+     *    var em = newEm(); // use factory to create a manager.
      *********************************************************/
-        // Creates newEm(), a typical function for making new EntityManagers (an EM factory)
-        // usage:
-        //    var serviceName = testFns.northwindServiceName,
-        //        newEm = testFns.emFactory(serviceName);
-        //    ...
-        //    var em = newEm();
     function newEmFactory(serviceName) {
-        var factory = function () {
-            return new breeze.EntityManager(factory.options);
+        var dataService = new breeze.DataService({serviceName: serviceName});
+        var metadataStore = testFns.preFetchMetadataStore(dataService);
+        return function() {
+            return new breeze.EntityManager({dataService: dataService, metadataStore: metadataStore})
         };
-        factory.options = {
-            serviceName: serviceName,
-            // every module gets its own metadataStore; they do not share the default
-            metadataStore: new breeze.MetadataStore()
-        };
-        return factory;
     }
 
     /*********************************************************
@@ -414,32 +409,53 @@
         document.body.appendChild(document.createElement('pre')).innerHTML = text;
     }
 
-    /*********************************************************
-     * Populate an EntityManager factory's metadataStore
-     *********************************************************/
-    // Keep a single copy of the metadataStore in this module
-    // and reuse it with each new EntityManager
-    // so we don't make repeated requests for metadata
-    // every time we create a new EntityManager
-    function populateMetadataStore(newEm, metadataSetupFn) {
-
-        var metadataStore = newEm.options.metadataStore;
-
-        // Check if the module metadataStore is empty
-        if (!metadataStore.isEmpty()) {
-            return breeze.Q(true); // ok ... it's been populated ... we're done.
+    // Guarantees that the metadataStore for a given dataService
+    // is populated with metadata for that dataService retrieved from the server during this test session
+    // Those metadata are cached and reused during the test session to reduce server requests for metadata
+    function preFetchMetadataStore(dataService, metadataStore){
+        if (typeof(dataService) === 'string' ){
+            dataService = new breeze.DataService();
+        }
+        if (dataService instanceof breeze.DataService){
+            if (!metadataStore) {
+                metadataStore = new breeze.MetadataStore();
+            }
+            if (metadataStore.isEmpty()){
+                var metadata = serverMetadata[dataService.serviceName];
+                if (metadata){
+                    metadataStore.importMetadata(metadata);
+                    metadataStore.addDataService(dataService);
+                } else {
+                    preFetchMetadataInBeforeHook(dataService, metadataStore)
+                }
+            }
+            return metadataStore;
+        } else {
+            throw new Error('preFetchMetadataStore failed: "dataService" must be a string or a breeze.DataService.');
         }
 
-        // It's empty; get metadata
-        var serviceName = newEm.options.serviceName;
+        function preFetchMetadataInBeforeHook(){
+            before(function(done){
+                metadataStore.fetchMetadata(dataService)
+                    .then(function(data){
+                        metadataStore.addDataService(dataService, true);
+                        serverMetadata[dataService.serviceName] = JSON.stringify(data);
+                        done();
+                    }, done);
+            });
+        }
+    }
 
-        return metadataStore.fetchMetadata(serviceName)
-            .then(function () {
-                if (typeof metadataSetupFn === 'function') {
-                    metadataSetupFn(metadataStore);
-                }
-            })
-            .fail(handleFail);
+    /*********************************************************
+     * Callback for promise success and failures in Mocha
+     * NASTY. See https://github.com/mad-eye/meteor-mocha-web/issues/70
+     *********************************************************/
+        // Usage:  manager.saveChanges.catch(promiseSaveFailed(done))
+    function promiseSaveFailed(done) {
+        return function(error){
+            error.message = 'Save failed: ' + getSaveErrorMessages(error);
+            done(error);
+        }
     }
 
     function reportRejectedPromises(promises) {
@@ -464,7 +480,6 @@
         before(function(done){
             if (testFns.isServerRunning === undefined){
                 this.timeout(32000);
-                var $injector = angular.injector(['ng']);
                 $injector.invoke(['$http', '$rootScope', function ($http, $rootScope) {
                     var url = serviceName+'/employees?$top=0';
                     // fire one in to kick the server... not sure why this is necessary
@@ -497,7 +512,24 @@
     }
 
     /**************************************************
-     * Pure Web API calls aimed at the TodosController     *
+     * Setup/teardown async ngMidwayTester via beforeEach/afterEach
+     * returns the tester for use by the specs
+     * call tester() inside your test to get that current tester object
+     **************************************************/
+    function setupNgMidwayTester() {
+        var args = arguments;
+        var tester;
+        beforeEach(function() {
+            tester = ngMidwayTester.apply(ngMidwayTester, args);
+        });
+        afterEach(function () {
+            if (tester) { tester.destroy(); }
+        });
+        return function(){return tester;}
+    }
+
+    /**************************************************
+     * Pure Web API calls aimed at the TodosController
      * Does NOT STOP/START the test runner!
      **************************************************/
     function todosPurge() {
@@ -508,6 +540,14 @@
     function todosReset() {
         var $http = get$http();
         return $http.post(testFns.todosServiceName + '/reset',{});
+    }
+
+    function useAngularAdapters(){
+        // initialize an injector we can use inside testFns.
+        // and initialize Breeze to use Angular
+        // NB: during tests, Breeze uses different Ng service instances!
+        $injector = angular.injector(['ng', 'breeze.angular']);
+        $injector.invoke(function(breeze){});
     }
 
 })( window.docCode || (window.docCode={}), window.specHelper);
