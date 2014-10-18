@@ -5,7 +5,7 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
     var extend = breeze.core.extend;
     var EntityQuery = breeze.EntityQuery;
@@ -35,7 +35,8 @@
     * can query the simple Vehicles model
     *********************************************************/
 
-    asyncTest("can query all Buses (concrete)", 1, function () {
+    asyncTest("can query all Buses (concrete)", function () {
+        expect(1);
         var em = newEm();
         var resourceName = 'Buses';
         return EntityQuery.from(resourceName)
@@ -46,8 +47,9 @@
             equal(len, 1, "should fetch {0} from '{1}'.".format(len, resourceName));
         }
     });
-    
-    asyncTest("can query all Cars (concrete)", 2, function () {
+
+    asyncTest("can query all Cars (concrete)", function () {
+        expect(2);
         var em = newEm();
         var resourceName = 'Cars';
         return EntityQuery.from(resourceName).orderBy('Speed')
@@ -77,8 +79,9 @@
         };
         ok(isOrdered, resourceName + " results should be in ascending 'Speed' order.");
     }
-    
-    asyncTest("can query all Vehicles (abstract)", 2, function () {
+
+    asyncTest("can query all Vehicles (abstract)", function () {
+        expect(2);
         var em = newEm();
         var resourceName = 'Vehicles';
         return EntityQuery.from(resourceName).orderBy('Speed')
@@ -90,7 +93,7 @@
                     .format(len, resourceName,
                         data.results.map(function (v) { return v.Name(); }).join(", "))
             );
-            
+
             // confirm that the ascending Speed 'orderBy' worked as well
             assertSortedByAscendingSpeed(resourceName, data.results);
         }
@@ -99,7 +102,8 @@
     /*********************************************************
     * can query all from each BillingType inherited type
     *********************************************************/
-    asyncTest("can query all BankAccounts", 6, function () {
+    asyncTest("can query all BankAccounts", function () {
+        expect(6);
         var promises = inheritanceTypes.map(function (t) {
             // TPH test data always has 4 more than the others
             var expectedCount = /TPH/.test(t) ? 7 : 3;
@@ -108,7 +112,8 @@
         waitForTestPromises(promises);
     });
 
-    asyncTest("can query all CreditCards", 6, function () {
+    asyncTest("can query all CreditCards", function () {
+        expect(6);
         var promises = inheritanceTypes.map(function (t) {
             // TPH test data always has 4 more than the others
             var expectedCount = /TPH/.test(t) ? 8 : 4;
@@ -117,7 +122,8 @@
         waitForTestPromises(promises);
     });
 
-    asyncTest("can query all base BillingDetails", 6, function () {
+    asyncTest("can query all base BillingDetails", function () {
+        expect(6);
         var promises = inheritanceTypes.map(function (t) {
             // TPH test data always has 8 more than the others
             var expectedCount = /TPH/.test(t) ? 15 : 7;
@@ -137,7 +143,7 @@
             var results = data.results, len = results.length;
             equal(len, expectedCount,
                 "should fetch {0} from '{1}'.".format(len, resourceName));
-          
+
             // confirm that the ascending Owner 'orderBy' worked as well
             var isOrdered = true, testOwner = "";
             for (var i = 0; i < len; i++) {
@@ -158,7 +164,8 @@
     var ownerPredicate = new breeze.Predicate('Owner', 'contains', 'a');
     ownerPredicate.description = "where 'Owner' contains an 'a'";
 
-    asyncTest("can filter 'Owner' in BankAccount", 3, function () {
+    asyncTest("can filter 'Owner' in BankAccount", function () {
+        expect(3);
         var promises = inheritanceTypes.map(function (t) {
             // TPH test data always has 2 more than the others
             var expectedCount = /TPH/.test(t) ? 4 : 2;
@@ -167,14 +174,16 @@
         waitForTestPromises(promises);
     });
 
-    asyncTest("can filter 'Owner' in CreditCard", 3, function () {
+    asyncTest("can filter 'Owner' in CreditCard", function () {
+        expect(3);
         var promises = inheritanceTypes.map(function (t) {
             return assertCanFilter(ownerPredicate, cardRoot + t, 4);
         });
         waitForTestPromises(promises);
     });
 
-    asyncTest("can filter 'Owner' in base class BillingDetail", 3, function () {
+    asyncTest("can filter 'Owner' in base class BillingDetail", function () {
+        expect(3);
         var promises = inheritanceTypes.map(function (t) {
             // TPH test data always has 2 more than the others
             var expectedCount = /TPH/.test(t) ? 8 : 6;
@@ -201,7 +210,8 @@
     * can filter each derived type on its own property
     *********************************************************/
 
-    asyncTest("can filter on 'BankName' in BankAccount", 3, function () {
+    asyncTest("can filter on 'BankName' in BankAccount", function () {
+        expect(3);
         var predicate = new breeze.Predicate('BankName', 'contains', 'Fun');
         predicate.description = "where 'BankName' contains 'Fun'";
 
@@ -211,7 +221,8 @@
         waitForTestPromises(promises);
     });
 
-    asyncTest("can filter on 'ExpiryMonth/Year' in CreditCard", 3, function() {
+    asyncTest("can filter on 'ExpiryMonth/Year' in CreditCard", function() {
+        expect(3);
         var predicate = new breeze.Predicate('ExpiryMonth', 'eq', '04');
         predicate = predicate.and('ExpiryYear', 'eq', '2014');
         predicate.description = "where 'ExpiryMonth/Year' equals '04/2014'";
@@ -226,7 +237,8 @@
     * can project across inheritance class boundary
     *********************************************************/
 
-    asyncTest("can select {'Id', 'Owner', 'BankName'} in BankAccount", 6, function () {
+    asyncTest("can select {'Id', 'Owner', 'BankName'} in BankAccount", function () {
+        expect(6);
         var promises = inheritanceTypes.map(function (t) {
             return assertCanProjectOnBankAccount(t, 1);
         });
@@ -260,7 +272,8 @@
     });
 
 
-    asyncTest("can select {'Id', 'Owner', 'ExpiryYear'} in CreditCard", 6, function () {
+    asyncTest("can select {'Id', 'Owner', 'ExpiryYear'} in CreditCard", function () {
+        expect(6);
         var promises = inheritanceTypes.map(function (t) {
             return assertCanProjectOnCardAccount(t, 1);
         });
@@ -297,21 +310,24 @@
      * can page (take/skip)
      * This test succeeds when we know how many items are in test data
      *********************************************************/
-    asyncTest("can page BankAccounts", 3, function () {
+    asyncTest("can page BankAccounts", function () {
+        expect(3);
         var promises = inheritanceTypes.map(function (t) {
             return assertCanSkipTake(bankRoot + t, 1, 2);
         });
         waitForTestPromises(promises);
     });
 
-    asyncTest("can page CreditCards", 3, function () {
+    asyncTest("can page CreditCards", function () {
+        expect(3);
         var promises = inheritanceTypes.map(function (t) {
             return assertCanSkipTake(cardRoot + t, 2, 2);
         });
         waitForTestPromises(promises);
     });
 
-    asyncTest("can page base BillingDetails", 3, function () {
+    asyncTest("can page base BillingDetails", function () {
+        expect(3);
         var promises = inheritanceTypes.map(function (t) {
             return assertCanSkipTake(baseRoot + t, 4, 3);
         });
@@ -340,8 +356,8 @@
     * NOTE: Must first register resourceNames for derived types
     *       See 'addToMetadata' below
     *********************************************************/
-    asyncTest("can query in cache for BankAccount and CreditCard", 6, function () {
-
+    asyncTest("can query in cache for BankAccount and CreditCard", function () {
+        expect(6);
         var promises = inheritanceTypes.map(function (t) {
             return assertQueryLocally(t, 1);
         });
@@ -365,7 +381,7 @@
                 var card = EntityQuery.from(cardType + 's')
                               .where('ExpiryYear', 'eq', '2015')
                               .using(em).executeLocally()[0];
-                
+
                 if (account) {
                     ok(true, "Found {0} in cache: {1}: '{2}' for '{3}'."
                     .format(bankType, account.Id(), account.BankName(), account.Owner()));
@@ -379,7 +395,7 @@
                 } else {
                     ok(false, "Did not find expected {0} in cache".format(cardType));
                 }
-                   
+
             }
         }
 
@@ -389,8 +405,8 @@
     * NOTE: Must first register resourceNames for derived types
     *       See 'addToMetadata' below
     *********************************************************/
-    asyncTest("can do polymorphic query in cache", 9, function () {
-
+    asyncTest("can do polymorphic query in cache", function () {
+        expect(9);
         var promises = inheritanceTypes.map(function (t) {
             return assertPolymorphicQueryLocally(t, 1);
         });
@@ -436,7 +452,8 @@
      * Then gets one each of every flavor of BankAccount and CreditCard
      * and asserts that can navigate from it to an AccountType in cache
      *********************************************************/
-    asyncTest("can navigate to pre-loaded AccountTypes", 12, function () {
+    asyncTest("can navigate to pre-loaded AccountTypes", function () {
+        expect(12);
         var em = newEm();
 
         // pre-load AccountTypes
@@ -495,13 +512,13 @@
         ok(accountType, "{0}'s AccountType, '{1}', is actually in cache."
             .format(type, accountType.Name()));
     }
-    
+
     /*********************************************************
     * can navigate to AccountType when eagerly loaded with expand
     * Tests one each of every flavor of BankAccount and CreditCard
     *********************************************************/
-    asyncTest("can navigate to AccountType eagerly loaded with expand", 12, function () {
-
+    asyncTest("can navigate to AccountType eagerly loaded with expand", function () {
+        expect(12);
         // Fetch a BankAccount and CreditCard of each flavor using expand
         // then prove can navigate to related AccountType
 
@@ -528,8 +545,8 @@
     * can navigate to AccountType when loaded on-demand
     * Tests one each of every flavor of BankAccount and CreditCard
     *********************************************************/
-    asyncTest("can navigate to AccountType loaded on-demand", 12, function ()  {
-
+    asyncTest("can navigate to AccountType loaded on-demand", function ()  {
+        expect(12);
         // Fetch a BankAccount and CreditCard of each flavor
         // then load the AccountType property and
         // then prove can navigate to related AccountType
@@ -563,8 +580,8 @@
             if (typeof entity.AccountType !== 'function') {
                 ok(false, type + " doesn't have an AccountType KO property");
                 return false;
-            } 
-            
+            }
+
             return entity.entityAspect.loadNavigationProperty("AccountType")
                     .then(function () {
                         verifyThatRelatedAccountTypeIsInCache(entity);
@@ -583,7 +600,8 @@
      * can load inherited types with expand on Status query
      * Only available for TPH and TPT (not TPC)
      *********************************************************/
-    asyncTest("can load inherited types with expand on Status query", 4, function () {
+    asyncTest("can load inherited types with expand on Status query", function () {
+        expect(4);
         var em = newEm();
 
         EntityQuery.from('AccountTypes')
@@ -630,10 +648,10 @@
         var manager = entity.entityAspect.entityManager;
         var typeName = entity.entityType.shortName;
         var inheritanceType = typeName.substring(typeName.length - 3);
-        
+
         var accounts = manager.getEntities(['BankAccount' + inheritanceType]);
         var cards = manager.getEntities(['CreditCard' + inheritanceType]);
-        
+
         var accountsLen = accounts.length;
         var cardsLen = cards.length;
         ok(accountsLen && cardsLen,
@@ -643,8 +661,8 @@
     /*********************************************************
     * can navigate to Deposits when eager loaded with expand
     *********************************************************/
-    asyncTest("can navigate to BankAccount Deposits eagerly loaded with expand", 3, function () {
-
+    asyncTest("can navigate to BankAccount Deposits eagerly loaded with expand", function () {
+        expect(3);
         // Fetch a BankAccount and CreditCard of each flavor using expand
         // then prove can navigate to related AccountType
 
@@ -657,7 +675,7 @@
 
         waitForTestPromises(bankPromises);
     });
-    
+
 
     // Assert can navigate to the related BankAccount Deposits
     function NavToDeposits(data) {
@@ -681,7 +699,8 @@
     /*********************************************************
      * can retrieve entities of self-referencing abstract base class
      *********************************************************/
-    asyncTest("can retrieve entities of self-referencing base (concrete class query)", 1, function () {
+    asyncTest("can retrieve entities of self-referencing base (concrete class query)", function () {
+        expect(1);
         var em = newEm();
         var resourceName = 'SoftProjects';
         return EntityQuery.from(resourceName)
@@ -692,7 +711,8 @@
             equal(len, 2, "should fetch {0} from '{1}'.".format(len, resourceName));
         }
     });
-    asyncTest("can retrieve entities of self-referencing base (abstract class query)", 1, function () {
+    asyncTest("can retrieve entities of self-referencing base (abstract class query)", function () {
+        expect(1);
         var em = newEm();
         var resourceName = 'Projects';
         return EntityQuery.from(resourceName)
@@ -715,11 +735,12 @@
 
     var createdAt = new Date(2013, 1, 1);
     var idSeed = 10000; // for TPC inheritance; start way out there.
-    
+
     /*********************************************************
     * can add, save, and requery new derived types
     *********************************************************/
-    asyncTest("can add, save, and requery a BankAccount", 3, function () {
+    asyncTest("can add, save, and requery a BankAccount", function () {
+        expect(3);
         var inits = makeBankAccountInits({ Number: "112-221" });
         var promises = inheritanceTypes.map(function (t) {
             return saveAndRequery(bankRoot + t, inits);
@@ -727,7 +748,8 @@
         waitForTestPromises(promises);
     });
 
-    asyncTest("can add, save, and requery a CreditCard", 3, function () {
+    asyncTest("can add, save, and requery a CreditCard", function () {
+        expect(3);
         var inits = makeCreditCardInits({ Number: "555-55-5555" });
         var promises = inheritanceTypes.map(function (t) {
             return saveAndRequery(cardRoot + t, inits);
@@ -767,25 +789,27 @@
                     "refetched the saved {0} with number {1}"
                         .format(typeName, detail.Number()));
         }
-    }  
+    }
 
     /*********************************************************
     * can update a base class property and derived property of each inherited type
     *********************************************************/
 
-    asyncTest("can update the 'Owner' & 'BankName' of a BankAccount", 9, function () {
+    asyncTest("can update the 'Owner' & 'BankName' of a BankAccount", function () {
+        expect(9);
         var testHelper = {
             updater: function (account) { account.BankName("Test"); },
             tester: function (account) { return account.BankName() === "Test"; }
         };
-        
+
         var promises = inheritanceTypes.map(function (t) {
             return assertCanUpdate(bankRoot + t, testHelper);
         });
         waitForTestPromises(promises);
     });
 
-    asyncTest("can update the 'Owner'& 'ExpiryYear' of a CreditCard", 9, function () {
+    asyncTest("can update the 'Owner'& 'ExpiryYear' of a CreditCard", function () {
+        expect(9);
         var testHelper = {
             updater: function (card) { card.ExpiryYear("Test"); },
             tester: function (card) { return card.ExpiryYear() === "Test"; }
@@ -795,7 +819,7 @@
         });
         waitForTestPromises(promises);
     });
-    
+
     function assertCanUpdate(typeName, testHelper) {
         var em = newEm();
         var targetEntity;
@@ -806,7 +830,7 @@
 
         function querySuccess(data) {
             targetEntity = data.results[0];
-            
+
             var propertyChanges = 0;
             targetEntity.entityAspect.propertyChanged.subscribe(function (args) {
                 propertyChanges += 1;
@@ -816,7 +840,7 @@
 
             equal(propertyChanges, 2,
                 "should have triggered two propertyChanges on the " + typeName);
-            
+
             return em.saveChanges().then(saveSuccess).fail(handleFail);
         }
 
@@ -834,14 +858,16 @@
     * can delete each inherited type
     *********************************************************/
 
-    asyncTest("can delete a BankAccount", 9, function () {
+    asyncTest("can delete a BankAccount", function () {
+        expect(9);
         var promises = inheritanceTypes.map(function (t) {
             return assertCanDelete(bankRoot + t, "Deposits");
         });
         waitForTestPromises(promises);
     });
 
-    asyncTest("can delete a CreditCard", 9, function () {
+    asyncTest("can delete a CreditCard", function () {
+        expect(9);
         var promises = inheritanceTypes.map(function (t) {
             return assertCanDelete(cardRoot + t);
         });
@@ -895,7 +921,7 @@
             .format(typeName, JSON.stringify(key.values)));
         }
     }
-    
+
 
     /************************** Changes/Validation *************************/
 
@@ -904,7 +930,8 @@
     /*********************************************************
     * Server model base class validation rule propagated to derived type
     *********************************************************/
-    test("base class 'Owner' required validation applies to derived types", 6, function () {
+    test("base class 'Owner' required validation applies to derived types", function () {
+        expect(6);
         var em = newEm();
         inheritanceTypes.map(function (t) {
             var inits = makeBankAccountInits({ Owner: "" }); // invalid
@@ -928,8 +955,9 @@
             ok(ownerRequiredError, "should have 'Owner required' error for the " + typeName);
         }
     });
-    
-    test("base class 'Owner' max length validation applies to derived types", 6, function () {
+
+    test("base class 'Owner' max length validation applies to derived types", function () {
+        expect(6);
         var em = newEm();
         var testOwner = "A way way way way way way way way way too long owner name";
         inheritanceTypes.map(function (t) {
@@ -969,9 +997,9 @@
         inheritanceTypes.map(function (t) {
             var typeName = cardRoot + t;
             metadataStore.setEntityTypeForResourceName(typeName + 's', typeName);
-        });       
+        });
     }
-    
+
     // A new TPC entity must have a client-assigned 'Id'
     function ensureIdForTPC(typeName, inits) {
         var isTPC = typeName.indexOf("TPC") > -1;
@@ -992,7 +1020,7 @@
         };
         return extend(extend({}, defaultBankAccount), changes || {});
     };
-    
+
     function makeCreditCardInits(changes) {
         var defaultCard = {
             CreatedAt: createdAt,

@@ -4,7 +4,7 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
     // Classes we'll need from the breeze namespaces
     var EntityQuery = breeze.EntityQuery;
@@ -17,7 +17,7 @@
     // Target the Northwind service by default
     var northwindService = testFns.northwindServiceName;
     var newNorthwindEm = testFns.newEmFactory(northwindService);
-   
+
     var alfredsID = testFns.wellKnownData.alfredsID;
 
     module("saveNorthwindTests", {
@@ -29,7 +29,8 @@
         }
     });
 
-    asyncTest("can save a new Customer entity", 1, function () {
+    asyncTest("can save a new Customer entity", function () {
+        expect(1);
         // Create and initialize entity to save
         var em = newNorthwindEm();
         var customer = em.createEntity('Customer', {
@@ -40,18 +41,19 @@
         entitySaveTester(customer, /*shouldSave*/ true);
 
     });
-    
-    asyncTest("can modify my own Customer entity", 2, function () {
+
+    asyncTest("can modify my own Customer entity", function () {
+        expect(2);
         var timestamp = new Date().toISOString();
         var em = newNorthwindEm();
-        
+
         var customer = em.createEntity('Customer', {
             CustomerID: newGuidComb(),
             CompanyName: "Test2A " + timestamp
         });
 
         em.saveChanges().then(modifyCustomer).fail(handleSaveFailed).fin(start);
-        
+
         function modifyCustomer(saveResults) {
             var saved = saveResults.entities[0];
             ok(saved && saved === customer,
@@ -60,7 +62,7 @@
             return em.saveChanges()
             .then(confirmCustomerSaved);
         }
-        
+
         function confirmCustomerSaved(saveResults) {
             var saved = saveResults.entities[0];
             ok(saved && saved === customer,
@@ -69,11 +71,12 @@
         }
 
     });
-    
-    asyncTest("can delete my own Customer entity", 3, function () {
+
+    asyncTest("can delete my own Customer entity", function () {
+        expect(3);
         var timestamp = new Date().toISOString();
         var em = newNorthwindEm();
-        
+
         var customer = em.createEntity('Customer', {
             CustomerID: newGuidComb(),
             CompanyName: "Test3A " + timestamp
@@ -95,7 +98,7 @@
             ok(saved && saved === customer,
                 "save of deleted customer, '{0}', should have succeeded"
                 .format(saved && saved.CompanyName()));
-            
+
             var state = customer.entityAspect.entityState.name;
             equal(state, breeze.EntityState.Detached.name,
                 "customer object should be 'Detached'");
@@ -106,8 +109,9 @@
     /*
      * This test removed when we made InternationalOrder a subclass of Order
      * Restore it if/when decide to demo IO as a separate entity related in 1..(0,1)
-     * 
-    asyncTest("can save a new Northwind Order & InternationalOrder [1..(0,1) relationship]", 2, function () {
+     *
+    asyncTest("can save a new Northwind Order & InternationalOrder [1..(0,1) relationship]", function () {
+        expect(2);
         // Create and initialize entity to save
         var em = newNorthwindEm();
 
@@ -137,7 +141,8 @@
     });
      */
 
-    asyncTest("delete of Product clears its related Category before save", 4, function () {
+    asyncTest("delete of Product clears its related Category before save", function () {
+        expect(4);
         var em = newNorthwindEm();
 
         EntityQuery.from('Products').top(1)
@@ -162,8 +167,9 @@
         }
 
     });
-    
-    asyncTest("delete of Order clears its related entities before save", 10, function () {
+
+    asyncTest("delete of Order clears its related entities before save", function () {
+        expect(10);
         var em = newNorthwindEm();
 
         EntityQuery.from('Orders').top(1)
@@ -203,7 +209,7 @@
             }
         }
     });
-    
+
     /************************** TEST HELPERS *************************/
     function entitySaveTester(masterEntity, shouldSave) {
         var typeName = masterEntity.entityType.shortName;

@@ -4,7 +4,7 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
     var breeze = testFns.breeze;
     var MetadataStore = breeze.MetadataStore;
@@ -34,8 +34,8 @@
     /*********************************************************
     * add untracked property directly to customer instance
     *********************************************************/
-    test("add untracked 'isPartial' property directly to customer instance", 1, function () {
-
+    test("add untracked 'isPartial' property directly to customer instance", function () {
+        expect(1);
         var em = newEm();
         var cust = em.createEntity('Customer', {
             CustomerID: testFns.newGuidComb()
@@ -51,26 +51,27 @@
         // The Breeze customerType knows nothing about it.
         ok(propInfo === null, "'isPartial' should be unknown to the customer type");
     });
-    
+
     /*********************************************************
     * add unmapped property via constructor
     *********************************************************/
-    test("add unmapped 'isPartial' property via constructor", 6, function () {
+    test("add unmapped 'isPartial' property via constructor", function () {
+        expect(6);
         var store = cloneModuleMetadataStore();
-        
+
         var Customer = function () {
             // These are simple 'field' properties.
-            // Breeze converts them to the right kind of properties  
+            // Breeze converts them to the right kind of properties
             // for the prevailing modelLibrary adapter
             // such as KO observable properties.
             this.CustomerID = testFns.newGuidComb();
             this.isPartial = true;
         };
-        
+
         store.registerEntityTypeCtor('Customer', Customer);
 
         var em = newEm(store);
-        var cust = em.createEntity('Customer'); 
+        var cust = em.createEntity('Customer');
 
         assertExpectedCustomerCtorProperties(cust);
     });
@@ -88,7 +89,7 @@
             "'isPartial' should be a KO observable");
 
         if (!custType) {return;} // no remaining tests would pass
-        
+
         var propInfo = custType.getProperty('CustomerID');
         ok(propInfo && !propInfo.isUnmapped && propInfo.isPartOfKey,
             "'CustomerID' should be detected as a mapped key property");
@@ -106,12 +107,13 @@
     * can 'new' the ctor .. but not a full entity until added to manager
     * not recommended; prefer CreateEntity approach
     *********************************************************/
-    test("can 'new' an entity via custom ctor and add to manager", 8, function () {
+    test("can 'new' an entity via custom ctor and add to manager", function () {
+        expect(8);
         var store = cloneModuleMetadataStore();
 
         var Customer = function () {
             this.CustomerID = testFns.newGuidComb();
-            this.isPartial = true; 
+            this.isPartial = true;
         };
 
         store.registerEntityTypeCtor('Customer', Customer);
@@ -136,7 +138,8 @@
     /*********************************************************
     * can add unmapped 'foo' property via constructor
     *********************************************************/
-    test("can add unmapped 'foo' property via constructor", 4, function () {
+    test("can add unmapped 'foo' property via constructor", function () {
+        expect(4);
         var store = cloneModuleMetadataStore();
         assertFooPropertyDefined(store, false);
 
@@ -158,7 +161,8 @@
     /*********************************************************
     * can add unmapped 'foo' property directly to EntityType
     *********************************************************/
-    test("can add unmapped 'foo' property directly to EntityType", 4, function () {
+    test("can add unmapped 'foo' property directly to EntityType", function () {
+        expect(4);
         var store = cloneModuleMetadataStore();
         assertFooPropertyDefined(store, false);
 
@@ -184,7 +188,8 @@
     /*********************************************************
     * can query an unmapped property with cache query
     *********************************************************/
-    test("can query an unmapped property with cache query", 3, function() {
+    test("can query an unmapped property with cache query", function() {
+        expect(3);
         // Add unmapped 'foo' property via its custom constructor
         var store = cloneModuleMetadataStore();
         var Customer = function() {
@@ -229,7 +234,8 @@
     /*********************************************************
     * unmapped 'foo' property is validated
     *********************************************************/
-    test("unmapped 'foo' property is validated", 5, function () {
+    test("unmapped 'foo' property is validated", function () {
+        expect(5);
         var store = cloneModuleMetadataStore();
         assertFooPropertyDefined(store);
         // Arrange for 'foo' to be an unmapped Customer property
@@ -262,13 +268,13 @@
             .format(errMsg));
 
     });
-  
+
     /*********************************************************
     * Changes to properties within ctor do NOT change EntityState
     * Doesn't matter if they are mapped or unmapped
     *********************************************************/
-    asyncTest("changes to properties within ctor should not change EntityState", 3, function () {
-
+    asyncTest("changes to properties within ctor should not change EntityState", function () {
+        expect(3);
         var store = cloneModuleMetadataStore();
         var employeeCtor = function () {
             // Mapped properties
@@ -278,7 +284,7 @@
             this.FunkyName = "Funky";
         };
         store.registerEntityTypeCtor("Employee", employeeCtor);
-        
+
         var em = newEm(store);
 
         EntityQuery.from('Employees').top(1)
@@ -301,10 +307,10 @@
     * changes to properties within custom initializer should not change EntityState
     * even if change is to mapped property
     *********************************************************/
-    asyncTest("changes to properties within custom initializer should not change EntityState", 3, function () {
-
+    asyncTest("changes to properties within custom initializer should not change EntityState", function () {
+        expect(3);
         var store = cloneModuleMetadataStore();
-        var employeeInitializer = function (emp) {           
+        var employeeInitializer = function (emp) {
             emp.FirstName("Jolly"); // change a mapped property
         };
         store.registerEntityTypeCtor("Employee", null, employeeInitializer);
@@ -328,11 +334,11 @@
     });
 
     /*********************************************************
-    * when unmapped property changes, what happens to 
+    * when unmapped property changes, what happens to
     * notifications, EntityState, and originalValues
     *********************************************************/
-    test("change to unmapped 'foo' property does not change EntityState", 5, function () {
-
+    test("change to unmapped 'foo' property does not change EntityState", function () {
+        expect(5);
         // Arrange for 'foo' to be an unmapped Customer property
         var store = cloneModuleMetadataStore();
         var Customer = function () {
@@ -341,7 +347,7 @@
         store.registerEntityTypeCtor("Customer", Customer);
 
         assertFooPropertyDefined(store, true);
-        
+
         // Fake an existing customer
         var manager = newEm(store);
         var cust = manager.createEntity(
@@ -378,11 +384,12 @@
         ok(hasOriginalValues,
             "'originalValues' have 'foo'; it is " + JSON.stringify(originalValues));
     });
-    
+
     /*********************************************************
     * reject changes should revert an unmapped property
     *********************************************************/
-    test("reject changes reverts an unmapped property", 2, function () {
+    test("reject changes reverts an unmapped property", function () {
+        expect(2);
         var store = cloneModuleMetadataStore();
 
         var originalTime = new Date(2013, 0, 1);
@@ -405,10 +412,10 @@
 
         // an hour passes ... and we visit to cancel
         cust.lastTouched(new Date(touched.getTime() + 60000));
-        
+
         cust.entityAspect.rejectChanges(); // roll back name change
         //manager.rejectChanges(); // would have same effect. Obviously less granular
-        
+
         equal(cust.CompanyName(), "Acme", "'name' data property should be rolled back");
         ok(originalTime === cust.lastTouched(),
             "'lastTouched' unmapped property should be rolled back. Started as {0}; now is {1}"
@@ -418,15 +425,15 @@
     /*********************************************************
     * unmapped properties are not persisted
     *********************************************************/
-    test("unmapped properties are not persisted", 9, function () {
-
+    test("unmapped properties are not persisted", function () {
+        expect(9);
         var store = cloneModuleMetadataStore();
-        
+
         var TodoItemCtor = function () {
             this.foo = 0;
         };
         store.registerEntityTypeCtor("TodoItem", TodoItemCtor);
-        
+
         var todoType = store.getEntityType("TodoItem");
         var fooProp = todoType.getProperty('foo');
         ok(fooProp && fooProp.isUnmapped,
@@ -502,8 +509,8 @@
     /*********************************************************
     * unmapped property can be set by server class calculated property
     *********************************************************/
-    test("unmapped property can be set by a calculated property of the server class", 4, function () {
-
+    test("unmapped property can be set by a calculated property of the server class", function () {
+        expect(4);
         var store1 = cloneModuleMetadataStore();
 
         var store2 = cloneModuleMetadataStore();
@@ -511,7 +518,7 @@
             //'Fullname' is a server-side calculated property of the Employee class
             // This unmapped property will be empty for new entities
             // but will be set for existing entities during query materialization
-            this.FullName = ""; 
+            this.FullName = "";
         };
         store2.registerEntityTypeCtor("Employee", employeeCtor);
 
@@ -525,7 +532,7 @@
         prop = em2.metadataStore.getEntityType('Employee').getProperty('FullName');
         ok(prop && prop.isUnmapped,
             "'FullName' should be an unmapped property in 'em2'");
-        
+
         var query = EntityQuery.from('Employees');
         var p1 = em1.executeQuery(query).then(success1);
         var p2 = em2.executeQuery(query).then(success2);
@@ -533,13 +540,13 @@
         stop(); // going async
 
         Q.all([p1, p2]).fail(handleFail).fin(start);
-        
+
         function success1(data) {
             var first = data.results[0];
             var fullname = first.FullName;
             ok(!fullname, "an Employee queried with 'em1' should NOT have a 'FullName' property, let alone a value for it");
         }
-        
+
         function success2(data) {
             var first = data.results[0];
             var fullname = first.FullName();
@@ -552,7 +559,8 @@
     /*********************************************************
     * add instance function via constructor
     *********************************************************/
-    test("add instance function via constructor", 3, function () {
+    test("add instance function via constructor", function () {
+        expect(3);
         var store = cloneModuleMetadataStore();
 
         var Customer = function () {
@@ -575,11 +583,12 @@
         equal(cust.foo(), 42,
             "'foo' should be a function returning 42");
     });
-    
+
     /*********************************************************
     * add mapped data property via constructor
     *********************************************************/
-    test("add mapped data property via constructor", 7, function () {
+    test("add mapped data property via constructor", function () {
+        expect(7);
         var store = cloneModuleMetadataStore();
 
         var Customer = function () {
@@ -601,7 +610,7 @@
             "'CompanyName' should be known to the customer type");
         ok(propInfo && !propInfo.isUnmapped,
             "'CompanyName' should be a mapped property");
-        
+
         // Although defined as a field, Breeze made it a KO property and initialized it
         equal(cust.CompanyName(), "Acme",
             "'CompanyName' should be a KO 'property' returning 'Acme'");
@@ -619,15 +628,16 @@
     /*********************************************************
     * add method to prototype via constructor
     *********************************************************/
-    test("add method to prototype via constructor", 2, function () {
+    test("add method to prototype via constructor", function () {
+        expect(2);
         var store = cloneModuleMetadataStore();
 
         var Customer = function () { };
-        
+
         Customer.prototype.sayHi = function () {
             return "Hi, my name is {0}!".format(this.CompanyName());
         };
-        
+
         store.registerEntityTypeCtor("Customer", Customer);
 
         var customerType = store.getEntityType("Customer");
@@ -648,7 +658,8 @@
     * can add unmapped readonly ES5 property via constructor
     * add breeze exports/imports just fine
     *********************************************************/
-    test("can add unmapped readonly ES5 property via constructor", 4, function () {
+    test("can add unmapped readonly ES5 property via constructor", function () {
+        expect(4);
         "use strict";
         var store = cloneModuleMetadataStore();
 
@@ -664,7 +675,7 @@
         assertFooPropertyDefined(store, true);
 
         var em = newEm(store);
-        
+
         var cust = em.createEntity('Customer', {
             CustomerID: testFns.newGuid(),
             CompanyName: "test cust"
@@ -689,7 +700,8 @@
     /*********************************************************
     * knockout computed property via constructor
     *********************************************************/
-    test("add knockout computed property via constructor", 2, function () {
+    test("add knockout computed property via constructor", function () {
+        expect(2);
         var store = cloneModuleMetadataStore();
 
         var Employee = function () {
@@ -699,7 +711,7 @@
                         return this.FirstName() + " " + this.LastName();
                     },
                     // required because FirstName and LastName not yet defined
-                    deferEvaluation: true 
+                    deferEvaluation: true
                 }, this);
         };
 
@@ -722,8 +734,8 @@
     /*********************************************************
     * knockout computed property based on collection navigation via constructor
     *********************************************************/
-    test("add knockout computed property based on collection navigation via constructor", 2,
-        function () {
+    test("add knockout computed property based on collection navigation via constructor", function () {
+        expect(2);
         var store = cloneModuleMetadataStore();
 
         var Employee = function () {
@@ -748,16 +760,16 @@
         var orderType = store.getEntityType("Order");
         var newOrder = orderType.createEntity();
         emp.Orders.push(newOrder);
-            
+
         equal(emp.orderCount(), 1,
             "orderCount should be 1 after pushing newOrder");
         });
    /*********************************************************
    * knockout computed property w/ re-defined mapped dependent properties
    *********************************************************/
-    test("add knockout computed property w/ re-defined mapped dependent properties", 3,
-        function () {
-            var store = cloneModuleMetadataStore();
+    test("add knockout computed property w/ re-defined mapped dependent properties", function () {
+        expect(3);
+        var store = cloneModuleMetadataStore();
 
             var Employee = function () {
                 var self = this;
@@ -803,7 +815,8 @@
     /*********************************************************
     * add subscription in post-construction initializer
     *********************************************************/
-    test("add subscription in post-construction initializer", 1, function () {
+    test("add subscription in post-construction initializer", function () {
+        expect(1);
         var store = cloneModuleMetadataStore();
 
         var Customer = function () {};
@@ -815,7 +828,7 @@
                     companyNameNotificationCount += 1;
             });
         };
-        
+
         store.registerEntityTypeCtor("Customer", Customer, customerInitializer);
 
         var customerType = store.getEntityType("Customer");
@@ -829,7 +842,8 @@
     /*********************************************************
     * add property in post-construction initializer
     *********************************************************/
-    test("add property in post-construction initializer", 2, function () {
+    test("add property in post-construction initializer", function () {
+        expect(2);
         var store = cloneModuleMetadataStore();
 
         var Customer = function () { };
@@ -845,7 +859,7 @@
 
         equal(cust.foo, "Foo ",
             "'foo' property, created in initializer, should return 'Foo");
-        
+
         var propInfo = customerType.getProperty("foo");
         // The Breeze customerType knows nothing about it.
         ok(propInfo === null, "'foo' should be unknown to the customer type");
@@ -854,9 +868,9 @@
     /*********************************************************
     * knockout computed property based on collection navigation via initializer
     *********************************************************/
-    test("add knockout computed property based on collection navigation via initializer", 2,
-        function () {
-            var store = cloneModuleMetadataStore();
+    test("add knockout computed property based on collection navigation via initializer", function () {
+        expect(2);
+        var store = cloneModuleMetadataStore();
 
             var employeeInitializer = function (employee) {
                 employee.orderCount = ko.computed(
@@ -887,8 +901,8 @@
     /*********************************************************
     * initializer called by importEntities
     *********************************************************/
-    test("initializer called by importEntities", 5, function () {
-        
+    test("initializer called by importEntities", function () {
+        expect(5);
         // ARRANGE
         // Start with clean metadataStore copy; no registrations
         var store = cloneModuleMetadataStore();
@@ -901,7 +915,7 @@
             serviceName: northwindService,
             metadataStore: store
         });
-        
+
         var emp = createEmployee42();
         em1.attachEntity(emp);
         var exportData = em1.exportEntities();
@@ -913,16 +927,16 @@
 
         var em2 = new breeze.EntityManager(northwindService);
         em2.metadataStore.registerEntityTypeCtor("Employee", null, employeeFooInitializer);
-        
+
         /* Create em2 with copy constructor
         * In this path, em2 all entityType metadata + registration
         * Not realistic. */
-        
+
         //var em2 = em1.createEmptyCopy(); // has ALL metadata
-        
+
         // ACTION
         em2.importEntities(exportData);
-        
+
         // ASSERT
         var emp2 = em2.findEntityByKey(emp.entityAspect.getKey());
 
@@ -935,7 +949,7 @@
           "emp from em2 should have 'fooComputed' observable from initializer");
         equal(emp2 && emp2.fooComputed && emp2.fooComputed(), "Foo Test",
            "emp from em2 should have expected fooComputed value");
-        
+
         function createEmployee42() {
             var employeeType = store.getEntityType("Employee");
             var employee = employeeType.createEntity();
@@ -954,9 +968,9 @@
     /*********************************************************
     * Can create employee after registering addhasValidationErrorsProperty initializer
     *********************************************************/
-    test("Can create employee after registering addhasValidationErrorsProperty initializer", 8,
-        function () {
-            var hasValidationErrorsRaised;
+    test("Can create employee after registering addhasValidationErrorsProperty initializer", function () {
+        expect(8);
+        var hasValidationErrorsRaised;
             var store = cloneModuleMetadataStore();
 
             store.registerEntityTypeCtor("Employee", function () { }, addhasValidationErrorsProperty);
@@ -965,7 +979,7 @@
             equal(employeeType.autoGeneratedKeyType, breeze.AutoGeneratedKeyType.Identity,
                 "'employeeType' should have identity key");
 
-            var emp = employeeType.createEntity();           
+            var emp = employeeType.createEntity();
             equal(emp.EmployeeID(), 0,
                 "new emp should have id===0 before adding to manager");
 
@@ -980,13 +994,13 @@
 
             ok(emp.hasValidationErrors && !emp.hasValidationErrors(),
                 "'hasValidationErrors' should be false before adding to manager.");
-            
+
             var manager = new breeze.EntityManager({
                 serviceName: northwindService,
                 metadataStore: store
             });
             manager.addEntity(emp);
-            
+
             ok(emp.EmployeeID() < 0,
                 "new emp should have temp id <0 after adding to manager; is " + emp.EmployeeID());
 
@@ -994,13 +1008,13 @@
             // when it is attached (added) to the manager
             ok(emp.hasValidationErrors && emp.hasValidationErrors(),
                 "'hasValidationErrors' should be true after adding to manager.");
-            
+
             ok(hasValidationErrorsRaised,
                 "'hasValidationErrors' observable raised a notification");
 
             ok(true, "Validation messages are: "+ testFns.getValidationErrMsgs(emp));
         });
-    
+
     // Initializer that adds hasValidationErrors observable property
     // to any entity. This observable notifies when validation errors change
     function addhasValidationErrorsProperty(entity) {
@@ -1027,8 +1041,9 @@
     /*********************************************************
     * queried entity has new property from post-construction initializer
     *********************************************************/
-    test("queried entity has new property from post-construction initializer", 1,
+    test("queried entity has new property from post-construction initializer",
         function () {
+            expect(1);
             var store = cloneModuleMetadataStore();
 
             var Customer = function () { };
@@ -1038,7 +1053,7 @@
             };
 
             store.registerEntityTypeCtor("Customer", Customer, customerInitializer);
-        
+
             // create EntityManager with extended metadataStore
             var em = newEm(store);
             var query = EntityQuery.from("Customers").top(1);
@@ -1056,8 +1071,9 @@
     /*********************************************************
     * unmapped property (and only unmapped property) preserved after export/import
     *********************************************************/
-    test("unmapped property preserved after export/import", 3,
+    test("unmapped property preserved after export/import",
         function () {
+            expect(3);
             var store = cloneModuleMetadataStore();
 
             var Customer = function () {
@@ -1102,8 +1118,9 @@
     /*********************************************************
     * createEntity sequence is ctor, init-vals, init-er, add
     *********************************************************/
-    test("createEntity sequence is ctor, init-vals, init-er, add", 1,
+    test("createEntity sequence is ctor, init-vals, init-er, add",
         function () {
+            expect(1);
             /* Arrange */
             var expected = {
                 ctor: "constructor",
@@ -1121,26 +1138,26 @@
                 function (c) { // initializer
                     if (c.CompanyName !== null) {
                         // CompanyName setting must have happened before this initializer
-                        actual.push(expected.initVals); 
+                        actual.push(expected.initVals);
                     }
                     actual.push(expected.initer);
                 });
             actual = []; // reset after registration
-            
+
             var em = newEm(store);
             em.entityChanged.subscribe(function (args) {
                 if (args.entityAction === breeze.EntityAction.Attach) {
                     actual.push(expected.attach);
                 }
             });
-            
+
             /* ACT */
             var cust = em.createEntity('Customer', {
 // ReSharper restore UnusedLocals
                 CustomerID: testFns.newGuidComb(),
                 CompanyName: expected[1]
             });
-            
+
             /* ASSERT */
             var exp = [];
             for (var prop in expected) { exp.push(expected[prop]);}
@@ -1151,8 +1168,9 @@
     /*********************************************************
     * query sequence is ctor, init-er, merge
     *********************************************************/
-    test("query entity sequence is ctor, init-er, merge", 1,
+    test("query entity sequence is ctor, init-er, merge",
         function () {
+            expect(1);
             /* Arrange */
             var expected = {
                 ctor: "constructor",
@@ -1198,8 +1216,9 @@
     * must conform to the keygenerator-interface
     * http://www.breezejs.com/sites/all/apidocs/classes/~keyGenerator-interface.html
     *********************************************************/
-    test("can define custom temporary key generator", 3,
+    test("can define custom temporary key generator",
         function () {
+            expect(3);
             var em = newEm();
 
             // add statics for testing the key generator
@@ -1250,14 +1269,14 @@
                 dataType.toString());
         }
     }
-    
+
     /*********************************************************
     * If a store-generated key and the key value is the default value
     * the default value is replaced by client-side temporary key generator
     *********************************************************/
-    test("store-gen keys w/ default values are re-set by key generator upon add to manager", 2,
-        function () {
-            var em = newEm();
+    test("store-gen keys w/ default values are re-set by key generator upon add to manager", function () {
+        expect(2);
+        var em = newEm();
 
             var o1 = em.createEntity('Order');
             var o1Id = o1.OrderID();
@@ -1290,8 +1309,8 @@
     /*********************************************************
     * unmapped property can be set by server class calculated property
     *********************************************************/
-    test("unmapped property can be set by a calculated property of the server class", 4, function () {
-
+    test("unmapped property can be set by a calculated property of the server class", function () {
+        expect(4);
         var store1 = cloneModuleMetadataStore();
 
         var store2 = cloneModuleMetadataStore();
@@ -1336,6 +1355,70 @@
         }
 
     });
+    /*********************************************************
+    * add fancy constructor to employee and query with it
+    *********************************************************/
+    asyncTest("add fancy constructor to employee and query with it", function () {
+        expect(2);
+        var store = cloneModuleMetadataStore();
+        var em = newEm(store);
+        addFancyEmpCtor(store);
+
+        breeze.EntityQuery.from('Employees')
+            .where('FirstName', 'eq', 'Nancy')
+            .using(em).execute()
+            .then(success).catch(handleFail).finally(start);
+
+        function success(data) {
+            var emp = data.results[0];
+            ok(emp != null, "Should have an employee");
+            var full = emp && emp.FullName;
+            equal('Nancy Davolio', full, "emp fullname is "+full);
+        }
+
+    });
+
+    /*********************************************************
+    * add fancy constructor to employee and expand query with it
+    * Explores test case raised by Brian Noyes' reader in this S.O.
+    * http://stackoverflow.com/questions/19723761/entityaspect-property-no-longer-availaible-after-adding-an-expand-clause-in-bree
+    *********************************************************/
+    asyncTest("add fancy constructor to employee and expand query with it", function () {
+        expect(2);
+        var store = cloneModuleMetadataStore();
+        var em = newEm(store);
+        addFancyEmpCtor(store);
+
+        breeze.EntityQuery.from('Employees')
+            .where('FirstName', 'eq', 'Nancy')
+            .expand('Orders')
+            .using(em).execute()
+            .then(success).catch(handleFail).finally(start);
+
+        function success(data) {
+            var emp = data.results[0];
+            ok(emp != null, "Should have an employee");
+            var ordersLen = emp ? emp.Orders.length : 0;
+            ok(ordersLen > 0, "emp has "+ordersLen+" orders.");
+        }
+
+    });
+    function addFancyEmpCtor(store) {
+        function EmployeeCtor() {
+            this.isChanged = false; // unmapped r/w property
+        }
+
+        Object.defineProperty(EmployeeCtor.prototype, 'FullName', {
+            get: function () {
+                var ln = this.LastName;
+                var fn = this.FirstName;
+
+                return ln ? fn + ' ' + ln : fn;
+            }
+        });
+
+        store.registerEntityTypeCtor('Employee', EmployeeCtor);
+    }
 
     /*********************************************************
     * helpers

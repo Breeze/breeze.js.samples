@@ -35,7 +35,8 @@
     // the config.blockServerRequests switch ensures that 
     // this particular request cannot accidentally go to the server
     // even if the test adapter would allow it otherwise.
-    test("server requests are blocked for THIS module's tests by default.", 1, function () {
+    test("server requests are blocked for THIS module's tests by default.", function () {
+        expect(1);
         ajaxInterceptor.enable();
     
         var ajaxConfig = makeAjaxConfig({ success: success, error: error });

@@ -31,8 +31,8 @@
     /*********************************************************
     * can save and requery a new Todo
     *********************************************************/
-    test("can save and requery a new Todo", 2, function () {
-
+    test("can save and requery a new Todo", function () {
+        expect(2);
         var em = newTodosEm();       // new empty EntityManager
 
         var description = "Save todo in Breeze";
@@ -67,8 +67,8 @@
     /*********************************************************
     * updates id and state after saving a new Todo
     *********************************************************/
-    test("updates id and state after saving a new Todo", 5, function () {
-        
+    test("updates id and state after saving a new Todo", function () {
+        expect(5);
         var em1 = newTodosEm();       // new empty EntityManager
 
         var description = "Learn to save in breeze";
@@ -120,8 +120,8 @@
     /*********************************************************
     * can save add,update, and delete in one batch
     *********************************************************/
-    test("can save add, update, and delete in one batch", 8, function () {
-
+    test("can save add, update, and delete in one batch", function () {
+        expect(8);
         var em = newTodosEm();      // new empty EntityManager
         var newTodo, updateTodo, deleteTodo;
 
@@ -179,7 +179,8 @@
     /*********************************************************
     * hasChangesChanged event raised after rejectChanges
     *********************************************************/
-    test("hasChangesChanged event raised after rejectChanges", 4, function () {
+    test("hasChangesChanged event raised after rejectChanges", function () {
+        expect(4);
         var em = newTodosEm();
         var hasChangesChangedRaised=[];
         em.hasChangesChanged.subscribe(
@@ -206,7 +207,8 @@
     /*********************************************************
     * hasChangesChanged event raised after saveChanges
     *********************************************************/
-    test("hasChangesChanged event raised after saveChanges", 4, function () {
+    test("hasChangesChanged event raised after saveChanges", function () {
+        expect(4);
         var em = newTodosEm();    
         var hasChangesChangedRaised = [];
         em.hasChangesChanged.subscribe(
@@ -237,7 +239,8 @@
     /*********************************************************
     * propertyChanged raised when merged save result changes a property
     *********************************************************/
-    asyncTest("propertyChanged raised when merged save result changes a property", 3, function () {
+    asyncTest("propertyChanged raised when merged save result changes a property", function () {
+        expect(3);
         var em = newTodosEm(); 
         var todo = em.createEntity('TodoItem', {Description: "Saved description" });
 
@@ -282,7 +285,8 @@
     * The unmapped property is sent to the server where it is unknown to the Todo class
     * but the server safely ignores it.
     *********************************************************/
-    test("can save TodoItem defined with an unmapped property", 4, function () {
+    test("can save TodoItem defined with an unmapped property", function () {
+        expect(4);
         var store = cloneTodosMetadataStore();
 
         var TodoItemCtor = function () {

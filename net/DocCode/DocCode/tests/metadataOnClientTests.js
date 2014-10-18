@@ -53,7 +53,8 @@
     /*********************************************************
     * 4 Types defined in client metadata are in metadata from server
     *********************************************************/
-    test("The 4 types defined in client metadata are in metadata from server", 2, function () {
+    test("The 4 types defined in client metadata are in metadata from server", function () {
+        expect(2);
         var clientTypes = clientStore.getEntityTypes();
         var serverTypes = serverStore.getEntityTypes();
 

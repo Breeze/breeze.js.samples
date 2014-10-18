@@ -11,7 +11,7 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
     var extend = breeze.core.extend;
     var EntityQuery = breeze.EntityQuery;
@@ -21,7 +21,7 @@
     var handleSaveFailed = testFns.handleSaveFailed;
     var reportRejectedPromises = testFns.reportRejectedPromises;
 
-    // When targeting the Foo controller 
+    // When targeting the Foo controller
     var fooDataService = new breeze.DataService({
         serviceName: "api",
         hasServerMetadata: false
@@ -29,7 +29,7 @@
     function newFooEm() {
         return new breeze.EntityManager({ dataService: fooDataService });
     }
-    
+
     // Target the Northwind service by default
     var northwindService = testFns.northwindServiceName;
     var newNorthwindEm = testFns.newEmFactory(northwindService);
@@ -39,13 +39,14 @@
     /************************** QUERIES *************************/
 
     module("dtoTests", moduleOptions);
-    
-    //#region Foo queries  
+
+    //#region Foo queries
 
     /*********************************************************
     * can query an arbitrary object from a vanilla Web API controller
     *********************************************************/
-    asyncTest("can query all Foos from a vanilla Web API controller", 1, function () {
+    asyncTest("can query all Foos from a vanilla Web API controller", function () {
+        expect(1);
         newFooEm().executeQuery("foos")
             .then(success).fail(handleFail).fin(start);
 
@@ -54,7 +55,8 @@
             ok(len, "Expected 'Foos' and got " + len);
         }
     });
-    asyncTest("can filter Foos from a vanilla Web API controller", 2, function () {
+    asyncTest("can filter Foos from a vanilla Web API controller", function () {
+        expect(2);
         newFooEm().executeQuery("foos/?$filter=ID le 3")
             .then(success).fail(handleFail).fin(start);
 
@@ -65,7 +67,8 @@
             equal(foosWithIdOver3.length, 0, "Should have no 'Foo' with ID>3.");
         }
     });
-    asyncTest("can get a Foo by ID from a vanilla Web API controller", 2, function () {
+    asyncTest("can get a Foo by ID from a vanilla Web API controller", function () {
+        expect(2);
         newFooEm().executeQuery("foos/1")
             .then(success).fail(handleFail).fin(start);
 
@@ -75,11 +78,12 @@
             equal(data.results[0].ID, 1, "Should have raw 'Foo' with ID eq 1.");
         }
     });
-    
+
     /*********************************************************
     * can get Foos metadata from a dedicated metadata controller
     *********************************************************/
-    asyncTest("can get Foos metadata from a dedicated metadata controller", 1, function () {
+    asyncTest("can get Foos metadata from a dedicated metadata controller", function () {
+        expect(1);
         var store = new breeze.MetadataStore();
         store.fetchMetadata("breeze/FoosMetadata")
             .then(success).fail(handleFail).fin(start);
@@ -95,7 +99,8 @@
     /*********************************************************
     * can fetch a hash of entities (Lookups)
     *********************************************************/
-    asyncTest("can fetch a hash of entities", 6, function () {
+    asyncTest("can fetch a hash of entities", function () {
+        expect(6);
         newNorthwindEm().executeQuery("Lookups")
             .then(success).fail(handleFail).fin(start);
 
@@ -116,16 +121,16 @@
                 } catch(ex) {}
                 ok(!ex, "expected '" +propName+ "' be an array containing Unchanged entities.");
             });
-            
+
         }
     });
-    
+
 
     /************************** SAVES *************************/
     // This CustomerID guid is known to be new in the Northwind db
     var newCustomerID = testFns.newGuidComb();
     var alfredsID = testFns.wellKnownData.alfredsID;
-    
+
     module("dtoTests - saves", {
         setup: function () {
             testFns.populateMetadataStore(newNorthwindEm);
@@ -135,8 +140,8 @@
         }
     });
 
-    asyncTest("can save a new Customer entity with hidden CustomerID_OLD", 1, function () {
-
+    asyncTest("can save a new Customer entity with hidden CustomerID_OLD", function () {
+        expect(1);
         // Create and initialize entity to save
         var em = newNorthwindEm();
         var entity = em.createEntity('Customer',
@@ -150,13 +155,13 @@
         entitySaveTester(entity, /*shouldSave*/ true);
 
     });
- 
+
     /************************** TEST HELPERS *************************/
     function entitySaveTester(entity, shouldSave) {
         var typeName = entity.entityType.shortName;
         var operation = entity.entityAspect.entityState.name;
         var msgPart = " save the " + operation + " " + typeName;
-        
+
         var manager = entity.entityAspect.entityManager;
         manager.saveChanges([entity])
         .then(function (saveResults) {

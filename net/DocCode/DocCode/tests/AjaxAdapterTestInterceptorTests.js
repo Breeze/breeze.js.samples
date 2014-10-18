@@ -2,12 +2,12 @@
  * Tests of the 'AjaxAdapterTestInterceptor' class which is used in DocCode
  * to mock JSON results for Breeze integration testing
  *
- * Such mocking is useful 
- * (1) while exploring payloads from services that may be difficult 
+ * Such mocking is useful
+ * (1) while exploring payloads from services that may be difficult
  * or impossible to reach during testing (e.g., Zumo) or to simulate
  * service behavior (e.g., server errors) that are difficult to create
  * with a real server.
- * 
+ *
  * (2) testing Breeze interaction wtih custom jsonResultsAdapters
  * as it is easier to mock difficult cases than write a service to
  * produce them.
@@ -19,11 +19,11 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
     var extend = breeze.core.extend;
     var EntityQuery = breeze.EntityQuery;
-    
+
     var handleFail = testFns.handleFail;
 
     var ajaxInterceptor = new AjaxAdapterTestInterceptor();
@@ -32,15 +32,15 @@
         serviceName: "test",
         hasServerMetadata: false
     });
-    
+
     function newTestEm() {
         return new breeze.EntityManager({ dataService: testDataService });
     }
-    
+
     var northwindService = testFns.northwindServiceName;
     var newNorthwindEm = testFns.newEmFactory(northwindService);
     /************************** UNIT TESTS *************************/
-    
+
     module("ajaxAdapterTestInterceptor unit tests", {
         setup: function () {
             // unit tests should never attempt to reach the server
@@ -54,12 +54,13 @@
         }
     });
 
-    // the config.blockServerRequests switch ensures that 
+    // the config.blockServerRequests switch ensures that
     // this particular request cannot accidentally go to the server
     // even if the test adapter would allow it otherwise.
-    test("server requests are blocked for THIS module's tests by default.", 1, function () {
+    test("server requests are blocked for THIS module's tests by default.", function () {
+        expect(1);
         ajaxInterceptor.enable();
-        
+
         var ajaxConfig = makeAjaxConfig({ success: success, error: error });
 
         ajaxInterceptor.ajax(ajaxConfig);
@@ -72,15 +73,15 @@
                 serverRequestBlockMessage(httpResponse));
         }
     });
-    
-    // the config.blockServerRequests switch ensures that 
+
+    // the config.blockServerRequests switch ensures that
     // this particular request cannot accidentally go to the server
     // even if the test adapter would allow it otherwise.
-    test("can block trip to server at request level.", 1, function () {
-        
+    test("can block trip to server at request level.", function () {
+        expect(1);
         // re-enable server requests for the adapter
         ajaxInterceptor.blockServerRequests = false;
-        
+
         // but block them for this request
         ajaxInterceptor.enable({ blockServerRequests: true });
 
@@ -97,11 +98,12 @@
         }
     });
 
-    test("can use JSON array quick syntax to fake an OK data response.", 1, function () {
+    test("can use JSON array quick syntax to fake an OK data response.", function () {
+        expect(1);
         var expectedData = [{ id: 1, name: 'Bob', userId: null }];
-               
+
         ajaxInterceptor.enable(expectedData); // the quick syntax: just a JSON array
- 
+
         var ajaxConfig = makeAjaxConfig({ success: success });
 
         ajaxInterceptor.ajax(ajaxConfig);
@@ -112,10 +114,11 @@
                     JSON.stringify(expectedData));
         }
     });
-    
-    test("can define a default response for all requests ('OK' example).", 1, function () {
-        var expectedData = [{ id: 2, name: 'Sally', userId: 42 }];
-        
+
+    test("can define a default response for all requests ('OK' example).", function () {
+    expect(1);
+    var expectedData = [{ id: 2, name: 'Sally', userId: 42 }];
+
         var adapterConfig = { defaultResponse: { data: expectedData } };
         ajaxInterceptor.enable(adapterConfig);
 
@@ -129,13 +132,13 @@
                     JSON.stringify(expectedData));
         }
     });
-    
-    test("can specify fake data response for targeted url.", 1, function () {
-        
+
+    test("can specify fake data response for targeted url.", function () {
+        expect(1);
         var testUrl = 'http://host.com/api/test';
         var expectedData = [{ id: 1, name: 'Bob', userId: null }];
         var response = { url: "api/test", data: expectedData };
-        
+
         // register a response for a specific url
         ajaxInterceptor.enable({responses:[response], blockServerRequests: true});
 
@@ -157,11 +160,11 @@
         },
         teardown: function () { ajaxInterceptor.disable(); }
     });
-    
-    asyncTest("can handle anonymous Zumo Todos when all properties are defined.", 1, function () {
-        
+
+    asyncTest("can handle anonymous Zumo Todos when all properties are defined.", function () {
+        expect(1);
         ajaxInterceptor.enable([{ id: 1, title: "Learn Breeze"}]);
-        
+
         newTestEm().executeQuery("Todos")
             .then(success).fail(handleFail).fin(start);
 
@@ -170,9 +173,9 @@
             ok(len, "Expected 'Foos' and got " + len);
         }
     });
-    
-    asyncTest("can handle anonymous Zumo Todos when a property is null.", 1, function () {
 
+    asyncTest("can handle anonymous Zumo Todos when a property is null.", function () {
+        expect(1);
         ajaxInterceptor.enable([{ id: 1, title: "Learn Breeze", userId: null }]);
 
         newTestEm().executeQuery("Todos")
@@ -183,10 +186,11 @@
             ok(len, "Expected 'Foos' and got " + len);
         }
     });
-    
-    test("can mix sync tests with async ajaxInterceptor tests", 1,
-     function () { ok(true, "should always be ok"); });
-    
+
+    test("can mix sync tests with async ajaxInterceptor tests", function () {
+        expect(1);
+        ok(true, "should always be ok"); });
+
     asyncTest("can project all Northwind customers (with server trip).", function () {
 
         // Notice that an enabled ajaxInterceptor is OK when no response matches
@@ -199,7 +203,7 @@
         northwindCustomerTwoPropTest();
 
     });
-    
+
     asyncTest("can test Northwind customer projection with data snapshot (no server trip).", function () {
 
         // Now we fake the data from a snapshot of the full projection
@@ -221,7 +225,7 @@
                     } ]
             }
         });
-        
+
         northwindCustomerTwoPropTest();
 
     });
@@ -264,8 +268,8 @@
         }
     }
 
-    asyncTest("can fake query result for all Northwind customers with snapshot (no server trip).", 3, function () {
-
+    asyncTest("can fake query result for all Northwind customers with snapshot (no server trip).", function () {
+        expect(3);
         // Now we fake the data from a snapshot of the full projection
         ajaxInterceptor.enable({
             responses: {
@@ -278,7 +282,7 @@
          .select('CustomerID, CompanyName')
          .using(newNorthwindEm()).execute()
          .then(success).fail(handleFail).fin(start);
-        
+
         function success(data) {
             var customers = data.results, len = customers.length;
             ok(len, "expected some complete Customers and got " + len);
@@ -328,9 +332,9 @@
             Phone: "(071) 23 67 22 20",
             Fax: "(071) 23 67 22 21"
         }];
- 
-    asyncTest("can block trip to server.", 1, function () {
 
+    asyncTest("can block trip to server.", function () {
+        expect(1);
         ajaxInterceptor.enable({ blockServerRequests: true });
 
         newTestEm().executeQuery("Todos")
@@ -345,7 +349,7 @@
                 serverRequestBlockMessage(error.httpResponse));
         }
     });
-    
+
     /************************** TEST HELPERS *************************/
     function makeAjaxConfig(config) {
         return extend({
@@ -355,7 +359,7 @@
                 error: unexpectedAjaxAdapterError
             }, config || {} );
     };
-    
+
     function unexpectedAjaxAdapterError(httpResponse) {
         ok(false,
             "ajax adapter returned unexpected error, {0}-{1}".format(
@@ -367,12 +371,12 @@
             (httpResponse.__ajaxConfig && httpResponse.__ajaxConfig.url) || 'unknown url',
             httpResponse.status, httpResponse.data);
     }
-    
+
     function entitySaveTester(entity, shouldSave) {
         var typeName = entity.entityType.shortName;
         var operation = entity.entityAspect.entityState.name;
         var msgPart = " save the " + operation + " " + typeName;
-        
+
         var manager = entity.entityAspect.entityManager;
         manager.saveChanges([entity])
         .then(function (saveResults) {

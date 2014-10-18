@@ -136,7 +136,8 @@
     /*********************************************************
     * Customer has no entity level validators
     *********************************************************/
-    test("Customer has no entity level validators", 1, function () {
+    test("Customer has no entity level validators", function () {
+        expect(1);
         var validators = customerType.validators, valCount = validators.length;
         ok(!valCount, "customer type shouldn't have entity validators; count = " + valCount);
     });
@@ -144,8 +145,8 @@
     /*********************************************************
     * Can export and import a metadataStore
     *********************************************************/
-    test("export and import a metadataStore", 2, function () {
-
+    test("export and import a metadataStore", function () {
+        expect(2);
         var metaExport = northwindMetadataStore.exportMetadata();
         var newStore = new MetadataStore();
         newStore.importMetadata(metaExport);
@@ -159,8 +160,8 @@
     /*********************************************************
     * Can export and import a metadataStore to file
     *********************************************************/
-    test("export and import a metadataStore from local storage", 2, function () {
-
+    test("export and import a metadataStore from local storage", function () {
+        expect(2);
         var metaExport = northwindMetadataStore.exportMetadata();
 
         ok(window.localStorage, "this browser supports local storage");
@@ -177,8 +178,8 @@
     /*********************************************************
     * Can add a 2nd service to a metadataStore
     *********************************************************/
-    test("add a 2nd service to a metadataStore", 4, function () {
-
+    test("add a 2nd service to a metadataStore", function () {
+        expect(4);
         var todosServiceName = testFns.todosServiceName;
 
         ok(!northwindMetadataStore.hasMetadataFor(todosServiceName),
@@ -211,9 +212,9 @@
     * Proves that simultaneous "first time" queries that can both request metadata
     * without a race condition.
     *********************************************************/
-    test("Can run two queries in parallel for fresh EM w/ empty metadataStore", 1,
-        function () {
-            var em = new breeze.EntityManager("breeze/todos");
+    test("Can run two queries in parallel for fresh EM w/ empty metadataStore", function () {
+        expect(1);
+        var em = new breeze.EntityManager("breeze/todos");
             var query = breeze.EntityQuery.from("Todos");
             var successCount = 0;
             stop();
@@ -240,7 +241,8 @@
     /*********************************************************
     * Can add type to metadataStore
     *********************************************************/
-    test("can add 'UserPartial' type to metadataStore", 5, function () {
+    test("can add 'UserPartial' type to metadataStore", function () {
+        expect(5);
         var metastore = clonenorthwindMetadataStore();
         var em = newNorthwindEm(metastore);
 
@@ -302,7 +304,8 @@
     /*********************************************************
     * Can project into a client-defined, made-up type 
     *********************************************************/
-    test("can project into the 'EmployeePartial' client-defined, made-up type", 4, function () {
+    test("can project into the 'EmployeePartial' client-defined, made-up type", function () {
+        expect(4);
         var store = clonenorthwindMetadataStore();
         var employeePartialType = defineEmployeePartialType(store);
         var em = newNorthwindEm(store);
@@ -431,8 +434,8 @@
     /*********************************************************
     * camelCasing NamingConvention applies to entity creation
     *********************************************************/
-    test("camelCasing NamingConvention applies to entity creation", 4, function () {
-
+    test("camelCasing NamingConvention applies to entity creation", function () {
+        expect(4);
         var defaultCustomerType = northwindMetadataStore.getEntityType("Customer");
         var defaultCust = defaultCustomerType.createEntity();
         
@@ -454,8 +457,8 @@
     /*********************************************************
     * query with camelCase
     *********************************************************/
-    test("query with camelCasing NamingConvention", 1, function () {
-
+    test("query with camelCasing NamingConvention", function () {
+        expect(1);
         var em = new breeze.EntityManager(
             {
                 serviceName: northwindService,

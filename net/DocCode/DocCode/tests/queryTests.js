@@ -38,8 +38,8 @@
     * execute the query via a test helper method
     * that encapsulates the ceremony
     *********************************************************/
-    test("all customers (concise)", 1, function () {
-
+    test("all customers (concise)", function () {
+        expect(1);
         var query = EntityQuery.from("Customers"); // Create query style #1
 
         verifyQuery(newEm, query, "all customers");
@@ -48,8 +48,8 @@
     /*********************************************************
     * all customers - promises style
     *********************************************************/
-    test("all customers (promises)", 1, function () {
-
+    test("all customers (promises)", function () {
+        expect(1);
         var query = new EntityQuery("Customers"); // Create query style #2
 
         stop();                     // going async ... tell testrunner to wait
@@ -67,8 +67,8 @@
     /*********************************************************
     * all customers - callback style
     *********************************************************/
-    test("all customers (callbacks)", 1, function () {
-
+    test("all customers (callbacks)", function () {
+        expect(1);
         var query = new EntityQuery().from("Customers"); // Create query style #3
 
         stop();                 // going async ... tell testrunner to wait
@@ -86,9 +86,9 @@
     * The server may or maynot complete the query but the
     * query has timedout from the client perspective.
     *********************************************************/
-    test("custom timeout cancels 'all customers' query", 1,
-        function () {
-            var timeoutMs = 1; // ridiculously short ... should time out
+    test("custom timeout cancels 'all customers' query", function () {
+        expect(1);
+        var timeoutMs = 1; // ridiculously short ... should time out
             allCustomerTimeoutQuery(timeoutMs, true);
         });
     /*********************************************************
@@ -99,9 +99,9 @@
    * that arrives after this promise is resolved.
    * If you need that, see the jQueryAdapterTests.
    *********************************************************/
-    test("'all customers' query completes before custom timeout", 1,
-        function () {
-            var timeoutMs = 100000; // ridiculously long ... should succeed
+    test("'all customers' query completes before custom timeout", function () {
+        expect(1);
+        var timeoutMs = 100000; // ridiculously long ... should succeed
             allCustomerTimeoutQuery(timeoutMs, false);
         });
     function allCustomerTimeoutQuery (timeoutMs, shouldTimeout) {
@@ -138,7 +138,8 @@
             }
         }
     }
-    asyncTest("can query for suppliers which holds a complex type", 2, function () {
+    asyncTest("can query for suppliers which holds a complex type", function () {
+        expect(2);
         var em = newEm();
 
         EntityQuery.from('Suppliers').top(1)
@@ -161,8 +162,8 @@
     /*********************************************************
     * customers starting w/ 'A' (string comparison)
     *********************************************************/
-    test("customers starting w/ 'A' ", 2, function () {
-
+    test("customers starting w/ 'A' ", function () {
+        expect(2);
         // query for customer starting with 'A', sorted by name
         var query = EntityQuery.from("Customers")
             .where("CompanyName", FilterQueryOp.StartsWith, "A")
@@ -176,8 +177,8 @@
     /*********************************************************
     * orders with freight cost over 100.
     *********************************************************/
-    test("orders with freight cost over 100", 1, function () {
-
+    test("orders with freight cost over 100", function () {
+        expect(1);
         var query = EntityQuery.from("Orders")
             .where("Freight", FilterQueryOp.GreaterThan, 100);
         //  .where("Freight", ">", 100); // alternative to FilterQueryOp
@@ -188,8 +189,8 @@
     /*********************************************************
     * orders placed on or after 1/1/1998.
     *********************************************************/
-    test("orders placed on or after 1/1/1998", 1, function () {
-
+    test("orders placed on or after 1/1/1998", function () {
+        expect(1);
         // Make sure date is in UTC (like the datetimes in the database)
         var testDate = new Date(Date.UTC(1998, 0, 1)); // month counts from zero!
 
@@ -203,8 +204,8 @@
     /*********************************************************
     * no orders placed exactly on 1/1/1998 at 9am GMT.
     *********************************************************/
-    test("orders placed on 1/1/1998 at 9am GMT", 1, function () {
-
+    test("orders placed on 1/1/1998 at 9am GMT", function () {
+        expect(1);
         // Make sure date is in UTC (like the datetimes in the database)
         var testDate = new Date(Date.UTC(1998, 0, 1, 9)); // month counts from zero!
 
@@ -221,8 +222,8 @@
     * orders shipped after they were required.
     * Demonstrates comparison of two fields in the same record
     *********************************************************/
-    test("orders shipped after they were required", 1, function () {
-
+    test("orders shipped after they were required", function () {
+        expect(1);
         var query = EntityQuery.from("Orders")
             .where("ShippedDate", ">", "RequiredDate");
 
@@ -234,8 +235,8 @@
     * Demonstrates comparison of two fields in the same record
     * (compare with next test)
     *********************************************************/
-    asyncTest("No employee whose FirstName and LastName are the same", 1, function () {
-
+    asyncTest("No employee whose FirstName and LastName are the same", function () {
+        expect(1);
         var query = EntityQuery.from("Employees")
             .where("FirstName", "==", "LastName");
 
@@ -248,8 +249,8 @@
     * Removing ambiguity of string value comparison with object value
     * (compare with previous test)
     *********************************************************/
-    asyncTest("No employee whose FirstName === 'LastName' (using value object)", 1, function () {
-
+    asyncTest("No employee whose FirstName === 'LastName' (using value object)", function () {
+        expect(1);
         var query = EntityQuery.from("Employees")
             .where("FirstName", "==",
                    // Search value is potentially the name of a property (as in this example)
@@ -263,8 +264,8 @@
     /*********************************************************
     * orders shipped to California (via ComplexType).
     *********************************************************/
-    test("orders shipped to California (via ComplexType)", 2, function () {
-
+    test("orders shipped to California (via ComplexType)", function () {
+        expect(2);
         var query = EntityQuery.from("Orders")
             .where("ShipTo.Region", "==", "CA")
             .expand("Customer");
@@ -283,8 +284,8 @@
 
     });
     /*********************************************************/
-    test("orders shipped to California (via ComplexType) WITH PROJECTION", 2, function () {
-
+    test("orders shipped to California (via ComplexType) WITH PROJECTION", function () {
+        expect(2);
         var query = EntityQuery.from("Orders")
             .where("ShipTo.Region", "==", "CA")
             .expand("Customer")
@@ -308,8 +309,8 @@
     /*********************************************************
     * customers from nowhere (testing for null)
     *********************************************************/
-    test("customers from nowhere", 2, function () {
-
+    test("customers from nowhere", function () {
+        expect(2);
         var query = EntityQuery
             .from("Customers")
             .where("Region", "==", null)
@@ -322,8 +323,8 @@
     /*********************************************************
     * customers from somewhere (testing for not null)
     *********************************************************/
-    test("customers from somewhere", 2, function () {
-
+    test("customers from somewhere", function () {
+        expect(2);
         var query = EntityQuery
             .from("Customers")
             .where("Region", "!=", null)
@@ -337,8 +338,8 @@
     /*********************************************************
     * ok to return no results (not an error)
     *********************************************************/
-    test("customers from Mars", 1, function () {
-
+    test("customers from Mars", function () {
+        expect(1);
         var query = EntityQuery
             .from("Customers")
             .where("Region", "==", "Mars");
@@ -353,8 +354,8 @@
     /*********************************************************
     * The Alfreds customer by id
     *********************************************************/
-    test("Alfreds customer by id", 2, function () {
-
+    test("Alfreds customer by id", function () {
+        expect(2);
         var query = new EntityQuery("Customers")
             .where(alfredsPredicate);
 
@@ -372,8 +373,8 @@
     * Let metadata say what is the EntityKey
     * Make query from the key-and-value
     *********************************************************/
-    test("Alfreds customer by key", 2, function () {
-
+    test("Alfreds customer by key", function () {
+        expect(2);
         var em = newEm();
         var customerType =
             em.metadataStore.getEntityType("Customer");
@@ -393,8 +394,8 @@
     /*********************************************************
     * Remote query does NOT return deleted entities (by default)
     *********************************************************/
-    asyncTest("Remote query does NOT return deleted entities (by default)", 1, function() {
-
+    asyncTest("Remote query does NOT return deleted entities (by default)", function() {
+        expect(1);
         var em = newEm();
         // fake alfreds customer in cache in a deleted state
         em.createEntity('Customer', {
@@ -419,8 +420,8 @@
     /*********************************************************
     * Remote query CAN return deleted entities with 'includeDeleted' option
     *********************************************************/
-    asyncTest("Remote query CAN return deleted entities with 'includeDeleted' option", 1, function () {
-
+    asyncTest("Remote query CAN return deleted entities with 'includeDeleted' option", function () {
+        expect(1);
         var em = newEm();
         // fake alfreds customer in cache in a deleted state
         em.createEntity('Customer', {
@@ -455,8 +456,8 @@
     * Nancy's orders  (compare nullable int)
     ******************************************************************/
     // Note: Order.EmployeeID is nullable<int>; can still filter on it.
-    test("Nancy's orders by Order.EmployeeID", 1, function () {
-
+    test("Nancy's orders by Order.EmployeeID", function () {
+        expect(1);
         var query = new EntityQuery("Orders")
            .where("EmployeeID", "==", testFns.wellKnownData.nancyID);
 
@@ -467,8 +468,8 @@
     * Alfreds orders (compare nullable Guid)
     *********************************************************/
     // Note: Order.CustomerID is nullable<Guid>; can still filter on it.
-    test("Alfreds orders by Order.CustomerID", 1, function () {
-
+    test("Alfreds orders by Order.CustomerID", function () {
+        expect(1);
         var query = new EntityQuery("Orders")
             .where(alfredsPredicate);
 
@@ -481,8 +482,8 @@
     /*********************************************************
     * customers with a name > 30 chars (compare w/ an OData function)
     *********************************************************/
-    test("customers with long names", 2, function () {
-
+    test("customers with long names", function () {
+        expect(2);
         var query = EntityQuery
             .from("Customers")
             .where("length(CompanyName)", ">", 30);
@@ -494,8 +495,8 @@
     /*********************************************************
     * customers whose 2nd and 3rd letters are "om" (compare w/ an OData function)
     *********************************************************/
-    test("customers whose 2nd and 3rd letters are \"om\"", 2, function () {
-
+    test("customers whose 2nd and 3rd letters are \"om\"", function () {
+        expect(2);
         var query = EntityQuery.from("Customers")
         .where("toUpper(substring(CompanyName, 1, 2))", "==", "OM");
 
@@ -506,8 +507,8 @@
     /*********************************************************
     * customer whose name contains 'market' (compare w/ nested OData functions)
     *********************************************************/
-    test("customers whose name contains 'market'", 2, function () {
-
+    test("customers whose name contains 'market'", function () {
+        expect(2);
         var query = EntityQuery.from("Customers")
             .where("CompanyName", FilterQueryOp.Contains, 'market');
         //.where("CompanyName", "contains", 'market'); // Alternative to FilterQueryOp
@@ -522,8 +523,8 @@
     /*********************************************************
     * Query using withParameters
     *********************************************************/
-    asyncTest("can query 'withParameters'", 2, function () {
-
+    asyncTest("can query 'withParameters'", function () {
+        expect(2);
         var em = newEm();
         var query = EntityQuery.from("CustomersStartingWith")
             .withParameters({ companyName: "qu"});
@@ -541,8 +542,8 @@
     /*********************************************************
     * Combination of IQueryable and withParameters
     *********************************************************/
-    asyncTest("can query combining 'withParameters' and filter", 3, function () {
-
+    asyncTest("can query combining 'withParameters' and filter", function () {
+        expect(3);
         var em = newEm();
         var query = EntityQuery.from("CustomersStartingWith")
             .where('Country', 'eq', 'Brazil')
@@ -569,7 +570,8 @@
     * but the logic of this test manifestly deals with it
     * because of the way it assigns results.
     *********************************************************/
-    asyncTest("can sequence results that arrive out of order", 3, function() {
+    asyncTest("can sequence results that arrive out of order", function() {
+        expect(3);
         var nextRequestId = 0;
         var em = newEm();
         var promises = [];
@@ -622,8 +624,8 @@
     /*********************************************************
     * customers in London
     *********************************************************/
-    test("customers in London", 2, function () {
-
+    test("customers in London", function () {
+        expect(2);
         var pred = new Predicate("City", FilterQueryOp.Equals, "London");
 
         var query = new EntityQuery("Customers").where(pred);
@@ -635,8 +637,8 @@
     /*********************************************************
     * customers in London or Paris
     *********************************************************/
-    test("customers in London OR Paris", 2, function () {
-
+    test("customers in London OR Paris", function () {
+        expect(2);
         var pred = new Predicate("City", FilterQueryOp.Equals, "London")
                              .or("City", "==", "Paris");
 
@@ -649,8 +651,8 @@
     /*********************************************************
     * orders ordered after April'98 AND with freight > 100
     *********************************************************/
-    test("orders ordered after April '98 AND with freight > 100", 2, function () {
-
+    test("orders ordered after April '98 AND with freight > 100", function () {
+        expect(2);
         var pred;
         // Make sure date is in UTC (like the datetimes in the database)
         var testDate = new Date(Date.UTC(1998, 3, 1)); // month counts from zero!
@@ -686,8 +688,8 @@
     /*********************************************************
     * orders either ordered after April'98 OR with freight > 100
     *********************************************************/
-    test("orders ordered after April '98 OR with freight > 100", 2, function () {
-
+    test("orders ordered after April '98 OR with freight > 100", function () {
+        expect(2);
         var pred;
         // Make sure date is in UTC (like the datetimes in the database)
         var testDate = new Date(Date.UTC(1998, 3, 1)); // month counts from zero!
@@ -723,8 +725,8 @@
     /*********************************************************
     * orders that do NOT have freight > 100
     *********************************************************/
-    test("orders that do NOT have freight > 100", 2, function () {
-
+    test("orders that do NOT have freight > 100", function () {
+        expect(2);
         var pred;
         var baseQuery = EntityQuery.from("Orders");
         var basePred = new Predicate("Freight", ">", 100);
@@ -750,8 +752,8 @@
     * orders shipped in '96 with freight > 100
     * define predicates separately and combine in new predicate
     *********************************************************/
-    test("orders shipped in '96 with freight > 100", 2, function () {
-
+    test("orders shipped in '96 with freight > 100", function () {
+        expect(2);
         // Get the predicate and show what it looks like in OData
         var pred = getOrderedIn1996Predicate();
         var em = newEm();
@@ -825,8 +827,8 @@
     * Customer is the related parent of Order
     * Demonstrates "nested query", filtering on a related entity
     *********************************************************/
-    test("orders of Customers located in California", 2, function () {
-
+    test("orders of Customers located in California", function () {
+        expect(2);
         var query = EntityQuery.from("Orders")
             .where("Customer.Region", "==", "CA")
             .expand("Customer");
@@ -849,8 +851,8 @@
     * Customer is the related parent of Order
     * Demonstrates "nested query", filtering on a related entity
     *********************************************************/
-    test("orders of Customers whose name starts with 'Alfred'", 2, function () {
-
+    test("orders of Customers whose name starts with 'Alfred'", function () {
+        expect(2);
         var query = EntityQuery.from("Orders")
             .where("Customer.CompanyName", "startsWith", "Alfred")
             .expand("Customer");
@@ -872,8 +874,8 @@
     * Alfreds orders include regular and 'InternationalOrders'
     * Have to look for both types in cache to get them all
     *********************************************************/
-    asyncTest("EntityManager.getEntities is not polymorphic", 3, function () {
-
+    asyncTest("EntityManager.getEntities is not polymorphic", function () {
+        expect(3);
         var em = newEm();
         var query = EntityQuery.from("Orders")
             // known to have a mix of Order types
@@ -902,8 +904,8 @@
     * Products in a Category whose name begins with 'S'
     * Category is the related parent of Product
     *********************************************************/
-    test("Products in categories whose names start with 'S'", 2, function () {
-
+    test("Products in categories whose names start with 'S'", function () {
+        expect(2);
         var query = EntityQuery.from("Products")
             .where("Category.CategoryName", "startsWith", "S")
             .expand("Category");
@@ -926,8 +928,8 @@
      * You can't really do this clientside.
      * But you can call a controller method to do it
      *********************************************************/
-    test("orders for Chai", 2, function () {
-
+    test("orders for Chai", function () {
+        expect(2);
         var manager = newEm();
         var chaiProductID = testFns.wellKnownData.chaiProductID;
 
@@ -967,8 +969,8 @@
     /*********************************************************
     * Alfreds orders, expanded with their OrderDetails
     *********************************************************/
-    test("Alfreds orders expanded with their OrderDetails", 3, function () {
-
+    test("Alfreds orders expanded with their OrderDetails", function () {
+        expect(3);
         var query = new EntityQuery("Orders")
           .where(alfredsPredicate)
           .expand("OrderDetails");
@@ -984,10 +986,9 @@
     * Alfreds orders, expanded with their parent Customers and
     * child OrderDetails
     *********************************************************/
-    test("Alfreds orders expanded with parent Customer and their child details ", 4,
-        function () {
-
-            var query = new EntityQuery("Orders")
+    test("Alfreds orders expanded with parent Customer and their child details ", function () {
+        expect(4);
+        var query = new EntityQuery("Orders")
               .where(alfredsPredicate)
               .expand("Customer, OrderDetails");
 
@@ -1003,9 +1004,9 @@
     * and the Products of those details,
     * using property path: "OrderDetails.Product"
     *********************************************************/
-    test("Alfreds orders expanded with their OrderDetails and Products", 4,
-            function () {
-                var query = new EntityQuery("Orders")
+    test("Alfreds orders expanded with their OrderDetails and Products", function () {
+        expect(4);
+        var query = new EntityQuery("Orders")
                   .where(alfredsPredicate)
                   .expand("OrderDetails.Product");
 
@@ -1051,7 +1052,8 @@
         ok(firstProduct !== null, "can navigate to first order's first detail's product");
     }
 
-    asyncTest("can query for products and get related Supplier entity with complex type", 2, function () {
+    asyncTest("can query for products and get related Supplier entity with complex type", function () {
+        expect(2);
         var em = newEm();
 
         EntityQuery.from('Products').top(1)
@@ -1071,10 +1073,9 @@
     * can filter, select, and expand
     *********************************************************/
     asyncTest("Can filter and select using API method " +
-              "that returns an HttpResponseMessage", 2,
-        function () {
-
-            var em = newEm();
+              "that returns an HttpResponseMessage", function () {
+        expect(2);
+        var em = newEm();
             var query = new EntityQuery.from('CustomersAsHRM')
                 .where("CustomerID", "eq", alfredsID)
                 .select('CustomerID, CompanyName');
@@ -1102,7 +1103,8 @@
     * Note that Employee has many Orders and many EmployeeTerritories
     * which matches the SO question's model structure
     *********************************************************/
-    asyncTest("Can run parallel queries and breeze will wire relationships", 5, function () {
+    asyncTest("Can run parallel queries and breeze will wire relationships", function () {
+        expect(5);
         var em = newEm();
         var queries = make_Emp_Orders_EmpTerritories_Queries(em);
         var all = [
@@ -1115,7 +1117,8 @@
         .catch(handleFail).finally(start);
     });
 
-    asyncTest("Can chain queries, dependent first, and breeze will wire relationships", 5, function () {
+    asyncTest("Can chain queries, dependent first, and breeze will wire relationships", function () {
+        expect(5);
         var em = newEm();
         var queries = make_Emp_Orders_EmpTerritories_Queries(em);
         // Run dependent entity queries first starting with Orders
@@ -1169,8 +1172,8 @@
     /*********************************************************
     * products sorted by ProductName ascending
     *********************************************************/
-    test("products sorted by name ascending ", 2, function () {
-
+    test("products sorted by name ascending ", function () {
+        expect(2);
         var query = EntityQuery.from("Products")
             .expand("Category")
             .orderBy("ProductName");
@@ -1182,8 +1185,8 @@
     /*********************************************************
     * products sorted by ProductName descending
     *********************************************************/
-    test("products sorted by name descending ", 2, function () {
-
+    test("products sorted by name descending ", function () {
+        expect(2);
         var query = EntityQuery.from("Products")
             .expand("Category")
         //            .orderBy("ProductName desc"); // either this way ...
@@ -1196,8 +1199,8 @@
     /*********************************************************
     * products sorted by price descending, then name ascending
     *********************************************************/
-    test("products sorted by price descending, then name ascending ", 2, function () {
-
+    test("products sorted by price descending, then name ascending ", function () {
+        expect(2);
         var query = EntityQuery.from("Products")
             .expand("Category")
             .orderBy("UnitPrice desc, ProductName");
@@ -1212,8 +1215,8 @@
     /*********************************************************
     * products sorted by related property (Category.CategoryName)
     *********************************************************/
-    test("products sorted by related Category descending ", 2, function () {
-
+    test("products sorted by related Category descending ", function () {
+        expect(2);
         var query = EntityQuery.from("Products")
             .expand("Category")
             .orderBy("Category.CategoryName desc, ProductName");
@@ -1226,8 +1229,8 @@
     /*********************************************************
     * products take
     *********************************************************/
-    test("first 5 products w/ take(5) ", 2, function () {
-
+    test("first 5 products w/ take(5) ", function () {
+        expect(2);
         var query = EntityQuery.from("Products")
             .orderBy("ProductName")
             .take(5)
@@ -1240,8 +1243,8 @@
     /*********************************************************
     * products skip
     *********************************************************/
-    test("skip 10 products ", 2, function () {
-
+    test("skip 10 products ", function () {
+        expect(2);
         var query = EntityQuery.from("Products")
             .orderBy("ProductName")
             .skip(10)
@@ -1254,8 +1257,8 @@
     /*********************************************************
     * products paging with skip and take
     *********************************************************/
-    test("paging products with skip 10, take 5", 2, function () {
-
+    test("paging products with skip 10, take 5", function () {
+        expect(2);
         var query = EntityQuery.from("Products")
             .orderBy("ProductName")
             .skip(10)
@@ -1280,8 +1283,8 @@
     /*********************************************************
     * inlineCount of paged products
     *********************************************************/
-    test("inlineCount of paged products", 2, function () {
-
+    test("inlineCount of paged products", function () {
+        expect(2);
         // Filtered query
         var productQuery = EntityQuery.from("Products")
             .where("ProductName", "startsWith", "C");
@@ -1329,8 +1332,8 @@
     * PROJECTION: customer names of Customers starting w/ 'C'
     * A projection of just the one property
     *********************************************************/
-    test("select company names of Customers starting w/ 'C'", 2, function () {
-
+    test("select company names of Customers starting w/ 'C'", function () {
+        expect(2);
         var query = EntityQuery.from("Customers")
             .where("CompanyName", FilterQueryOp.StartsWith, "C")
             .select("CompanyName")
@@ -1353,8 +1356,8 @@
     /*********************************************************
     * PROJECTION: customer names of Orders with Freight >500
     *********************************************************/
-    test("select company names of orders with Freight > 500", 2, function () {
-
+    test("select company names of orders with Freight > 500", function () {
+        expect(2);
         var query = EntityQuery.from("Orders")
             .where("Freight", FilterQueryOp.GreaterThan, 500)
             .select("Customer.CompanyName")
@@ -1379,8 +1382,8 @@
     * PROJECTION: selected properties of Customers starting w/ 'C'
     * A projection of multiple data property
     *********************************************************/
-    test("project several properties of Customers starting w/ 'C'", 2, function () {
-
+    test("project several properties of Customers starting w/ 'C'", function () {
+        expect(2);
         var query = EntityQuery.from("Customers")
             .where("CompanyName", FilterQueryOp.StartsWith, "C")
         //.select("CustomerID", "CompanyName", "ContactName" ) // future alternate syntax?
@@ -1407,8 +1410,8 @@
     * PROJECTION: orders of Customers starting w/ 'C'
     * A projection of just the one navigation property
     *********************************************************/
-    test("select orders of Customers starting w/ 'C'", 3, function () {
-
+    test("select orders of Customers starting w/ 'C'", function () {
+        expect(3);
         var query = EntityQuery.from("Customers")
             .where("CompanyName", FilterQueryOp.StartsWith, "C")
             .select("Orders");
@@ -1424,8 +1427,8 @@
     * Note that orders are in cache because they are whole entities
     * Customer names are not entities and are not in cache.
     *********************************************************/
-    test("names of Customers starting w/ 'C' and their orders", 4, function () {
-
+    test("names of Customers starting w/ 'C' and their orders", function () {
+        expect(4);
         var query = EntityQuery.from("Customers")
             .where("CompanyName", FilterQueryOp.StartsWith, "C")
             .select("CompanyName, Orders")
@@ -1471,8 +1474,8 @@
     /*********************************************************
     * PROJECTION: Lookups - a query returing an array of entity lists
     *********************************************************/
-    test("query a lookup array of entity lists", 5, function () {
-
+    test("query a lookup array of entity lists", function () {
+        expect(5);
         var em = newEm();
         stop(); // going async ..
         EntityQuery.from('LookupsArray')
@@ -1503,8 +1506,8 @@
     * PROJECTION: Lookups - a query returing an anonymous object
     * whose properties are entity lists
     *********************************************************/
-    test("query a lookup object w/ entity list properties", 5, function () {
-
+    test("query a lookup object w/ entity list properties", function () {
+        expect(5);
         var em = newEm();
         stop(); // going async ..
         EntityQuery.from('Lookups')
@@ -1529,7 +1532,8 @@
     * PROJECTION: Populate a combobox with a list from a lookup
     * Also demonstrates QUnit testing of Knockout binding
     *********************************************************/
-    test("Can populate a combobox with a list from a lookup", 1, function () {
+    test("Can populate a combobox with a list from a lookup", function () {
+        expect(1);
         var view = setupCombobox();
         var vm = getComboboxTestVm();
         ko.applyBindings(vm, view);
@@ -1590,8 +1594,8 @@
     *********************************************************/
 
     /*********************************************************/
-    test("'Users' query returns objects of type 'UserPartial'", 3, function () {
-
+    test("'Users' query returns objects of type 'UserPartial'", function () {
+        expect(3);
         var query = EntityQuery.from("UserPartials").top(1);
         var em = newEm();
 
@@ -1607,8 +1611,8 @@
             "'user' result should not have a 'Password' property");
     }
     /*********************************************************/
-    test("'GetUserById' query returns 'UserPartial' with roles", 4, function () {
-
+    test("'GetUserById' query returns 'UserPartial' with roles", function () {
+        expect(4);
         var query = EntityQuery
             .from("GetUserById")
             .withParameters({ Id: 3 }); // id=3 has two UserRoles
@@ -1636,8 +1640,8 @@
     * Demonstrates that the same query works
     * for both server and cache.
     *********************************************************/
-    test("customers starting w/ 'A' (cache)", 4, function () {
-
+    test("customers starting w/ 'A' (cache)", function () {
+        expect(4);
         // query for customer starting with 'A', sorted by name
         // will be used BOTH on server AND on client.
         // The "expand will be ignored locally but will run remotely
@@ -1669,8 +1673,8 @@
     /*********************************************************
     * Local query does NOT return deleted entities (by default)
     *********************************************************/
-    asyncTest("Local query does NOT return deleted entities (by default)", 1, function () {
-
+    asyncTest("Local query does NOT return deleted entities (by default)", function () {
+        expect(1);
         var em = newEm();
         // fake alfreds customer in cache in a deleted state
         em.createEntity('Customer', {
@@ -1697,8 +1701,8 @@
     /*********************************************************
     * Local query CAN return deleted entities with includeDeleted option
     *********************************************************/
-    asyncTest("Local query CAN return deleted entities with includeDeleted option", 1, function () {
-
+    asyncTest("Local query CAN return deleted entities with includeDeleted option", function () {
+        expect(1);
         var em = newEm();
         // fake alfreds customer in cache in a deleted state
         em.createEntity('Customer', {
@@ -1731,8 +1735,8 @@
     * including new, unsaved customers
     * v1 - Using FetchStrategy
     *********************************************************/
-    test("combined remote & local query gets all customers w/ 'A'", 6, function () {
-
+    test("combined remote & local query gets all customers w/ 'A'", function () {
+        expect(6);
         var query = getQueryForCustomerA();
 
         // new 'A' customer in cache ... not saved
@@ -1777,8 +1781,8 @@
     * including new, unsaved customers
     * v1=using FetchStrategy.FromLocalCache
     *********************************************************/
-    test("combined remote & local query gets all customers w/ 'A' (v1 - FetchStrategy) ", 1, function () {
-
+    test("combined remote & local query gets all customers w/ 'A' (v1 - FetchStrategy) ", function () {
+        expect(1);
         var query = getQueryForCustomerA();
 
         // new 'A' customer in cache ... not saved
@@ -1803,8 +1807,8 @@
     * including new, unsaved customers
     * v2=using ExecuteLocally()
     *********************************************************/
-    test("combined remote & local query gets all customers w/ 'A' (v2- ExecuteLocally) ", 1, function () {
-
+    test("combined remote & local query gets all customers w/ 'A' (v2- ExecuteLocally) ", function () {
+        expect(1);
         var query = getQueryForCustomerA();
 
         // new 'A' customer in cache ... not saved
@@ -1825,7 +1829,8 @@
         .fin(start);
     });
 
-    test("combined remote & local query gets all Employees w/ 'A' (v2- ExecuteLocally) ", 1, function () {
+    test("combined remote & local query gets all Employees w/ 'A' (v2- ExecuteLocally) ", function () {
+        expect(1);
         var em = newEm();
 
         // create an 'Alice' employee
@@ -1853,7 +1858,8 @@
         .fin(start);
     });
 
-    test("combined remote & local query for 'A' Employees ignores changed 'Anne'.", 3, function () {
+    test("combined remote & local query for 'A' Employees ignores changed 'Anne'.", function () {
+        expect(3);
         var em = newEm();
         var anne;
         var anneQuery = EntityQuery.from('Employees')
@@ -1898,8 +1904,8 @@
     * Caller doesn't have to wait for results
     * Useful in data binding scenarios
     *********************************************************/
-    test("query customers w/ 'A' into a list", 3, function () {
-
+    test("query customers w/ 'A' into a list", function () {
+        expect(3);
         // list could be an observable array bound to the UI
         var customerList = [];
 
@@ -1981,10 +1987,9 @@
     /*********************************************************
      * Fetch unchanged Customer by key found on server
      *********************************************************/
-    test("fetchEntityByKey of Customer found on the server", 2,
-        function () {
-
-            var em = newEm(); // empty manager
+    test("fetchEntityByKey of Customer found on the server", function () {
+        expect(2);
+        var em = newEm(); // empty manager
 
             stop(); // should go async
             em.fetchEntityByKey("Customer", alfredsID,
@@ -2005,10 +2010,9 @@
     /*********************************************************
     * Fetch unchanged Customer by key found in cache
     *********************************************************/
-    test("fetchEntityByKey of unchanged Customer found in cache", 2,
-        function () {
-
-            var em = newEm(); // empty manager
+    test("fetchEntityByKey of unchanged Customer found in cache", function () {
+        expect(2);
+        var em = newEm(); // empty manager
             var id = '11111111-2222-3333-4444-555555555555';
             // fake it in cache so we can find it
             attachCustomer(em, id);
@@ -2024,10 +2028,9 @@
     /*********************************************************
     * Fetch unchanged Customer by key found in cache using EntityType instead of type name
     *********************************************************/
-    test("fetchEntityByKey of unchanged Customer found in cache using EntityType", 2,
-        function () {
-
-            var em = newEm(); // empty manager
+    test("fetchEntityByKey of unchanged Customer found in cache using EntityType", function () {
+        expect(2);
+        var em = newEm(); // empty manager
             var id = '11111111-2222-3333-4444-555555555555';
             // fake it in cache so we can find it
             var cust = attachCustomer(em, id);
@@ -2044,10 +2047,9 @@
     /*********************************************************
     * Fetch unchanged Customer by key found in cache using EntityKey
     *********************************************************/
-    test("fetchEntityByKey of unchanged Customer found in cache using EntityKey", 2,
-        function () {
-
-            var em = newEm(); // empty manager
+    test("fetchEntityByKey of unchanged Customer found in cache using EntityKey", function () {
+        expect(2);
+        var em = newEm(); // empty manager
             var id = '11111111-2222-3333-4444-555555555555';
             // fake it in cache so we can find it
             var cust = attachCustomer(em, id);
@@ -2071,10 +2073,9 @@
     /*********************************************************
      * Fetch OrderDetail by its 2-part key from cache from server
      *********************************************************/
-    test("fetchEntityByKey of OrderDetail by 2-part key from server", 2,
-        function () {
-
-            var em = newEm(); // empty manager
+    test("fetchEntityByKey of OrderDetail by 2-part key from server", function () {
+        expect(2);
+        var em = newEm(); // empty manager
             var orderDetailKey = testFns.wellKnownData.alfredsOrderDetailKey;
 
             stop(); // should go async
@@ -2097,9 +2098,8 @@
     /*********************************************************
     * fetchEntityByKey of non-existent Customer returns null
     *********************************************************/
-    test("fetchEntityByKey of non-existent Customer returns null", 2,
-    function () {
-
+    test("fetchEntityByKey of non-existent Customer returns null", function () {
+        expect(2);
         var em = newEm(); // empty manager
         var id = '11111111-2222-3333-4444-555555555555';
 
@@ -2120,9 +2120,8 @@
     /*********************************************************
     * fetchEntityByKey of Customer marked-for-delete returns null
     *********************************************************/
-    test("fetchEntityByKey of Customer marked-for-delete returns null", 2,
-    function () {
-
+    test("fetchEntityByKey of Customer marked-for-delete returns null", function () {
+        expect(2);
         var em = newEm(); // empty manager
         var id = '11111111-2222-3333-4444-555555555555';
         // fake it in cache so we can find it
@@ -2154,9 +2153,8 @@
     * getEntityByKey of Customer marked-for-delete returns the deleted entity
     * getEntityByKey is a synchronous method that only looks at cache
     *********************************************************/
-    test("getEntityByKey of Customer marked-for-delete returns the deleted entity", 2,
-    function () {
-
+    test("getEntityByKey of Customer marked-for-delete returns the deleted entity", function () {
+        expect(2);
         var em = newEm(); // empty manager
         var id = '11111111-2222-3333-4444-555555555555';
         // fake it in cache so we can find it
@@ -2213,10 +2211,9 @@
     /*********************************************************
      * [obsolete] Get unchanged customer by id from cache from server
      *********************************************************/
-    test("getById of unchanged customer from server [obsolete]", 2,
-        function () {
-
-            var em = newEm(); // empty manager
+    test("getById of unchanged customer from server [obsolete]", function () {
+        expect(2);
+        var em = newEm(); // empty manager
             var queryResult = { };
 
             stop(); // might go async
@@ -2233,10 +2230,9 @@
     /*********************************************************
     * Get unchanged customer by id from cache
     *********************************************************/
-    test("getById of unchanged customer from cache [obsolete]", 2,
-        function () {
-
-            var em = newEm(); // empty manager
+    test("getById of unchanged customer from cache [obsolete]", function () {
+        expect(2);
+        var em = newEm(); // empty manager
             var queryResult = {};
             attachCustomer(em, alfredsID);
 
@@ -2254,10 +2250,9 @@
     /*********************************************************
     * getById of deleted customer in cache returns null
     *********************************************************/
-    test("getById of deleted customer in cache returns null [obsolete]", 3,
-        function () {
-
-            var em = newEm(); // empty manager
+    test("getById of deleted customer in cache returns null [obsolete]", function () {
+        expect(3);
+        var em = newEm(); // empty manager
             var queryResult = {};
             var cust = attachCustomer(em, alfredsID);
             cust.entityAspect.setDeleted();
@@ -2279,10 +2274,9 @@
      /*********************************************************
      * getById of non-existent customer returns null after looking in cache and server
      *********************************************************/
-     test("getById of non-existent customer returns null [obsolete]", 2,
-        function () {
-
-            var em = newEm(); // empty manager
+     test("getById of non-existent customer returns null [obsolete]", function () {
+        expect(2);
+        var em = newEm(); // empty manager
             var id = '11111111-2222-3333-4444-555555555555';
             var queryResult = {};
 

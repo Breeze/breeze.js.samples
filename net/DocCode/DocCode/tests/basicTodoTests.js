@@ -4,7 +4,7 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
     // Classes we'll need from the Breeze namespaces
     var EntityManager = breeze.EntityManager;
@@ -26,8 +26,8 @@
     * Get all todos - condensed
     *********************************************************/
 
-    test("get all todos (condensed)", 1, function () {
-
+    test("get all todos (condensed)", function () {
+        expect(1);
         var query = new EntityQuery("Todos");
 
         verifyQuery(newEm, query, "all todos query");
@@ -37,8 +37,8 @@
     * Get all todos - raw version
     *********************************************************/
 
-    test("get all todos (raw)", 1, function () {
-
+    test("get all todos (raw)", function () {
+        expect(1);
         var query = new EntityQuery("Todos");
 
         var em = new EntityManager(serviceName);
@@ -54,11 +54,11 @@
     });
 
     /*********************************************************
-    * Get all active (not archived) todos 
+    * Get all active (not archived) todos
     *********************************************************/
 
-    test("get all active (not archived) todos", 2, function () {
-
+    test("get all active (not archived) todos", function () {
+        expect(2);
         var query = new EntityQuery("Todos")
             .where("IsArchived", Qop.Equals, false)
             .orderBy("CreatedAt");
@@ -87,11 +87,11 @@
 
     /*********************************************************
     * Get only open and unarchived todos
-    * Demonstrates use of predicate for a compound filter 
+    * Demonstrates use of predicate for a compound filter
     *********************************************************/
 
-    test("get only open and active todos", 2, function () {
-
+    test("get only open and active todos", function () {
+        expect(2);
         var p1 = new breeze.Predicate("IsArchived", Qop.Equals, false);
         var p2 = breeze.Predicate("IsDone", "==", false);
         var predicate = p1.and(p2);
@@ -124,8 +124,8 @@
     * Get all todos, ordered by creation date
     * Imitates "dataservice.getAllTodos" in Todo App
     *********************************************************/
-    test("get all todos, ordered by creation date", 2, function () {
-
+    test("get all todos, ordered by creation date", function () {
+        expect(2);
         var manager = newEm();
 
         var query = new breeze.EntityQuery
@@ -150,8 +150,8 @@
     * get first Todo in the database (uses "take")
     *********************************************************/
 
-    test("get first Todo in the db using 'take(1)'", 1, function () {
-
+    test("get first Todo in the db using 'take(1)'", function () {
+        expect(1);
         var firstQuery = new EntityQuery("Todos").take(1);
 
         stop(); // going async ... tell the testrunner to wait
@@ -164,11 +164,11 @@
     * get by id
     *********************************************************/
 
-    test("get by Id", 3, function () {
-
-        // We don't have a well-known Id to query for 
+    test("get by Id", function () {
+        expect(3);
+        // We don't have a well-known Id to query for
         // because we're always re-building the database
-        // so let's get the first Todo we find and use its Id 
+        // so let's get the first Todo we find and use its Id
         // for our get-by-id test.
 
         var firstId, firstTodo,
@@ -176,7 +176,7 @@
 
         var em = newEm();
 
-        stop(); // going async ... 
+        stop(); // going async ...
 
         // Query for the first Todo in the database
         queryForOne(em, firstQuery, "get first Todo")
@@ -203,11 +203,11 @@
     });
 
     /*********************************************************
-    * freshly queried entity is in unmodified state 
+    * freshly queried entity is in unmodified state
     *********************************************************/
 
-    test("freshly queried entity is in unchanged state", 2, function () {
-
+    test("freshly queried entity is in unchanged state", function () {
+        expect(2);
         // get the first TodoItem in the db
         var query = new EntityQuery("Todos").take(1);
 
@@ -226,8 +226,8 @@
     * a queried entity's state becomes "modified" after setting property
     *********************************************************/
 
-    test("queried entity in modified state after property set", 3, function () {
-
+    test("queried entity in modified state after property set", function () {
+        expect(3);
         // get the first TodoItem in the db
         var query = new EntityQuery("Todos").take(1);
 
@@ -250,11 +250,11 @@
     });
 
     /*********************************************************
-    * new Todo is detached 
+    * new Todo is detached
     *********************************************************/
 
-    test("new Todo is detached", 1, function () {
-
+    test("new Todo is detached", function () {
+        expect(1);
         var newTodo = createTodo("Learn Breeze");
 
         ok(newTodo.entityAspect.entityState.isDetached(),
@@ -263,11 +263,11 @@
     });
 
     /*********************************************************
-    * new Todo in cache is in added state 
+    * new Todo in cache is in added state
     *********************************************************/
 
-    test("new Todo in cache is in added state", 2, function () {
-
+    test("new Todo in cache is in added state", function () {
+        expect(2);
         var newTodo = createTodo("Learn Breeze");
 
         var em = newEm();  // new empty EntityManager
@@ -289,8 +289,8 @@
     * new Todo leaves cache and becomes detached after deletion
     *********************************************************/
 
-    test("new Todo leaves cache and becomes detached after deletion", 3, function () {
-
+    test("new Todo leaves cache and becomes detached after deletion", function () {
+        expect(3);
         var newTodo = createTodo("A bad mistake");
 
         var em = newEm();  // new empty EntityManager
@@ -312,8 +312,8 @@
     /*********************************************************
     * can get changes from cache
     *********************************************************/
-    test("get changes from cache", 3, function () {
-
+    test("get changes from cache", function () {
+        expect(3);
         var em = newEm();
         var query = new EntityQuery("Todos");
 
@@ -343,11 +343,11 @@
     });
 
     /*********************************************************
-    * entityAspect.rejectChanges reverts an entity's changes 
+    * entityAspect.rejectChanges reverts an entity's changes
     *********************************************************/
 
-    test("rejectChanges reverts pending changes", 5, function () {
-
+    test("rejectChanges reverts pending changes", function () {
+        expect(5);
         var em = newEm();
 
         // get three Todos from the db
@@ -390,12 +390,12 @@
     });
 
     /*********************************************************
-    * after deleting a queried entity, it remains in cache as "deleted" 
+    * after deleting a queried entity, it remains in cache as "deleted"
     * won't be removed from cache until saved.
     *********************************************************/
 
-    test("after deleting a queried entity, it remains in cache as 'deleted'", 3, function () {
-
+    test("after deleting a queried entity, it remains in cache as 'deleted'", function () {
+        expect(3);
         // get the first TodoItem in the db
         var query = new EntityQuery("Todos").take(1);
 
@@ -465,8 +465,8 @@
         var changes = em.getChanges();
         equal(changes.length, 3, "three of them: an Add, a Delete, and an Update");
 
-        // total number of asserts should equal 
-        // number of subscriptions + 
+        // total number of asserts should equal
+        // number of subscriptions +
         // the "hasChanges" and "getChanges" asserts.
         expect(testCount + 2);
     });
@@ -487,8 +487,8 @@
     /*********************************************************
     * Knockout property subscriptions added to each property individually
     *********************************************************/
-    test("KO property change notifications raised", 1, function () {
-
+    test("KO property change notifications raised", function () {
+        expect(1);
         var newTodo = createTodo("test me");
 
         // Tricky: store notifications on the recorder
@@ -546,8 +546,8 @@
     /*********************************************************
     * Breeze propertyChanged raised when any property changes
     *********************************************************/
-    test("Breeze propertyChanged raised when any property changes", 1, function () {
-
+    test("Breeze propertyChanged raised when any property changes", function () {
+        expect(1);
         var newTodo = createTodo("test me");
 
         var notifications = [];
@@ -595,13 +595,13 @@
     * Todo validation errors raised when properties set to bad values
     *********************************************************/
     test("Todo validation errors raised when properties set to bad values", function () {
-        
+
         var em = newEm();  // new empty EntityManager
         var todo = createTodo("test me");
-        
+
         // enter the cache as 'Unchanged'
-        em.attachEntity(todo); 
-        
+        em.attachEntity(todo);
+
         // Start monitoring validation error changes
         todo.entityAspect
             .validationErrorsChanged.subscribe(assertValidationErrorsChangedRaised);
@@ -611,7 +611,7 @@
         todo.IsDone(true); // ok. no problem
 
         todo.IsDone("true"); // still ok with coercion
-        
+
         todo.IsDone("xxx"); // 2. Wrong data type
 
         todo.Id(null); // 3. Id is the pk; automatically required
@@ -623,7 +623,7 @@
             "Keep it simple");
 
         todo.entityAspect.rejectChanges(); // (7,8) reverses Id & IsDone errors 
-        
+
         expect(8); // asserts about validation errors
 
     });
@@ -650,8 +650,8 @@
     /*********************************************************
     * Export changes to local storage and re-import them
     *********************************************************/
-    test("Export changes to local storage and re-import", 5, function () {
-
+    test("Export changes to local storage and re-import", function () {
+        expect(5);
         var em = newEm();
 
         // add a new Todo to the cache
@@ -689,7 +689,7 @@
         ok(newTodo !== restoredState,
             "Restored Todo is not the same object as the original Todo");
     });
-        
+
 
     /*********************************************************
     * HELPERS

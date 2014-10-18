@@ -31,7 +31,8 @@
     /*********************************************************
     * concurrent save throws exceptions by default
     *********************************************************/
-    test("Concurrent save throws exceptions by default", 2, function () {
+    test("Concurrent save throws exceptions by default", function () {
+        expect(2);
         var em = newEm();
         // add new Todo (not interest in the item)
         em.createEntity('TodoItem', { Description: "DeleteMe" });
@@ -71,7 +72,8 @@
     * DON'T USE THIS FEATURE UNLESS YOU KNOW WHY
     *********************************************************/
     test("Concurrent save w/ 'allowConcurrentSaves' saves a new entity twice",
-        4, function () {
+        function () {
+        expect(4);
         var em = newEm();
         var description = "DeleteMe";
         em.createEntity('TodoItem', { Description: description });
@@ -132,7 +134,8 @@
     * concurrent save with separate managers is ok
     * as if two different users saved concurrently
     *********************************************************/
-    test("Concurrent save with separate managers is ok", 5, function () {
+    test("Concurrent save with separate managers is ok", function () {
+        expect(5);
         var em1 = newEm();
         var em2 = newEm();
 
@@ -178,8 +181,9 @@
     /*********************************************************
     * second save w/ savequeuing does not resave
     *********************************************************/
-    test("Second save w/ savequeuing does not resave", 2, function () {
-            var em = newEm();
+    test("Second save w/ savequeuing does not resave", function () {
+        expect(2);
+        var em = newEm();
             em.enableSaveQueuing(true); // <-- 
             
             em.createEntity('TodoItem', { Description: "DeleteMe" });
@@ -217,8 +221,9 @@
     * Two [add+save] events are in two separate saves
     * The saves are in order
     *********************************************************/
-    test("Two [add+save] events are in two separate saves", 6, function () {
-            var em = newEm();
+    test("Two [add+save] events are in two separate saves", function () {
+        expect(6);
+        var em = newEm();
             em.enableSaveQueuing(true); // <-- 
 
             var todo1 = em.createEntity('TodoItem', { Description: "DeleteMe 1" });
@@ -269,8 +274,9 @@
     * Queued saves may be joined but will not double-save
     * in which case the 3rd save is an empty save
     *********************************************************/
-    test("Queued saves may be joined but will not double-save", 6, function () {
-            var em = newEm();
+    test("Queued saves may be joined but will not double-save", function () {
+        expect(6);
+        var em = newEm();
             em.enableSaveQueuing(true); // <-- 
 
             stop(); // going async ... tell the testrunner to wait
@@ -332,8 +338,9 @@
     /*********************************************************
     * Failure in a middle save aborts the rest
     *********************************************************/
-    test("Failure in a middle save aborts the rest", 8, function () {
-            var em = newEm();
+    test("Failure in a middle save aborts the rest", function () {
+        expect(8);
+        var em = newEm();
             em.enableSaveQueuing(true); // <-- 
 
             stop(); // going async ... tell the testrunner to wait
@@ -409,7 +416,8 @@
     /*********************************************************
     * Failure in first save aborts the rest
     *********************************************************/
-    test("Failure in first save aborts the rest", 6, function () {
+    test("Failure in first save aborts the rest", function () {
+        expect(6);
         var em = newEm();
         em.enableSaveQueuing(true); // <-- 
 

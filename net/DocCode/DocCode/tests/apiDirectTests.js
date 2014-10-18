@@ -17,7 +17,8 @@
     * purge the Todos Db
     *********************************************************/
 
-    test("purge the Todos Db", 1, function () {
+    test("purge the Todos Db", function () {
+        expect(1);
         stop(); // going async
         testFns.todosPurge()
             .then(function (msg) {
@@ -25,15 +26,14 @@
             })
             .fail(testFns.handleFail).fin(start);
     });
-    
-   
+
 
     /*********************************************************
     * reset the Todos Db
     *********************************************************/
 
-    test("reset the Todos Db", 1, function () {
-
+    test("reset the Todos Db", function () {
+        expect(1);
         stop();
         testFns.todosReset()
             .then(function (msg) {

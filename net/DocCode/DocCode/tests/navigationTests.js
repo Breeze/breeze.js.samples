@@ -30,8 +30,8 @@
     * Use case: 
     *   Eagerly load OrderDetails with parent Order
     *********************************************************/
-    test("Customer via navigation", 4, function () {
-
+    test("Customer via navigation", function () {
+        expect(4);
         var alfredsOrdersQuery = new EntityQuery("Orders")
           .where(alfredsPredicate)
           .expand("Customer");
@@ -69,8 +69,8 @@
     * Use case: 
     *   Eagerly load OrderDetails with parent Order
     *********************************************************/
-    test("OrderDetails via navigation", 4, function () {
-
+    test("OrderDetails via navigation", function () {
+        expect(4);
         var alfredsFirstOrderQuery = new EntityQuery("Orders")
           .where(alfredsPredicate).take(1)
           .expand("OrderDetails");
@@ -104,8 +104,8 @@
     * Use case: 
     *   Creating a new Order and assigning it to an existing Customer
     *********************************************************/
-    test("setting child's parent entity enables parent to navigate to child", 4, function () {
-
+    test("setting child's parent entity enables parent to navigate to child", function () {
+        expect(4);
         var em = newEm();
         var existingCustomer = getFakeExistingCustomer(em);
 
@@ -134,8 +134,8 @@
     /*********************************************************
     * setting child's parent entity raises property changed
     *********************************************************/
-    test("setting child's parent entity raises property changed", 3, function () {
-
+    test("setting child's parent entity raises property changed", function () {
+        expect(3);
         var em = newEm();
         var existingCustomer = getFakeExistingCustomer(em);
 
@@ -174,8 +174,8 @@
     *   When writing a general purpose Breeze library use the Breeze 
     *   getProperty/setProperty syntax to avoid  binding framework dependencies.
     *********************************************************/
-    test("can use getProperty and setProperty to read/write navigation properties", 3, function () {
-
+    test("can use getProperty and setProperty to read/write navigation properties", function () {
+        expect(3);
         var em = newEm();
         var existingCustomer = getFakeExistingCustomer(em);
 
@@ -202,8 +202,8 @@
     /*********************************************************
     * Do not set a collection navigation property!
     *********************************************************/
-    test("cannot set a collection navigation property", 1, function () {
-
+    test("cannot set a collection navigation property", function () {
+        expect(1);
         var em = newEm();
         var existingCustomer = getFakeExistingCustomer(em);
 
@@ -215,8 +215,8 @@
     /*********************************************************
     * Can add to a collection navigation property
     *********************************************************/
-    test("add child entity to a parent's collection", 3, function () {
-
+    test("add child entity to a parent's collection", function () {
+        expect(3);
         var em = newEm();
         var existingCustomer = getFakeExistingCustomer(em);
 
@@ -240,9 +240,8 @@
     /*********************************************************
     * Adding to a collection navigation property raises KO notification
     *********************************************************/
-    test("adding to a collection navigation property raises KO notification", 2,
-        function () {
-
+    test("adding to a collection navigation property raises KO notification", function () {
+        expect(2);
         var em = newEm();
         var existingCustomer = getFakeExistingCustomer(em);
 
@@ -279,8 +278,8 @@
     /*********************************************************
     * detaching a child entity empties its navigations
     *********************************************************/
-    test("detaching an entity empties its navigations", 3, function () {
-
+    test("detaching an entity empties its navigations", function () {
+        expect(3);
         var em = newEm();
         var existingCustomer = getFakeExistingCustomer(em);
 
@@ -303,8 +302,8 @@
     /*********************************************************
    * detaching a parent entity empties its navigations
    *********************************************************/
-    test("detaching an entity empties its navigations", 3, function () {
-
+    test("detaching an entity empties its navigations", function () {
+        expect(3);
         var em = newEm();
         var existingCustomer = getFakeExistingCustomer(em);
 
@@ -329,8 +328,8 @@
     * Use case: 
     *   reassigning an order to a different Customer
     *********************************************************/
-    test("changing child's parent entity removes it from old parent", 4, function () {
-
+    test("changing child's parent entity removes it from old parent", function () {
+        expect(4);
         var em = newEm();
         var customer1 = getFakeExistingCustomer(em, "Customer 1");
         var customer2 = getFakeExistingCustomer(em, "Customer 2");
@@ -357,8 +356,8 @@
     * undoing a change of parent nav restores original state
     * for both the child entity and the related customers
     *********************************************************/
-    test("undoing a change of parent nav restores original state", 5, function () {
-
+    test("undoing a change of parent nav restores original state", function () {
+        expect(5);
         var em = newEm();
         var customer1 = getFakeExistingCustomer(em, "Customer 1");
         var customer2 = getFakeExistingCustomer(em, "Customer 2");
@@ -389,8 +388,8 @@
     * The child is left in a modified state, not deleted state; 
     * Breeze does not cascade delete.
     *********************************************************/
-    test("deleting a child's parent clears the parent nav & defaults the parent FK", 5, function () {
-
+    test("deleting a child's parent clears the parent nav & defaults the parent FK", function () {
+        expect(5);
         var em = newEm();
         var customer = getFakeExistingCustomer(em);
         var order = getFakeExistingOrder(em, "customer", customer);
@@ -417,8 +416,8 @@
     /*********************************************************
     * setting child's parent entity null removes it from old parent
     *********************************************************/
-    test("setting child's parent entity null removes it from old parent", 2, function () {
-
+    test("setting child's parent entity null removes it from old parent", function () {
+        expect(2);
         var em = newEm();
         var customer = getFakeExistingCustomer(em);
 
@@ -441,8 +440,8 @@
     * if you don't want this side-effect, 
     * set the FK instead of the parent navigation property
     *********************************************************/
-    test("setting unattached child's parent entity pulls it into cache", 3, function () {
-
+    test("setting unattached child's parent entity pulls it into cache", function () {
+        expect(3);
         var em = newEm();
         var existingCustomer = getFakeExistingCustomer(em);
 
@@ -474,8 +473,8 @@
     * That state does NOT change when the parent becomes available
     * via query.
     *********************************************************/
-    test("setting existing child's parent entity changes child's state", 1, function () {
-
+    test("setting existing child's parent entity changes child's state", function () {
+        expect(1);
         var em = newEm();
         var existingOrder = getFakeExistingOrder(em);
         var existingCustomer = getFakeExistingCustomer(em);
@@ -490,8 +489,8 @@
    * throws exception if set a navigation property with
    * entity in a different EntityManager
    *********************************************************/
-    test("exception if set nav to entity with different manager", 2, function () {
-
+    test("exception if set nav to entity with different manager", function () {
+        expect(2);
         var em1 = newEm();
         var existingOrder = getFakeExistingOrder(em1);
 
@@ -514,8 +513,8 @@
     *   Creating a new Order and setting it's parent CustomerID
     *   when you don't have the Customer (which we do in this test)
     *********************************************************/
-    test("setting FK enables two-way navigation", 4, function () {
-
+    test("setting FK enables two-way navigation", function () {
+        expect(4);
         var em = newEm();
         var existingCustomer = getFakeExistingCustomer(em);
 
@@ -547,8 +546,8 @@
     /*********************************************************
     * changing FK to key of a different parent removes it from old parent
     *********************************************************/
-    test("changing FK to key of a different parent removes it from old parent", 3, function () {
-
+    test("changing FK to key of a different parent removes it from old parent", function () {
+        expect(3);
         var em = newEm();
         var customer1 = getFakeExistingCustomer(em, "Customer 1");
         var customer2 = getFakeExistingCustomer(em, "Customer 2");
@@ -572,8 +571,8 @@
     /*********************************************************
     * changing FK to null removes it from old parent
     *********************************************************/
-    test("changing FK to null removes it from old parent", 2, function () {
-
+    test("changing FK to null removes it from old parent", function () {
+        expect(2);
         var em = newEm();
         var customer = getFakeExistingCustomer(em);
 
@@ -723,7 +722,8 @@
     * and then fill it with proper values when they arrive
     * preserving object identity as you do so.
     *********************************************************/
-    test("fill placeholder customer asynchronously", 3, function () {
+    test("fill placeholder customer asynchronously", function () {
+        expect(3);
         var em = newEm();
         var custType = em.metadataStore.getEntityType("Customer");
         var customer = custType.createEntity();
@@ -775,7 +775,8 @@
     * can set child' parent navigation when both child and parent are detached
     * Use case: NONE ... don't do this. It may work but that is accidental
     *********************************************************/
-    test("can set child' parent navigation when both child and parent are detached", 5, function () {
+    test("can set child' parent navigation when both child and parent are detached", function () {
+        expect(5);
         var newCustomer = createCustomer();
         var newOrder = createOrder();
 

@@ -47,8 +47,9 @@
 
      module("jQueryAjaxAdapter tests (requestInterceptor)", beforeEach);
 
-     asyncTest("can get all customers w/o interceptor", 1, function () {
-         EntityQuery.from("Customers")                
+     asyncTest("can get all customers w/o interceptor", function () {
+        expect(1);
+        EntityQuery.from("Customers")                
            .using(newEm()).execute()
            .then(success).catch(handleFail).finally(start);             
 
@@ -58,8 +59,9 @@
          }
      });
 
-     asyncTest("can get faked customer response with interceptor", 1, function () {
-         ajaxAdapter.requestInterceptor = interceptor;
+     asyncTest("can get faked customer response with interceptor", function () {
+        expect(1);
+        ajaxAdapter.requestInterceptor = interceptor;
          EntityQuery.from("Customers")
            .using(newEm()).execute()
            .then(success).catch(handleFail).finally(start);
@@ -74,8 +76,9 @@
          }
      });
 
-     asyncTest("can timeout with interceptor", 1, function () {
-         ajaxAdapter.requestInterceptor = interceptor;
+     asyncTest("can timeout with interceptor", function () {
+        expect(1);
+        ajaxAdapter.requestInterceptor = interceptor;
          EntityQuery.from("Customers")
            .using(newEm()).execute()
            .then(success).catch(expectedFail).finally(start);
@@ -93,9 +96,9 @@
          }
      });
 
-     asyncTest("can create cancel option with interceptor", 1, function () {
-
-         var canceller = new Canceller(); // Canceller defined among helpers
+     asyncTest("can create cancel option with interceptor", function () {
+        expect(1);
+        var canceller = new Canceller(); // Canceller defined among helpers
 
          ajaxAdapter.requestInterceptor = function (requestInfo) {
                  canceller.requestInfo = requestInfo;
@@ -126,8 +129,9 @@
          }
      });
 
-     asyncTest("long timeout won't interfere with query", 1, function () {
-         ajaxAdapter.requestInterceptor = interceptor;
+     asyncTest("long timeout won't interfere with query", function () {
+        expect(1);
+        ajaxAdapter.requestInterceptor = interceptor;
          EntityQuery.from("Customers")
            .using(newEm()).execute()
            .then(success).catch(fail).finally(start);
@@ -148,8 +152,9 @@
          }
      });
 
-     asyncTest("interceptor.oneTime flag prevents its reuse", 1, function () {
-         ajaxAdapter.requestInterceptor = interceptor;
+     asyncTest("interceptor.oneTime flag prevents its reuse", function () {
+        expect(1);
+        ajaxAdapter.requestInterceptor = interceptor;
          interceptor.oneTime = true;
 
          EntityQuery.from("Customers")
@@ -195,8 +200,8 @@
       * Because Breeze bug "2590 dataserviceadapter throws if ajax call throws",
       * the exception bubbles out synchronously and the test fails
       *********************************************************/
-     asyncTest("exception in ajax adapter should be caught in promise", 1, function() {
-
+     asyncTest("exception in ajax adapter should be caught in promise", function() {
+        expect(1);
          var em = new breeze.EntityManager('/bad/address/');
          var wasCaught = false;
 

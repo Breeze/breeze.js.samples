@@ -35,7 +35,8 @@
     /*********************************************************
     * validates a mapped property
     *********************************************************/
-    test("validates a mapped property", 3, function () {
+    test("validates a mapped property", function () {
+        expect(3);
         var em = newEm();
         var meta = em.metadataStore;
 
@@ -69,7 +70,8 @@
     /*********************************************************
     * validates an unmapped property
     *********************************************************/
-    test("validates an unmapped property", 4, function () {
+    test("validates an unmapped property", function () {
+        expect(4);
         var em = newEm();
         var meta = em.metadataStore;
 
@@ -110,8 +112,8 @@
     /*********************************************************
     * validates on attach by default (validateOnAttach == true)
     *********************************************************/
-    test("validates on attach by default", 1, function () {
-
+    test("validates on attach by default", function () {
+        expect(1);
         var em = newEm();  // new empty EntityManager
         var empType = getEmployeeType(em);
 
@@ -134,8 +136,8 @@
     /*********************************************************
     * does NOT validate on attach when that ValidationOption turned off
     *********************************************************/
-    test("does not validate on attach when validateOnAttach option is false", 1, function () {
-
+    test("does not validate on attach when validateOnAttach option is false", function () {
+        expect(1);
         var em = newEm();  // new empty EntityManager
 
         // copy options, changing only "validateOnAttach"
@@ -311,7 +313,8 @@
     /*********************************************************
     * Auto property validation only for attached entity
     *********************************************************/
-    test("Auto property validation only for attached entity", 2, function () {
+    test("Auto property validation only for attached entity", function () {
+        expect(2);
         var emp = createEmployee();
 
         emp.EmployeeID(null); // value violates ID required
@@ -333,7 +336,8 @@
     /*********************************************************
     * Detaching entity clears validation errors
     *********************************************************/
-    test("Detaching entity clears validation errors", 3, function () {
+    test("Detaching entity clears validation errors", function () {
+        expect(3);
         var em = newEm();  // new empty EntityManager;
 
         var emp = em.createEntity('Employee');
@@ -421,7 +425,8 @@
     /*********************************************************
     * Employee can be from Canada (before countryIsInUS validator)
     *********************************************************/
-    test("Employee can be from Canada (before countryIsInUS validator)", 1, function () {
+    test("Employee can be from Canada (before countryIsInUS validator)", function () {
+        expect(1);
         var emp = createEmployee("Wayne", "Gretzky");
         emp.Country("Canada");
 
@@ -437,7 +442,8 @@
     /*********************************************************
     * Employee must be from US (after countryIsInUS validator)
     *********************************************************/
-    test("Employee must be from US (after countryIsInUS validator)", 2, function () {
+    test("Employee must be from US (after countryIsInUS validator)", function () {
+        expect(2);
         var em = newEm();
         var emp = createEmployee("Shania", "Twain");
         emp.EmployeeID(1);
@@ -465,8 +471,8 @@
     * Customer must be from US (after countryIsInUS validator)
     * Illustrates reuse of validator on different entity type
     *********************************************************/
-    test("Customer must be in US (after countryIsInUS Validator)", 2, function () {
-
+    test("Customer must be in US (after countryIsInUS Validator)", function () {
+        expect(2);
         var em = newEm();
         var cust = createCustomer("Univ. of Waterloo");
         cust.CustomerID(testFns.newGuidComb());
@@ -492,8 +498,8 @@
     * Customer must be from Canada (after configured countryValidator)
     * Illustrates reuse of validator on different entity type
     *********************************************************/
-    test("Customer must be in Canada (after configured countryValidator)", 2, function () {
-
+    test("Customer must be in Canada (after configured countryValidator)", function () {
+        expect(2);
         var em = newEm();
 
         // create a Canada-only validator
@@ -522,8 +528,8 @@
     /*********************************************************
     * US Customer must have valid zip code
     *********************************************************/
-    test("US Customer must have valid zip code", 2, function () {
-
+    test("US Customer must have valid zip code", function () {
+        expect(2);
         var em = newEm();
 
         // add US zip code validator to the entity (not to a property)
@@ -556,8 +562,8 @@
     /*********************************************************
     * Remove a rule ... and an error
     *********************************************************/
-    test("Remove a rule", 2, function () {
-
+    test("Remove a rule", function () {
+        expect(2);
         var em = newEm();
 
         var alwaysWrong = new Validator(
@@ -600,8 +606,8 @@
     /*********************************************************
     * Add and remove a (fake) ValidationError
     *********************************************************/
-    test("Add and remove a (fake) ValidationError", 3, function () {
-
+    test("Add and remove a (fake) ValidationError", function () {
+        expect(3);
         var em = newEm();
 
         // We need a validator to make a ValidationError

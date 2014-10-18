@@ -10,7 +10,7 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
     var origOData = window.OData;
     // 'Web API' adapter by default; a test can change it
@@ -20,7 +20,7 @@
     var fakeAjaxErr = 'All requests are "errors" in changeRequestInterceptor tests';
 
     /************************** UNIT TESTS *************************/
-    
+
     module("changeRequestInterceptor unit tests", {
         setup: function () { ajaxAdapter.ajax = fakeAjaxFn; },
         teardown: function() {
@@ -30,7 +30,8 @@
         }
     });
 
-    asyncTest("Doing nothing with the changeRequestInterceptor is fine", 2, function () {
+    asyncTest("Doing nothing with the changeRequestInterceptor is fine", function () {
+        expect(2);
         var stuff = prepareCachedData();
         var origNote = stuff.employee.getProperty('Notes');
         stuff.employee.setProperty('Notes', 'An alternative note.');
@@ -43,15 +44,15 @@
             equal(empData.entityAspect.originalValuesMap.Notes, origNote, "should send original note in orig values");
         }
     });
-    asyncTest("Web API adapter's changeRequestInterceptor methods are called", 6, function () {
-
+    asyncTest("Web API adapter's changeRequestInterceptor methods are called", function () {
+        expect(6);
         var stuff = prepareCachedData();
 
         dsAdapter.changeRequestInterceptor = function (saveContext, saveBundle) {
             ok(saveContext != null, '"saveContext" is available to the interceptor constructor');
             ok(saveBundle != null, '"saveBundle" is available to the interceptor constructor');
 
-            this.getRequest = function (request, entity, index) {               
+            this.getRequest = function (request, entity, index) {
                 ok(request != null, 'entity request is available to the interceptor getRequest method');
                 ok(entity === stuff.employee, 'the entity passed to the interceptor getRequest method is the changed employee');
                 equal(index, 0, "the index of the entity in the change-set is passed to the interceptor getRequest method");
@@ -65,15 +66,15 @@
         stuff.em.saveChanges().then(successGuard).fin(start);
     });
 
-    asyncTest("Web API adapter's changeRequestInterceptor.getRequest can clear original value", 1, function () {
-
+    asyncTest("Web API adapter's changeRequestInterceptor.getRequest can clear original value", function () {
+        expect(1);
         dsAdapter.changeRequestInterceptor = function (/*saveContext, saveBundle*/) {
             this.getRequest = function (request/*, entity, index*/) {
                 var map = request.entityAspect.originalValuesMap;
                 if (map && map.Notes) {
                     // Null the original value but KEEP the property name.
                     // The existence of this property name tells the server you want to update it
-                    // with the current value in the request body.              
+                    // with the current value in the request body.
                     map.Notes = null;
                 }
                 return request;
@@ -92,8 +93,8 @@
         }
     });
 
-    asyncTest("Web API adapter's changeRequestInterceptor.done can clear original values", 4, function () {
-
+    asyncTest("Web API adapter's changeRequestInterceptor.done can clear original values", function () {
+        expect(4);
         dsAdapter.changeRequestInterceptor = function (/*saveContext, saveBundle*/) {
             this.getRequest = function (request/*, entity, index*/) { return request;};
             this.done = function( requests) {
@@ -130,8 +131,8 @@
         }
     });
 
-    asyncTest("Web API adapter's changeRequestInterceptor.getRequest can discard a changed property", 5, function () {
-
+    asyncTest("Web API adapter's changeRequestInterceptor.getRequest can discard a changed property", function () {
+        expect(5);
         dsAdapter.changeRequestInterceptor = function (/*saveContext, saveBundle*/) {
             this.getRequest = function (request/*, entity, index*/) {
                 var map = request.entityAspect.originalValuesMap;
@@ -139,7 +140,7 @@
                     delete request.__unmapped.Foo; // don't send this unmapped property
                 }
                 if (map.Foo) {
-                    // Delete the original value property name too              
+                    // Delete the original value property name too
                     delete map.Foo;
                 }
                 return request;
@@ -153,7 +154,7 @@
         stuff.employee.setProperty('Foo', newFoo);
         stuff.employee.setProperty('Zig', 'Zag');
         // updating a mapped property triggers EntityState change (so will save)
-        stuff.employee.setProperty('LastName', 'Hiss'); 
+        stuff.employee.setProperty('LastName', 'Hiss');
         stuff.em.saveChanges().then(successGuard).catch(inspect).fin(start);
 
         function inspect(error) {
@@ -173,7 +174,8 @@
         }
     });
 
-    asyncTest("OData adapter's changeRequestInterceptor.getRequest can add request header", 2, function () {
+    asyncTest("OData adapter's changeRequestInterceptor.getRequest can add request header", function () {
+        expect(2);
         useFakeOData();
         var funHeader = "ha ha ha";
         dsAdapter.changeRequestInterceptor = function (/*saveContext, saveBundle*/) {
@@ -197,7 +199,8 @@
             });
         }
     });
-    asyncTest("OData adapter's changeRequestInterceptor.done can tweak requestUr", 2, function() {
+    asyncTest("OData adapter's changeRequestInterceptor.done can tweak requestUr", function() {
+        expect(2);
         useFakeOData();
         var uriPrefix = "test/";
         dsAdapter.changeRequestInterceptor = function( /*saveContext, saveBundle*/) {
@@ -224,7 +227,7 @@
     });
 /************************** TEST HELPERS *************************/
 
-    // errors out immediately. 
+    // errors out immediately.
     // Use getSaveData(error) to see what the interceptor did
     function fakeAjaxFn(config) {
         var httpResponse = {

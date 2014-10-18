@@ -37,25 +37,29 @@
         setModelLibrary(defaultModelLibraryName);
     }
 
-    test("returns empty graph when no roots (regardless of expand)", 1, function () {
+    test("returns empty graph when no roots (regardless of expand)", function () {
+        expect(1);
         var graph = getEntityGraph([], 'Customer');
         equal(graph.length, 0, "should return empty array");
     });
 
-    test("returns all orders when no expand", 1, function () {
+    test("returns all orders when no expand", function () {
+        expect(1);
         var graph = getEntityGraph(orders);
         equal(graph.length, orders.length,
             "should return same length as `orders`, " + orders.length);
     });
 
-    test("all orders with expand='Customer' returns orders and their customers", 1, function () {
+    test("all orders with expand='Customer' returns orders and their customers", function () {
+        expect(1);
         var graph = getEntityGraph(orders, 'Customer');
         var expectedLength = orders.length + customers.length;
         equal(graph.length, expectedLength,
             "should return same length as `orders`+`customers`, " + expectedLength);
     });
 
-    test("returns first order and its customer with expand='Customer'", 1, function () {
+    test("returns first order and its customer with expand='Customer'", function () {
+        expect(1);
         var order = orders[0];
         var orderCust = order.getProperty('Customer');
 
@@ -67,7 +71,8 @@
         ok(k, "should return one `Order`+ one `Customer`");
     });
 
-    test("returns first order and its customer with expandClause", 1, function () {
+    test("returns first order and its customer with expandClause", function () {
+        expect(1);
         var query = new breeze.EntityQuery.from('Orders').expand('Customer');
 
         var order = orders[0];
@@ -81,7 +86,8 @@
         ok(k, "should return one `Order`+ one `Customer`");
     });
 
-    test("returns just first order with expand='Customer' when order.Customer is null", 2, function (){
+    test("returns just first order with expand='Customer' when order.Customer is null", function (){
+        expect(2);
         var order = orders[0];
         order.setProperty('Customer', null);
 
@@ -93,14 +99,16 @@
             "the order should be 'Modified'");
     });
 
-    test("first order returns no details with expand='OrderDetails'", 1, function () {
+    test("first order returns no details with expand='OrderDetails'", function () {
+        expect(1);
         var order = orders[0];
         var graph = getEntityGraph(order, 'OrderDetails');
         var k = graph.length === 1 && graph[0] === order;
         ok(k, "should return exactly one `Order` (the first)");
     });
 
-    test("last order returns details with expand='OrderDetails'", 3, function () {
+    test("last order returns details with expand='OrderDetails'", function () {
+        expect(3);
         var order = orders.pop();
         var orderdetails = order.getProperty('OrderDetails');
 
@@ -111,8 +119,8 @@
         assertAllInNoDups(graph, orderdetails, " order details");
     });
 
-    test("last order returns details (including deleted) with expand='OrderDetails'", 4,
-    function () {
+    test("last order returns details (including deleted) with expand='OrderDetails'", function () {
+        expect(4);
         var order = orders.pop();
         var orderdetails = order.getProperty('OrderDetails').slice();
         orderdetails[0].entityAspect.setDeleted();
@@ -126,8 +134,8 @@
              "'order.OrderDetails' returns one fewer because of deletion");
     });
 
-    test("get order graph of changes only (ready for save)", 1,
-    function () {
+    test("get order graph of changes only (ready for save)", function () {
+        expect(1);
         var order = orders.pop();
         var orderdetails = order.getProperty('OrderDetails').slice();
 
@@ -146,8 +154,8 @@
         assertCount(changes, 3);
     });
 
-    test("last order returns customer and details with expand='Customer,OrderDetails'", 4,
-    function () {
+    test("last order returns customer and details with expand='Customer,OrderDetails'", function () {
+        expect(4);
         var order = orders.pop();
         var orderCust = order.getProperty('Customer');
         var orderdetails = order.getProperty('OrderDetails');
@@ -161,7 +169,8 @@
         assertAllInNoDups(graph, orderdetails, " order details");
     });
 
-    test("first order returns just the order with expand='OrderDetails.Product'", 1, function () {
+    test("first order returns just the order with expand='OrderDetails.Product'", function () {
+        expect(1);
         var order = orders[0];
         var graph = getEntityGraph(order, 'OrderDetails.Product');
         var k = graph.length === 1 && graph[0] === order;
@@ -169,8 +178,8 @@
     });
 
     test("last order returns the order, its customer, its details, and their products " +
-         "with expand='OrderDetails.Product, Customer'", 5,
-    function () {
+         "with expand='OrderDetails.Product, Customer'", function () {
+        expect(5);
         var order = orders.pop();
         var orderCust = order.getProperty('Customer');
         var orderdetails = order.getProperty('OrderDetails');
@@ -190,15 +199,17 @@
     // Compact expand
     var custExpand = 'Orders.OrderDetails.Product, Orders.Employee';
     test("first customer returns its orders, their employees, their details, and their products " +
-        "with compact expand='" + custExpand + "'", 6, function () {
-            customerExpandTest(customers[0]);
+        "with compact expand='" + custExpand + "'", function () {
+        expect(6);
+        customerExpandTest(customers[0]);
     });
 
     // Verbose expand
     custExpand = 'Orders, Orders.OrderDetails, Orders.OrderDetails.Product, Orders.Employee';
     test("first customer returns its orders, their employees, their details, and their products " +
-        "with verbose expand='" + custExpand + "'", 6, function () {
-            customerExpandTest(customers[0]);
+        "with verbose expand='" + custExpand + "'", function () {
+        expect(6);
+        customerExpandTest(customers[0]);
         });
 
     function customerExpandTest (cust) {
@@ -229,7 +240,8 @@
     }
 
     // works for self-referential type
-    test("first employee should have 2 layers of direct reports", 3, function () {
+    test("first employee should have 2 layers of direct reports", function () {
+        expect(3);
         var first = employees[0];
         var seconds = first.getProperty('DirectReports');
         var thirds = [];
@@ -245,7 +257,8 @@
     });
 
     // get graph from a Customer expand query; requires a manager instance
-    test("customer query with 'Orders.OrderDetails' returns graph with orders & details", 4, function () {
+    test("customer query with 'Orders.OrderDetails' returns graph with orders & details", function () {
+        expect(4);
         var cust = customers[0];
 
         var query = breeze.EntityQuery.from('Customers')
@@ -256,7 +269,8 @@
     });
 
     // get graph from a Customer query but override expand; requires a manager instance
-    test("customer query with separate expand spec returns graph with orders & details", 4, function () {
+    test("customer query with separate expand spec returns graph with orders & details", function () {
+        expect(4);
         var cust = customers[1];
 
         var query = breeze.EntityQuery.from('Customers')
@@ -286,11 +300,13 @@
     // 2nd customer's orders are mix of Order and its InternationalOrder subtype
     custExpand = 'Orders.OrderDetails.Product, Orders.Employee';
     test("second customer returns its mix of orders (regular and international), \
-         with expand='" + custExpand + "'", 6, function () {
-            customerExpandTest(customers[0]);
+         with expand='" + custExpand + "'", function () {
+        expect(6);
+        customerExpandTest(customers[0]);
          });
 
-    test("InternationalOrder's OrderDetail returns its parent InternationalOrder", 3, function () {
+    test("InternationalOrder's OrderDetail returns its parent InternationalOrder", function () {
+        expect(3);
         var detail = internationalOrder.getProperty('OrderDetails')[0];
         var graph = getEntityGraph(detail, 'Order');
         assertCount(graph, 2);
@@ -298,7 +314,8 @@
         assertAllInNoDups(graph, internationalOrder, "InternationalOrder parent");
     });
 
-    test("can graph mixed-type roots with common base class", 2, function () {
+    test("can graph mixed-type roots with common base class", function () {
+        expect(2);
         var graph = getEntityGraph([orders[0], internationalOrder]);
         assertCount(graph, 2, "when Order precedes InternationalOrder, ");
 
@@ -310,17 +327,20 @@
      * Edge and Error cases
     *********************************************************/
 
-    test("removes duplicate roots from result", 1, function () {
+    test("removes duplicate roots from result", function () {
+        expect(1);
         var graph = getEntityGraph([orders[0], orders[0], orders[0]]);
         equal(graph.length, 1, "should return only one of the duplicate orders");
     });
 
-    test("ignores root collection with null element", 1, function () {
+    test("ignores root collection with null element", function () {
+        expect(1);
         var graph = getEntityGraph([null]);
         equal(graph.length, 0, "should ignore the null root");
     });
 
-    test("returns root when no related entities in cache", 1, function () {
+    test("returns root when no related entities in cache", function () {
+        expect(1);
         var em2 = manager.createEmptyCopy();
 
         // move last order to the empty EntityManager
@@ -332,7 +352,8 @@
         equal(graph[0], order, "should return only the root");
     });
 
-    test("returns just the root when root is in deleted state", 1, function () {
+    test("returns just the root when root is in deleted state", function () {
+        expect(1);
         var order = orders.pop();
         order.entityAspect.setDeleted();
 
@@ -340,13 +361,15 @@
         equal(graph[0], order, "should return only the root");
     });
 
-    test("should error if root is not an entity", 1, function () {
+    test("should error if root is not an entity", function () {
+        expect(1);
         throws(function () {
             var graph = getEntityGraph({}, 'OrderDetails');
         }, /not an entity/, "throws 'not an entity' error");
     });
 
-    test("should error if root detached", 1, function () {
+    test("should error if root detached", function () {
+        expect(1);
         var order = orders.pop();
         order.entityAspect.setDetached();
         throws(function() {
@@ -354,7 +377,8 @@
         }, /detached/, "throws 'detached' error");
     });
 
-    test("should succeed when a child entity has become detached via add/delete", 5, function () {
+    test("should succeed when a child entity has become detached via add/delete", function () {
+        expect(5);
         var order = orders.pop();
         var newDetail = manager.createEntity('OrderDetail', {
             OrderID: order.getProperty('OrderID'),
@@ -377,7 +401,8 @@
         equal(nulls.length, 0, "no graph member is null or undefined");
     });
 
-    test("should error when root is created-and-deleted (detached)", 1, function () {
+    test("should error when root is created-and-deleted (detached)", function () {
+        expect(1);
         // for variety, call getEntityGraph with one unchanged and one detached root
         var unchangedOrder = orders.pop();
 
@@ -394,7 +419,8 @@
         }, /detached/, "created-and-deleted (detached) root throws 'detached' error");
     });
 
-    test("should error if mixed type roots", 1, function () {
+    test("should error if mixed type roots", function () {
+        expect(1);
         var order = orders.pop();
         var customer = customers.pop();
         throws(function () {
@@ -402,7 +428,8 @@
         }, /entitytype/i, "throws mixed 'EntityType' error");
     });
 
-    test("should error if roots have different managers", 1, function() {
+    test("should error if roots have different managers", function() {
+        expect(1);
         var order1 = orders[0];
         var em2 = manager.createEmptyCopy();
         var imports = em2.importEntities(manager.exportEntities([orders[1]], false));
@@ -413,14 +440,16 @@
         }, /entitymanager/i, "throws mixed EntityManager error");
     });
 
-    test("should error if bad expand object", 1, function () {
+    test("should error if bad expand object", function () {
+        expect(1);
         var order = orders.pop();
         throws(function () {
             var graph = getEntityGraph(order, ["this", 2, "that"]);
         }, /must be an expand/, "throws 'must be an expand' error");
     });
 
-    test("should error if invalid expand path", 1, function () {
+    test("should error if invalid expand path", function () {
+        expect(1);
         var order = orders.pop();
         throws(function () {
             var graph = getEntityGraph(order, 'details');

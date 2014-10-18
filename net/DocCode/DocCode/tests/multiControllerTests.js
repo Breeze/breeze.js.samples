@@ -52,7 +52,8 @@
     /*********************************************************
     * all employees
     *********************************************************/
-    asyncTest("all employees", 1, function () {
+    asyncTest("all employees", function () {
+        expect(1);
         var query = EntityQuery.from("Customers");
 
         newEm().executeQuery(query)
@@ -62,7 +63,8 @@
     /*********************************************************
     * Employees with 'n' name
     *********************************************************/
-    asyncTest("all employees with 'n' in FirstName", 1, function () {
+    asyncTest("all employees with 'n' in FirstName", function () {
+        expect(1);
         var query = EntityQuery.from("Employees")
             .where('FirstName', 'contains', 'n');
 
@@ -73,7 +75,8 @@
     /*********************************************************
     * Employee found by where(EmployeeID eq 1)
     *********************************************************/
-    asyncTest("Employee found by where(EmployeeID eq 1)", 4, function () {
+    asyncTest("Employee found by where(EmployeeID eq 1)", function () {
+        expect(4);
         var query = EntityQuery.from("Employees")
             .where('EmployeeID', 'eq', 1);
 
@@ -87,7 +90,8 @@
     /*********************************************************
     * Employee found by EmployeeID when appended to resource name
     *********************************************************/
-    asyncTest("Employee found by EmployeeID when appended to resource name", 3, function () {
+    asyncTest("Employee found by EmployeeID when appended to resource name", function () {
+        expect(3);
         var query = EntityQuery
             .from("Employees/1"); // by-pass OData query by appending to resource name
 
@@ -101,7 +105,8 @@
     /*********************************************************
     * First 10 customers
     *********************************************************/
-    asyncTest("First 10 customers", 1, function () {
+    asyncTest("First 10 customers", function () {
+        expect(1);
         var query = EntityQuery.from("Customers")
             .orderBy('CompanyName')
             .top(10);
@@ -113,7 +118,8 @@
     /*********************************************************
     * 'Alfreds' customer found by CustomerID in where clause
     *********************************************************/
-    asyncTest("'Alfreds' customer found by CustomerID in where clause", 4, function () {
+    asyncTest("'Alfreds' customer found by CustomerID in where clause", function () {
+        expect(4);
         var query = EntityQuery.from("Customers")
             .where('CustomerID', '==', alfredsID);
 
