@@ -1,6 +1,4 @@
 /* jshint -W117, -W030, -W109 */
-// ReSharper disable UnusedParameter
-// ReSharper disable InconsistentNaming
 describe("query_simple:", function () {
     'use strict';
 

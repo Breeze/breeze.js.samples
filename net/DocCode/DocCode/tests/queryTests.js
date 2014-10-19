@@ -245,18 +245,17 @@
     });
 
     /*********************************************************
-    * No employee whose FirstName === 'LastName' .
-    * Removing ambiguity of string value comparison with object value
-    * (compare with previous test)
+     * Breeze will interpret a string value as a property name
+     * if the value happens to correspond to a property name
+     * Eliminate all possible ambiguity by building a predicate with an object value
     *********************************************************/
     asyncTest("No employee whose FirstName === 'LastName' (using value object)", function () {
         expect(1);
         var query = EntityQuery.from("Employees")
+            // We're looking for a person with the first name of 'LastName'
+            // Hey ... it could happen :-)
             .where("FirstName", "==",
-                   // Search value is potentially the name of a property (as in this example)
-                   // eliminate chance of breeze treating it as a property name
-                   // by explicitly declaring the true nature of the comparison value
-                   { value: "LastName", isLiteral: true, dataType: breeze.DataType.String });
+                { value: "LastName", isLiteral: true, dataType: breeze.DataType.String });
 
         queryForNone(newEm, query, "FirstName === 'LastName'")
         .catch(handleFail).finally(start);
@@ -299,7 +298,7 @@
                 return "({0}) '{1}' is in '{2}'".format(
                     // Notice that breeze creates projected property names by
                     // flattening the navigation paths using "_" as a separator
-                    // (whether path is baded on EntityType or ComplexType)
+                    // (whether path is based on EntityType or ComplexType)
                     o.OrderID, o.Customer_CompanyName, o.ShipTo_Region);
             });
             ok(true, "Got " + ords.join(", "));
@@ -392,7 +391,7 @@
         .fin(start);
     });
     /*********************************************************
-    * Remote query does NOT return deleted entities (by default)
+    * Remote query does NOT return deleted entities (by default) D#2636
     *********************************************************/
     asyncTest("Remote query does NOT return deleted entities (by default)", function() {
         expect(1);
@@ -418,7 +417,7 @@
         .fail(handleFail).fin(start);
     });
     /*********************************************************
-    * Remote query CAN return deleted entities with 'includeDeleted' option
+    * Remote query CAN return deleted entities with 'includeDeleted' option F#2256
     *********************************************************/
     asyncTest("Remote query CAN return deleted entities with 'includeDeleted' option", function () {
         expect(1);
@@ -426,7 +425,7 @@
         // fake alfreds customer in cache in a deleted state
         em.createEntity('Customer', {
             CustomerID: alfredsID,
-            CompanyName: "Alfreds"
+            CompanyName: "Alfreds",
         }, breeze.EntityState.Deleted);
 
         // Base on this manager's default QueryOptions
@@ -562,59 +561,48 @@
             ok(len === brazil, "all of them should be in Brazil");
         }
     });
-
     /*********************************************************
-    * Dealing with response order
-    * It's difficult to make the server flip the response order
-    * (run it enough times and the response order will flip)
-    * but the logic of this test manifestly deals with it
-    * because of the way it assigns results.
-    *********************************************************/
-    asyncTest("can sequence results that arrive out of order", function() {
-        expect(3);
-        var nextRequestId = 0;
-        var em = newEm();
-        var promises = [];
-        var results = [];
+     * Dealing with response order of parallel queries
+     * The order in which the server responds is not predictable
+     * but promise library ensures order of the results
+     *
+     * It's difficult to make the server flip the response order
+     * (run it enough times and the response order will flip)
+     * but the logic of this test manifestly deals with it
+     * because of the way it assigns results.
+     *********************************************************/
+    asyncTest("can run queries in parallel with Q.all and preserve response order", function () {
         var arrived = [];
 
-        promises.push(breeze.EntityQuery.from('Customers')
-            .where('CompanyName', 'startsWith', 'a')
-            .using(em).execute()
-            .then(makeSuccessFn()).catch(handleFail));
+        var queries = [
+            EntityQuery.from('Customers').where('CompanyName', 'startsWith', 'a'),
+            EntityQuery.from('Customers').where('CompanyName', 'startsWith', 'c'),
+            EntityQuery.from('Customers').where('CompanyName', 'startsWith', 's'),
+            EntityQuery.from('Customers').where('CompanyName', 'startsWith', 't')
+        ];
 
-        promises.push(breeze.EntityQuery.from('Customers')
-            .where('CompanyName', 'startsWith', 's')
-            .using(em).execute()
-            .then(makeSuccessFn()).catch(handleFail));
+        expect(queries.length);
 
-        function makeSuccessFn() {
-            var requestId = nextRequestId++;
-            return function success(data) {
-                // Don't know which response arrived first?
-                // Sure you do. Just refer to the requestId which is a capture
-                arrived.push(requestId);
-                results[requestId] = data.results;
-                assertWhenDone();
-            }
-        }
+        var em = newEm();
+        var promises = queries.map(function(q, i){
+            return em.executeQuery(q).finally(function(){arrived.push(i);});
+        });
 
-        function assertWhenDone() {
-            if (results[0] && results[1]) {
-                start(); // we're done
-                // Here we report the actual response order
-                ok(true, "Request #{0} arrived before #{1}".format(arrived[0], arrived[1]));
-                // no matter what the response order
-                // the 'a' companies go in results slot #0
-                // the 's' companies go in results slot #1
-                var aCompany = results[0][1].CompanyName();
-                var sCompany = results[1][1].CompanyName();
-                equal(aCompany[0].toLowerCase(), 'a',
-                    "company from first batch should be an 'a', was " + aCompany);
-                equal(sCompany[0].toLowerCase(), 's',
-                    "company from second batch should be an 's', was " + sCompany);
-            }
-        }
+        breeze.Q.all(promises)
+            // called when ALL promises have been fulfilled
+            .then(function(responses){
+                // Completion order is unpredictable. Uncomment and re-run several times to see for yourself
+                console.log("Order of parallel query responses was " + JSON.stringify(arrived));
+
+                // regardless, the promise responses are in the same order as the queries
+                responses.forEach(function(res, rix){
+                    var qix = queries.indexOf(res.query)
+                    equal(qix, rix, 'response ' + rix + ' was for query ' +
+                          qix + ' ' + res.query.wherePredicate.toString());
+                })
+            })
+            .catch(handleFail)
+            .finally(start);
     });
 
     /*** PREDICATES ***/
