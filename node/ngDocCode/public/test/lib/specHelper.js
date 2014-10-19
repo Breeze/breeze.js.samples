@@ -1,11 +1,14 @@
-/*jshint -W079 */
-/* globals afterEach, inject, sinon */
-window.specHelper = (function() {
-    return {
+/*jshint -W079, -W117*/
+(function() {
+    var specHelper = {
         fakeRouteProvider: fakeRouteProvider,
         injector: injector,
+        gotResults: gotResults,
+        gotNoResults: gotNoResults,
         verifyNoOutstandingHttpRequests: verifyNoOutstandingHttpRequests
     };
+    window.specHelper = specHelper;
+    return;
     ////////////////////////
 
     function fakeRouteProvider($provide) {
@@ -52,6 +55,14 @@ window.specHelper = (function() {
             });
         }
         return params;
+    }
+
+    function gotResults (data) {
+        expect(data.results).is.not.empty;
+    }
+
+    function gotNoResults(data) {
+        expect(data.results).is.empty;
     }
 
     /**

@@ -2,14 +2,12 @@
 describe("query_simple:", function () {
     'use strict';
 
-    var testFns = window.docCode.testFns;
-
-    testFns.serverIsRunningPrecondition();
-    testFns.setupNgMidwayTester('testApp');
-
-    var EntityQuery = breeze.EntityQuery;
     var em;
-    var newEm = testFns.newEmFactory(testFns.northwindServiceName);
+    var EntityQuery = breeze.EntityQuery;
+    var newEm = ash.newEmFactory(ash.northwindServiceName);
+
+    ash.serverIsRunningPrecondition();
+    ash.setupNgMidwayTester('testApp');
 
     var gotResults = function (data) {
         expect(data.results).is.not.empty;
@@ -27,7 +25,7 @@ describe("query_simple:", function () {
 
             // the one time in this file that we'll create a manager from scratch
             // use newEm() thereafter.
-            var em = new breeze.EntityManager(testFns.northwindServiceName);
+            var em = new breeze.EntityManager(ash.northwindServiceName);
 
             em.executeQuery(query)
                 .then(gotResults)

@@ -30,7 +30,7 @@ module.exports = function (config) {
 
             /* Spec helpers */
             './public/test/lib/specHelper.js',
-            './public/test/lib/testFns.js',
+            './public/test/lib/appSpecHelper.js',
             './public/test/lib/*.js',
 
             /* Specs */

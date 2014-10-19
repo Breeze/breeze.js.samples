@@ -24,15 +24,13 @@
 describe("ngAjaxAdapter:", function () {
     'use strict';
 
-    var testFns = window.docCode.testFns;
-
-    testFns.serverIsRunningPrecondition();
-    var tester = testFns.setupNgMidwayTester('testApp');
-
     var ajaxAdapter  = breeze.config.getAdapterInstance('ajax');
-    var EntityQuery = breeze.EntityQuery;
     var em;
-    var newEm = testFns.newEmFactory(testFns.northwindServiceName);
+    var EntityQuery = breeze.EntityQuery;
+    var newEm = ash.newEmFactory(ash.northwindServiceName);
+    var tester = ash.setupNgMidwayTester('testApp');
+
+    ash.serverIsRunningPrecondition();
 
     beforeEach(function () {
         em = newEm();

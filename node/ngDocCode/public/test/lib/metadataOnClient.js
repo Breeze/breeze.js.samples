@@ -3,7 +3,7 @@
  * Example of defining metadata on the client in JavaScript
  * Used by metadataTests.js
  **********************************************************/
-(function (testFns) {
+(function () {
     'use strict';
 
     // Convenience variables
@@ -18,7 +18,7 @@
     var addTypeToStore = helper.addTypeToStore.bind(helper);
     var setDefaultNamespace = helper.setDefaultNamespace.bind(helper);
 
-    testFns.metadataOnClient = {
+    window.ash.metadataOnClient = {
         createDtoMetadataStore: createDtoMetadataStore,
 
         addCategoryType        : addCategoryType,
@@ -35,7 +35,9 @@
 
         createEmployeeMetadataStore: createEmployeeMetadataStore
     };
+    return;
 
+    /////////////////////////////////
 
     // Creates a metadataStore with 3 Northwind Product EntityTypes:
     // Product, Category, Supplier and a LocationComplexType
@@ -56,8 +58,7 @@
         return store;
     }
 
-    //#region Category
-    // A simple reference type
+    // Category - a simple reference type
     function addCategoryType(store) {
         var et = {
             shortName: 'Category',
@@ -76,9 +77,8 @@
 
         return addTypeToStore(store, et);
     }
-    //#endregion
 
-    //#region Location ComplexType
+    //Location - a ComplexType
     function addLocationComplexType(store) {
         var et = {
             shortName: 'Location',
@@ -96,9 +96,7 @@
         return addTypeToStore(store, et);
     }
 
-    //#endregion
-
-    //#region Product
+    // Product
     function addProductType(store) {
         var et = {
             shortName: 'Product',
@@ -136,10 +134,8 @@
 
         return addTypeToStore(store, et);
     }
-    //#endregion
 
-    //#region Supplier
-    // Another simple reference type
+    // Supplier - another simple reference type
     function addSupplierType(store) {
         var et = {
             shortName: 'Supplier',
@@ -181,8 +177,6 @@
 
         return addTypeToStore(store, et);
     }
-    //#endregion
-
 
     // Creates a metadataStore with NorthwindDto entity types:
     // Customer, Order, OrderDetail, Product
@@ -203,7 +197,7 @@
         return store;
     }
 
-    //#region CustomerDto
+    // CustomerDto
     function addCustomerDtoType(store) {
         var et = {
             shortName: 'Customer',
@@ -229,9 +223,7 @@
         return addTypeToStore(store, et);
     }
 
-    //#endregion
-
-    //#region OrderDto
+    // OrderDto
     function addOrderDtoType(store) {
         var et = {
             shortName: 'Order',
@@ -267,9 +259,7 @@
         return addTypeToStore(store, et);
     }
 
-    //#endregion
-
-    //#region OrderDetailDto
+    // OrderDetailDto
     function addOrderDetailDtoType(store) {
         var et = {
             shortName: 'OrderDetail',
@@ -303,9 +293,7 @@
         return addTypeToStore(store, et);
     }
 
-    //#endregion
-
-    //#region ProductDto
+    // ProductDto
     function addProductDtoType(store) {
         var et = {
             shortName: 'Product',
@@ -321,7 +309,6 @@
 
         return addTypeToStore(store, et);
     }
-    //#endregion
 
     //http://stackoverflow.com/questions/24172631/something-is-wrong-with-attaching-navigationproperties-when-done-in-different-or
     // Creates a metadataStore with 3 entity types:
@@ -346,7 +333,7 @@
         return metadataStore;
 
 
-        //#region Employee
+        // Employee
         function addEmployeeType(store) {
             var et = {
                 name: employeeEntityName,
@@ -364,9 +351,7 @@
             return addTypeToStore(store, et);
         }
 
-        //#endregion
-
-        //#region DaySchedule
+        // DaySchedule
         function addDayScheduleType(store) {
             var et = {
                 name: dayScheduleEntityName,
@@ -384,9 +369,7 @@
             return addTypeToStore(store, et);
         }
 
-        //#endregion
-
-        //#region AttendanceDay
+        // AttendanceDay
         function addAttendanceDayType(store) {
             var et = {
                 name: attendanceDayEntityName,
@@ -403,10 +386,7 @@
 
             return addTypeToStore(store, et);
         }
-
-        //#endregion
     }
-
 
 
     //private helper methods
@@ -416,4 +396,4 @@
     }
 
 
-})(window.docCode.testFns);
+})();

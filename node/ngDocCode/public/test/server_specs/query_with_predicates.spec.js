@@ -2,24 +2,15 @@
 describe("query_with_predicates:", function () {
     'use strict';
 
-    var testFns = window.docCode.testFns;
-
-    testFns.serverIsRunningPrecondition();
-    testFns.setupNgMidwayTester('testApp');
-
-    var alfredsID = testFns.wellKnownData.alfredsID;
-    var EntityQuery = breeze.EntityQuery;
     var em;
-    var newEm = testFns.newEmFactory(testFns.northwindServiceName);
+    var EntityQuery = breeze.EntityQuery;
+    var gotResults = ash.gotResults;
+    var gotNoResults = ash.gotNoResults;
+    var newEm = ash.newEmFactory(ash.northwindServiceName);
     var Predicate = breeze.Predicate;
 
-    var gotResults = function (data) {
-        expect(data.results).is.not.empty;
-    };
-
-    var gotNoResults = function (data) {
-        expect(data.results).is.empty;
-    };
+    ash.serverIsRunningPrecondition();
+    ash.setupNgMidwayTester('testApp');
 
     beforeEach(function () {
         em = newEm(); // fresh EntityManager before each test

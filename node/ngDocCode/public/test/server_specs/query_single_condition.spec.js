@@ -2,23 +2,14 @@
 describe("query_single_condition:", function () {
     'use strict';
 
-    var testFns = window.docCode.testFns;
-
-    testFns.serverIsRunningPrecondition();
-    testFns.setupNgMidwayTester('testApp');
-
-    var alfredsID = testFns.wellKnownData.alfredsID;
-    var EntityQuery = breeze.EntityQuery;
     var em;
-    var newEm = testFns.newEmFactory(testFns.northwindServiceName);
+    var EntityQuery = breeze.EntityQuery;
+    var gotResults = ash.gotResults;
+    var gotNoResults = ash.gotNoResults;
+    var newEm = ash.newEmFactory(ash.northwindServiceName);
 
-    var gotResults = function (data) {
-        expect(data.results).is.not.empty;
-    };
-
-    var gotNoResults = function (data) {
-        expect(data.results).is.empty;
-    };
+    ash.serverIsRunningPrecondition();
+    ash.setupNgMidwayTester('testApp');
 
     beforeEach(function () {
         em = newEm(); // fresh EntityManager before each test
@@ -28,12 +19,12 @@ describe("query_single_condition:", function () {
 
     it("where ID equals", function (done) {
         EntityQuery.from('Customers')
-            .where('CustomerID', '==', alfredsID)
+            .where('CustomerID', '==', ash.alfredsID)
 
             // Filter query operation alternatives
             // see http://www.breezejs.com/sites/all/apidocs/classes/FilterQueryOp.html
-            // .where('CustomerID', 'eq', alfredsID)
-            // .where('CustomerID', breeze.FilterQueryOp.Equals, alfredsID)
+            // .where('CustomerID', 'eq', ash.alfredsID)
+            // .where('CustomerID', breeze.FilterQueryOp.Equals, ash.alfredsID)
 
             .using(em).execute()
             .then(success).then(done, done);
@@ -47,7 +38,7 @@ describe("query_single_condition:", function () {
 
     it("where query can return no results as an empty array", function (done) {
         EntityQuery.from('Customers')
-            .where('CustomerID', '==', testFns.wellKnownData.emptyGuid)
+            .where('CustomerID', '==', ash.emptyGuid)
             .using(em).execute()
             .then(gotNoResults).then(done, done);
     });
@@ -186,7 +177,7 @@ describe("query_single_condition:", function () {
     it("can filter nullable number property", function (done) {
         // Order.EmployeeID is nullable int; can still filter on it.
         EntityQuery.from('Orders')
-            .where('EmployeeID', '==', testFns.wellKnownData.nancyID)
+            .where('EmployeeID', '==', ash.nancyID)
             .using(em).execute()
             .then(gotResults).then(done, done);
     });
@@ -194,7 +185,7 @@ describe("query_single_condition:", function () {
     it("can filter nullable Guid property", function (done) {
         // Order.CustomerID is nullable guid; can still filter on it.
         EntityQuery.from('Orders')
-            .where('CustomerID', '==', alfredsID)
+            .where('CustomerID', '==', ash.alfredsID)
             .using(em).execute()
             .then(gotResults).then(done, done);
     });
@@ -293,7 +284,7 @@ describe("query_single_condition:", function () {
     it("EntityQuery.fromEntityKey", function (done) {
         // See http://www.breezejs.com/sites/all/apidocs/classes/EntityQuery.html#method_fromEntityKey
         var customerType = em.metadataStore.getEntityType("Customer");
-        var key = new breeze.EntityKey(customerType, alfredsID);
+        var key = new breeze.EntityKey(customerType, ash.alfredsID);
 
         EntityQuery.fromEntityKey(key)
             .using(em).execute()
@@ -308,7 +299,7 @@ describe("query_single_condition:", function () {
 
     it("EntityManager.fetchEntityByKey", function (done) {
         // See http://www.breezejs.com/sites/all/apidocs/classes/EntityManager.html#method_getEntityByKey
-        em.fetchEntityByKey('Customer',alfredsID)
+        em.fetchEntityByKey('Customer',ash.alfredsID)
             .then(success).then(done, done);
 
         function success(data){
@@ -327,7 +318,7 @@ describe("query_single_condition:", function () {
         beforeEach(function () {
             // fake alfreds customer in cache in a deleted state
             em.createEntity('Customer', {
-                CustomerID: alfredsID,
+                CustomerID: ash.alfredsID,
                 CompanyName: "Alfreds"
             }, breeze.EntityState.Deleted);
         });
@@ -337,7 +328,7 @@ describe("query_single_condition:", function () {
             // although the 'Alfreds' Customer is in the db,
             // breeze excludes from results because it is in cache in a deleted state.
             EntityQuery.from('Customers')
-                .where('CustomerID', '==', alfredsID)
+                .where('CustomerID', '==', ash.alfredsID)
                 .using(em).execute()
                 .then(gotNoResults)
                 .then(done, done);
@@ -352,7 +343,7 @@ describe("query_single_condition:", function () {
             var queryOptions = em.queryOptions.using({ includeDeleted: true });
 
             EntityQuery.from('Customers')
-                .where('CustomerID', '==', alfredsID)
+                .where('CustomerID', '==', ash.alfredsID)
                 .using(queryOptions)
                 .using(em).execute()
                 .then(gotResults)

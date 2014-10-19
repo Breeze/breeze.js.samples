@@ -55,7 +55,7 @@
         }
     });
 **/
-(function (docCode) {
+(function () {
     'use strict';
     var extend = breeze.core.extend;
     var clone = function (thing) { return extend({}, thing); };
@@ -177,7 +177,7 @@
 
     };
 
-    docCode.AjaxAdapterTestInterceptor = interceptor;
+    window.ash.AjaxAdapterTestInterceptor = interceptor;
 
     ///////////////////////////
 
@@ -327,4 +327,4 @@
 
     //#endregion
 
-})(window.docCode);
+})();

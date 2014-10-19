@@ -3,18 +3,15 @@
 describe("entity:", function () {
     'use strict';
 
-    var testFns = window.docCode.testFns;
-
     var cust;
     var em;
     var EntityState = breeze.EntityState;
-    var dummyCustID = testFns.newGuidComb();
-    var dummyEmpID = 42;
+    var dummyCustID = ash.newGuidComb();
     var UNCHGD = EntityState.Unchanged;
 
     beforeEach(function () {
-        em = new breeze.EntityManager(testFns.northwindServiceName);
-        testFns.importNorthwindMetadata(em);
+        em = new breeze.EntityManager(ash.northwindServiceName);
+        ash.importNorthwindMetadata(em);
     });
 
     it("can add Customer with manager.CreateEntity", function () {

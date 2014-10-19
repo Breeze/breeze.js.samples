@@ -2,16 +2,17 @@
 /***********************************************************
 * Sample data from Northwind model for test purposes
 ***********************************************************/
-docCode.northwindTestData = (function () {
+(function () {
     'use strict';
 
-    return {
+    window.ash.northwindTestData = {
         primeTheCache: primeTheCache,
         createCustomer: createCustomer,
         createFakeExistingCustomer: createFakeExistingCustomer,
-        createOrder: createOrder,
+        createOrder: createOrder
     };
-
+    return;
+    ///////////////////////////////////////
     function primeTheCache(em) {
 
         /* simulate unchanged, queried entities */
@@ -65,7 +66,7 @@ docCode.northwindTestData = (function () {
             newCust: newCust,
             newOrder: newOrder,
             changedCust: changedCust,
-            deletedCust: deletedCust,
+            deletedCust: deletedCust
         };
     }
 

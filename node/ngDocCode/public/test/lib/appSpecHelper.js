@@ -1,85 +1,83 @@
 /* jshint -W117, -W030, -W071 */
 /*********************************************************
- * testFns reduces boilerplate repetition in tests
- * initial version copied from DocCode
- * modified for ngDocCode
+ * ash - appSpecHelper - reduces boilerplate repetition in application tests
+ * initial version copied from DocCode's testFns modified for ngDocCode
  *********************************************************/
 // ReSharper disable InconsistentNaming
 
-(function (docCode, specHelper) {
+(function () {
     'use strict';
+
+    var _nextIntId = 10000; // seed for getNextIntId()
+    var $injector;  // for ash exclusive use; not the one used by a local test
+    var serverMetadata = {}; // server-side metadata retrieved during current test session
+    var serverRoot = 'http://localhost:58066/'; // DocCode's Web API server
 
     // extend native String with format, startsWith, endsWith
     // Ex: '{0} returned {1} item(s)'.format(queryName, count));
     extendString();
-
-
-    var _nextIntId = 10000; // seed for getNextIntId()
-    var $injector;  // for testFns exclusive use; not the one used by a local test
-
     useAngularAdapters();
 
-    var wellKnownData = {
-        // ID of the Northwind 'Alfreds Futterkiste' customer
-        alfredsID: '785efa04-cbf2-4dd7-a7de-083ee17b6ad2',
-        // ID of the Northwind 'Nancy Davolio' employee
-        nancyID: 1,
-        // Key values of a Northwind 'Alfreds Futterkiste''s OrderDetail
-        alfredsOrderDetailKey: { OrderID: 10643, ProductID: 28 /*Rössle Sauerkraut*/ },
-        // ID of Chai product
-        chaiProductID: 1,
-        emptyGuid: '00000000-0000-0000-0000-000000000000'
-    };
     /*********************************************************
-     * testFns - the module object
+     * ash - the module object
      *********************************************************/
-    var serverRoot = 'http://localhost:58066/'; // DocCode Web API server
-    var serverMetadata = {}; // server-side metadata retrieved during current test session
 
-    var testFns = {
+    var ash = {
+        alfredsID: '785efa04-cbf2-4dd7-a7de-083ee17b6ad2', // Northwind 'Alfreds Futterkiste' customer ID
+        //  a Northwind 'Alfreds Futterkiste' Order's OrderDetail Key for Rössle Sauerkraut
+        alfredsOrderDetailKey: { OrderID: 10643, ProductID: 28 },
+        // AjaxAdapterTestInterceptor: AjaxAdapterTestInterceptor.js
         assertIsSorted: assertIsSorted,
         breeze: breeze,
+        chaiProductID: 1, // Chai product ID
         customerResultsToStringArray: customerResultsToStringArray,
+        emptyGuid: '00000000-0000-0000-0000-000000000000',
         ensureIsEm: ensureIsEm,
+        fakeRouteProvider: specHelper.fakeRouteProvider,
         foosMetadataServiceName: serverRoot + 'breeze/FoosMetadata',
         getNextIntId: getNextIntId,
         getParserForUrl: getParserForUrl,
         getValidationErrMsgs: getValidationErrMsgs,
+        gotResults: specHelper.gotResults,
+        gotNoResults: specHelper.gotNoResults,
         promiseSaveFailed: promiseSaveFailed,
         importMetadata: importMetadata,
         importNorthwindMetadata: importNorthwindMetadata,
         inheritancePurge: inheritancePurge, // empty the Inheritance Model db completely
         inheritanceReset: inheritanceReset, // reset to known state
         inheritanceServiceName: 'breeze/inheritance',
+        injector: specHelper.injector,
         morphString: morphString,
         morphStringProp: morphStringProp,
+        nancyID: 1, // Northwind 'Nancy Davolio' employee ID
         newEmFactory: newEmFactory,
         newGuid: newGuid,
         newGuidComb: newGuidComb,
+        // northwindDtoMetadata: northwindDtoMetadata.js
         northwindDtoServiceName: serverRoot + 'breeze/NorthwindDto',
         northwindDtoNamespace: 'Northwind.DtoModels',
+        // northwindMetadata: northwindMetadata.js
         northwindNamespace: 'Northwind.Models',
         northwindReset: northwindReset, // reset Northwind db to known state
         northwindServiceName: serverRoot + 'breeze/Northwind',
+        // northwindTestData: northwindTestData.js
         output: output,
         preFetchMetadataStore: preFetchMetadataStore,
         reportRejectedPromises: reportRejectedPromises,
         rootUri: getRootUri(),
         serverIsRunningPrecondition: serverIsRunningPrecondition,
-        serverRoot: serverRoot,
         serverMetadata: serverMetadata,
+        serverRoot: serverRoot,
         setupNgMidwayTester: setupNgMidwayTester,
         todosPurge: todosPurge, // empty the Todos db completely
         todosReset: todosReset, // reset to known state
         todosServiceName: serverRoot + 'breeze/todos',
         userSessionId: newGuidComb(),
-        wellKnownData: wellKnownData
+        verifyNoOutstandingHttpRequests: specHelper.verifyNoOutstandingHttpRequests
     };
+    window.ash = window.appSpecHelper = ash;
 
     createTestAppModule();
-
-
-    docCode.testFns = testFns;
 
     return;
 
@@ -110,7 +108,7 @@
 
     function createTestAppModule(){
         return angular.module('testApp',['breeze.angular'])
-            // ensure breeze is configured for angular
+            // ensure breeze is configured for angular for THIS particular module
             .run(function(breeze){
                 initAjaxAdapter();
             });
@@ -120,7 +118,7 @@
             var ajaxAdapter = breeze.config.getAdapterInstance('ajax');
             ajaxAdapter.defaultSettings = {
                 headers: {
-                    'X-UserSessionId': testFns.userSessionId
+                    'X-UserSessionId': ash.userSessionId
                 }
             };
         }
@@ -275,11 +273,11 @@
     // Import metadata into an entityManager or metadataStore
     // and optionally set the store's dataService
     // Usage:
-    //     testFns.importMetadata(manager, testFns.northwindMetadata, testFns.northwindServiceName)
-    //     testFns.importMetadata(someMetadataStore, testFns.northwindMetadata)
+    //     ash.importMetadata(manager, ash.northwindMetadata, ash.northwindServiceName)
+    //     ash.importMetadata(someMetadataStore, ash.northwindMetadata)
     function importMetadata(metadataStore, metadata, dataService) {
         if (!metadata){
-            throw new Error('testFns#importMetadata: no metadata to import');
+            throw new Error('ash#importMetadata: no metadata to import');
         }
         if (!metadataStore){
             metadataStore = new breeze.MetadataStore();
@@ -302,10 +300,10 @@
 
     // Import NorthwindMetadata from script into an entityManager or metadataStore
     // Usage:
-    //     testFns.importNorthwindMetadata(manager)
-    //     testFns.importNorthwindMetadata(someMetadataStore)
+    //     ash.importNorthwindMetadata(manager)
+    //     ash.importNorthwindMetadata(someMetadataStore)
     function importNorthwindMetadata(metadataStore) {
-        importMetadata(metadataStore, docCode.northwindMetadata, testFns.northwindServiceName );
+        importMetadata(metadataStore, ash.northwindMetadata, ash.northwindServiceName );
     }
 
     /**************************************************
@@ -314,12 +312,12 @@
      **************************************************/
     function inheritancePurge() {
         var $http = get$http();
-        return $http.post(testFns.inheritanceServiceName + '/purge',{});
+        return $http.post(ash.inheritanceServiceName + '/purge',{});
     }
 
     function inheritanceReset() {
         var $http = get$http();
-        return $http.post(testFns.inheritanceServiceName + '/reset',{});
+        return $http.post(ash.inheritanceServiceName + '/reset',{});
     }
 
     function morphStringProp(entity, propName) {
@@ -347,14 +345,14 @@
      *
      * Usage:
      *    // Called inside a `describe`, typically the file's outermost `describe`
-     *    var serviceName = testFns.northwindServiceName,
-     *        newEm = testFns.newEmFactory(serviceName); // the factory
+     *    var serviceName = ash.northwindServiceName,
+     *        newEm = ash.newEmFactory(serviceName); // the factory
      *    ...
      *    var em = newEm(); // use factory to create a manager.
      *********************************************************/
     function newEmFactory(serviceName) {
         var dataService = new breeze.DataService({serviceName: serviceName});
-        var metadataStore = testFns.preFetchMetadataStore(dataService);
+        var metadataStore = ash.preFetchMetadataStore(dataService);
         return function() {
             return new breeze.EntityManager({dataService: dataService, metadataStore: metadataStore});
         };
@@ -401,8 +399,8 @@
     function northwindReset(fullReset) {
         var $http = get$http();
         var queryString = fullReset ? '/?options=fullreset' : '';
-        return $http.post(testFns.northwindServiceName + '/reset' + queryString,{
-            headers: { 'X-UserSessionId': testFns.userSessionId }
+        return $http.post(ash.northwindServiceName + '/reset' + queryString,{
+            headers: { 'X-UserSessionId': ash.userSessionId }
         });
     }
 
@@ -468,43 +466,42 @@
      * Determine if the server is running so that midway tests can run.
      * No point in running them if the server is not up.
      * Place the following near the top of each midway spec file
-     *     testFns.serverIsRunningPrecondition();
+     *     ash.serverIsRunningPrecondition();
      * Calls a mocha `before` hook that pings the server
      * Caches the result of the ping so that subsequent midway spec files don't re-ping
      * @method serverIsRunningPrecondition {String}
      *********************************************************/
     function serverIsRunningPrecondition(){
         //Todo: allow the server to vary
-        var serviceName = testFns.northwindServiceName;
+        var serviceName = ash.northwindServiceName;
         var notRunningError = new Error('Server '+serviceName+' is NOT running; can\'t run these specs');
 
         before(function(done){
-            if (testFns.isServerRunning === undefined){
+            if (ash.isServerRunning === undefined){
                 this.timeout(32000);
-                $injector.invoke(['$http', '$rootScope', function ($http, $rootScope) {
+                $injector.invoke(function ($http, $rootScope) {
                     var url = serviceName+'/employees?$top=0';
                     // fire one in to kick the server... not sure why this is necessary
                     $http.get(url);
                     // Now we really test this one
                     $http.get(url, {timeout: 30000})// just looking for a response
                         .then(function(){
-                            testFns.isServerRunning = true;
+                            ash.isServerRunning = true;
                             console.log('Server '+serviceName+' is running');
                             done();
                         })
                         .catch(function(res){
                             if (res.status === 0 ){
-                                testFns.isServerRunning = false;
+                                ash.isServerRunning = false;
                                 done(notRunningError);
                             } else {
                                 // something else is wrong but the server is up and that's all we care about here
-                                testFns.isServerRunning = true;
+                                ash.isServerRunning = true;
                                 console.error('Unexpected error while looking for server: '+res.data);
                             }
                         });
-                    $rootScope.$apply();
-                }]);
-            } else if (testFns.isServerRunning){
+                });
+            } else if (ash.isServerRunning){
                 done();
             } else {
                 done(notRunningError);
@@ -535,20 +532,20 @@
      **************************************************/
     function todosPurge() {
         var $http = get$http();
-        return $http.post(testFns.todosServiceName + '/purge',{});
+        return $http.post(ash.todosServiceName + '/purge',{});
     }
 
     function todosReset() {
         var $http = get$http();
-        return $http.post(testFns.todosServiceName + '/reset',{});
+        return $http.post(ash.todosServiceName + '/reset',{});
     }
 
     function useAngularAdapters(){
-        // initialize an injector we can use inside testFns.
+        // initialize an injector we can use inside appSpecHelper.
         // and initialize Breeze to use Angular
         // NB: during tests, Breeze uses different Ng service instances!
         $injector = angular.injector(['ng', 'breeze.angular']);
         $injector.invoke(function(breeze){});
     }
 
-})( window.docCode || (window.docCode={}), window.specHelper);
+})( );
