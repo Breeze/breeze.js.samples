@@ -1,4 +1,4 @@
-/* jshint -W117, -W030 */
+/* jshint -W117, -W030, -W071 */
 /*********************************************************
  * testFns reduces boilerplate repetition in tests
  * initial version copied from DocCode
@@ -33,8 +33,8 @@
     /*********************************************************
      * testFns - the module object
      *********************************************************/
-    var serverRoot = 'http://localhost:58066/' // DocCode Web API server
-    var serverMetadata = {} // server-side metadata retrieved during current test session
+    var serverRoot = 'http://localhost:58066/'; // DocCode Web API server
+    var serverMetadata = {}; // server-side metadata retrieved during current test session
 
     var testFns = {
         assertIsSorted: assertIsSorted,
@@ -356,7 +356,7 @@
         var dataService = new breeze.DataService({serviceName: serviceName});
         var metadataStore = testFns.preFetchMetadataStore(dataService);
         return function() {
-            return new breeze.EntityManager({dataService: dataService, metadataStore: metadataStore})
+            return new breeze.EntityManager({dataService: dataService, metadataStore: metadataStore});
         };
     }
 
@@ -427,7 +427,7 @@
                     metadataStore.importMetadata(metadata);
                     metadataStore.addDataService(dataService);
                 } else {
-                    preFetchMetadataInBeforeHook(dataService, metadataStore)
+                    preFetchMetadataInBeforeHook(dataService, metadataStore);
                 }
             }
             return metadataStore;
@@ -456,7 +456,7 @@
         return function(error){
             error.message = 'Save failed: ' + getSaveErrorMessages(error);
             done(error);
-        }
+        };
     }
 
     function reportRejectedPromises(promises) {
@@ -499,11 +499,11 @@
                             } else {
                                 // something else is wrong but the server is up and that's all we care about here
                                 testFns.isServerRunning = true;
-                                console.error("Unexpected error while looking for server: "+res.data);
+                                console.error('Unexpected error while looking for server: '+res.data);
                             }
                         });
                     $rootScope.$apply();
-                }])
+                }]);
             } else if (testFns.isServerRunning){
                 done();
             } else {
@@ -526,7 +526,7 @@
         afterEach(function () {
             if (tester) { tester.destroy(); }
         });
-        return function(){return tester;}
+        return function(){return tester;};
     }
 
     /**************************************************

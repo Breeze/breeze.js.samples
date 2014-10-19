@@ -130,7 +130,7 @@ describe("query_simple:", function () {
                 if (queryFinished) {return;} // dealt with it already
                 queryFinished = true;
                 expect(shouldTimeout).to.equal(true,"Query timed out" + expectTimeoutMsg);
-                done()
+                done();
             }
         }
     });

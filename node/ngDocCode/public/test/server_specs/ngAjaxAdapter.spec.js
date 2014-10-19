@@ -294,7 +294,9 @@ describe("ngAjaxAdapter:", function () {
 
     // fake ajax adapter success object, grabbed from a real query for 3 customers
     var mockCustomerQueryResponse = {
+        // jshint -W101
         data:       [{ "$id": "1", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "729de505-ea6d-4cdf-89f6-0360ad37bde7", "CompanyName": "Die Wandernde Kuh", "ContactName": "Rita Müller", "ContactTitle": "Sales Representative", "Address": "Adenauerallee 900", "City": "Stuttgart", "Region": null, "PostalCode": "70563", "Country": "Germany", "Phone": "0711-020361", "Fax": "0711-035428", "RowVersion": null, "Orders": null }, { "$id": "2", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "cd98057f-b5c2-49f4-a235-05d155e636df", "CompanyName": "Suprêmes délices", "ContactName": "Pascale Cartrain", "ContactTitle": "Accounting Manager", "Address": "Boulevard Tirou, 255", "City": "Charleroi", "Region": null, "PostalCode": "B-6000", "Country": "Belgium", "Phone": "(071) 23 67 22 20", "Fax": "(071) 23 67 22 21", "RowVersion": null, "Orders": null }, { "$id": "3", "$type": "Northwind.Models.Customer, DocCode.Models", "CustomerID": "9d4d6598-b6c2-4b52-890b-0636b23ec85b", "CompanyName": "Franchi S.p.A.", "ContactName": "Paolo Accorti", "ContactTitle": "Sales Representative", "Address": "Via Monte Bianco 34", "City": "Torino", "Region": null, "PostalCode": "10100", "Country": "Italy", "Phone": "011-4988260", "Fax": "011-4988261", "RowVersion": null, "Orders": null }],
+        // jshint +W101
         headers:    getSuccessHeaders,
         status:     200,
         statusText: "200 OK"

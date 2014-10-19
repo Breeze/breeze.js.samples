@@ -1,5 +1,5 @@
-/* jshint -W117, -W030, -W109 */
-describe.only("query_single_condition:", function () {
+/* jshint -W117, -W030, -W106, -W109 */
+describe("query_single_condition:", function () {
     'use strict';
 
     var testFns = window.docCode.testFns;
@@ -7,11 +7,10 @@ describe.only("query_single_condition:", function () {
     testFns.serverIsRunningPrecondition();
     testFns.setupNgMidwayTester('testApp');
 
+    var alfredsID = testFns.wellKnownData.alfredsID;
     var EntityQuery = breeze.EntityQuery;
     var em;
     var newEm = testFns.newEmFactory(testFns.northwindServiceName);
-
-    var alfredsID = testFns.wellKnownData.alfredsID;
 
     var gotResults = function (data) {
         expect(data.results).is.not.empty;
