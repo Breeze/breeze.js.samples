@@ -858,37 +858,6 @@
     });
 
     /*********************************************************
-    * EntityManager.getEntities is not polymorphic
-    * 'Around the Horn' orders include regular and 'InternationalOrders'
-    * Have to look for both types in cache to get them all
-    *********************************************************/
-    asyncTest("EntityManager.getEntities is not polymorphic", function () {
-        expect(3);
-        var em = newEm();
-        var query = EntityQuery.from("Orders")
-            // known to have a mix of Order types
-            .where('Customer.CompanyName', 'eq', 'Around the Horn')
-            .expand("Customer");
-
-        em.executeQuery(query)
-            .then(getOrdersFromCache).catch(handleFail).fin(start);
-
-        function getOrdersFromCache(data) {
-            var cust = em.getEntities('Customer')[0];
-            var custOrders = cust.getProperty('Orders');
-            var custOrderCount = custOrders.length;
-            var qOrders = em.getEntities('Order');
-            var qOrderCount = qOrders.length;
-            var qInternationalOrders = em.getEntities('InternationalOrder');
-            var qInternationalOrderCount = qInternationalOrders.length;
-
-            ok(qOrderCount, "should have some Orders; count = " + qOrderCount);
-            ok(qInternationalOrderCount, "should have some InternationalOrders; count = " + qInternationalOrderCount);
-            equal(qOrderCount + qInternationalOrderCount, custOrderCount,
-                "sum of regular & international orders should = total cust orders, " + custOrderCount);
-        }
-    });
-    /*********************************************************
     * Products in a Category whose name begins with 'S'
     * Category is the related parent of Product
     *********************************************************/
@@ -1934,6 +1903,38 @@
                 return list;
             });
     }
+
+    /*********************************************************
+    * EntityManager.getEntities is not polymorphic
+    * 'Around the Horn' orders include regular and 'InternationalOrders'
+    * Have to look for both types in cache to get them all
+    *********************************************************/
+    asyncTest("EntityManager.getEntities is not polymorphic", function () {
+        expect(3);
+        var em = newEm();
+        var query = EntityQuery.from("Orders")
+            // known to have a mix of Order types
+            .where('Customer.CompanyName', 'eq', 'Around the Horn')
+            .expand("Customer");
+
+        em.executeQuery(query)
+            .then(getOrdersFromCache).catch(handleFail).fin(start);
+
+        function getOrdersFromCache(data) {
+            var cust = em.getEntities('Customer')[0];
+            var custOrders = cust.getProperty('Orders');
+            var custOrderCount = custOrders.length;
+            var qOrders = em.getEntities('Order');
+            var qOrderCount = qOrders.length;
+            var qInternationalOrders = em.getEntities('InternationalOrder');
+            var qInternationalOrderCount = qInternationalOrders.length;
+
+            ok(qOrderCount, "should have some Orders; count = " + qOrderCount);
+            ok(qInternationalOrderCount, "should have some InternationalOrders; count = " + qInternationalOrderCount);
+            equal(qOrderCount + qInternationalOrderCount, custOrderCount,
+                "sum of regular & international orders should = total cust orders, " + custOrderCount);
+        }
+    });
 
     /*********************************************************
     * "Query Local" module helpers

@@ -160,12 +160,59 @@ describe("query_xtras:", function () {
     });
 
     describe("'.withParameters'", function () {
+
         it("set one parameter", function (done) {
+            // Looking for Customers whose company name begins "qu", ignoring case
             // The 'CustomersStartingWith' endpoint
             // expects a 'companyName' URL query string parameter
-            // Looking for Customers whose company name begins "qu", ignoring case
             var query = EntityQuery.from('CustomersStartingWith')
                 .withParameters({ companyName: 'qu'});
+
+            em.executeQuery(query).then(success).then(done, done);
+
+            function success(data) {
+                gotResults(data);
+                data.results.forEach(function(c){
+                    expect(c.CompanyName).to.match(/^qu/i);
+                });
+            }
+        });
+
+        it("set one parameter (nested query API example)", function (done) {
+            // Orders with an OrderDetail for a specific product
+            // Demonstrates "nested query" filtering on a collection navigation
+            // Can do with 'ANY' client query
+            // But in this case we let the controller's "OrdersForProduct" method do it
+            // That method also includes the related Customer and OrderDetails
+
+            var query = EntityQuery.from('OrdersForProduct/?productID=' + ash.chaiProductID);
+
+            em.executeQuery(query)
+                .then(success)
+                .then(done, done);
+
+            function success(data) {
+                gotResults(data);
+                data.results.forEach(function(o){
+                    var cust = o.Customer || {CompanyName: '<no customer>'};
+
+                    var chaiItems = o.OrderDetails.filter(
+                        function (od) { return od.ProductID === ash.chaiProductID; }
+                    );
+                    var orderLabel ='{0}-{1} order has {2} chai product details'
+                        .format(o.OrderID, cust.CompanyName, chaiItems.length);
+                    expect(chaiItems.length).above(0, orderLabel)
+                });
+            }
+        });
+
+        it("hack the query string instead ", function (done) {
+            // Looking for Customers whose company name begins "qu", ignoring case
+            // The 'CustomersStartingWith' endpoint
+            // expects a 'companyName' URL query string parameter
+            // Hack the query string rather than use .withParameters
+            // it's up to you to get it right.
+            var query = EntityQuery.from('CustomersStartingWith/?companyName=qu')
 
             em.executeQuery(query).then(success).then(done, done);
 
