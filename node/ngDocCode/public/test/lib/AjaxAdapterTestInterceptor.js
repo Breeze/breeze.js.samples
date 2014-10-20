@@ -180,8 +180,6 @@
     window.ash.AjaxAdapterTestInterceptor = interceptor;
 
     ///////////////////////////
-
-        //#region private functions
     function createFakeAjaxFn(getAdapterConfig, origAjaxFn) {
 
         return function (origAjaxSettings) {
@@ -324,7 +322,5 @@
     }
 
     function noop() { }
-
-    //#endregion
 
 })();

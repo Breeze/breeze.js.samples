@@ -1,7 +1,8 @@
 /* jshint -W117, -W030, -W071 */
 /*********************************************************
- * ash - appSpecHelper - reduces boilerplate repetition in application tests
- * initial version copied from DocCode's testFns modified for ngDocCode
+ * ash - appSpecHelper - common values and functions for application specs
+ * Reduces repetition in application tests
+ * Based on DocCode's "testFns";  modified for ngDocCode
  *********************************************************/
 // ReSharper disable InconsistentNaming
 

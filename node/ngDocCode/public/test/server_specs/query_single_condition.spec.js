@@ -174,7 +174,7 @@ describe("query_single_condition:", function () {
             .then(gotResults).then(done, done);
     });
 
-    it("can filter nullable number property", function (done) {
+    it("where number property is nullable", function (done) {
         // Order.EmployeeID is nullable int; can still filter on it.
         EntityQuery.from('Orders')
             .where('EmployeeID', '==', ash.nancyID)
@@ -182,7 +182,7 @@ describe("query_single_condition:", function () {
             .then(gotResults).then(done, done);
     });
 
-    it("can filter nullable Guid property", function (done) {
+    it("where Guid property is nullable", function (done) {
         // Order.CustomerID is nullable guid; can still filter on it.
         EntityQuery.from('Orders')
             .where('CustomerID', '==', ash.alfredsID)
@@ -190,7 +190,7 @@ describe("query_single_condition:", function () {
             .then(gotResults).then(done, done);
     });
 
-    it("can filter with string function 'contains'", function (done) {
+    it("where filter with string function 'contains'", function (done) {
         EntityQuery.from('Customers')
             // looking for customers whose names contain the word 'market', ignoring case
             .where('CompanyName', 'contains', 'market')
@@ -210,7 +210,7 @@ describe("query_single_condition:", function () {
         }
     });
 
-    it("can filter with string function 'length'", function (done) {
+    it("where filter with string function 'length'", function (done) {
         EntityQuery.from('Customers')
             .where('length(CompanyName)', '>', 30)
             .using(em).execute()
@@ -224,7 +224,7 @@ describe("query_single_condition:", function () {
         }
     });
 
-    it("can filter with string function combinations", function (done) {
+    it("where filter with string function combinations", function (done) {
         EntityQuery.from('Customers')
             // looking for customers whose names have 'om' as 2nd and 3rd letter, ignoring case
             .where('toUpper(substring(CompanyName, 1, 2))', '==', 'OM')
@@ -239,7 +239,7 @@ describe("query_single_condition:", function () {
         }
     });
 
-    it("can filter with date function, e.g. 'year(OrderDate)'", function (done) {
+    it("where filter with date function, e.g. 'year(OrderDate)'", function (done) {
 
         EntityQuery.from('Orders')
             .where('year(OrderDate)', '==', 1996)
@@ -296,7 +296,7 @@ describe("query_single_condition:", function () {
         }
     });
 
-    it("EntityQuery.fromEntityKey", function (done) {
+    it("using EntityQuery.fromEntityKey", function (done) {
         // See http://www.breezejs.com/sites/all/apidocs/classes/EntityQuery.html#method_fromEntityKey
         var customerType = em.metadataStore.getEntityType("Customer");
         var key = new breeze.EntityKey(customerType, ash.alfredsID);
@@ -312,7 +312,7 @@ describe("query_single_condition:", function () {
         }
     });
 
-    it("EntityManager.fetchEntityByKey", function (done) {
+    it("using EntityManager.fetchEntityByKey", function (done) {
         // See http://www.breezejs.com/sites/all/apidocs/classes/EntityManager.html#method_getEntityByKey
         em.fetchEntityByKey('Customer',ash.alfredsID)
             .then(success).then(done, done);
