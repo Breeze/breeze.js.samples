@@ -4,14 +4,10 @@ describe("query_simple:", function () {
 
     var em;
     var EntityQuery = breeze.EntityQuery;
+    var gotResults = ash.gotResults;
     var newEm = ash.newEmFactory(ash.northwindServiceName);
 
     ash.serverIsRunningPrecondition();
-    ash.setupNgMidwayTester('testApp');
-
-    var gotResults = function (data) {
-        expect(data.results).is.not.empty;
-    };
 
     beforeEach(function () {
         em = newEm(); // fresh EntityManager before each test
@@ -69,71 +65,8 @@ describe("query_simple:", function () {
 
     });
 
-    describe("when write a callback timeout", function () {
-        /*********************************************************
-         * Show how you could create a timeout such that
-         * you ignored the Breeze query callback (if/when you get it)
-         * if the query exceeds a timeout value
-         *
-         * This timeout governs the callbacks!
-         * It doesn't stop the server from sending the data
-         * nor does it stop the Breeze EntityManager from processing a response
-         * that arrives after the promise is resolved.
-         *
-         * If you want that behavior, AND YOU PROBABLY DO, see the ngAjaxAdapter.spec
-         *********************************************************/
 
-        it("short timeout cancels 'all customers' query callback", function (done) {
-            var timeoutMs = 1; // ridiculously short ... should time out
-            allCustomerTimeoutQuery(done, timeoutMs, true);
-        });
-
-        it("long timeout allows 'all customers' query callback", function (done) {
-            var timeoutMs = 100000; // ridiculously long ... should succeed
-            allCustomerTimeoutQuery(done, timeoutMs, false);
-        });
-
-        function allCustomerTimeoutQuery (done, timeoutMs, shouldTimeout) {
-
-            var expectTimeoutMsg = shouldTimeout ?
-                " when should timeout." : " when should not timeout.";
-
-            var query = new EntityQuery().from("Customers").using(em);
-            var queryFinished = false;
-
-            setTimeout(queryTimedout, timeoutMs);
-            query.execute()
-                .then(queryFinishedBeforeTimeout)
-                .catch(queryFailed);
-
-            function queryFailed(error){
-                if (queryFinished) {return;} // dealt with it already
-                queryFinished = true;
-                done(error);
-            }
-            function queryFinishedBeforeTimeout(data) {
-                if (queryFinished) {return;} // dealt with it already
-                queryFinished = true;
-                var count = data.results.length;
-                try {
-                    expect(shouldTimeout).to.equal(false,
-                        "Query succeeded and got {0} records; {1}.".format(count, expectTimeoutMsg));
-                    done();
-                } catch (e){
-                    done(e);
-                }
-            }
-
-            function queryTimedout() {
-                if (queryFinished) {return;} // dealt with it already
-                queryFinished = true;
-                expect(shouldTimeout).to.equal(true,"Query timed out" + expectTimeoutMsg);
-                done();
-            }
-        }
-    });
-
-    describe("query for one supplier", function () {
+    describe("query for first supplier", function () {
 
         var query = EntityQuery.from('Suppliers').top(1);
 

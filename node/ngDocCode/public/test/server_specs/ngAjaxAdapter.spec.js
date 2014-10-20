@@ -28,13 +28,14 @@ describe("ngAjaxAdapter:", function () {
     var em;
     var EntityQuery = breeze.EntityQuery;
     var newEm = ash.newEmFactory(ash.northwindServiceName);
-    var tester = ash.setupNgMidwayTester('testApp');
+    var $q = breeze.Q;
 
     ash.serverIsRunningPrecondition();
 
     beforeEach(function () {
         em = newEm();
     });
+
     afterEach(function () {
         ajaxAdapter.requestInterceptor = null;
     });
@@ -98,7 +99,6 @@ describe("ngAjaxAdapter:", function () {
     });
 
     it("can create cancel option with interceptor", function (done) {
-        var $q = tester().inject('$q');
         var canceller;
 
         ajaxAdapter.requestInterceptor = function (requestInfo) {
@@ -122,7 +122,6 @@ describe("ngAjaxAdapter:", function () {
     });
 
     it("query succeeds if you don't cancel", function (done) {
-        var $q = tester().inject('$q');
         var canceller;
 
         ajaxAdapter.requestInterceptor = function (requestInfo) {

@@ -10,7 +10,6 @@ describe("query_with_predicates:", function () {
     var Predicate = breeze.Predicate;
 
     ash.serverIsRunningPrecondition();
-    ash.setupNgMidwayTester('testApp');
 
     beforeEach(function () {
         em = newEm(); // fresh EntityManager before each test

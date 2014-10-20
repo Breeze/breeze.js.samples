@@ -9,7 +9,6 @@ describe("query_single_condition:", function () {
     var newEm = ash.newEmFactory(ash.northwindServiceName);
 
     ash.serverIsRunningPrecondition();
-    ash.setupNgMidwayTester('testApp');
 
     beforeEach(function () {
         em = newEm(); // fresh EntityManager before each test
@@ -18,6 +17,7 @@ describe("query_single_condition:", function () {
     ///////////////////////////
 
     it("where ID equals", function (done) {
+        // Prefer EntityManager.fetchEntityByKey or EntityQuery.fromEntityKey; see below
         EntityQuery.from('Customers')
             .where('CustomerID', '==', ash.alfredsID)
 
@@ -313,83 +313,4 @@ describe("query_single_condition:", function () {
         }
     });
 
-    // Todo: move to a different query spec as topic is not simple
-    describe("when queried entity is already in cache in Deleted state", function () {
-        beforeEach(function () {
-            // fake alfreds customer in cache in a deleted state
-            em.createEntity('Customer', {
-                CustomerID: ash.alfredsID,
-                CompanyName: "Alfreds"
-            }, breeze.EntityState.Deleted);
-        });
-
-        // These tests fail until clear D#2636 and F#2256
-        it.skip("entity is excluded from query result D#2636", function (done) {
-            // although the 'Alfreds' Customer is in the db,
-            // breeze excludes from results because it is in cache in a deleted state.
-            EntityQuery.from('Customers')
-                .where('CustomerID', '==', ash.alfredsID)
-                .using(em).execute()
-                .then(gotNoResults)
-                .then(done, done);
-        });
-
-        it.skip("entity is included when includeDeleted=true F#2256", function (done) {
-
-            // // Base queryOptions on the QueryOptions class default
-            // var queryOption = new breeze.QueryOptions({ includeDeleted: true });
-
-            // Base queryOptions on this manager's default QueryOptions
-            var queryOptions = em.queryOptions.using({ includeDeleted: true });
-
-            EntityQuery.from('Customers')
-                .where('CustomerID', '==', ash.alfredsID)
-                .using(queryOptions)
-                .using(em).execute()
-                .then(gotResults)
-                .then(done, done);
-        });
-    });
-
-    /*********************************************************
-     * Dealing with response order of parallel queries
-     * The order in which the server responds is not predictable
-     * but promise library ensures order of the results
-     *
-     * It's difficult to make the server flip the response order
-     * (run it enough times and the response order will flip)
-     * but the logic of this test manifestly deals with it
-     * because of the way it assigns results.
-     *********************************************************/
-    it("can run queries in parallel with $q.all and preserve response order", function (done) {
-        var arrived = [];
-
-        var queries = [
-            EntityQuery.from('Customers').where('CompanyName', 'startsWith', 'a'),
-            EntityQuery.from('Customers').where('CompanyName', 'startsWith', 'c'),
-            EntityQuery.from('Customers').where('CompanyName', 'startsWith', 's'),
-            EntityQuery.from('Customers').where('CompanyName', 'startsWith', 't')
-        ];
-
-        var promises = queries.map(function(q, i){
-            return em.executeQuery(q).finally(function(){arrived.push(i);});
-        });
-
-        // breeze.Q is $q
-        breeze.Q.all(promises)
-            // called when ALL promises have been fulfilled
-            .then(function(responses){
-                // Completion order is unpredictable. Uncomment and re-run several times to see for yourself
-                // console.log("Order of parallel query responses was " + JSON.stringify(arrived));
-
-                // regardless, the promise responses are in the same order as the queries
-                responses.forEach(function(res, rix){
-                    var qix = queries.indexOf(res.query);
-                    expect(qix).to.equal(rix,
-                            'response ' + rix + ' was for query ' +
-                            qix + ' ' + res.query.wherePredicate.toString());
-                });
-            })
-            .then(done,done);
-    });
 });
