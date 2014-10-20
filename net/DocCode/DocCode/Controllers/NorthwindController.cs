@@ -46,6 +46,8 @@ namespace DocCode.Controllers
         }
 
         [HttpGet]
+        // See http://stackoverflow.com/questions/21775107/breeze-predicate-on-multiple-levels-of-children/21779728#21779728
+        [BreezeQueryable(MaxAnyAllExpressionDepth = 5)]
         public IQueryable<Customer> Customers() {
             return _repository.Customers;
         }

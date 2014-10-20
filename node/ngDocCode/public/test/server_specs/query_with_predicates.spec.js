@@ -366,6 +366,29 @@ describe("query_with_predicates:", function () {
         }
     });
 
+    it("a nested ANY + ALL predicate", function (done){
+        // Look for a Customer with any Order whose every OrderDetail has a unit price of more than $200.00.
+        var pred = new Predicate('Orders', 'any', 'OrderDetails', 'all', 'UnitPrice', '>', 200);
+
+        logPredicate(pred, customerType);
+
+        EntityQuery.from('Customers')
+            .where(pred)
+            .top(1)
+            .expand('Orders.OrderDetails')
+            .using(em).execute().then(success).then(done, done);
+
+        function success(data){
+            var customer = data.results[0] || {};
+            // customer orders whose every OrderDetail has a UnitPrice > 200
+            var matchingOrders = customer.Orders.filter(function(o){
+                var count = o.OrderDetails.length;
+                return count === o.OrderDetails.filter( function(od){ return od.UnitPrice > 200; }).length;
+            });
+            expect(matchingOrders).is.not.empty;
+        }
+    });
+
     ////// helpers //////
 
     function logPredicate(predicate, entityType){
