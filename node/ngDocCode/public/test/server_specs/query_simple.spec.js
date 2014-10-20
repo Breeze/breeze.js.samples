@@ -52,7 +52,7 @@ describe("query_simple:", function () {
             );
         });
 
-        // the most common pattern that we see
+        // a common alternative to EntityManager.executeQuery; both are good.
         it("using EntityQuery.execute", function (done) {
             // Usually we have the manager already, long before composing the query
             // later construct query and execute it using that manager
@@ -64,7 +64,6 @@ describe("query_simple:", function () {
         });
 
     });
-
 
     describe("query for first supplier", function () {
 

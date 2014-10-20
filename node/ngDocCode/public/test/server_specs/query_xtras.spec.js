@@ -117,17 +117,17 @@ describe("query_xtras:", function () {
         });
     });
 
-    /*********************************************************
-     * Dealing with response order of parallel queries
-     * The order in which the server responds is not predictable
-     * but promise library ensures order of the results
-     *
-     * It's difficult to make the server flip the response order
-     * (run it enough times and the response order will flip)
-     * but the logic of this test manifestly deals with it
-     * because of the way it assigns results.
-     *********************************************************/
     it("can run queries in parallel with $q.all and preserve response order", function (done) {
+        /*********************************************************
+         * Dealing with response order of parallel queries
+         * The order in which the server responds is not predictable
+         * but promise library ensures order of the results
+         *
+         * It's difficult to make the server flip the response order
+         * (run it enough times and the response order will flip)
+         * but the logic of this test manifestly deals with it
+         * because of the way it assigns results.
+         *********************************************************/
         var arrived = [];
 
         var queries = [
@@ -158,4 +158,46 @@ describe("query_xtras:", function () {
             })
             .then(done,done);
     });
+
+    describe("'.withParameters'", function () {
+        it("set one parameter", function (done) {
+            // The 'CustomersStartingWith' endpoint
+            // expects a 'companyName' URL query string parameter
+            // Looking for Customers whose company name begins "qu", ignoring case
+            var query = EntityQuery.from('CustomersStartingWith')
+                .withParameters({ companyName: 'qu'});
+
+            em.executeQuery(query).then(success).then(done, done);
+
+            function success(data) {
+                gotResults(data);
+                data.results.forEach(function(c){
+                    expect(c.CompanyName).to.match(/^qu/i);
+                });
+            }
+        });
+
+        it("combined with breeze filter", function (done) {
+            // The 'CustomersStartingWith' endpoint
+            // expects a 'companyName' URL query string parameter
+            // and understands OData query syntax.
+            // Looking for Customers whose company name begins "qu", ignoring case,
+            // and located in 'Brazil'
+            var query = EntityQuery.from('CustomersStartingWith')
+                .withParameters({ companyName: 'qu'})
+                .where('Country', 'eq', 'Brazil');
+
+            em.executeQuery(query).then(success).then(done, done);
+
+            function success(data) {
+                gotResults(data);
+                data.results.forEach(function(c){
+                    expect(c.CompanyName).to.match(/^qu/i);
+                    expect(c.Country).to.equal('Brazil');
+                });
+            }
+        });
+
+    });
+
 });

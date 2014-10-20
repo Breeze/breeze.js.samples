@@ -239,10 +239,25 @@ describe("query_single_condition:", function () {
         }
     });
 
+    it("can filter with date function, e.g. 'year(OrderDate)'", function (done) {
+
+        EntityQuery.from('Orders')
+            .where('year(OrderDate)', '==', 1996)
+            .using(em).execute().then(success).then(done, done);
+
+        function success(data){
+            gotResults(data);
+            data.results.forEach(function(o) {
+                var order = 'Order {0} - {1}'.format(o.OrderID, o.ShipName);
+                expect(o.OrderDate.getFullYear()).to.equal(1996, order);
+            });
+        }
+    });
+
     it("where property is a ComplexType property", function (done) {
         // Looking for Orders shipped to CA
-        var query = EntityQuery.from("Orders")
-            .where("ShipTo.Region", "==", "CA")
+        var query = EntityQuery.from('Orders')
+            .where('ShipTo.Region', '==', 'CA')
             .using(em).execute()
             .then(success).then(done, done);
 
