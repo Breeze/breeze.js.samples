@@ -859,7 +859,7 @@
 
     /*********************************************************
     * EntityManager.getEntities is not polymorphic
-    * Alfreds orders include regular and 'InternationalOrders'
+    * 'Around the Horn' orders include regular and 'InternationalOrders'
     * Have to look for both types in cache to get them all
     *********************************************************/
     asyncTest("EntityManager.getEntities is not polymorphic", function () {

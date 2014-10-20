@@ -1,18 +1,21 @@
-/* jshint -W117, -W030 */
 /***********************************************************
-* Sample data from Northwind model for test purposes
-***********************************************************/
+ * Sample data from Northwind model for test purposes
+ ***********************************************************/
+/* jshint -W117, -W030 */
 (function () {
     'use strict';
 
     window.ash.northwindTestData = {
-        primeTheCache: primeTheCache,
         createCustomer: createCustomer,
         createFakeExistingCustomer: createFakeExistingCustomer,
-        createOrder: createOrder
+        createOrder: createOrder,
+        createInternationalOrder: createInternationalOrder,
+        primeTheCache: primeTheCache
     };
+
     return;
-    ///////////////////////////////////////
+
+    ///////////////
     function primeTheCache(em) {
 
         /* simulate unchanged, queried entities */
@@ -26,10 +29,16 @@
         unchanged.push(createFakeExistingCustomer(em, 'Customer 4'));
 
         var unchangedOrder = createOrder(em,unchangedCust.CompanyName());
-        unchangedOrder.OrderID(42);
-        unchangedOrder.CustomerID(unchangedCust.CustomerID());
+        unchangedOrder.setProperty('OrderID', 42);
+        unchangedOrder.setProperty('CustomerID', unchangedCust.CustomerID());
         em.attachEntity(unchangedOrder); // pretend already exists
         unchanged.push(unchangedOrder);
+
+        var unchangedInternationalOrder = createInternationalOrder(em, unchangedCust.CompanyName());
+        unchangedInternationalOrder.setProperty('OrderID', 84);
+        unchangedInternationalOrder.setProperty('CustomerID', unchangedCust.CustomerID());
+        em.attachEntity(unchangedInternationalOrder); // pretend already exists
+        unchanged.push(unchangedInternationalOrder);
 
         /* Changed entities */
         var changed = [];
@@ -37,10 +46,10 @@
         // add a new customer and new order to the cache
         var newCust = em.addEntity(createCustomer(em, 'Ima Nu'));
         var newOrder = em.addEntity(createOrder(em, 'Suez He'));
-        newOrder.Customer(newCust);// new order for new customer
+        newOrder.setProperty('Customer', newCust); // new order for new customer
 
         var changedCust = createFakeExistingCustomer(em);
-        changedCust.CompanyName('Ima Different');
+        changedCust.setProperty('CompanyName', 'Ima Different');
 
         var deletedCust = createFakeExistingCustomer(em, 'Delete Me');
         deletedCust.entityAspect.setDeleted();
@@ -63,6 +72,7 @@
             unchangedCust: unchangedCust,
             unchangedCust2: unchangedCust2,
             unchangedOrder: unchangedOrder,
+            unchangedInternationalOrder: unchangedInternationalOrder,
             newCust: newCust,
             newOrder: newOrder,
             changedCust: changedCust,
@@ -96,4 +106,13 @@
         return order;
     }
 
+    // InternationalOrder created but not added to em
+    function createInternationalOrder(em, shipName) {
+        var orderType = em.metadataStore.getEntityType('InternationalOrder');
+        var order = orderType.createEntity({
+            ShipName: shipName ? (shipName + ' International') : 'New International Order',
+            CustomsDescription: '100 Monkeys'
+        });
+        return order;
+    }
 })();
