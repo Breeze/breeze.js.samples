@@ -12,25 +12,97 @@ Demonstrates through automated tests how BreezeJS works within an Angular applic
 	
 
 ## Installing Node.js and Bower Packages
-- Open terminal
-- Type `npm install`
+
+- Open terminal or command window
+- Enter `npm install`
+
+>For a pristine re-install, first delete both *node_modules* and *bower_components*.
 
 ## Installing Bower Packages
 `npm install` will install these too, but you can do it manually.
-- Open terminal
-- Type `bower install`
 
-## Running
-TBD
+- Open terminal or command window
+- Enter `bower install`
 
-## Testing
-Type `gulp test` to run the tests including both unit and midway tests (spins up a server). This will create a watch on the files, with a 5 second delay, to run the tests.
+>While the bower package is the official stable release, you can
+get the most current committed file versions by running the
+*getLibs.cmd* command (Windows only).
 
-Testing uses karma, mocha, chai, sinon, ngMidwayTester libraries.
+## Running the app
+There is no application to run at this time.
+
+## Running the tests
+
+Many of the tests are "midway integration tests" that make calls to a remote server. **You must start the server first** if you want these tests to pass. See the **["*Starting the Server*" section](#startServer)** below.
+
+<a name="gulpTest"></a>
+### Testing with gulp
+
+Open a command/terminal window and enter `gulp test`.
+
+This gulp task runs all tests *once*, including the midway tests, and then shuts down.
+
+Entering `gulp autotest` runs all tests and stays alive. It creates a watch on the pertinent files, with a 5 second delay, and re-runs the tests automatically when any of them change.
+
+You can start the server first by adding the "`--startServer`" flag
+to the command as in:
+
+	gulp autotest --startServer
+	gulp test --startServer
+
+>The gulp test task doesn't shut the server down yet.
+
+<a name="webstormTest"></a>
+### Testing with Web Storm
+
+Web Storm is a nice IDE for development and debugging. You can run the tests inside Web Storm as follows:
+
+1. Create a "karma" configuration (one time setup)
+
+	* [ctrl-shift-A], "Edit Configurations"
+	
+    * click the "+" icon to create a new configuration
+
+    * Select the "Karma" default template
+    
+    * Name it (e.g, "Karma")
+    
+	* Configuation file: navigate to `karma.conf.js` at root level
+	
+    * Click [OK].
+
+1. Start the remote server (see **["*Starting the Server*"](#startServer)**).
+
+1. [ctrl-F5] to launch karma and the test or click the "Play" icon in the upper right toolbar.
+
+Review the Web Storm documentation for further details.
+
+## Debugging Tests
+
+You can debug the tests in a browser once the karma server is running.
+
+* Open a browser and navigate to `http://localhost:9876/debug.html`.
+* Open the browser's Developer Tools (F12).
+* Find the source code file(s) of interest and set breakpoints.
+* Refresh the browser and have fun.
 
 ## How It Works
 
-TBD
+The tests (called "specs") are all in the `public/test` folder.
+
+We use **karma** to manage the tests.
+
+Specs are written with **mocha** (testrunner), **chai** (*expect* assertions), **sinon** (mocking), and the **ngMidwayTester** (angular tests that call to the server).
+
+Specs at the top level run without a running remote server. Almost all of them are synchronous. 
+
+Specs in the `server_specs` sub-folder are async "midway" tests that require  a running remote server. See the **["*Starting the Server*" section](#startServer)**.
+
+Files in the `lib` sub-folder define helpers and test data to facilitate testing.
+
+The helpers pile all of their material into the global namespace called `window.appSpecHelper`; **`window.ash`** is an alias for that namespace and most specs use this alias.
+
+
 ## Disable ng-inspector!
 **The ng-inspector chrome plug-in interferes with debugging of tests in chrome.**
 
@@ -38,11 +110,14 @@ You know you've hit the problem when the test fails in a "before hook" and the s
 
 Please disable it or remove it from your Chrome extensions.
 
-## Starting the DocCode WebAPI server
+<a id="startServer"></a>
+## Starting the Server
 
 The midway tests talk to a local test server which must already be running.
  
-The DocCode Web API server is the current default server. 
+The DocCode Web API server is the current default server and the only server available at this time.
+
+
 This Web API server is defined in the "net/DocCode" which parallels this "node/ngDocCode" sample.
 
 >Soon we will default to a different node server and you won't need .NET or IISExpress to run these tests.
@@ -69,8 +144,7 @@ The server is running on `http://localhost:58066`
 Confirm that it works by opening a browser and navigating to [`http://localhost:58066/breeze/Northwind/employees`](http://localhost:58066/breeze/Northwind/employees). 
 After a pause to start the server, it should display the JSON result of an "all employees" query. The PowerShell window should display each request to that server.
 
-Close the PowerShell window to shut down the server when you're done. 
+Close the PowerShell window to shut down the server when you're done.
 
-Can also launch it with gulp in a command window: gulp 
 
 

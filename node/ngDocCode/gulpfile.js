@@ -258,7 +258,7 @@ gulp.task('watch', function() {
 /**
  * Run specs once and exit
  * To start servers and run midway specs as well:
- *    gulp test --startServers
+ *    gulp test --startServer
  * @return {Stream}
  */
 gulp.task('test', function (done) {
@@ -269,7 +269,7 @@ gulp.task('test', function (done) {
  * Run specs and wait.
  * Watch for file changes and re-run tests on each change
  * To start servers and run midway specs as well:
- *    gulp autotest --startServers
+ *    gulp autotest --startServer
  */
 gulp.task('autotest', function (done) {
     startTests(false /*singleRun*/, done);
@@ -416,7 +416,7 @@ function startTests(singleRun, done) {
     var excludeFiles = [];
     var fork = require('child_process').fork;
 
-    if (env.startServers) {
+    if (env.startServer) {
         log('Starting servers');
         var savedEnv = process.env;
         savedEnv.NODE_ENV = 'dev';
