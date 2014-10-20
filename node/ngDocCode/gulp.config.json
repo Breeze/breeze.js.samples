@@ -2,10 +2,12 @@
     "client": "./public/",
     "server": "./",
     "htmltemplates": "./public/**/*.html",
+    "servertemplates": "./server_templates/",
+
     "css": [
         "./public/stylesheets/styles.css"
     ],
-    "js": [
+    "app": [
         "app/**/*.module.js",
         "app/**/*.js"
     ],
@@ -13,6 +15,8 @@
         "./public/test/**/*.spec.js"
     ],
     "specHelpers": [
+        "./public/test/lib/specHelper.js",
+        "./public/test/lib/appSpecHelper.js",
         "./public/test/lib/**/*.js"
     ],
     "nodejs": [
@@ -28,14 +32,27 @@
     ],
     "build": "./build/",
     "report": "./report/",
-    "vendorjs": [
-        "./bower_components/angular/angular.min.js",
-        "./bower_components/angular-animate/angular-animate.min.js",
-        "./bower_components/angular-route/angular-route.min.js",
-        "./bower_components/angular-sanitize/angular-sanitize.min.js",
-
-        "./bower_components/breezejs/breeze.min.js"
+    "testharnessjs":[
+        "./node_modules/chai/chai.js",
+        "./node_modules/mocha/mocha.js",
+        "./node_modules/sinon/lib/sinon.js",
+        "./node_modules/sinon-chai/lib/sinon-chai.js"
     ],
-    "vendorcss": [
+    "vendorjs": [
+        "./node_modules/ng-midway-tester/src/ngMidwayTester.js",
+
+        "./bower_components/angular/angular.js",
+        "./bower_components/angular-mocks/angular-mocks.js",
+        "./bower_components/angular-animate/angular-animate.js",
+        "./bower_components/angular-route/angular-route.js",
+        "./bower_components/angular-sanitize/angular-sanitize.js",
+
+        "./bower_components/breezejs/breeze.debug.js",
+        "./bower_components/breezejs/labs/breeze.angular.js",
+        "./bower_components/breezejs/labs/breeze.getEntityGraph.js",
+        "./bower_components/breezejs/labs/breeze.metadata-helper.js"
+    ],
+   "vendorcss": [
+        "./node_modules/mocha/mocha.css"
     ]
 }
