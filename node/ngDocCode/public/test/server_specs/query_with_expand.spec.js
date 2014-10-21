@@ -1,11 +1,9 @@
 /* jshint -W117, -W030, -W106, -W109 */
-describe.only("query_with_expand:", function () {
+describe("query_with_expand:", function () {
     'use strict';
 
     var em;
     var EntityQuery = breeze.EntityQuery;
-    var gotResults = ash.gotResults;
-    var gotNoResults = ash.gotNoResults;
     var newEm = ash.newEmFactory(ash.northwindServiceName);
 
     ash.serverIsRunningPrecondition();
@@ -29,7 +27,6 @@ describe.only("query_with_expand:", function () {
             expect(order).has.property('Customer').that.exist;
         }
     });
-
 
     it("include related parent entity which has a complex type property, e.g. an Product's Supplier", function (done) {
         // Get first Product and its related parent Supplier which has a complex Location property

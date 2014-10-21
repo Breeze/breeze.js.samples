@@ -13,6 +13,94 @@ describe("query_xtras:", function () {
 
     /////////////
 
+    describe("'.withParameters'", function () {
+
+        it("set one parameter", function (done) {
+            // Looking for Customers whose company name begins "qu", ignoring case
+            // The 'CustomersStartingWith' endpoint
+            // expects a 'companyName' URL query string parameter
+            var query = EntityQuery.from('CustomersStartingWith')
+                .withParameters({ companyName: 'qu'});
+
+            em.executeQuery(query).then(success).then(done, done);
+
+            function success(data) {
+                gotResults(data);
+                data.results.forEach(function(c){
+                    expect(c.CompanyName).to.match(/^qu/i);
+                });
+            }
+        });
+
+        it("set one parameter (nested query API example)", function (done) {
+            // Orders with an OrderDetail for a specific product
+            // Demonstrates "nested query" filtering on a collection navigation
+            // Can do with 'ANY' client query
+            // But in this case we let the controller's "OrdersForProduct" method do it
+            // That method also includes the related Customer and OrderDetails
+
+            var query = EntityQuery.from('OrdersForProduct/?productID=' + ash.chaiProductID);
+
+            em.executeQuery(query)
+                .then(success)
+                .then(done, done);
+
+            function success(data) {
+                gotResults(data);
+                data.results.forEach(function(o){
+                    var cust = o.Customer || {CompanyName: '<no customer>'};
+
+                    var chaiItems = o.OrderDetails.filter(
+                        function (od) { return od.ProductID === ash.chaiProductID; }
+                    );
+                    var orderLabel ='{0}-{1} order has {2} chai product details'
+                        .format(o.OrderID, cust.CompanyName, chaiItems.length);
+                    expect(chaiItems.length).above(0, orderLabel)
+                });
+            }
+        });
+
+        it("hack the query string instead ", function (done) {
+            // Looking for Customers whose company name begins "qu", ignoring case
+            // The 'CustomersStartingWith' endpoint
+            // expects a 'companyName' URL query string parameter
+            // Hack the query string rather than use .withParameters
+            // it's up to you to get it right.
+            var query = EntityQuery.from('CustomersStartingWith/?companyName=qu')
+
+            em.executeQuery(query).then(success).then(done, done);
+
+            function success(data) {
+                gotResults(data);
+                data.results.forEach(function(c){
+                    expect(c.CompanyName).to.match(/^qu/i);
+                });
+            }
+        });
+
+        it("combined with breeze filter", function (done) {
+            // The 'CustomersStartingWith' endpoint
+            // expects a 'companyName' URL query string parameter
+            // and understands OData query syntax.
+            // Looking for Customers whose company name begins "qu", ignoring case,
+            // and located in 'Brazil'
+            var query = EntityQuery.from('CustomersStartingWith')
+                .withParameters({ companyName: 'qu'})
+                .where('Country', 'eq', 'Brazil');
+
+            em.executeQuery(query).then(success).then(done, done);
+
+            function success(data) {
+                gotResults(data);
+                data.results.forEach(function(c){
+                    expect(c.CompanyName).to.match(/^qu/i);
+                    expect(c.Country).to.equal('Brazil');
+                });
+            }
+        });
+
+    });
+
     describe("when write a callback timeout", function () {
         /*********************************************************
          * N.B. Prefer technique in the ngAjaxAdapter.spec#"can timeout with interceptor"
@@ -159,92 +247,47 @@ describe("query_xtras:", function () {
             .then(done,done);
     });
 
-    describe("'.withParameters'", function () {
+    describe("breeze wires-up related entities", function () {
+        var eQuery, etQuery, oQuery;
 
-        it("set one parameter", function (done) {
-            // Looking for Customers whose company name begins "qu", ignoring case
-            // The 'CustomersStartingWith' endpoint
-            // expects a 'companyName' URL query string parameter
-            var query = EntityQuery.from('CustomersStartingWith')
-                .withParameters({ companyName: 'qu'});
+        beforeEach(function () {
+            eQuery  = EntityQuery.from('Employees')
+                .where('EmployeeID', '==', ash.nancyID).using(em); // Nancy Davolio
 
-            em.executeQuery(query).then(success).then(done, done);
+            etQuery = EntityQuery.from('EmployeeTerritories').using(em);
 
-            function success(data) {
-                gotResults(data);
-                data.results.forEach(function(c){
-                    expect(c.CompanyName).to.match(/^qu/i);
-                });
-            }
+            oQuery  = EntityQuery.from('Orders')
+                .where('EmployeeID', '==', ash.nancyID).using(em); // Nancy's orders
         });
 
-        it("set one parameter (nested query API example)", function (done) {
-            // Orders with an OrderDetail for a specific product
-            // Demonstrates "nested query" filtering on a collection navigation
-            // Can do with 'ANY' client query
-            // But in this case we let the controller's "OrdersForProduct" method do it
-            // That method also includes the related Customer and OrderDetails
-
-            var query = EntityQuery.from('OrdersForProduct/?productID=' + ash.chaiProductID);
-
-            em.executeQuery(query)
-                .then(success)
+        it("when queries run in parallel", function (done) {
+            var promises =[eQuery, etQuery, oQuery].map(function(q){ return q.execute();});
+            breeze.Q.all(promises)
+                .then(expectNancyWiredUp)
                 .then(done, done);
-
-            function success(data) {
-                gotResults(data);
-                data.results.forEach(function(o){
-                    var cust = o.Customer || {CompanyName: '<no customer>'};
-
-                    var chaiItems = o.OrderDetails.filter(
-                        function (od) { return od.ProductID === ash.chaiProductID; }
-                    );
-                    var orderLabel ='{0}-{1} order has {2} chai product details'
-                        .format(o.OrderID, cust.CompanyName, chaiItems.length);
-                    expect(chaiItems.length).above(0, orderLabel)
-                });
-            }
         });
 
-        it("hack the query string instead ", function (done) {
-            // Looking for Customers whose company name begins "qu", ignoring case
-            // The 'CustomersStartingWith' endpoint
-            // expects a 'companyName' URL query string parameter
-            // Hack the query string rather than use .withParameters
-            // it's up to you to get it right.
-            var query = EntityQuery.from('CustomersStartingWith/?companyName=qu')
-
-            em.executeQuery(query).then(success).then(done, done);
-
-            function success(data) {
-                gotResults(data);
-                data.results.forEach(function(c){
-                    expect(c.CompanyName).to.match(/^qu/i);
-                });
-            }
+        it("when queries are chained", function (done) {
+            // Orders, then ETerritories, then Employee
+            oQuery.execute()
+                .then(function(){return etQuery.execute();})
+                .then(function(){return eQuery.execute();})
+                .then(expectNancyWiredUp)
+                .then(done, done);
         });
 
-        it("combined with breeze filter", function (done) {
-            // The 'CustomersStartingWith' endpoint
-            // expects a 'companyName' URL query string parameter
-            // and understands OData query syntax.
-            // Looking for Customers whose company name begins "qu", ignoring case,
-            // and located in 'Brazil'
-            var query = EntityQuery.from('CustomersStartingWith')
-                .withParameters({ companyName: 'qu'})
-                .where('Country', 'eq', 'Brazil');
+        function expectNancyWiredUp(){
+            var emps           = em.executeQueryLocally(eQuery);
+            var empTerritories = em.executeQueryLocally(etQuery);
+            var orders         = em.executeQueryLocally(oQuery);
 
-            em.executeQuery(query).then(success).then(done, done);
-
-            function success(data) {
-                gotResults(data);
-                data.results.forEach(function(c){
-                    expect(c.CompanyName).to.match(/^qu/i);
-                    expect(c.Country).to.equal('Brazil');
-                });
-            }
-        });
-
+            expect(emps).to.be.length(1, 'should have one Employee (Nancy)');
+            var nancy = emps[0];
+            expect(orders).length.above(0, 'Orders in cache');
+            expect(orders).length(nancy.Orders.length, 'same as # of nancy.Orders');
+            expect(empTerritories).length.above(0, 'EmployeeTerritories in cache');
+            expect(nancy.EmployeeTerritories).length.above(0, 'nancy.EmployeeTerritories');
+        }
     });
 
 });

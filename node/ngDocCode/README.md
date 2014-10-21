@@ -25,15 +25,20 @@ Demonstrates through automated tests how BreezeJS works within an Angular applic
 - Enter `bower install`
 
 >While the bower package is the official stable release, you can
-get the most current committed file versions by running the
-*getLibs.cmd* command (Windows only).
-
-## Running the app
-There is no application to run at this time. The tests ARE the application.
+get the most recently committed Breeze.js file versions by running the *getLibs.cmd* command (Windows only).
 
 ## Running the tests
 
-Many of the tests are "midway integration tests" that make calls to a remote server. **You must start the server first** if you want these tests to pass. See the **["*Starting the Server*" section](#startServer)** below.
+You can run the tests in several ways:
+
+1. Open *index.html* in a browser directly from the file system
+2. With gulp
+3. With Web Storm
+
+Details of these approaches follow.
+
+**Regardless of approach you must start the remote server first**.
+Many of the tests are "midway integration tests" that make calls to a remote server.  See the **["*Starting the Server*" section](#startServer)** below.
 
 <a name="indexhtmlTest"></a>
 ### Testing with *index.html*
@@ -68,9 +73,11 @@ to the command as in:
 <a name="webstormTest"></a>
 ### Testing with Web Storm
 
-Web Storm is a nice IDE for development and debugging. You can run the tests inside Web Storm as follows:
+Web Storm is a nice IDE for development and debugging. You can run the tests inside Web Storm with Karma or as a Node application.
 
-1. Create a "karma" configuration (one time setup)
+####Run with Karma
+
+1. Create a Web Storm configuration for "karma" (one time setup)
 
 	* [ctrl-shift-A], "Edit Configurations"
 	
@@ -80,19 +87,54 @@ Web Storm is a nice IDE for development and debugging. You can run the tests ins
     
     * Name it (e.g, "Karma")
     
-	* Configuation file: navigate to `karma.conf.js` at root level
+	* For "Configuation file" navigate to `karma.conf.js` at root level
 	
     * Click [OK].
 
 1. Start the remote server (see **["*Starting the Server*"](#startServer)**).
 
-1. [ctrl-F5] to launch karma and the test or click the "Play" icon in the upper right toolbar.
+1. Select the "Karma" Web Storm configuration
 
-Review the Web Storm documentation for further details.
+1. [ctrl-F5] to launch or click the "Play" icon in the upper right toolbar.
+
+#### Run as node application
+
+You can also run the tests in a browser with a node/express server.
+
+1. Create a Web Storm configuration for "App" (one time setup)
+
+	* [ctrl-shift-A], "Edit Configurations"
+	
+    * click the "+" icon to create a new configuration
+
+    * Select the "Node.js" default template
+    
+    * Name it (e.g, "App")
+    
+	* For "JavaScript file" enter `server.js`
+	
+    * Click [OK].
+
+1. Start the remote server (see **["*Starting the Server*"](#startServer)**).
+
+1. Select the "App" Web Storm configuration
+
+1. [ctrl-F5] to launch or click the "Play" icon in the upper right toolbar.
+>Review the Web Storm documentation for further details.
 
 ## Debugging Tests
 
-You can debug the tests in a browser once the karma server is running.
+You can debug the tests in Web Storm but most of us will debug them in a browser. How you do that depends upon how you're running the tests.
+
+### Running in a browser
+
+* Open the browser's Developer Tools (F12).
+* Find the source code file(s) of interest and set breakpoints.
+* Refresh the browser and have fun.
+
+### Running with Karma
+
+Once the karma server is running.
 
 * Open a browser and navigate to `http://localhost:9876/debug.html`.
 * Open the browser's Developer Tools (F12).
@@ -105,11 +147,11 @@ The tests (called "specs") are all in the `public/test` folder.
 
 We use **karma** to manage the tests.
 
-Specs are written with **mocha** (testrunner), **chai** (*expect* assertions), **sinon** (mocking), and the **ngMidwayTester** (angular tests that call to the server).
+Specs are written with **mocha** (the testrunner), **chai** (using *expect* assertions), **sinon** (for mocking), and the **ngMidwayTester** (for angular tests that make AJAX calls to the server).
 
-Specs at the top level run without a running remote server. Almost all of them are synchronous. 
+Specs at the top level can pass without access to a running remote data server. Most of these tests are synchronous. 
 
-Specs in the `server_specs` sub-folder are async "midway" tests that require  a running remote server. See the **["*Starting the Server*" section](#startServer)**.
+Specs in the `server_specs` sub-folder are async "midway" tests that require  a running remote data server. See the **["*Starting the Server*" section](#startServer)**.
 
 Files in the `lib` sub-folder define helpers and test data to facilitate testing.
 
@@ -123,7 +165,7 @@ You know you've hit the problem when the test fails in a "before hook" and the s
 
 Please disable it or remove it from your Chrome extensions.
 
-<a id="startServer"></a>
+<a name="startServer"></a>
 ## Starting the Server
 
 The midway tests talk to a local test server which must already be running.
