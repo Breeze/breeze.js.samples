@@ -1,15 +1,6 @@
-# ngDocCode - BreezeJS exploratory tests in Angular
+# ngDocCode - Breeze/Angular exploratory tests 
 
-Demonstrates through automated tests how BreezeJS works within an Angular application 
-
-## Structure
-	/build 	(created on the fly)
-	/gulp	
-	/public
-		/test
-			/lib
-    server.js
-	
+Demonstrates through automated tests how BreezeJS works within an Angular application.
 
 ## Installing Node.js and Bower Packages
 
@@ -97,6 +88,8 @@ Web Storm is a nice IDE for development and debugging. You can run the tests ins
 
 1. [ctrl-F5] to launch or click the "Play" icon in the upper right toolbar.
 
+1. (*optional*) browse to `http://localhost:9876/` for in-browser debugging.
+
 #### Run as node application
 
 You can also run the tests in a browser with a node/express server.
@@ -120,6 +113,9 @@ You can also run the tests in a browser with a node/express server.
 1. Select the "App" Web Storm configuration
 
 1. [ctrl-F5] to launch or click the "Play" icon in the upper right toolbar.
+
+1. Browse to `http://localhost:3456`
+
 >Review the Web Storm documentation for further details.
 
 ## Debugging Tests
@@ -134,7 +130,7 @@ You can debug the tests in Web Storm but most of us will debug them in a browser
 
 ### Running with Karma
 
-Once the karma server is running.
+Once the Karma server is running.
 
 * Open a browser and navigate to `http://localhost:9876/debug.html`.
 * Open the browser's Developer Tools (F12).
@@ -143,19 +139,27 @@ Once the karma server is running.
 
 ## How It Works
 
-The tests (called "specs") are all in the `public/test` folder.
+The folders and files of most interest are:
 
-We use **karma** to manage the tests.
+    /public
+        /app                  -- client app (empty for now)                     
+		/test                 -- all mocha tests (AKA "specs")
+			/lib              -- helpers and test data
+            /server-specs     -- specs that require the data server
+            ...spec.js        -- specs that don't call the data server
+    index.html                -- mocha test page
+    server.js                 -- node server
+	
+
+The tests (called "specs") are all in the `public/test` folder.
 
 Specs are written with **mocha** (the testrunner), **chai** (using *expect* assertions), **sinon** (for mocking), and the **ngMidwayTester** (for angular tests that make AJAX calls to the server).
 
-Specs at the top level can pass without access to a running remote data server. Most of these tests are synchronous. 
+Specs at the **`test`** folder level do not call the data server. Most of these tests are synchronous. 
 
-Specs in the `server_specs` sub-folder are async "midway" tests that require  a running remote data server. See the **["*Starting the Server*" section](#startServer)**.
+Specs in the **`server_specs`** sub-folder are async "midway" tests that require a running data server. See the **["*Starting the Server*" section](#startServer)**.
 
-Files in the `lib` sub-folder define helpers and test data to facilitate testing.
-
-The helpers pile all of their material into the global namespace called `window.appSpecHelper`; **`window.ash`** is an alias for that namespace and most specs use this alias.
+Files in the **`lib`** sub-folder define test data, app constants, and helpers for common test authoring tasks. All of this material is attached to the global namespace, **`appSpecHelper`**. Most specs reference the **`ash`** alias for this namespace.
 
 
 ## Disable ng-inspector!
