@@ -8,12 +8,17 @@
  * conditions of the IdeaBlade Breeze license, available at http://www.breezejs.com/license
  *
  * Author: Steve Schmidt
- * Version: 1.0.6
+ * Version: 1.1.0 - revised: eliminated return object, configAjaxAdapter method; add ajaxPostEnabled flag
+ *          1.0.6 - original
  * 
  * Special parameters:
  *  $method: ‘POST’ or ‘GET’ (the default)
  *  $encoding: ‘JSON’ or x-www-form-urlencoded (the default)
  *  $data: contains the data to be sent to the server
+ *
+ * Installation: 
+ *    play script after breeze
+ *    call breeze.ajaxpost() if you change the ajax adapter (e.g, in Angular apps)
  *
  * Example:
  *   var query = breeze.EntityQuery.from('SimilarCustomersPOST')
@@ -41,69 +46,57 @@
 }(function (breeze) {
     'use strict';
     breeze.ajaxpost = function(ajaxAdapter) {
-
-        divertAjaxImpl(ajaxAdapter);
-
-        return {
-            configAjaxAdapter: divertAjaxImpl
-        };
+        wrapAjaxImpl(ajaxAdapter);
     };
 
-    breeze.ajaxpost(); // run it immediately on whatever is the current ajax adapter
+    breeze.ajaxpost(); // immediately wrap whatever is the current ajax adapter
 
-    // Add processSettings to ajaxAdapter
-    function divertAjaxImpl(ajaxAdapter) {
+    ////////////////////
+
+    function wrapAjaxImpl(ajaxAdapter) {
         if (!ajaxAdapter) {
             ajaxAdapter = breeze.config.getAdapterInstance("ajax");
         }
+        if (ajaxAdapter.ajaxPostEnabled){
+            return; // already wrapped it.
+        }
 
         var ajaxFunction = ajaxAdapter.ajax;
-        // Grab the custom headers set on the ajax adapter
-        var customHeaders = ajaxAdapter.defaultSettings.headers;
         if (ajaxFunction) {
             ajaxAdapter.ajax = function (settings) {
                 processSettings(settings);
                 return ajaxFunction.call(ajaxAdapter, settings);
             };
+            ajaxAdapter.ajaxPostEnabled = true;
         }
     }
 
     // Handle the POST-specific properties in the settings - $method, $data, $encoding
     function processSettings(settings) {
-        if (settings) {
-            var parameters = settings.params;
-            if (parameters) {
-                // wrapped data; handle the special properties
-                settings.type = parameters.$method || settings.type; // GET is default method
+        var parameters = settings && settings.params;
+        if (!parameters) return settings;
 
-                var data = parameters.$data;
-                if (data) {
-                 // if $data exists, assume all of other parameters are guidance for building a POST
-                    if (parameters.$encoding === 'JSON') {
-                        // JSON encoding 
-                        settings.processData = false; // don't let JQuery form-encode it 
-                        settings.contentType = "application/json; charset=UTF-8";
+        // wrapped data; handle the special properties
+        settings.type = parameters.$method || settings.type; // GET is default method
 
-                        if (typeof (data) === 'object') {
-                            settings.data = JSON.stringify(data); // encode parameters as JSON
-                        } else {
-                            settings.data = data;
-                        }
-                    } else {
-                        settings.data = data;
-                    }
-                    // must be null or jQuery ajax adapter won't see settings.data
-                    settings.params = null; 
+        var data = parameters.$data;
+        if (data) {
+         // if $data exists, assume all of other parameters are guidance for building a POST
+            if (parameters.$encoding === 'JSON') {
+                // JSON encoding 
+                settings.processData = false; // don't let JQuery form-encode it 
+                settings.contentType = "application/json; charset=UTF-8";
+
+                if (typeof (data) === 'object') {
+                    settings.data = JSON.stringify(data); // encode parameters as JSON
+                } else {
+                    settings.data = data;
                 }
+            } else {
+                settings.data = data;
             }
-        }
-        // If there are custom headers,
-        if (customHeaders) {
-            settings.headers = {  };
-            // Create each one on the headers object
-            $.each(customHeaders, function (index, item) {
-                settings.headers[index]= item;
-            });
+            // must be null or jQuery ajax adapter won't see settings.data
+            settings.params = null; 
         }
 
         return settings;
