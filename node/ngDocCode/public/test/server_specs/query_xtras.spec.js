@@ -168,8 +168,7 @@ describe("query_xtras:", function () {
         }
     });
 
-    // Skipping these tests; they'll fail until we clear D#2636 and F#2256
-    describe.skip("when queried entity is already in cache in Deleted state", function () {
+    describe("when queried entity is already in cache in Deleted state", function () {
         beforeEach(function () {
             // fake alfreds customer in cache in a deleted state
             em.createEntity('Customer', {
@@ -178,13 +177,13 @@ describe("query_xtras:", function () {
             }, breeze.EntityState.Deleted);
         });
 
-        it("entity is excluded from query result D#2636", function (done) {
+        it("entity is excluded from query result", function (done) {
             // although the 'Alfreds' Customer is in the db,
             // breeze excludes from results because it is in cache in a deleted state.
             EntityQuery.from('Customers')
                 .where('CustomerID', '==', ash.alfredsID)
                 .using(em).execute()
-                .then(gotNoResults)
+                .then(ash.gotNoResults)
                 .then(done, done);
         });
 

@@ -110,7 +110,7 @@ describe("query_ordering_paging:", function () {
         });
     });
 
-    describe.only("when paging (top, take, skip)", function () {
+    describe("when paging (top, take, skip)", function () {
         var productIds;
         // use this product query as the basis for subsequent queries in this section
         var rootQuery =  EntityQuery.from("Products").orderBy('ProductName');
@@ -192,8 +192,7 @@ describe("query_ordering_paging:", function () {
 
 
             function pagedQuery() {
-                return filtered
-                    .skip(10).take(5).inlineCount()
+                return filtered.skip(10).take(5).inlineCount()
                     .using(em).execute();
             }
 
