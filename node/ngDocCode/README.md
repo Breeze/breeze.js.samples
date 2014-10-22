@@ -28,15 +28,15 @@ You can run the tests in several ways:
 
 Details of these approaches follow.
 
-**Regardless of approach you must start the remote server first**.
-Many of the tests are "midway integration tests" that make calls to a remote server.  See the **["*Starting the Server*" section](#startServer)** below.
+**Regardless of approach you must start the data server first**.
+Many of the tests are "midway integration tests" that make calls to a data server.  See the **["*Starting the Server*" section](#startServer)** below.
 
 <a name="indexhtmlTest"></a>
 ### Testing with *index.html*
 
 The tests can be run directly in the browser if your OS and browser permit running HTML files from the local file system.
 
-1. Start the remote server (see **["*Starting the Server*"](#startServer)**).
+1. Start the data server (see **["*Starting the Server*"](#startServer)**).
 
 1. Double-click the *index.html* located in the root of the ngDocCode directory. A browser should open and the tests should run.
 
@@ -82,7 +82,7 @@ Web Storm is a nice IDE for development and debugging. You can run the tests ins
 	
     * Click [OK].
 
-1. Start the remote server (see **["*Starting the Server*"](#startServer)**).
+1. Start the data server (see **["*Starting the Server*"](#startServer)**).
 
 1. Select the "Karma" Web Storm configuration
 
@@ -108,7 +108,7 @@ You can also run the tests in a browser with a node/express server.
 	
     * Click [OK].
 
-1. Start the remote server (see **["*Starting the Server*"](#startServer)**).
+1. Start the data server (see **["*Starting the Server*"](#startServer)**).
 
 1. Select the "App" Web Storm configuration
 

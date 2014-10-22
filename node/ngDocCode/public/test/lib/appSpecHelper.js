@@ -64,6 +64,7 @@
         // northwindTestData: northwindTestData.js
         output: output,
         preFetchMetadataStore: preFetchMetadataStore,
+        replaceAccentChars: specHelper.replaceAccentChars,
         reportRejectedPromises: reportRejectedPromises,
         rootUri: getRootUri(),
         serverIsRunningPrecondition: serverIsRunningPrecondition,
@@ -80,9 +81,9 @@
 
     createTestAppModule();
 
-    return;
-
+    ///////////////////////
     /*** ALL FUNCTION DECLARATIONS FROM HERE DOWN; NO MORE REACHABLE CODE ***/
+
     /*********************************************************
      * assert that the collection of entities is sorted properly on one property
      *********************************************************/
@@ -190,9 +191,7 @@
      *********************************************************/
     function get$http(){
         var $http;
-        inject(function($http){
-            $http = _$http_;
-        });
+        inject(function(_$http_){ $http = _$http_; });
         return $http;
     }
 
