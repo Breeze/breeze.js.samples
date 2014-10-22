@@ -406,14 +406,13 @@
         .where(alfredsPredicate)
         .using(em).execute()
         .then(function (data) { // back from query
-          if (data.results.length == 0) {
-              ok(true, "Deleted Customer not found (presumably because deleted)");
-            
-          } else {
-              var cust = data.results[0];
-              ok(false, "Returned {0} Customer whose name is {1}.".
-                format(cust.entityAspect.entityState.name, cust.CompanyName()));
-          }
+            var cust = data.results[0];
+            if (cust == null) {
+                ok(true, "Deleted Customer not found (presumably because deleted)");
+            } else {
+                ok(false, "Returned {0} Customer whose name is {1}.".
+                    format(cust.entityAspect.entityState.name, cust.CompanyName()));
+            }
         })
         .fail(handleFail).fin(start);
     });
@@ -1645,12 +1644,12 @@
         .using(breeze.FetchStrategy.FromLocalCache)
         .using(em).execute()
         .then(function (data) {
-            if (data.results.length == 0) {
-              ok(true, "Deleted customer not found (presumably because deleted)");
+            var cust = data.results[0];
+            if (cust == null) {
+                ok(true, "Deleted customer not found (presumably because deleted)");
             } else {
-              var cust = data.results[0];
-              ok(false, "Returned {0} Customer whose name is {1}.".
-              format(cust.entityAspect.entityState.name, cust.CompanyName()));
+                ok(false, "Returned {0} Customer whose name is {1}.".
+                    format(cust.entityAspect.entityState.name, cust.CompanyName()));
             }
         })
         .fail(handleFail).fin(start);
