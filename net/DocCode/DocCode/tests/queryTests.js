@@ -1025,6 +1025,8 @@
         }
     });
 
+    /*******  SOME WACKY TESTS UNRELATED TO EXPAND **********/
+    
     /*********************************************************
     * When API method returns an HttpResponseMessage (HRM)
     * can filter, select, and expand

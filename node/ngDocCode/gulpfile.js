@@ -154,6 +154,41 @@ gulp.task('images', function() {
 });
 
 /**
+ * Inject all the spec files into the index.html
+ * @return {Stream}
+ */
+gulp.task('build-index', function() {
+        log('building index.html');
+
+        var index = paths.servertemplates + 'index.html';
+        var stream = gulp
+
+            // inject the files into index.html
+            .src([index])
+            .pipe(inject([].concat(paths.testharnessjs), 'inject-testharness'))
+            .pipe(inject([].concat(paths.vendorjs), 'inject-vendor'))
+            .pipe(inject([].concat(paths.app), 'inject-app'))
+            .pipe(inject([].concat(paths.specHelpers), 'inject-specHelpers'))
+            .pipe(inject([].concat(paths.specs), 'inject-specs'))
+            .pipe(inject([].concat(paths.vendorcss), 'inject-vendorcss'))
+
+            .pipe(gulp.dest(paths.server)); // write the index.html file changes
+            //.pipe(gulp.dest(paths.build)); // write the index.html file changes
+
+
+    function inject(path, name) {
+            //var pathGlob = paths.build + path;
+            var options = {
+                //ignorePath: paths.build.substring(1),
+                addRootSlash: false,
+                read: false
+            };
+            if (name) { options.name = name; }
+            return plug.inject(gulp.src(path), options);
+        }
+    });
+
+/**
  * Inject all the files into the new index.html
  * rev, but no map
  * @return {Stream}
@@ -258,7 +293,7 @@ gulp.task('watch', function() {
 /**
  * Run specs once and exit
  * To start servers and run midway specs as well:
- *    gulp test --startServers
+ *    gulp test --startServer
  * @return {Stream}
  */
 gulp.task('test', function (done) {
@@ -269,7 +304,7 @@ gulp.task('test', function (done) {
  * Run specs and wait.
  * Watch for file changes and re-run tests on each change
  * To start servers and run midway specs as well:
- *    gulp autotest --startServers
+ *    gulp autotest --startServer
  */
 gulp.task('autotest', function (done) {
     startTests(false /*singleRun*/, done);
@@ -416,7 +451,7 @@ function startTests(singleRun, done) {
     var excludeFiles = [];
     var fork = require('child_process').fork;
 
-    if (env.startServers) {
+    if (env.startServer) {
         log('Starting servers');
         var savedEnv = process.env;
         savedEnv.NODE_ENV = 'dev';

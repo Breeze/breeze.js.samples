@@ -130,7 +130,7 @@ describe("query_with_navigation_property:", function () {
         // Fails. Skipping. D#2637
         it.skip("a given complex property value D#2637", function (done) {
             // Get first Customer with any order shipped to California
-            EntityQuery.from('Customer')
+            EntityQuery.from('Customers')
                 .where('Orders', 'any', 'ShipTo.Region', '==', 'CA')
                 .top(1)
                 .expand('Orders')

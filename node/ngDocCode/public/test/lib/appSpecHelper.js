@@ -1,7 +1,8 @@
 /* jshint -W117, -W030, -W071 */
 /*********************************************************
- * ash - appSpecHelper - reduces boilerplate repetition in application tests
- * initial version copied from DocCode's testFns modified for ngDocCode
+ * ash - appSpecHelper - common values and functions for application specs
+ * Reduces repetition in application tests
+ * Based on DocCode's "testFns";  modified for ngDocCode
  *********************************************************/
 // ReSharper disable InconsistentNaming
 
@@ -63,6 +64,7 @@
         // northwindTestData: northwindTestData.js
         output: output,
         preFetchMetadataStore: preFetchMetadataStore,
+        replaceAccentChars: specHelper.replaceAccentChars,
         reportRejectedPromises: reportRejectedPromises,
         rootUri: getRootUri(),
         serverIsRunningPrecondition: serverIsRunningPrecondition,
@@ -79,9 +81,9 @@
 
     createTestAppModule();
 
-    return;
-
+    ///////////////////////
     /*** ALL FUNCTION DECLARATIONS FROM HERE DOWN; NO MORE REACHABLE CODE ***/
+
     /*********************************************************
      * assert that the collection of entities is sorted properly on one property
      *********************************************************/
@@ -189,9 +191,7 @@
      *********************************************************/
     function get$http(){
         var $http;
-        inject(function($http){
-            $http = _$http_;
-        });
+        inject(function(_$http_){ $http = _$http_; });
         return $http;
     }
 

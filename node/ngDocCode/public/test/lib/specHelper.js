@@ -5,10 +5,11 @@
         injector: injector,
         gotResults: gotResults,
         gotNoResults: gotNoResults,
+        replaceAccentChars: replaceAccentChars,
         verifyNoOutstandingHttpRequests: verifyNoOutstandingHttpRequests
     };
     window.specHelper = specHelper;
-    return;
+
     ////////////////////////
 
     function fakeRouteProvider($provide) {
@@ -63,6 +64,26 @@
 
     function gotNoResults(data) {
         expect(data.results).is.empty;
+    }
+
+    // Replaces the accented characters of many European languages w/ unaccented chars
+    // Use it in JavaScript string sorts where such characters may be encountered
+    // Matches the default string comparers of most databases.
+    // Ex: replaceAccentChars(a.Name) < replaceAccentChars(b.Name)
+    // instead of:            a.Name  <                    b.Name
+    function replaceAccentChars(s) {
+        var r = s.toLowerCase();
+        r = r.replace(new RegExp(/[àáâãäå]/g), "a");
+        r = r.replace(new RegExp(/æ/g), "ae");
+        r = r.replace(new RegExp(/ç/g), "c");
+        r = r.replace(new RegExp(/[èéêë]/g), "e");
+        r = r.replace(new RegExp(/[ìíîï]/g), "i");
+        r = r.replace(new RegExp(/ñ/g), "n");
+        r = r.replace(new RegExp(/[òóôõö]/g), "o");
+        r = r.replace(new RegExp(/œ/g), "oe");
+        r = r.replace(new RegExp(/[ùúûü]/g), "u");
+        r = r.replace(new RegExp(/[ýÿ]/g), "y");
+        return r;
     }
 
     /**
