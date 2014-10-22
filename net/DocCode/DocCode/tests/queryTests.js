@@ -406,13 +406,15 @@
         .where(alfredsPredicate)
         .using(em).execute()
         .then(function (data) { // back from query
-            var cust = data.results[0];
-            if (cust == null) {
-                ok(true, "Deleted Customer not found (presumably because deleted)");
+            if (data.results.length == 0) {
+              ok(true, "Deleted Customer not found (presumably because deleted)");
             } else {
-                ok(false, "Returned {0} Customer whose name is {1}.".
-                    format(cust.entityAspect.entityState.name, cust.CompanyName()));
+              var cust = data.results[0];
+              ok(false, "Returned {0} Customer whose name is {1}.".
+                format(cust.entityAspect.entityState.name, cust.CompanyName()));
             }
+
+
         })
         .fail(handleFail).fin(start);
     });
