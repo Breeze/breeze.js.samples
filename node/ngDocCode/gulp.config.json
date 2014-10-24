@@ -5,7 +5,7 @@
     "servertemplates": "./server_templates/",
 
     "css": [
-        "./public/stylesheets/styles.css"
+        "./public/stylesheets/style.css"
     ],
     "app": [
         "app/**/*.module.js",

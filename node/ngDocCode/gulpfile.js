@@ -171,6 +171,8 @@ gulp.task('build-index', function() {
             .pipe(inject([].concat(paths.specHelpers), 'inject-specHelpers'))
             .pipe(inject([].concat(paths.specs), 'inject-specs'))
             .pipe(inject([].concat(paths.vendorcss), 'inject-vendorcss'))
+            .pipe(inject([].concat(paths.css), 'inject-css'))
+
 
             .pipe(gulp.dest(paths.server)); // write the index.html file changes
             //.pipe(gulp.dest(paths.build)); // write the index.html file changes
