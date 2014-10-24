@@ -21,7 +21,7 @@ namespace DocCode.Controllers
 
         // Todo: inject via an interface rather than "new" the concrete class
         public NorthwindController(NorthwindRepository repository)
-        {         
+        {
             _repository = repository ?? new NorthwindRepository();
         }
 
@@ -31,7 +31,7 @@ namespace DocCode.Controllers
             _repository.UserSessionId = getUserSessionId();
         }
 
-        // ~/breeze/northwind/Metadata 
+        // ~/breeze/northwind/Metadata
         [HttpGet]
         public string Metadata()
         {
@@ -47,7 +47,7 @@ namespace DocCode.Controllers
 
         [HttpGet]
         // See http://stackoverflow.com/questions/21775107/breeze-predicate-on-multiple-levels-of-children/21779728#21779728
-        [BreezeQueryable(MaxAnyAllExpressionDepth = 5)]
+        [EnableBreezeQuery(MaxAnyAllExpressionDepth = 5)]
         public IQueryable<Customer> Customers() {
             return _repository.Customers;
         }
@@ -59,7 +59,7 @@ namespace DocCode.Controllers
         }
 
         [HttpGet]
-        [BreezeQueryable]
+        [EnableBreezeQuery]
         public HttpResponseMessage CustomersAsHRM()
         {
             return Request.CreateResponse(HttpStatusCode.OK, _repository.Customers);
@@ -91,7 +91,7 @@ namespace DocCode.Controllers
             return _repository.InternationalOrders;
         }
         [HttpGet]
-        [BreezeQueryable(MaxExpansionDepth = 3)]
+        [EnableBreezeQuery(MaxExpansionDepth = 3)]
         public IQueryable<Order> Orders() {
             return _repository.Orders;
         }
@@ -102,8 +102,8 @@ namespace DocCode.Controllers
         }
 
         [HttpGet]
-        // should guard against pulling too much data with limiting BreezeQueryableAttribute, e.g.
-        [BreezeQueryable(MaxTop = 10)]
+        // should guard against pulling too much data with limiting EnableBreezeQueryAttribute, e.g.
+        [EnableBreezeQuery(MaxTop = 10)]
         public IQueryable<Order> OrdersAndDetails()
         {
             return _repository.OrdersAndDetails;
@@ -191,11 +191,11 @@ namespace DocCode.Controllers
         /// Regions, Territories, and Categories.
         /// </summary>
         /// <returns>
-        /// Returns an array, not an IQueryable. 
+        /// Returns an array, not an IQueryable.
         /// Each array element is a different entity list.
         /// Note that the list elements arrive on the client
         /// as objects, not arrays, with properties
-        /// such as '0', '1', '2' ... 
+        /// such as '0', '1', '2' ...
         /// See the DocCode:QueryTests (Projections) module.
         /// </returns>
         /// <remarks>
@@ -214,11 +214,11 @@ namespace DocCode.Controllers
         }
 
         /// <summary>
-        /// Query returing a 1-element array with a lookups object whose 
+        /// Query returing a 1-element array with a lookups object whose
         /// properties are all Regions, Territories, and Categories.
         /// </summary>
         /// <returns>
-        /// Returns one object, not an IQueryable, 
+        /// Returns one object, not an IQueryable,
         /// whose properties are "region", "territory", "category".
         /// The items arrive as arrays.
         /// </returns>
