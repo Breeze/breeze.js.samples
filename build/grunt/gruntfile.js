@@ -1,3 +1,5 @@
+// Grunt Build for breeze.js.samples
+
 module.exports = function(grunt) {
 
   var path = require('path');
@@ -78,17 +80,17 @@ module.exports = function(grunt) {
       options: {
         // uncomment to test
         // "no-write": true,
-        force: true,
+        force: true
       },
       tempDir: tempDir,
-      samples:  join( ['../../**/'], tempPaths),
+      samples:  join( ['../../**/'], tempPaths)
     },
     
 	  msBuild: {
       samples: {
         msBuildOptions: msBuildOptions,
-        solutionFileNames: sampleSolutionFileNames,
-      },
+        solutionFileNames: sampleSolutionFileNames
+      }
     },
     
     copy: {
@@ -203,7 +205,7 @@ module.exports = function(grunt) {
       expand: true, 
       cwd: serverNetDir + dllName + '/bin/release',
       src: [ dllName + '.dll', dllName + '.pdb' ],
-      dest: tempDir + 'NetDlls',
+      dest: tempDir + 'NetDlls'
     }
     return cmd;
   }
