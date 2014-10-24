@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Breeze Angular Module and "breeze service"
  *
  * v.0.9.0

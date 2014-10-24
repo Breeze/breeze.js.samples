@@ -16,7 +16,10 @@ echo Copying breeze client files into the breeze.js.samples repo
 @echo on
 XCOPY "%1..\..\..\breeze.js\build\*.js" "%1js" /Y 
 
-XCOPY "%1..\..\..\breeze.js\src\breeze.dataService.mongo.js" "%1js.adapters" /Y 
+XCOPY "%1js\breeze.dataService.mongo.js" "%1js.adapters"  /Y
+XCOPY "%1js\breeze.modelLibrary.backbone.js" "%1js.adapters"  /Y
+DEL "%1js\breeze.dataService.mongo.js"  2>nul
+DEL "%1js\breeze.modelLibrary.backbone.js"  2>nul
 
 XCOPY "%1..\..\..\breeze.js.labs\*.js" "%1js.labs" /Y 
 XCOPY "%1..\..\..\breeze.js.labs\*.css" "%1js.labs" /Y 

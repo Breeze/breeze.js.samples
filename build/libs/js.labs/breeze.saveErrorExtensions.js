@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Extend breeze with saveErrorMessageService,   
  * a utility service for processing errors returned from a save.
  *

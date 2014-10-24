@@ -1,4 +1,4 @@
-//#region Copyright, Version, and Description
+﻿//#region Copyright, Version, and Description
 /*
  *  Functions to enable Breeze to use POST for queries when
  *  special parameters are passed using the .withParameters function.

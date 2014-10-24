@@ -1,4 +1,4 @@
-//#region Copyright, Version, and Description
+﻿//#region Copyright, Version, and Description
 /*
  * DO NOT USE. TOO PRIMITIVE AND NOT GOOD GUIDANCE. WILL BE DEPRECATED SOON
  * 

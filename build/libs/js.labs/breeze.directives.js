@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Breeze Labs: Breeze Directives for Angular Apps
  *
  *  v.1.3.9
