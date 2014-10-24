@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Breeze Labs Azure Mobile Services DataServiceAdapter
  *
  *  v.0.6.0

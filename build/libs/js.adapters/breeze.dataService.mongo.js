@@ -1,4 +1,4 @@
-﻿(function (definition, global) {
+(function (definition, global) {
   var factory = function (breeze) {
     return definition(breeze, global);
   };

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Breeze Labs Abstract REST DataServiceAdapter
  *
  *  v.0.6.2

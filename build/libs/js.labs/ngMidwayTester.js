@@ -1,4 +1,4 @@
-﻿/**
+/**
  * FROM:  https://github.com/yearofmoo/ngMidwayTester
  *
  * Creates an instance of the midway tester on the specified module. 

@@ -157,7 +157,7 @@ gulp.task('zip', ['copyToTempDir'], function() {
 });
 
 // gulp.task('default', ['sampleSolutionsBuild'] , function() {
-gulp.task('default', ['zip'] , function() {
+gulp.task('default', ['sampleSolutionsBuild', 'zip'] , function() {
 
 });
 
