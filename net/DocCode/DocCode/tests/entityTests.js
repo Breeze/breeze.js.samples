@@ -138,6 +138,40 @@
             "newOrder's parent Customer should be " + parentCustomer.CompanyName());
     });
 
+    // Fails until D#2644 is fixed.
+    test("changing a child FK to ID of entity-not-in cache clears the navigation", function() {
+        expect(2);
+        var em = newEm();
+
+        // create a parent Customer and its child order
+        var parentCustomer = em.createEntity("Customer", {
+            CustomerID: dummyCustID,
+            CompanyName: 'TestCo'
+        }, UNCHGD);
+
+        var order = em.createEntity("Order", {
+            CustomerID: parentCustomer.CustomerID()
+        }, UNCHGD);
+
+        // If uncommented, this entity will be in cache and returned by the Order.Customer
+        //var alfredsCustomer = em.createEntity("Customer", {
+        //    CustomerID: testFns.wellKnownData.alfredsID,
+        //    CompanyName: 'Alfreds'
+        //}, UNCHGD);
+
+        var orderCustomer = order.Customer();
+        ok(orderCustomer, "order parent 'Customer' property should return a Customer entity before change");
+
+        // change FK to ID of an entity not-in-cache
+        order.CustomerID(testFns.wellKnownData.alfredsID);
+
+        orderCustomer = order.Customer();
+        ok(orderCustomer === null,
+            "order parent 'Customer' property should be null after change; is "+
+            (orderCustomer ? orderCustomer.CompanyName() : "null"));
+
+    });
+
     /*********************************************************
     * Add an OrderDetail with initializer that set its composite key with ids
     * Interesting because client must supply the composite key
@@ -153,7 +187,6 @@
 
     /*********************************************************
     * Add an OrderDetail with initializer that set its composite key via related entities
-    * This does not work as of v.1.3.0. See Feature Request #2155
     *********************************************************/
     test("add OrderDetail created using initializer with parent entities", function() {
         expect(1);
@@ -164,11 +197,9 @@
             { OrderID: 1 }, UNCHGD);
         var parentProduct = em.createEntity("Product",
             { ProductID: 1 }, UNCHGD);
-        try {
-            // Can't initialize with related entity. Feature request to make this possible
-            newDetail = em.createEntity("OrderDetail", { Order: parentOrder, Product: parentProduct });
-        } catch(ex) { /* test will fail */
-        }
+
+        newDetail = em.createEntity("OrderDetail", { Order: parentOrder, Product: parentProduct });
+
         ok(newDetail && newDetail.entityAspect.entityState.isAdded(), "newDetail should be 'added'");
     });
 
