@@ -373,7 +373,7 @@ function analyzejshint(sources, overrideRcFile) {
     return gulp
         .src(sources)
         .pipe(plug.jshint(jshintrcFile))
-        .pipe(plug.jshint.reporter('jshint-stylish',{verbose: true}));
+        .pipe(plug.jshint.reporter('jshint-stylish', {verbose: true}));
 }
 
 /**

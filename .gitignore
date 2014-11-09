@@ -38,6 +38,16 @@ breeze*.nupkg
 *.sdf
 /node/zza-node-mongo/database/
 
+
+# mongo db
+###################
+#Don't commit Mongo Database files
+*.lock
+*.0
+*.1
+*.ns
+journal
+
 /node/zza-node-mongo/client/deprecated/routeManager.js
 /node/zza-node-mongo/client/deprecated/routeController.js
 /node/zza-node-mongo/client/deprecated/orig.html
