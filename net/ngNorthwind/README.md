@@ -1,30 +1,48 @@
 #Breeze Angular Northwind Demo
 
->*Opinionated AngularJS style guide for teams by [@john_papa](//twitter.com/john_papa)*
-
->More details about the styles and patterns used in this app can be found in my [AngularJS Style Guide](https://github.com/johnpapa/angularjs-styleguide) and my [AngularJS Patterns: Clean Code](http://jpapa.me/ngclean) course at [Pluralsight](http://pluralsight.com/training/Authors/Details/john-papa) and working in teams. 
-
 ## Structure
-The structure also contains a gulpfile.js and a server folder. The server is there just so we can serve the app using node. Feel free to use any server you wish.
+
 
 	/src
 		/client
 			/app
 			/content
+
+       / server
+          app.js
+
+       gulpfile.js
+       package.json
+       bower.json
+
+The server exists to serve the app using node. Feel free to use any server you wish.
 	
 ## Pre-Requisites
 Install [Node.js](http://nodejs.org)
 
 Install these NPM packages globally:
 
-`npm install -g bower gulp nodemon`
+	npm install -g bower gulp nodemon
+
+
+## Installing Packages
+- Open a terminal or command window
+- Type `npm install`
+
+`npm install` will install bower packages too, but you can install them separately if you wish.
+
+- Open terminal
+- Type `bower install`
 
 ## Northwind API Server
 
-For this Breeze demo we need a running Web API server that delivers Northwind data. 
+The demo reaches out to a .NET Web API server that delivers Northwind data.  You have to make sure that server is running before you can run the client.
+
+You have two choices of Web API server: remote and local.
 
 ### Remote server
-We can hit an IdeaBlade server at `http://sampleservice.breezejs.com/api/northwind/employees`. The serviceName is `/api/northwind/`.
+
+The demo can talk to an IdeaBlade server at `http://sampleservice.breezejs.com/api/northwind/employees`. The serviceName is `/api/northwind/`.
 
 Here's an example query you can run in a browser.
 
@@ -32,41 +50,40 @@ Here's an example query you can run in a browser.
 
 
 ### Local server
-To run locally, you'll need a pre-built Breeze DocCode Sample in
-just the right directory relative to this one (to be fixed)
 
->look at the `$wwwRoot` definition in *start-webapi.ps1*
+To run locally, you'll need a pre-built Breeze DocCode Sample in the sibling *DocCode* sample directory.
 
-Try running it in its own command window with the following gulp command 
+>You must build the DocCode sample before you can run it from this demo.
+
+
+Try launching this server in its own command window with the following gulp command 
 
 	gulp serve-webapi
 
 If all is well, you'll see something like this:
 
-	C:\Users\Ward\Documents\GitHub\ngNorthwind>gulp serve-webapi
-	[18:05:35] Using gulpfile ~\Documents\GitHub\ngNorthwind\gulpfile.js
+	~\Documents\GitHub\breeze\breeze.js.samples\ngNorthwind>gulp serve-webapi
+	[18:05:35] Using gulpfile ~\Documents\GitHub\breeze\breeze.js.samples\ngNorthwind\gulpfile.js
 	[18:05:35] Starting 'serve-webapi'...
 	[18:05:35] Running DocCode Web API server. Browse to http://localhost:58066/breeze/Northwind/employees
 	[18:05:35] Finished 'serve-webapi' after 8.5 ms
 
-... and the cursor is just blinking. You'll close the server later simply by closing this command window.
+... and the cursor is just blinking. You'll shut this server down when you're done simply by closing this command window.
 
-Test it in a browser with `http://localhost:58066/breeze/Northwind/employees`.
+>If the gulp command fails, look at the  `$wwwRoot` definition in *start-webapi.ps1* to ensure it is pointing to the right place. Remember ... you also have to build the DocCode project first!
+
+If all is well, smoke test the Web API in a browser with `http://localhost:58066/breeze/Northwind/employees`.
 After a long pause (server start-up), you should see employee data.
 
-
-## Installing Packages
-- Open terminal
-- Type `npm install`
-
-`npm install` will install bower packages too, but you can do it manually.
-- Open terminal
-- Type `bower install`
-
 ## Running
-Runs locally, no database required.
 
-Type `gulp serve-dev` and browse to `http://localhost:7300`
+Open a second command window and type `gulp serve-dev` or `npm start`. This launches the node server whose sole purpose is to deliver the static assets (HTML, JavaScript, CSS, images) of the client app.
+
+The console output tells you that the server is running in **nodemon** and watching the application files; it shuts down and restarts the node server automatically when changes are saved.
+
+It also tells you that this server is **listening on port 7300**.
+
+Now browse to `http://localhost:7300`
 
 ## Linting
 Type `gulp jshint` to run code analysis on the code.
@@ -74,34 +91,36 @@ Type `gulp jshint` to run code analysis on the code.
 Type `gulp spy` to run code analysis using a watch.
 
 ## How It Works
-The app is quite simple and has 2 main routes:
-- dashboard
-- admin list
+The app has 2 main routes:
+- customers
+- products
 
 ### The Modules
-The app has 4 feature modules and depends on a series of external modules and custom but cross-app modules
+This app is based on John Papa's ["hottowel-ng" starter on github](https://github.com/johnpapa/hottowel-ng).
 
-```
-app --> [
-        app.admin,
-        app.dashboard,
-        app.layout,
-        app.widgets,
-		app.core --> [
-			ngAnimate,
-			ngRoute,
-			ngSanitize,
-			blocks.exception,
-			blocks.logger,
-			blocks.router
-		]
-    ]
-```
+>More details about the styles and patterns used in this app can be found in my [AngularJS Style Guide](https://github.com/johnpapa/angularjs-styleguide) and John's [AngularJS Patterns: Clean Code](http://jpapa.me/ngclean) course at [Pluralsight](http://pluralsight.com/training/Authors/Details/john-papa) and working in teams.
+
+The app has 4 feature modules and depends on a series of external modules and custom, cross-app modules
+
+	app --> [
+	        app.customers,
+	        app.products,
+	        app.layout,
+	        app.widgets,
+			app.core --> [
+				ngAnimate,
+				ngRoute,
+				ngSanitize,
+				blocks.exception,
+				blocks.logger,
+				blocks.router
+			]
+	    ]
 
 ## core Module
-Core modules are ones that are shared throughout the entire application and may be customized for the specific application. Example might be common data services.
+Core modules are ones that are shared throughout the entire application and may be customized for the specific application. The dataservice components are here because the support both feature modules..
 
-This is an aggregator of modules that the application will need. The `core` module takes the blocks, common, and Angular sub-modules as dependencies. 
+The `core` module takes the blocks, common, and Angular sub-modules as dependencies. 
 
 ## blocks Modules
 Block modules are reusable blocks of code that can be used across projects simply by including them as dependencies.
