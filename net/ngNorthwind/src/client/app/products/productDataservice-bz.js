@@ -3,7 +3,7 @@
 
     angular
         .module('app.core')
-        .factory('bz-dataservice', dataservice);
+        .factory('productDataservice-bz', dataservice);
 
     dataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger'];
 
@@ -11,17 +11,16 @@
     function dataservice($q, breeze, emFactory, logger) {
 
         var manager = getEntityManager();
-        var queried = {};
+        var queriedProducts = false;
 
         var service = {
             categoryNullo: categoryNullo,
             // categories: see getLookups()
             createProduct: createProduct,
-            getCustomers: getCustomers,
             getProducts: getProducts,
             getProductById: getProductById,
             // hasChanges
-            name: 'Breeze dataservice',
+            name: 'Breeze productDataservice',
             ready: ready,
             supplierNullo: supplierNullo
             // suppliers: see getSuppliers()
@@ -37,35 +36,6 @@
             return manager.createEntity('Product');
         }
 
-        function getCustomers() {
-            var resource = 'Customers';
-            var query = breeze.EntityQuery.from(resource)
-                .orderBy('companyName');
-
-            // if previously queried
-            // query the cache instead of the remote server
-            if (queried[resource]){
-                query = query.using(breeze.FetchStrategy.FromLocalCache);
-            }
-
-            return manager
-                .executeQuery(query)
-                .then(success(resource))
-                .catch(failed(resource));
-        }
-
-        function getLookups() {
-            return breeze.EntityQuery.from('Lookups')
-                .using(manager).execute()
-                .then(success)
-                .catch(failed('Lookups'));
-
-            function success(data){
-                var lups = data.results[0]
-                service.categories = lups.categories;
-                return lups;
-            }
-        }
 
         function getProducts(forceRefresh) {
             var resource = 'Products';
@@ -74,14 +44,20 @@
 
             // if should get from cache and previously queried
             // query the cache instead of the remote server
-            if (!forceRefresh && queried[resource]){
+            if (!forceRefresh && queriedProducts){
                 query = query.using(breeze.FetchStrategy.FromLocalCache);
             }
 
             return manager
                 .executeQuery(query)
-                .then(success(resource))
+                .then(success)
                 .catch(failed(resource));
+
+            function success(data){
+               queriedProducts = true; // remember we queried it
+               return data.results;             
+            }
+        
         }
 
         function getProductById(id, forceRemote) {
@@ -94,6 +70,41 @@
             }
         }
 
+        /////// Helpers /////////
+
+        function failed(resource){
+            return function(error) {
+                var msg = resource + ' query failed:\n' + error.message;
+                logger.error(msg);
+            };
+        }
+
+        function getEntityManager() {
+
+            // No suppliers in the IdeaBlade sampleservice
+            // redefine getSuppliers function to return nothing
+            if (emFactory.isSampleService)  {
+                getSuppliers = function() {
+                    return $q.when([]); // return empty suppliers
+                };
+            } 
+
+            return emFactory.manager;        
+        } 
+
+        function getLookups() {
+            return breeze.EntityQuery.from('Lookups')
+                .using(manager).execute()
+                .then(success)
+                .catch(failed('Lookups'));
+
+            function success(data){
+                var lups = data.results[0];
+                service.categories = lups.categories;
+                return lups;
+            }
+        }
+
         function getSuppliers() {
             return breeze.EntityQuery.from('Suppliers')
                 .orderBy('companyName')
@@ -103,7 +114,7 @@
 
             function success(data){
                 var suppliers = data.results;
-                service.suppliers = suppliers
+                service.suppliers = suppliers;
                 return suppliers;
             }
         }
@@ -123,41 +134,7 @@
             service.ready = function(){return promise;}; 
 
             return promise;          
-        }
-
-        ///// helpers       
-
-        function getEntityManager() {
-
-            // No suppliers in the IdeaBlade sampleservice
-            // redefine getSuppliers function to return nothing
-            if (emFactory.isSampleService)  {
-                getSuppliers = function() {
-                    return $q.when([]); // return empty suppliers
-                };
-            } 
-
-            return emFactory.manager;        
-        } 
-
-        function failed(resource){
-            return function(error) {
-                var msg = resource + ' query failed:\n' + error.message;
-                logger.error(msg);
-            };
-        }
-
-        function results(data) {
-            return data.results;
-        }
-
-        function success(resource){
-            return function(data){
-               queried[resource]=true; // remember we queried it
-               return data.results;             
-            };
-        }
-
+        }     
 
         var _categoryNullo;
         function categoryNullo(){
@@ -166,8 +143,8 @@
                 {
                     categoryID: 0,
                     categoryName: '-- Select a category --'
-                }
-                , breeze.EntityState.Unchanged)
+                },
+                breeze.EntityState.Unchanged)
             );
         }
 
@@ -178,8 +155,8 @@
                 {
                     supplierID: 0,
                     companyName: '-- Select a supplier --'
-                }
-                , breeze.EntityState.Unchanged)
+                },
+                breeze.EntityState.Unchanged)
             );
         }
 

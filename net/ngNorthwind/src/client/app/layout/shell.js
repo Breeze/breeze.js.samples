@@ -5,9 +5,9 @@
         .module('app.layout')
         .controller('Shell', Shell);
 
-    Shell.$inject = ['config', 'dataservice', 'logger'];
+    Shell.$inject = ['config', 'productDataservice', 'logger'];
 
-    function Shell(config, dataService, logger) {
+    function Shell(config, productDataservice, logger) {
         /*jshint validthis: true */
         var vm = this;
 
@@ -20,7 +20,7 @@
 
         function activate() {
             logger.success(config.appTitle + ' loaded!', null);
-            dataService.ready().then(hideSplash);
+            productDataservice.ready().then(hideSplash);
         }
 
         function hideSplash() {

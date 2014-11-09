@@ -38,16 +38,16 @@
         var rConfig = routehelperConfigProvider.config;
         rConfig.$routeProvider = $routeProvider;
         rConfig.docTitle = 'Breeze Northwind: ';
-        rConfig.resolveAlways = { dataservice: ready };
+        rConfig.resolveAlways = { productDataservice: ready };
 
         // Configure the common exception handler
         exceptionConfigProvider.config.appErrorPrefix = config.appErrorPrefix;
     }
 
-    // For convenience, all routes require a dataservice that is ready.
+    // For simplicity, all routes require that the productDataservice be ready.
     function ready(dataservice) {
         return dataservice.ready();
     }
-    ready.$inject = ['dataservice'];
+    ready.$inject = ['productDataservice'];
 
 })();

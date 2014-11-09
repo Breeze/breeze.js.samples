@@ -3,12 +3,12 @@
 
     angular
         .module('app.core')
-        .factory('dataservice', dataservice);
+        .factory('productDataservice', dataservice);
 
     dataservice.$inject = ['$injector', 'config'];
 
     function dataservice($injector, config) {
-        var ds = config.useBreeze ? 'bz-dataservice' : 'mem-dataservice';
+        var ds = config.useBreeze ? 'productDataservice-bz' : 'productDataservice-mem';
         return $injector.get(ds);
     }
 })();

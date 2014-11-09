@@ -5,7 +5,7 @@
         .module('app.customers')
         .controller('Customers', Customers);
 
-    Customers.$inject = ['dataservice', 'logger'];
+    Customers.$inject = ['customerDataservice', 'logger'];
 
     /* @ngInject */
     function Customers(dataservice, logger) {

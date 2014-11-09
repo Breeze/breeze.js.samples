@@ -5,7 +5,7 @@
         .module('app.products')
         .controller('Products', Products);
 
-    Products.$inject = ['$location', 'dataservice', 'logger'];
+    Products.$inject = ['$location', 'productDataservice', 'logger'];
 
     /* @ngInject */
     function Products($location, dataservice, logger) {

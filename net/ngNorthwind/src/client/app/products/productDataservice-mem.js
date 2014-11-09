@@ -3,23 +3,21 @@
 
     angular
         .module('app.core')
-        .factory('mem-dataservice', dataservice);
+        .factory('productDataservice-mem', dataservice);
 
     dataservice.$inject = ['$q', '$timeout', 'logger', 'test-data'];
 
     /* @ngInject */
     function dataservice($q, $timeout, logger, testData) {
-        var products;
 
         var service = {
             categoryNullo: categoryNullo,
             categories: testData.categories,
             createProduct: createProduct,
-            getCustomers: getCustomers,
             getProducts: getProducts,
             getProductById: getProductById,
             hasChanges: false,
-            name: 'In-memory dataservice',
+            name: 'In-memory productDataservice',
             ready: ready,
             suppliers: testData.suppliers,
             supplierNullo: supplierNullo
@@ -31,10 +29,6 @@
 
         function createProduct() {
             logger.error('Create product is not yet implemented');
-        }
-
-        function getCustomers() {
-            return $q.when(testData.customers);
         }
 
         function getProducts() {

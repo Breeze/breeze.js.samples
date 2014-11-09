@@ -5,7 +5,7 @@
         .module('app.products')
         .controller('ProductDetail', ProductDetail);
 
-    ProductDetail.$inject = ['$location', '$routeParams', '$window', 'dataservice', 'logger'];
+    ProductDetail.$inject = ['$location', '$routeParams', '$window', 'productDataservice', 'logger'];
 
     /* @ngInject */
     function ProductDetail($location, $routeParams, $window, dataservice, logger) {

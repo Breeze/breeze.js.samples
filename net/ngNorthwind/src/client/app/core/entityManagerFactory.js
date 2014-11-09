@@ -22,7 +22,7 @@
         return {
             isSampleService: /sampleservice/i.test(host),
             manager: manager
-        }      
+        };      
     }
 
 })();
