@@ -4,6 +4,11 @@
     var core = angular.module('app.core');
 
     var config = {
+
+        // Pick ONE. See README.md
+        apiHost: //'http://sampleservice.breezejs.com/api/',
+                'http://localhost:58066/breeze/',
+
         appErrorPrefix: '[bzNorthwind Error] ', 
         appTitle: 'Breeze Angular Northwind',
         useBreeze: true,
@@ -30,11 +35,19 @@
         toastr.options.positionClass = 'toast-bottom-right';
 
         // Configure the common route provider
-        routehelperConfigProvider.config.$routeProvider = $routeProvider;
-        routehelperConfigProvider.config.docTitle = 'Breeze Northwind: ';
+        var rConfig = routehelperConfigProvider.config;
+        rConfig.$routeProvider = $routeProvider;
+        rConfig.docTitle = 'Breeze Northwind: ';
+        rConfig.resolveAlways = { dataservice: ready };
 
         // Configure the common exception handler
         exceptionConfigProvider.config.appErrorPrefix = config.appErrorPrefix;
     }
+
+    // For convenience, all routes require a dataservice that is ready.
+    function ready(dataservice) {
+        return dataservice.ready();
+    }
+    ready.$inject = ['dataservice'];
 
 })();

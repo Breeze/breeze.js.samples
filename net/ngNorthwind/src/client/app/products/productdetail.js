@@ -5,7 +5,7 @@
         .module('app.products')
         .controller('ProductDetail', ProductDetail);
 
-    ProductDetail.$inject = ['$location', '$routeParams', '$window','dataservice', 'logger'];
+    ProductDetail.$inject = ['$location', '$routeParams', '$window', 'dataservice', 'logger'];
 
     /* @ngInject */
     function ProductDetail($location, $routeParams, $window, dataservice, logger) {
@@ -27,9 +27,7 @@
         activate();
 
         function activate() {
-            return dataservice.ready()
-                .then(getRequestedProduct)
-                .then(function(){
+            return getRequestedProduct().then(function(){
                     initLookups();
                     logger.info('Activated ProductDetails View');
                 });
@@ -85,7 +83,9 @@
         function initLookups(){
             // initialize the combos
             vm.categories = dataservice.categories;
+            vm.categories.unshift(dataservice.categoryNullo());
             vm.suppliers = dataservice.suppliers;
+            vm.suppliers.unshift(dataservice.supplierNullo());
         }
 
         function save() {

@@ -5,16 +5,16 @@
         .module('app.core')
         .factory('bz-dataservice', dataservice);
 
-    dataservice.$inject = ['$q', 'breeze', 'logger'];
+    dataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger'];
 
     /* @ngInject */
-    function dataservice($q, breeze, logger) {
-        var manager;
+    function dataservice($q, breeze, emFactory, logger) {
+
+        var manager = getEntityManager();
         var queried = {};
 
-        prepForBreeze();
-
         var service = {
+            categoryNullo: categoryNullo,
             // categories: see getLookups()
             createProduct: createProduct,
             getCustomers: getCustomers,
@@ -22,7 +22,8 @@
             getProductById: getProductById,
             // hasChanges
             name: 'Breeze dataservice',
-            ready: ready
+            ready: ready,
+            supplierNullo: supplierNullo
             // suppliers: see getSuppliers()
         };
 
@@ -60,7 +61,7 @@
                 .catch(failed('Lookups'));
 
             function success(data){
-                var lups = data.results[0];
+                var lups = data.results[0]
                 service.categories = lups.categories;
                 return lups;
             }
@@ -101,17 +102,20 @@
                 .catch(failed('Suppliers'));
 
             function success(data){
-                service.suppliers = data.results;
-                return service.suppliers;
+                var suppliers = data.results;
+                service.suppliers = suppliers
+                return suppliers;
             }
         }
 
+        // returns a promise which resolves to this service after initialization
         function ready(){
             // The app is ready when we've loaded the lookups
             // and the suppliers
             var promise = $q.all([getLookups(), getSuppliers()])
                             .then(function(){
                                 logger.info('Loaded lookups and suppliers');
+                                return service;
                             })
                             .catch(failed('Ready'));
 
@@ -121,32 +125,20 @@
             return promise;          
         }
 
-        ///// helpers
+        ///// helpers       
 
-        function prepForBreeze() {
-             // use camelCase property names on the client
-            breeze.NamingConvention.camelCase.setAsDefault();
+        function getEntityManager() {
 
-            // create a new manager talking to Northwind service 
-            var host =
-                // Pick ONE
-                //'http://sampleservice.breezejs.com/api/';
-                'http://localhost:58066/breeze/';
-
-            var serviceName = host+'Northwind';
-
-            logger.info('Connecting to '+ serviceName);
-
-            manager = new breeze.EntityManager(serviceName);  
-
-            if (/sampleservice/i.test(host))  {
-                // No suppliers in the IdeaBlade sampleservice
-                // override getSuppliers function to return nothing
+            // No suppliers in the IdeaBlade sampleservice
+            // redefine getSuppliers function to return nothing
+            if (emFactory.isSampleService)  {
                 getSuppliers = function() {
                     return $q.when([]); // return empty suppliers
                 };
-            }       
-        }        
+            } 
+
+            return emFactory.manager;        
+        } 
 
         function failed(resource){
             return function(error) {
@@ -165,5 +157,31 @@
                return data.results;             
             };
         }
+
+
+        var _categoryNullo;
+        function categoryNullo(){
+            return _categoryNullo || (
+                _categoryNullo = manager.createEntity('Category', 
+                {
+                    categoryID: 0,
+                    categoryName: '-- Select a category --'
+                }
+                , breeze.EntityState.Unchanged)
+            );
+        }
+
+        var _supplierNullo;
+        function supplierNullo(){
+            return _supplierNullo || (
+                _supplierNullo = manager.createEntity('Supplier', 
+                {
+                    supplierID: 0,
+                    companyName: '-- Select a supplier --'
+                }
+                , breeze.EntityState.Unchanged)
+            );
+        }
+
     }
 })();

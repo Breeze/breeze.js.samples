@@ -12,6 +12,7 @@
         var products;
 
         var service = {
+            categoryNullo: categoryNullo,
             categories: testData.categories,
             createProduct: createProduct,
             getCustomers: getCustomers,
@@ -19,14 +20,16 @@
             getProductById: getProductById,
             hasChanges: false,
             name: 'In-memory dataservice',
-            suppliers: testData.suppliers,
             ready: ready,
+            suppliers: testData.suppliers,
+            supplierNullo: supplierNullo
         };
 
         return service;
 
         ////////
-         function createProduct() {
+
+        function createProduct() {
             logger.error('Create product is not yet implemented');
         }
 
@@ -39,6 +42,7 @@
         }
 
         function getProductById(id){
+            id = +id; // coerce to number
             var entity = testData.products.filter(function(p){
                 return p.productID === id;
             })[0];
@@ -47,21 +51,32 @@
                 entity = null;
                 logger.warning('Could not find Product with id:' + id);
             }
-            return entity;          
+            return $q.when(entity);          
         }
 
+        // returns a promise which resolves to this service after initialization
         function ready(){
             var deferred = $q.defer();
 
             // Simulate data access initialization with a 1 second delay.
             $timeout(function () {
-                deferred.resolve(true);
+                deferred.resolve(service);
             }, 1000);
 
             // subsequent calls just get the promise
             service.ready = function(){return deferred.promise;}; 
 
             return deferred.promise;          
+        }
+
+        ///// Helpers
+
+        function categoryNullo(){
+            return {categoryID: 0, categoryName:  '-- Select a category --'};
+        }
+
+        function supplierNullo(){
+            return {supplierID: 0, companyName:  '-- Select a supplier --'};
         }
     }
 })();
