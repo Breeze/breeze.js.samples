@@ -427,11 +427,11 @@ namespace Northwind.Models
 
     public int ProductID {get;set;}
     
-    [MaxLength(40)]
+    [Required, MaxLength(40)]
     public string ProductName {get;set;}
     
-    public int? SupplierID {get;set;}    
-    public int? CategoryID {get;set;}    
+    public int SupplierID {get;set;}    
+    public int CategoryID {get;set;}    
     public string QuantityPerUnit {get;set;}    
     public decimal? UnitPrice {get;set;}    
     public short? UnitsInStock {get;set;}    
