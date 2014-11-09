@@ -1,0 +1,9 @@
+
+# Ignore Node & Bower
+###################
+node_modules
+bower_components
+
+# Ignore OS files
+###################
+*.lnk

@@ -1,0 +1,70 @@
+<section class="mainbar" >
+    <section class="matter">
+        <div class="container">
+            <button class="btn btn-info btn-form-md"
+                    ng-click="vm.goBack()">
+                <i class="fa fa-hand-o-left"></i>Back
+            </button>
+            <button class="btn btn-info btn-form-md"
+                    ng-click="vm.cancel()" ng-disabled="!vm.canSave">
+                <i class="fa fa-undo"></i>Cancel
+            </button>
+            <button class="btn btn-info btn-form-md"
+                    ng-click="vm.save()" ng-disabled="!vm.canSave">
+                <i class="fa fa-save"></i>Save
+            </button>
+            <button class="btn btn-danger btn-form-md" ng-click="vm.deleteProduct()">
+                <i class="fa fa-trash-o"></i>Delete
+            </button>
+
+            <!--Need ng-hide for show/hide animations-->
+                <span ng-show="vm.hasChanges" class="dissolve-animation ng-hide flag-haschanges">
+                    <i class="fa fa-asterisk fa fa-asterisk-large" rel="tooltip" title="You have changes"></i>
+                </span>
+        </div>
+        <div class="widget wgreen">
+            <div cc-widget-header title="Edit {{vm.product.productName || 'New Product'}}"></div>
+            <form class="widget-content user">
+                <div class="form-group">
+                    <label class="control-label">Name</label>
+
+                    <div class="">
+                        <input class="form-control"
+                               ng-model="vm.product.productName"
+                               z-validate
+                               placeholder="Product name"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Category</label>
+
+                    <div>
+                        <select class="form-control"
+                                ng-options="cat.categoryName for cat in vm.categories"
+                                ng-model="vm.product.category"
+                                z-validate></select>
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label class="control-label">Supplier</label>
+
+                    <div>
+                        <select class="form-control"
+                                ng-options="s.companyName for s in vm.suppliers"
+                                ng-model="vm.product.supplier"
+                                z-validate></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Unit Price</label>
+
+                    <div>
+                        <input class="form-control"
+                                  ng-model="vm.product.unitPrice"
+                                  z-validate></input>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</section>

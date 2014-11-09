@@ -1,0 +1,36 @@
+﻿<section id="dashboard-view" class="mainbar">
+    <section class="matter">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="widget wviolet">
+                        <div data-cc-widget-header title="Customers"></div>
+                        <div class="widget-content text-left text-info">
+                            <table class="table table-condensed table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Contact</th>
+                                        <th>City</th>
+                                        <th>Country</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-ng-repeat="c in vm.customers">
+                                        <td>{{c.companyName}}</td>
+                                        <td>{{c.contactName}}</td>
+                                        <td>{{c.city}}</td>
+                                        <td>{{c.country}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="widget-foot">
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>

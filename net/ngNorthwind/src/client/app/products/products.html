@@ -1,0 +1,46 @@
+﻿<section class="mainbar">
+    <section class="matter">
+        <div class="container">
+             <div class="row">
+                <div class="col-md-6">
+                    <div class="btn-group pull-right">
+                        <a class="btn btn-info btn-form-md"
+                           data-ng-click="vm.refresh()"><i class="fa fa-refresh"></i><span>Refresh</span></a>
+                        <a class="btn btn-info btn-form-md"
+                           href="#/product/new"><i class="fa fa-plus"></i><span>Add Product</span></a>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="widget wgreen">
+                        <div data-cc-widget-header title="Products"></div>
+                        <div class="widget-content text-left text-info">
+                            <table class="table table-condensed table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Supplier</th>
+                                        <th>Unit Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-ng-repeat="p in vm.products" ng-click="vm.gotoProduct(p)" class="clickable">
+                                        <td>{{p.productName}}</td>
+                                        <td>{{p.category.categoryName}}</td>
+                                        <td>{{p.supplier.companyName}}</td>
+                                        <td>{{p.unitPrice | currency}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="widget-foot">
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
