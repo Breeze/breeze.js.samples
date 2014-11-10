@@ -431,6 +431,14 @@ a {
 }
 /*#endregion */
 
+/*#region EntityState */
+
+.Added {color: green; font-weight: bold; margin-left: 8px;}
+.Modified {color: purple; font-weight: bold; margin-left: 8px;}
+.Deleted {color: grey; text-decoration: line-through; margin-left: 8px;}
+
+/*#endregion EntityState */
+
 /*#region Responsive */
 
 @media (max-width: 979px) {
