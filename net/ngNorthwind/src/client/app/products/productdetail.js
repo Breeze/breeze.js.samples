@@ -82,9 +82,9 @@
 
         function initLookups(){
             // initialize the combos
-            vm.categories = dataservice.categories;
+            vm.categories = dataservice.categories();
             vm.categories.unshift(dataservice.categoryNullo());
-            vm.suppliers = dataservice.suppliers;
+            vm.suppliers = dataservice.suppliers();
             vm.suppliers.unshift(dataservice.supplierNullo());
         }
 

@@ -5,10 +5,10 @@
         .module('app.core')
         .factory('productDataservice-bz', dataservice);
 
-    dataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger'];
+    dataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger', 'model'];
 
     /* @ngInject */
-    function dataservice($q, breeze, emFactory, logger) {
+    function dataservice($q, breeze, emFactory, logger, model) {
 
         var manager = getEntityManager();
         var queriedProducts = false;
@@ -100,7 +100,7 @@
 
             function success(data){
                 var lups = data.results[0];
-                service.categories = lups.categories;
+                service.categories = function() {return lups.categories.slice();};
                 return lups;
             }
         }
@@ -114,21 +114,25 @@
 
             function success(data){
                 var suppliers = data.results;
-                service.suppliers = suppliers;
+                service.suppliers = function() {return suppliers.slice();};
                 return suppliers;
             }
         }
 
         // returns a promise which resolves to this service after initialization
         function ready(){
-            // The app is ready when we've loaded the lookups
-            // and the suppliers
-            var promise = $q.all([getLookups(), getSuppliers()])
-                            .then(function(){
-                                logger.info('Loaded lookups and suppliers');
-                                return service;
-                            })
-                            .catch(failed('Ready'));
+            // Ready when we've loaded the lookups and the suppliers
+            // Get the metadata first and extend it.
+            var promise = manager.fetchMetadata()
+                .then(function(){
+                   model.extendMetadata(manager.metadataStore);
+                   return $q.all([getLookups(), getSuppliers()]); 
+                })
+                .then(function(){
+                    logger.info('Loaded lookups and suppliers');
+                    return service;
+                })
+                .catch(failed('Ready'));
 
             // subsequent calls just get the promise
             service.ready = function(){return promise;}; 

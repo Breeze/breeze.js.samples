@@ -17,6 +17,7 @@
         'app.core',
         'app.widgets',
         'breeze.angular',
+        'breeze.directives',
 
         /*
          * Feature areas

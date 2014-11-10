@@ -12,14 +12,14 @@
 
         var service = {
             categoryNullo: categoryNullo,
-            categories: testData.categories,
+            categories: function() {return testData.categories.slice();},
             createProduct: createProduct,
             getProducts: getProducts,
             getProductById: getProductById,
             hasChanges: false,
             name: 'In-memory productDataservice',
             ready: ready,
-            suppliers: testData.suppliers,
+            suppliers: function() {return testData.suppliers.slice();},
             supplierNullo: supplierNullo
         };
 
