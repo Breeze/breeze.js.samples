@@ -13,7 +13,7 @@
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <div class="widget wgreen">
+                    <div class="widget worange">
                         <div data-cc-widget-header title="Products"></div>
                         <div class="widget-content text-left text-info">
                             <table class="table table-condensed table-striped">
@@ -26,7 +26,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr data-ng-repeat="p in vm.products" ng-click="vm.gotoProduct(p)" class="clickable {{p.entityAspect.entityState.name}}">
+                                    <tr data-ng-repeat="p in vm.products" ng-click="vm.gotoProduct(p)" class="clickable EState {{p.entityAspect.entityState.name}}">
                                         <td>{{p.productName}}</td>
                                         <td>{{p.category.categoryName}}</td>
                                         <td>{{p.supplier.companyName}}</td>

@@ -433,9 +433,18 @@ a {
 
 /*#region EntityState */
 
-.Added {color: green; font-weight: bold; margin-left: 8px;}
-.Modified {color: purple; font-weight: bold; margin-left: 8px;}
-.Deleted {color: grey; text-decoration: line-through; margin-left: 8px;}
+tr.EState.Added {color: Green; font-weight: bold; }
+tr.EState.Modified {color: Purple; font-weight: bold; }
+tr.EState.Deleted {color: Gray; text-decoration: line-through; }
+
+.EState.Added div.widget-head {
+    background-color: LimeGreen !important;
+    border: 1px solid LimeGreen !important;
+}
+.EState.Modified div.widget-head {
+    background-color: purple !important ;
+    border: 1px solid purple !important;
+}
 
 /*#endregion EntityState */
 
