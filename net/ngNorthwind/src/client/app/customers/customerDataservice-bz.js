@@ -5,10 +5,10 @@
         .module('app.core')
         .factory('customerDataservice-bz', dataservice);
 
-    dataservice.$inject = ['breeze', 'entityManagerFactory', 'logger'];
+    dataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger'];
 
     /* @ngInject */
-    function dataservice(breeze, emFactory, logger) {
+    function dataservice($q, breeze, emFactory, logger) {
 
         var manager = emFactory.manager;
         var queriedCustomer = false;
@@ -45,6 +45,7 @@
             function failed(error){
                 var msg = 'Customer query failed:\n' + error.message;
                 logger.error(msg);
+                return $q.reject(error); //pass error along
             }
 
         }

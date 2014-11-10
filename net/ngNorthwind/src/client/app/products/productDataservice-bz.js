@@ -76,6 +76,7 @@
             return function(error) {
                 var msg = resource + ' query failed:\n' + error.message;
                 logger.error(msg);
+                return $q.reject(error); //pass error along
             };
         }
 
