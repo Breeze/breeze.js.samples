@@ -9,7 +9,6 @@
 
     /* @ngInject */
     function ProductDetail($location, $routeParams, $window, dataservice, logger) {
-        /*jshint validthis: true */
         var vm = this;
         vm.cancel = cancel;
         // vm.canSave

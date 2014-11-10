@@ -3,27 +3,24 @@
 
     angular
         .module('app.core')
-        .factory('productDataservice-mem', dataservice);
+        .service('productDataservice-mem', ProductDataservice);
 
-    dataservice.$inject = ['$q', '$timeout', 'logger', 'test-data'];
+    ProductDataservice.$inject = ['$q', '$timeout', 'logger', 'test-data'];
 
     /* @ngInject */
-    function dataservice($q, $timeout, logger, testData) {
-
-        var service = {
-            categoryNullo: categoryNullo,
-            categories: function() {return testData.categories.slice();},
-            createProduct: createProduct,
-            getProducts: getProducts,
-            getProductById: getProductById,
-            hasChanges: false,
-            name: 'In-memory productDataservice',
-            ready: ready,
-            suppliers: function() {return testData.suppliers.slice();},
-            supplierNullo: supplierNullo
-        };
-
-        return service;
+    function ProductDataservice($q, $timeout, logger, testData) {
+        /*jshint validthis: true */
+        var service = this;
+        this.categoryNullo = categoryNullo;
+        this.categories = function() {return testData.categories.slice();};
+        this.createProduct = createProduct;
+        this.getProducts = getProducts;
+        this.getProductById = getProductById;
+        this.hasChanges = false;
+        this.name = 'In-memory productDataservice';
+        this.ready = ready;
+        this.suppliers = function() {return testData.suppliers.slice();};
+        this.supplierNullo = supplierNullo;
 
         ////////
 

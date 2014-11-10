@@ -9,7 +9,6 @@
 
     /* @ngInject */
     function Customers(dataservice, logger) {
-        /*jshint validthis: true */
         var vm = this;
         vm.customers = [];
         vm.title = 'Customers';

@@ -3,23 +3,18 @@
 
     angular
         .module('app.core')
-        .factory('customerDataservice-bz', dataservice);
+        .service('customerDataservice-bz', CustomerDataservice);
 
-    dataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger'];
+    CustomerDataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger'];
 
     /* @ngInject */
-    function dataservice($q, breeze, emFactory, logger) {
-
+    function CustomerDataservice($q, breeze, emFactory, logger) {
         var manager = emFactory.manager;
         var queriedCustomer = false;
 
-        var service = {
-            getCustomers: getCustomers,
-            name: 'Breeze customerDataservice'
-        };
-
-        return service;
-
+        this.getCustomers = getCustomers;
+        this.name = 'Breeze customerDataservice';
+        
         ///////////////////////////
 
         function getCustomers() {

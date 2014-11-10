@@ -9,7 +9,6 @@
 
     /* @ngInject */
     function Products($location, dataservice, logger) {
-        /*jshint validthis: true */
         var vm = this;
         vm.gotoProduct = gotoProduct;
         vm.products = [];

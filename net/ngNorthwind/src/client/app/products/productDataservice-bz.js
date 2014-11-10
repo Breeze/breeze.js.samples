@@ -3,33 +3,31 @@
 
     angular
         .module('app.core')
-        .factory('productDataservice-bz', dataservice);
+        .service('productDataservice-bz', ProductDataservice);
 
-    dataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger', 'model'];
+    ProductDataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger', 'model'];
 
     /* @ngInject */
-    function dataservice($q, breeze, emFactory, logger, model) {
-
+    function ProductDataservice($q, breeze, emFactory, logger, model) {
+        /*jshint validthis: true */        
+        var service = this;
         var manager = getEntityManager();
         var queriedProducts = false;
 
-        var service = {
-            categoryNullo: categoryNullo,
-            // categories: see getLookups()
-            createProduct: createProduct,
-            getProducts: getProducts,
-            getProductById: getProductById,
-            // hasChanges
-            name: 'Breeze productDataservice',
-            ready: ready,
-            supplierNullo: supplierNullo
-            // suppliers: see getSuppliers()
-        };
+        this.categoryNullo  = categoryNullo;
+        // this.categories  = see getLookups()
+        this.createProduct  = createProduct;
+        this.getProducts    = getProducts;
+        this.getProductById = getProductById;
+        // this.hasChanges
+        this.name           = 'Breeze productDataservice';
+        this.ready          = ready;
+        this.supplierNullo  = supplierNullo;
+        // this.suppliers: see getSuppliers()
 
-        Object.defineProperty(service, 'hasChanges', 
+        Object.defineProperty(this, 'hasChanges', 
             { get: manager.hasChanges.bind(manager) });
 
-        return service;
 
         ///////////////////////////
         function createProduct() {
