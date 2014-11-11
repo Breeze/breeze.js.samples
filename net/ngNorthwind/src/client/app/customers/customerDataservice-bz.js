@@ -7,13 +7,11 @@
 
     CustomerDataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger'];
 
-    /* @ngInject */
     function CustomerDataservice($q, breeze, emFactory, logger) {
         var manager = emFactory.manager;
-        var queriedCustomer = false;
+        var hasQueriedCustomer = false;
 
         this.getCustomers = getCustomers;
-        this.name = 'Breeze customerDataservice';
         
         ///////////////////////////
 
@@ -23,7 +21,7 @@
 
             // if previously queried
             // query the cache instead of the remote server
-            if (queriedCustomer){
+            if (hasQueriedCustomer){
                 query = query.using(breeze.FetchStrategy.FromLocalCache);
             }
 
@@ -33,7 +31,7 @@
                 .catch(failed);
 
             function success(data){
-               queriedCustomer=true; // remember we queried it
+               hasQueriedCustomer=true; // remember we queried it
                return data.results;             
             }
 

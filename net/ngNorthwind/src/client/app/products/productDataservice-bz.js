@@ -7,28 +7,23 @@
 
     ProductDataservice.$inject = ['$q', '$http', 'breeze', 'entityManagerFactory', 'logger', 'model'];
 
-    /* @ngInject */
     function ProductDataservice($q, $http, breeze, emFactory, logger, model) {
-        /*jshint validthis: true */        
         var service = this;
         var manager = getEntityManager();
-        var queriedProducts = false;
+        var hasQueriedProducts = false;
 
-        this.categoryNullo  = categoryNullo;
-        // this.categories  = see getLookups()
-        this.createProduct  = createProduct;
-        this.getProducts    = getProducts;
-        this.getProductById = getProductById;
-        // this.hasChanges
-        this.name           = 'Breeze productDataservice';
-        this.ready          = ready;
-        this.rejectChanges  = rejectChanges;
-        this.reset          = reset;    
-        this.save           = save;
-        this.supplierNullo  = supplierNullo;
-        // this.suppliers: see getSuppliers()
+        service.createProduct  = createProduct;
+        service.getProducts    = getProducts;
+        service.getProductById = getProductById;
+        service.ready          = ready;
+        service.rejectChanges  = rejectChanges;
+        service.reset          = reset;    
+        service.save           = save;
 
-        Object.defineProperty(this, 'hasChanges', 
+        service.categoryNullo  = categoryNullo;
+        service.supplierNullo  = supplierNullo;
+
+        Object.defineProperty(service, 'hasChanges', 
             { get: manager.hasChanges.bind(manager) });
 
 
@@ -39,30 +34,29 @@
 
 
         function getProducts(forceRefresh) {
-            var resource = 'Products';
-            var query = breeze.EntityQuery.from(resource)
+
+            var query = breeze.EntityQuery.from('Products')
                 .orderBy('productName');
 
             // if should get from cache and previously queried
             // query the cache instead of the remote server
-            if (!forceRefresh && queriedProducts){
+            if (!forceRefresh && hasQueriedProducts){
                 query = query.using(breeze.FetchStrategy.FromLocalCache);
             }
 
             return manager
                 .executeQuery(query)
                 .then(success)
-                .catch(failed(resource));
+                .catch(failed('Products'));
 
             function success(data){
-               queriedProducts = true; // remember we queried it
+               hasQueriedProducts = true; // remember we queried it
                return data.results;             
-            }
-        
+            }    
         }
 
         function getProductById(id, forceRemote) {
-            return manager.fetchEntityByKey('Product', [id], !forceRemote)
+            return manager.fetchEntityByKey('Product', id, !forceRemote)
             .then(success)
             .catch(failed('Product with id:' + id));
 
@@ -81,18 +75,20 @@
             };
         }
 
+
         function getEntityManager() {
 
-            // No suppliers in the IdeaBlade sampleservice
-            // redefine getSuppliers function to return nothing
+            // DEMO ARTIFACT: ignore in your code
+            // IdeaBlade sampleservice lacks Suppliers
+            // redefine `getSuppliers` to return nothing
             if (emFactory.isSampleService)  {
-                getSuppliers = function() {
-                    return $q.when([]); // return empty suppliers
-                };
+                getSuppliers = function() {return $q.when([]);};
             } 
 
             return emFactory.manager;        
         } 
+
+
 
         function getLookups() {
             return breeze.EntityQuery.from('Lookups')
@@ -107,6 +103,8 @@
             }
         }
 
+
+
         function getSuppliers() {
             return breeze.EntityQuery.from('Suppliers')
                 .orderBy('companyName')
@@ -120,6 +118,8 @@
                 return suppliers;
             }
         }
+
+
 
         // returns a promise which resolves to this service after initialization
         function ready(){
@@ -142,12 +142,18 @@
             return promise;          
         }     
 
+
+
+
         function rejectChanges(){
             manager.rejectChanges();
         }
 
+
+
+
         function save(entity) {
-            // save one or save all
+            // save one or save all (undefined)
             var entitiesToSave = entity ? [entity] : undefined; 
 
             manager.saveChanges(entitiesToSave).then(success).catch(fail);
@@ -160,6 +166,13 @@
                 logger.error('Save failed: \n'+error.message);                
             }
         }
+
+
+
+
+
+
+
 
 
         var _categoryNullo;
