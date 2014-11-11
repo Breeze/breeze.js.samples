@@ -9,16 +9,16 @@
                     ng-click="vm.cancel()" ng-disabled="!vm.canSave">
                 <i class="fa fa-undo"></i>Cancel
             </button>
-            <button class="btn btn-info btn-form-md"
+            <button class="btn btn-success btn-form-md"
                     ng-click="vm.save()" ng-disabled="!vm.canSave">
                 <i class="fa fa-save"></i>Save
-            </button>
+            </button>            
             <button class="btn btn-danger btn-form-md" ng-click="vm.deleteProduct()">
                 <i class="fa fa-trash-o"></i>Delete
             </button>
 
             <!--Need ng-hide for show/hide animations-->
-                <span ng-show="vm.hasChanges" class="dissolve-animation ng-hide flag-haschanges">
+                <span ng-show="vm.canSave" class="dissolve-animation ng-hide flag-haschanges">
                     <i class="fa fa-asterisk fa fa-asterisk-large" rel="tooltip" title="You have changes"></i>
                 </span>
         </div>

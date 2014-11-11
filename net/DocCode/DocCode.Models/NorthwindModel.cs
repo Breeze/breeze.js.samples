@@ -422,26 +422,26 @@ namespace Northwind.Models
   #endregion PreviousEmployee class
 
   #region Product class
- 
-  public class Product {    
+
+  public class Product : ISaveable {
 
     public int ProductID {get;set;}
-    
+
     [Required, MaxLength(40)]
     public string ProductName {get;set;}
-    
-    public int SupplierID {get;set;}    
-    public int CategoryID {get;set;}    
-    public string QuantityPerUnit {get;set;}    
-    public decimal? UnitPrice {get;set;}    
-    public short? UnitsInStock {get;set;}    
-    public short? UnitsOnOrder {get;set;}    
+
+    public int SupplierID {get;set;}
+    public int CategoryID {get;set;}
+    public string QuantityPerUnit {get;set;}
+    public decimal? UnitPrice {get;set;}
+    public short? UnitsInStock {get;set;}
+    public short? UnitsOnOrder {get;set;}
     public short? ReorderLevel {get;set;}
-    
+
     [DefaultValue(false)]
     public bool Discontinued {get;set;}
 
-    public DateTime? DiscontinuedDate {get;set;}    
+    public DateTime? DiscontinuedDate {get;set;}
     public int RowVersion {get;set;}
 
     public Category Category {get;set;}
@@ -451,9 +451,14 @@ namespace Northwind.Models
     //
     //[InverseProperty("Product")]
     //public ICollection<OrderDetail> OrderDetails {get;set;}
-    
+
     public Supplier Supplier {get;set;}
 
+    [JsonIgnore]
+    public Guid? UserSessionId { get; set; }
+
+    public static int HighestOriginalID = 77;
+    public string CanAdd() { return null; }
   }
   #endregion Product class
 

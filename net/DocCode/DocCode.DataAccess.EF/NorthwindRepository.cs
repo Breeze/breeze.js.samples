@@ -53,7 +53,7 @@ namespace DocCode.DataAccess
             var query = ForCurrentUser(Context.Orders);
 
             query = query.Include("Customer").Include("OrderDetails");
-            
+
             return (productID == 0)
                         ? query
                         : query.Where(o => o.OrderDetails.Any(od => od.ProductID == productID));
@@ -103,7 +103,7 @@ namespace DocCode.DataAccess
 
         public IQueryable<Product> Products
         {
-            get { return Context.Products; }
+          get { return ForCurrentUser(Context.Products); }
         }
 
         public IQueryable<Category> Categories
@@ -125,7 +125,7 @@ namespace DocCode.DataAccess
         {
             get { return Context.Territories; }
         }
- 
+
         // Demonstrate a "View Entity" a selection of "safe" entity properties
         // UserPartial is not in Metadata and won't be client cached unless
         // you define metadata for it on the Breeze client
@@ -133,7 +133,7 @@ namespace DocCode.DataAccess
         {
             get
             {
-                return ForCurrentUser(Context.Users)                  
+                return ForCurrentUser(Context.Users)
                               .Select(u => new UserPartial
                                   {
                                       Id = u.Id,
@@ -150,7 +150,7 @@ namespace DocCode.DataAccess
         // Could further restrict to the authenticated user
         public UserPartial GetUserById(int id)
         {
-            return ForCurrentUser(Context.Users) 
+            return ForCurrentUser(Context.Users)
                 .Where(u => u.Id == id )
                 .Select(u => new UserPartial
                 {
@@ -182,6 +182,10 @@ namespace DocCode.DataAccess
             deleteSql = "DELETE FROM [EMPLOYEE] WHERE [USERSESSIONID] " + where;
             count = Context.Database.ExecuteSqlCommand(deleteSql);
             deleted.Append(count + " Employees; ");
+
+            deleteSql = "DELETE FROM [PRODUCT] WHERE [USERSESSIONID] " + where;
+            count = Context.Database.ExecuteSqlCommand(deleteSql);
+            deleted.Append(count + " Products; ");
 
             deleteSql = "DELETE FROM [ORDERDETAIL] WHERE [USERSESSIONID] " + where;
             count = Context.Database.ExecuteSqlCommand(deleteSql);

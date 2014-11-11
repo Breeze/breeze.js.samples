@@ -19,6 +19,9 @@
         this.hasChanges = false;
         this.name = 'In-memory productDataservice';
         this.ready = ready;
+        this.rejectChanges = function(){}; // No implementation
+        this.reset = getProducts; // mock implementation
+        this.save = save;
         this.suppliers = function() {return testData.suppliers.slice();};
         this.supplierNullo = supplierNullo;
 
@@ -29,7 +32,7 @@
         }
 
         function getProducts() {
-            return $q.when(testData.products); 
+            return $q.when(testData.products.slice()); 
         }
 
         function getProductById(id){
@@ -58,6 +61,10 @@
             service.ready = function(){return deferred.promise;}; 
 
             return deferred.promise;          
+        }
+
+        function save() {
+            logger.error('Save is not yet implemented');
         }
 
         ///// Helpers

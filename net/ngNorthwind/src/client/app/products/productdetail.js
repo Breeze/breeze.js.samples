@@ -15,7 +15,6 @@
         // vm.categories - see initLookups
         vm.deleteProduct = deleteProduct;
         vm.goBack = goBack;
-        vm.hasChanges = false;
         vm.isSaving = false;
         vm.product = undefined;
         vm.save = save;
@@ -87,9 +86,11 @@
             vm.suppliers.unshift(dataservice.supplierNullo());
         }
 
-        function save() {
-            logger.error('Save is not yet implemented');
+        function save(){
+            // save THIS product and only if it is in a changed state
+            if (!vm.product.entityAspect.entityState.isUnchanged()){
+                dataservice.save(vm.product);
+            }
         }
-
     }
 })();

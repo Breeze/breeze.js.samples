@@ -81,23 +81,26 @@ namespace DocCode.DataAccess
             if (type == typeof(Customer))
             {
                 return ExistingCustomerSaveGuard(arg);
-            }
+            } else
             if (type == typeof(Employee))
             {
                 return ExistingEmployeeSaveGuard(arg);
-            }
+            } else
             if (type == typeof(Order))
             {
                 return ExistingOrderSaveGuard(arg);
-            }
+            } else
             if (type == typeof(OrderDetail))
             {
                 return ExistingOrderDetailSaveGuard(arg);
-            }
+            } else
+            if (type == typeof(Product)) {
+              return ExistingProductSaveGuard(arg);
+            } else
             if (type == typeof(InternationalOrder))
             {
                 return ExistingInternationalOrderSaveGuard(arg);
-            }
+            } else
             if (type == typeof(User))
             {
                 return ExistingUserSaveGuard(arg);
@@ -160,6 +163,12 @@ namespace DocCode.DataAccess
             var entity = (InternationalOrder)arg.Entity;
             var orig = readContext.InternationalOrders.SingleOrDefault(e => e.OrderID == entity.OrderID);
             return ExistingEntityGuard(orig, entity.OrderID);
+        }
+
+        private string ExistingProductSaveGuard(EntityInfo arg) {
+          var entity = (Product)arg.Entity;
+          var orig = readContext.Products.SingleOrDefault(e => e.ProductID == entity.ProductID);
+          return ExistingEntityGuard(orig, entity.ProductID);
         }
 
         private string ExistingUserSaveGuard(EntityInfo arg)

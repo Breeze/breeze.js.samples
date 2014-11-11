@@ -4,10 +4,31 @@
              <div class="row">
                 <div class="col-md-6">
                     <div class="btn-group pull-right">
+                        <button class="btn btn-info btn-form-md"
+                            data-ng-click="vm.refresh()">
+                            <i class="fa fa-refresh"></i>Refresh
+                        </button>
                         <a class="btn btn-info btn-form-md"
-                           data-ng-click="vm.refresh()"><i class="fa fa-refresh"></i><span>Refresh</span></a>
-                        <a class="btn btn-info btn-form-md"
-                           href="#/product/new"><i class="fa fa-plus"></i><span>Add Product</span></a>
+                           href="#/product/new"><i class="fa fa-plus">
+                           </i><span>Add Product</span>
+                        </a>
+                        <button class="btn btn-info btn-form-md"
+                                ng-click="vm.cancel()" ng-disabled="!vm.canSave">
+                            <i class="fa fa-undo"></i>Cancel
+                        </button>
+                        <button class="btn btn-success btn-form-md"
+                                ng-click="vm.save()" ng-disabled="!vm.canSave">
+                            <i class="fa fa-save"></i>Save
+                        </button>
+                        <button class="btn btn-danger btn-form-md" ng-click="vm.reset()">
+                            <i class="fa fa-trash-o"></i>Reset
+                        </button>
+
+                    <!--Need ng-hide for show/hide animations-->
+                        <span ng-show="vm.canSave" class="dissolve-animation ng-hide flag-haschanges">
+                            <i class="fa fa-asterisk fa fa-asterisk-large" rel="tooltip" title="You have changes"></i>
+                        </span>
+
                     </div>
                 </div>
             </div>

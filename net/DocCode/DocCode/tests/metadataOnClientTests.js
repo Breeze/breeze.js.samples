@@ -205,7 +205,7 @@
 
         function createSomeMockData(mgr) {
             var employeeId = 20;
-            
+
             //test will pass if employee is created first
             //mgr.createEntity(employeeEntityName, { id: employeeId });
             mgr.createEntity(attendanceDayEntityName, { employeeId: employeeId });

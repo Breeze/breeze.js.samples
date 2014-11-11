@@ -5,10 +5,10 @@
         .module('app.core')
         .service('productDataservice-bz', ProductDataservice);
 
-    ProductDataservice.$inject = ['$q', 'breeze', 'entityManagerFactory', 'logger', 'model'];
+    ProductDataservice.$inject = ['$q', '$http', 'breeze', 'entityManagerFactory', 'logger', 'model'];
 
     /* @ngInject */
-    function ProductDataservice($q, breeze, emFactory, logger, model) {
+    function ProductDataservice($q, $http, breeze, emFactory, logger, model) {
         /*jshint validthis: true */        
         var service = this;
         var manager = getEntityManager();
@@ -22,6 +22,9 @@
         // this.hasChanges
         this.name           = 'Breeze productDataservice';
         this.ready          = ready;
+        this.rejectChanges  = rejectChanges;
+        this.reset          = reset;    
+        this.save           = save;
         this.supplierNullo  = supplierNullo;
         // this.suppliers: see getSuppliers()
 
@@ -139,6 +142,26 @@
             return promise;          
         }     
 
+        function rejectChanges(){
+            manager.rejectChanges();
+        }
+
+        function save(entity) {
+            // save one or save all
+            var entitiesToSave = entity ? [entity] : undefined; 
+
+            manager.saveChanges(entitiesToSave).then(success).catch(fail);
+
+            function success(saveResult){
+                logger.success('Saved changes');
+            }
+
+            function fail(error){
+                logger.error('Save failed: \n'+error.message);                
+            }
+        }
+
+
         var _categoryNullo;
         function categoryNullo(){
             return _categoryNullo || (
@@ -163,5 +186,38 @@
             );
         }
 
+
+
+
+
+
+
+        ///// RESET IS ADVANCED STUFF.  
+        // Interesting for its use of a non-Breeze API call
+        // Clear everything local and reload from server.
+        function reset(){
+            // wip.stop();
+            // wip.clear();
+
+            return resetNorthwind()
+                .then(refreshProducts)
+                .finally(function(){
+                    //wip.resume();
+                });
+
+            function refreshProducts(){
+                var prods = manager.getEntities('Product');
+                prods.forEach(function(p){manager.detachEntity(p);}); 
+                return getProducts(true)
+                    .then(function(products){ 
+                        logger.success('Products reset');
+                        return products;
+                    });           
+            }
+        }
+
+        function resetNorthwind() {
+            return $http.post(manager.dataService.serviceName + '/reset/?options=fullreset');
+        }
     }
 })();

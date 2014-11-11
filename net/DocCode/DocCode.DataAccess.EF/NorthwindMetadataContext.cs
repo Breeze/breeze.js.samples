@@ -24,6 +24,7 @@ namespace Northwind.Models
             // Cannot specify ignore on InternationalOrder when it inherits from Order
             //modelBuilder.Entity<InternationalOrder>().Ignore(t => t.UserSessionId);
             modelBuilder.Entity<OrderDetail>().Ignore(t => t.UserSessionId);
+            modelBuilder.Entity<Product>().Ignore(t => t.UserSessionId);
             modelBuilder.Entity<User>().Ignore(t => t.UserSessionId);
         }
     }

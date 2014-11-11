@@ -446,7 +446,37 @@ tr.EState.Deleted {color: Gray; text-decoration: line-through; }
     border: 1px solid purple !important;
 }
 
+.flag-haschanges {
+    position: fixed !important;
+    display: inline;
+}
+
 /*#endregion EntityState */
+
+
+/*#region Angular ng-show dissolve animation */
+
+.dissolve-animation.ng-hide-remove,
+.dissolve-animation.ng-hide-add {
+    /*position: fixed !important;*/
+    display: inline !important;
+    -webkit-transition: 0.5s linear all;
+    -moz-transition: 0.5s linear all;
+    -o-transition: 0.5s linear all;
+    transition: 0.5s linear all;
+}
+
+.dissolve-animation.ng-hide-remove.ng-hide-remove-active,
+.dissolve-animation.ng-hide-add {
+    opacity: 1;
+}
+
+.dissolve-animation.ng-hide-add.ng-hide-add-active,
+.dissolve-animation.ng-hide-remove {
+    opacity: 0;
+}
+
+/*#endregion */
 
 /*#region Responsive */
 
