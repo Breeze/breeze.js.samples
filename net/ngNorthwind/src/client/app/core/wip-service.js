@@ -29,6 +29,7 @@
         var disabled = false;
         var entityChangedToken;
         var eventName = 'WIP';
+        var initialized = false;
         var isRestoring = false;
         var manager;
         var propChangeAction = breeze.PropertyChange;
@@ -67,9 +68,10 @@
 
 
         function initialize(entityManager){
-            if (typeof disabled === 'boolean') {
+            if (initialized) {
                 throw new Error('WIP already enabled, can\'t enable twice.');
             }
+            initialized = true;
             if (!db){
                 disabled = true;
                 stashCount = 0;

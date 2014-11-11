@@ -5,9 +5,9 @@
         .module('app.core')
         .service('productDataservice-bz', ProductDataservice);
 
-    ProductDataservice.$inject = ['$q', '$http', 'breeze', 'entityManagerFactory', 'logger', 'model'];
+    ProductDataservice.$inject = ['$q', '$http', 'breeze', 'entityManagerFactory', 'logger', 'model', 'wip-service'];
 
-    function ProductDataservice($q, $http, breeze, emFactory, logger, model) {
+    function ProductDataservice($q, $http, breeze, emFactory, logger, model, wip) {
         var service = this;
         var manager = getEntityManager();
         var hasQueriedProducts = false;
@@ -131,6 +131,7 @@
                    return $q.all([getLookups(), getSuppliers()]); 
                 })
                 .then(function(){
+                    wip.restore();
                     logger.info('Loaded lookups and suppliers');
                     return service;
                 })
@@ -209,16 +210,17 @@
         // Interesting for its use of a non-Breeze API call
         // Clear everything local and reload from server.
         function reset(){
-            // wip.stop();
-            // wip.clear();
+            wip.stop();
+            wip.clear();
 
             return resetNorthwind()
                 .then(refreshProducts)
                 .finally(function(){
-                    //wip.resume();
+                    wip.resume();
                 });
 
             function refreshProducts(){
+                manager.rejectChanges();
                 var prods = manager.getEntities('Product');
                 prods.forEach(function(p){manager.detachEntity(p);}); 
                 return getProducts(true)
