@@ -156,6 +156,7 @@
 
                 // should stash with metadata and app version but this is a demo
                 db.setItem(stashName, exported);
+                
             } else  if (stashCount !== 0){
                 sendWipMessage('No changes; clearing stash');
                 db.removeItem(stashName);

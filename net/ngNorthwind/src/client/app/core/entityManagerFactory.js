@@ -13,8 +13,7 @@
         breeze.NamingConvention.camelCase.setAsDefault();
 
         // create a new manager talking to Northwind service 
-        var host = config.apiHost;
-        var serviceName = host+'Northwind';
+        var serviceName = config.apiHost + 'Northwind';
 
         var manager = new breeze.EntityManager(serviceName); 
          
@@ -23,7 +22,7 @@
         logger.info('Connecting to '+ serviceName);
 
         return {
-            isSampleService: /sampleservice/i.test(host),
+            isSampleService: /sampleservice/i.test(serviceName),
             manager: manager
         };      
     }

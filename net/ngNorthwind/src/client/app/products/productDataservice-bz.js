@@ -38,22 +38,28 @@
             var query = breeze.EntityQuery.from('Products')
                 .orderBy('productName');
 
-            // if should get from cache and previously queried
-            // query the cache instead of the remote server
-            if (!forceRefresh && hasQueriedProducts){
-                query = query.using(breeze.FetchStrategy.FromLocalCache);
+            // if forced to go remote or haven't queried remotely yet.
+            if (forceRefresh || !hasQueriedProducts){
+                return manager
+                    .executeQuery(query)
+                    .then(success)
+                    .catch(failed('Products'));
             }
 
-            return manager
-                .executeQuery(query)
-                .then(success)
-                .catch(failed('Products'));
+            return $q.when(queryLocally());
+
+            function queryLocally(){
+                return manager.executeQueryLocally(query);
+            }
 
             function success(data){
                hasQueriedProducts = true; // remember we queried it
-               return data.results;             
+               // ignore actual query results and re-query the cache
+               // in order to pick up unsave added products.
+               return queryLocally();            
             }    
         }
+
 
         function getProductById(id, forceRemote) {
             return manager.fetchEntityByKey('Product', id, !forceRemote)
