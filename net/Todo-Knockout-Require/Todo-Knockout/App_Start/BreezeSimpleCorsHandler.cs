@@ -78,9 +78,7 @@ namespace Breeze.WebApi
 
                     response.Headers.Add(AccessControlAllowCredentials, "true");
 
-                    var tcs = new TaskCompletionSource<HttpResponseMessage>();
-                    tcs.SetResult(response);
-                    return tcs.Task;
+                    return Task.FromResult(response);
                 }
                 return base.SendAsync(request, cancellationToken).ContinueWith(t =>
                     {
