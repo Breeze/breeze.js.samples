@@ -43,7 +43,7 @@ module.exports = function (config) {
 
         // list of files to exclude
         exclude: [
-            // Excluding tests that require a server for now; comment this line out when you want to run them
+            // Uncommment next line to exclude tests that require a server 
             //'./public/test/server_specs/**/*.spec.js'
         ],
 

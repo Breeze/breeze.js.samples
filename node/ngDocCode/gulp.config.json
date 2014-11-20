@@ -8,8 +8,8 @@
         "./public/stylesheets/style.css"
     ],
     "js": [
-        "app/**/*.module.js",
-        "app/**/*.js"
+        "./public/app/**/*.module.js",
+        "./public/app/**/*.js"
     ],
     "specs": [
         "./public/test/**/*.spec.js"
@@ -35,7 +35,7 @@
     "testharnessjs":[
         "./node_modules/chai/chai.js",
         "./node_modules/mocha/mocha.js",
-        "./node_modules/sinon/lib/sinon.js",
+        "./bower_components/sinon/index.js",
         "./node_modules/sinon-chai/lib/sinon-chai.js"
     ],
     "vendorjs": [

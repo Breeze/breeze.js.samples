@@ -126,7 +126,6 @@ describe('entityExtension:', function() {
 
         expect(cust.foo).to.equal(42,
             "'cust.foo' should return the default=42");
-
     });
 
     /*********************************************************
@@ -179,7 +178,7 @@ describe('entityExtension:', function() {
         var Customer = function () {
             this.foo = "";
         };
-        store.registerEntityTypeCtor("Customer", Customer);
+        store.registerEntityTypeCtor('Customer', Customer);
         var fooProp = assertFooPropertyDefined(store, true);
 
         var maxLengthValidator = breeze.Validator.maxLength({maxLength:5});
@@ -203,193 +202,178 @@ describe('entityExtension:', function() {
         expect(errMsg).to.match(/foo.*or less/,
             "error message, \"{0}\", should complain that 'foo' is too long."
             .format(errMsg));
-
     });
-
 
     /*********************************************************
     * when unmapped property changes, what happens to
     * notifications, EntityState, and originalValues
     *********************************************************/
-    it("change to unmapped 'foo' property does not change EntityState"); /*,, function () {
-        // Arrange for 'foo' to be an unmapped Customer property
-        var store = cloneModuleMetadataStore();
-        var Customer = function () {
-            this.foo = 42;
-        };
-        store.registerEntityTypeCtor("Customer", Customer);
+    describe("setting an unmapped property", function(){
+        var cust;
 
-        assertFooPropertyDefined(store, true);
+        beforeEach(function(){
+            // Arrange for 'foo' to be an unmapped Customer property
+            var store = cloneModuleMetadataStore();
+            var CustomerCtor = function () {
+                this.foo = 42;
+            };
+            store.registerEntityTypeCtor('Customer', CustomerCtor);
 
-        // Fake an existing customer
-        var manager = newEm(store);
-        var cust = manager.createEntity(
-            'Customer',
-            { CustomerID: ash.newGuidComb() },
-              EntityState.Unchanged);
-
-        // Listen for foo changes
-        var koFooNotified, breezeFooNotified;
-        cust.foo.subscribe(function () { koFooNotified = true; });
-        cust.entityAspect.propertyChanged.subscribe(function (args) {
-            if (args.propertyName === "foo") { breezeFooNotified = true; }
+            // Fake an existing customer
+            var manager = newEm(store);
+            cust = manager.createEntity('Customer',
+                { CustomerID: ash.newGuidComb() },
+                EntityState.Unchanged);
         });
 
-        // Act
-        cust.foo(12345);
+        it("raises propertyChanged", function () {
 
-        ok(koFooNotified, "KO should have raised property changed for 'foo'.");
-        ok(breezeFooNotified, "Breeze should have raised its property changed for 'foo'.");
+            // Listen for foo changes
+            var breezeFooNotified = false;
+            cust.entityAspect.propertyChanged.subscribe(function (args) {
+                if (args.propertyName === "foo") { breezeFooNotified = true; }
+            });
 
-        var stateName = cust.entityAspect.entityState.name;
-        equal(stateName, "Unchanged",
+
+            cust.foo = 12345;
+            expect(breezeFooNotified).to.equal(true,
+                "Breeze should have raised its property changed for 'foo'.");
+        });
+
+        it("the EntityState remains unchanged", function () {
+            cust.foo = 12345;
+            var stateName = cust.entityAspect.entityState.name;
+            expect(stateName).to.equal("Unchanged",
             "cust's EntityState should still be 'Unchanged'; it is " + stateName);
+        });
 
-        var originalValues = cust.entityAspect.originalValues;
-        var hasOriginalValues = null;
-        for (var key in originalValues) {
-            if (key === 'foo') {
-                hasOriginalValues = true;
-                break;
-            }
-        }
 
-        ok(hasOriginalValues,
-            "'originalValues' have 'foo'; it is " + JSON.stringify(originalValues));
+        it("the property is listed in originalValues", function () {
+            cust.foo = 12345;
+
+            var originalValues = cust.entityAspect.originalValues;
+            var keys = Object.keys(originalValues);
+            var fooInOriginalValues = keys.some(function(key) {
+                return key === 'foo';
+            });
+
+            expect(fooInOriginalValues).to.be.true;
+        });
     });
-*/
+
     /*********************************************************
     * reject changes should revert an unmapped property
     *********************************************************/
-    it("reject changes reverts an unmapped property"); /*, function () {
-        var store = cloneModuleMetadataStore();
+    it("reject changes reverts an unmapped property", function () {
 
-        var originalTime = new Date(2013, 0, 1);
-        var Customer = function () {
-            this.lastTouched = originalTime;
+        var CustomerCtor = function () {
+            this.lastTouched = new Date();
         };
-
-        store.registerEntityTypeCtor("Customer", Customer);
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Customer', CustomerCtor);
 
         var manager = newEm(store);
 
         // create a fake customer
-        var cust = manager.createEntity("Customer", { CompanyName: "Acme" },
-                   EntityState.Unchanged);
-        var touched = cust.lastTouched();
+        var originalTime = new Date(2013, 0, 1);
+        var cust = manager.createEntity('Customer', {
+              CompanyName: "Acme",
+              lastTouched: originalTime 
+          }, EntityState.Unchanged);
 
-        // an hour passes ... and we visit the customer object
-        cust.CompanyName("Beta");
-        cust.lastTouched(touched = new Date(touched.getTime() + 60000));
 
-        // an hour passes ... and we visit to cancel
-        cust.lastTouched(new Date(touched.getTime() + 60000));
+        // an hour passes ... and we rename the customer object
+        cust.lastTouched = new Date(cust.lastTouched.getTime() + 60000);
+        cust.CompanyName = "Beta";
 
-        cust.entityAspect.rejectChanges(); // roll back name change
+        // time passes and we want to roll back all changes
+        cust.entityAspect.rejectChanges();
         //manager.rejectChanges(); // would have same effect. Obviously less granular
 
-        equal(cust.CompanyName(), "Acme", "'name' data property should be rolled back");
-        ok(originalTime === cust.lastTouched(),
-            "'lastTouched' unmapped property should be rolled back. Started as {0}; now is {1}"
-            .format(originalTime, cust.lastTouched()));
+        expect(cust.CompanyName).to.equal('Acme', 
+            "'CompanyName' data property should be rolled back to 'Acme'");
+
+        expect(cust.lastTouched).to.equal(originalTime,
+            "'lastTouched' unmapped property should be rolled back to 'originalTime'");
     });
-*/
+
 
     /*********************************************************
-    * add instance function via constructor
+    * define a mapped data property within constructor
+    * to supply a default value
     *********************************************************/
-    it("add instance function via constructor"); /*, function () {
-        var store = cloneModuleMetadataStore();
+    it("can re-define a mapped data property within constructor", function () {
 
-        var Customer = function () {
+        var CustomerCtor = function () {
+            this.CompanyName = 'Acme'; 
+        };
+
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Customer', CustomerCtor);
+
+        var customerType = store.getEntityType('Customer');
+        var cust = customerType.createEntity();
+
+        expect(cust.CompanyName).to.equal('Acme',
+            "'CompanyName' should equal 'Acme' by default");
+
+        // 'CompanyName' is a mapped data property
+        var propInfo = customerType.getProperty('CompanyName');
+        expect(propInfo && !propInfo.isUnmapped).to.equal(true,
+            "'CompanyName' should be a mapped Customer property.");
+    });
+
+    /*********************************************************
+    * add instance method via constructor
+    *********************************************************/
+    it("can add instance method via constructor", function () {
+
+        var CustomerCtor = function () {
             this.foo = function () { return 42;};
         };
 
-        store.registerEntityTypeCtor("Customer", Customer);
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Customer', CustomerCtor);
 
-        var customerType = store.getEntityType("Customer");
+        var customerType = store.getEntityType('Customer');
         var cust = customerType.createEntity();
 
-        ok(cust["foo"],
-            "should have 'foo' property via constructor");
+        expect(cust.foo()).to.equal(42,
+            "'foo' should be a function returning 42");
 
-        // 'foo' is a non-KO function; it is NOT listed as an unmapped property
+
+        // 'foo' is a function; fns are NOT listed as unmapped properties
         // The Breeze customerType knows nothing about it.
         var propInfo = customerType.getProperty("foo");
-        ok(propInfo === null, "'foo' should be unknown to the customer type");
-
-        equal(cust.foo(), 42,
-            "'foo' should be a function returning 42");
+        expect(propInfo).to.equal(null, 
+            "'foo' should be unknown to the customer type");
     });
-*/
+
     /*********************************************************
-    * add mapped data property via constructor
+    * add prototype method via constructor
     *********************************************************/
-    it("add mapped data property via constructor"); /*, function () {
-        var store = cloneModuleMetadataStore();
-
-        var Customer = function () {
-            this.CompanyName = "Acme"; // a field, not a KO property
-            this.ContactName = ko.observable("Amy"); // is a KO property
-        };
-
-        store.registerEntityTypeCtor("Customer", Customer);
-
-        var customerType = store.getEntityType("Customer");
-        var cust = customerType.createEntity();
-
-        ok(cust["CompanyName"],
-            "should have 'CompanyName' property via constructor");
-
-        // 'CompanyName' is a mapped data property
-        var propInfo = customerType.getProperty("CompanyName");
-        ok(propInfo !== null,
-            "'CompanyName' should be known to the customer type");
-        ok(propInfo && !propInfo.isUnmapped,
-            "'CompanyName' should be a mapped property");
-
-        // Although defined as a field, Breeze made it a KO property and initialized it
-        equal(cust.CompanyName(), "Acme",
-            "'CompanyName' should be a KO 'property' returning 'Acme'");
-
-        // Breeze preserved the ContactName KO property as a mapped data property
-        propInfo = customerType.getProperty("ContactName");
-        ok(propInfo !== null,
-            "'ContactName' should be known to the customer type");
-        ok(propInfo && !propInfo.isUnmapped,
-            "'ContactName' should be a mapped property");
-        equal(cust.ContactName(), "Amy",
-            "'ContactName' should be a KO 'property' returning 'Amy'");
-    });
-*/
-    /*********************************************************
-    * add method to prototype via constructor
-    *********************************************************/
-    it("add method to prototype via constructor"); /*, function () {
-        var store = cloneModuleMetadataStore();
+    it("can add prototype method via constructor", function () {
 
         var Customer = function () { };
 
         Customer.prototype.sayHi = function () {
-            return "Hi, my name is {0}!".format(this.CompanyName());
+            return "Hi, my name is {0}!".format(this.CompanyName);
         };
 
-        store.registerEntityTypeCtor("Customer", Customer);
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Customer', Customer);
 
-        var customerType = store.getEntityType("Customer");
-        var cust = customerType.createEntity();
-        cust.CompanyName("Acme");
-
-        ok(cust["sayHi"],
-            "should have 'sayHi' member via constructor");
+        var customerType = store.getEntityType('Customer');
+        var cust = customerType.createEntity({
+            CompanyName: 'Acme'
+        });
 
         var expected = "Hi, my name is Acme!";
-        equal(cust.sayHi(), expected,
+        expect(cust.sayHi()).to.equal(expected,
             "'sayHi' function should return expected message, '{0}'."
                 .format(expected));
     });
 
-*/
     /*********************************************************
     * can add unmapped readonly ES5 defined property via constructor
     * add breeze exports/imports just fine
@@ -494,58 +478,29 @@ describe('entityExtension:', function() {
     }
 
     /*********************************************************
-    * add subscription in post-construction initializer
+    * add untracked property in post-construction initializer
     *********************************************************/
-    it("add subscription in post-construction initializer"); /*,  function () {
-        var store = cloneModuleMetadataStore();
-
-        var Customer = function () {};
-
-        var companyNameNotificationCount = 0;
-        var customerInitializer = function(customer) {
-            customer.CompanyName.subscribe(
-                function () {
-                    companyNameNotificationCount += 1;
-            });
-        };
-
-        store.registerEntityTypeCtor("Customer", Customer, customerInitializer);
-
-        var customerType = store.getEntityType("Customer");
-        var cust = customerType.createEntity();
-
-        cust.CompanyName("Beta");
-
-        equal(companyNameNotificationCount, 1,
-            "should have raised 'CompanyName' change notification once");
-    });
-*/
-    /*********************************************************
-    * add property in post-construction initializer
-    *********************************************************/
-    it("add property in post-construction initializer"); /*,  function () {
-        var store = cloneModuleMetadataStore();
-
-        var Customer = function () { };
+    it("can add untracked property in post-construction initializer", function () {
 
         var customerInitializer = function (customer) {
-            customer.foo = "Foo " + customer.CompanyName();
+            customer.foo = 'Foo';
         };
 
-        store.registerEntityTypeCtor("Customer", Customer, customerInitializer);
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Customer', null, customerInitializer);
 
-        var customerType = store.getEntityType("Customer");
+        var customerType = store.getEntityType('Customer');
         var cust = customerType.createEntity();
 
-        equal(cust.foo, "Foo ",
-            "'foo' property, created in initializer, should return 'Foo");
+        expect(cust.foo).to.equal('Foo',
+            "'foo' property, created in initializer, should return 'Foo'");
 
-        var propInfo = customerType.getProperty("foo");
         // The Breeze customerType knows nothing about it.
-        ok(propInfo === null, "'foo' should be unknown to the customer type");
+        var propInfo = customerType.getProperty('foo');
+        expect(propInfo).to.equal(null, 
+            "'foo' property should be unknown to the customer type");
 
     });
-*/
 
     /*********************************************************
     * initializer called by importEntities
@@ -631,7 +586,7 @@ describe('entityExtension:', function() {
                     customer.foo || "new initializerProperty";
             };
 
-            store.registerEntityTypeCtor("Customer", Customer, customerInitializer);
+            store.registerEntityTypeCtor('Customer', Customer, customerInitializer);
 
             // create EntityManager with extended metadataStore
             var em1 = newEm(store);
@@ -800,7 +755,7 @@ describe('entityExtension:', function() {
     *********************************************************/
 
     function assertFooPropertyDefined(metadataStore, shouldBe) {
-        var custType = metadataStore.getEntityType("Customer");
+        var custType = metadataStore.getEntityType('Customer');
         var fooProp = custType.getDataProperty('foo');
         if (shouldBe) {
             expect(fooProp && fooProp.isUnmapped).to.equal(true,

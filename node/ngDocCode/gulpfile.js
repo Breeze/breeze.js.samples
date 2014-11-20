@@ -38,120 +38,6 @@ gulp.task('analyze', function() {
     return merge(jshint, jscs);
 });
 
-/**
- * Create $templateCache from the html templates
- * @return {Stream}
- */
-gulp.task('templatecache', function() {
-    log('Creating an AngularJS $templateCache');
-
-    return gulp
-        .src(paths.htmltemplates)
-        // .pipe(plug.bytediff.start())
-        .pipe(plug.minifyHtml({empty:true}))
-        // .pipe(plug.bytediff.stop(bytediffFormatter))
-        .pipe(plug.angularTemplatecache('templates.js', {
-            module: 'app.core',
-            standalone: false,
-            root: 'app/'
-        }))
-        .pipe(gulp.dest(paths.build));
-});
-
-/**
- * Minify and bundle the app's JavaScript
- * @return {Stream}
- */
-gulp.task('js', ['analyze', 'templatecache'], function() {
-    log('Bundling, minifying, and copying the app\'s JavaScript');
-
-    var source = [].concat(paths.js, paths.build + 'templates.js');
-    return gulp
-        .src(source)
-        // .pipe(plug.sourcemaps.init()) // get screwed up in the file rev process
-        .pipe(plug.concat('all.min.js'))
-        .pipe(plug.ngAnnotate({add: true, single_quotes: true}))
-        .pipe(plug.bytediff.start())
-        .pipe(plug.uglify({mangle: true}))
-        .pipe(plug.bytediff.stop(bytediffFormatter))
-        // .pipe(plug.sourcemaps.write('./'))
-        .pipe(gulp.dest(paths.build));
-});
-
-/**
- * Copy the Vendor JavaScript
- * @return {Stream}
- */
-gulp.task('vendorjs', function() {
-    log('Bundling, minifying, and copying the Vendor JavaScript');
-
-    return gulp.src(paths.vendorjs)
-        .pipe(plug.concat('vendor.min.js'))
-        .pipe(plug.bytediff.start())
-        .pipe(plug.uglify())
-        .pipe(plug.bytediff.stop(bytediffFormatter))
-        .pipe(gulp.dest(paths.build));
-});
-
-/**
- * Minify and bundle the CSS
- * @return {Stream}
- */
-gulp.task('css', function() {
-    log('Bundling, minifying, and copying the app\'s CSS');
-
-    return gulp.src(paths.css)
-        .pipe(plug.concat('all.min.css')) // Before bytediff or after
-        .pipe(plug.autoprefixer('last 2 version', '> 5%'))
-        .pipe(plug.bytediff.start())
-        .pipe(plug.minifyCss({}))
-        .pipe(plug.bytediff.stop(bytediffFormatter))
-//        .pipe(plug.concat('all.min.css')) // Before bytediff or after
-        .pipe(gulp.dest(paths.build + 'content'));
-});
-
-/**
- * Minify and bundle the Vendor CSS
- * @return {Stream}
- */
-gulp.task('vendorcss', function() {
-    log('Compressing, bundling, copying vendor CSS');
-
-    var vendorFilter = plug.filter(['**/*.css']);
-
-    return gulp.src(paths.vendorcss)
-        .pipe(vendorFilter)
-        .pipe(plug.concat('vendor.min.css'))
-        .pipe(plug.bytediff.start())
-        .pipe(plug.minifyCss({}))
-        .pipe(plug.bytediff.stop(bytediffFormatter))
-        .pipe(gulp.dest(paths.build + 'content'));
-});
-
-/**
- * Copy fonts
- * @return {Stream}
- */
-gulp.task('fonts', function() {
-    var dest = paths.build + 'fonts';
-    log('Copying fonts');
-    return gulp
-        .src(paths.fonts)
-        .pipe(gulp.dest(dest));
-});
-
-/**
- * Compress images
- * @return {Stream}
- */
-gulp.task('images', function() {
-    var dest = paths.build + 'content/images';
-    log('Compressing, caching, and copying images');
-    return gulp
-        .src(paths.images)
-        .pipe(plug.cache(plug.imagemin({optimizationLevel: 3})))
-        .pipe(gulp.dest(dest));
-});
 
 /**
  * Inject all the spec files into the index.html
@@ -188,68 +74,6 @@ gulp.task('build-index', function() {
             if (name) { options.name = name; }
             return plug.inject(gulp.src(path), options);
         }
-    });
-
-/**
- * Inject all the files into the new index.html
- * rev, but no map
- * @return {Stream}
- */
-gulp.task('rev-and-inject',
-    ['js', 'vendorjs', 'css', 'vendorcss'], function() {
-        log('Rev\'ing files and building index.html');
-
-        var minified = paths.build + '**/*.min.*';
-        var index = paths.client + 'index.html';
-        var minFilter = plug.filter(['**/*.min.*', '!**/*.map']);
-        var indexFilter = plug.filter(['index.html']);
-
-        var stream = gulp
-            // Write the revisioned files
-            .src([].concat(minified, index)) // add all built min files and index.html
-            .pipe(minFilter) // filter the stream to minified css and js
-            .pipe(plug.rev()) // create files with rev's
-            .pipe(gulp.dest(paths.build)) // write the rev files
-            .pipe(minFilter.restore()) // remove filter, back to original stream
-
-            // inject the files into index.html
-            .pipe(indexFilter) // filter to index.html
-            .pipe(inject('content/vendor.min.css', 'inject-vendor'))
-            .pipe(inject('content/all.min.css'))
-            .pipe(inject('vendor.min.js', 'inject-vendor'))
-            .pipe(inject('all.min.js'))
-            .pipe(gulp.dest(paths.build)) // write the rev files
-            .pipe(indexFilter.restore()) // remove filter, back to original stream
-
-            // replace the files referenced in index.html with the rev'd files
-            .pipe(plug.revReplace())         // Substitute in new filenames
-            .pipe(gulp.dest(paths.build)) // write the index.html file changes
-            .pipe(plug.rev.manifest()) // create the manifest (must happen last or we screw up the injection)
-            .pipe(gulp.dest(paths.build)); // write the manifest
-
-        function inject(path, name) {
-            var pathGlob = paths.build + path;
-            var options = {
-                ignorePath: paths.build.substring(1),
-                read: false
-            };
-            if (name) { options.name = name; }
-            return plug.inject(gulp.src(pathGlob), options);
-        }
-    });
-
-/**
- * Build the optimized app
- * @return {Stream}
- */
-gulp.task('build',
-    ['rev-and-inject', 'images', 'fonts'], function() {
-        log('Building the optimized app');
-
-        return gulp.src('').pipe(plug.notify({
-            onLast: true,
-            message: 'Deployed code!'
-        }));
     });
 
 /**
@@ -312,36 +136,6 @@ gulp.task('autotest', function (done) {
     startTests(false /*singleRun*/, done);
 });
 
-/**
- * serve the dev environment, with debug,
- * and with node inspector
- */
-gulp.task('serve-dev-debug', function() {
-    serve({mode: 'dev', debug: '--debug'});
-});
-
-/**
- * serve the dev environment, with debug-brk,
- * and with node inspector
- */
-gulp.task('serve-dev-debug-brk', function() {
-    serve({mode: 'dev', debug: '--debug-brk'});
-});
-
-/**
- * serve the dev environment
- */
-gulp.task('serve-dev', function() {
-    serve({mode: 'dev'});
-});
-
-/**
- * serve the build environment
- */
-gulp.task('serve-build', function() {
-    serve({mode: 'build'});
-});
-
 
 /**
  * serve the DocCode Web API server
@@ -397,7 +191,7 @@ function analyzejscs(sources) {
  */
 function serve(args) {
     var options = {
-        script: paths.server + 'app.js',
+        script: paths.server + 'server.js',
         delayTime: 1,
         ext: 'html js',
         env: {'NODE_ENV': args.mode},
