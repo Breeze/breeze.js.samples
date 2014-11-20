@@ -167,11 +167,11 @@ gulp.task('build-index', function() {
             .src([index])
             .pipe(inject([].concat(paths.testharnessjs), 'inject-testharness'))
             .pipe(inject([].concat(paths.vendorjs), 'inject-vendor'))
-            .pipe(inject([].concat(paths.app), 'inject-app'))
+            .pipe(inject([].concat(paths.js)))
             .pipe(inject([].concat(paths.specHelpers), 'inject-specHelpers'))
             .pipe(inject([].concat(paths.specs), 'inject-specs'))
-            .pipe(inject([].concat(paths.vendorcss), 'inject-vendorcss'))
-            .pipe(inject([].concat(paths.css), 'inject-css'))
+            .pipe(inject([].concat(paths.vendorcss), 'inject-vendor'))
+            .pipe(inject([].concat(paths.css)))
 
 
             .pipe(gulp.dest(paths.server)); // write the index.html file changes
@@ -372,6 +372,7 @@ function analyzejshint(sources, overrideRcFile) {
     log('Running JSHint');
     return gulp
         .src(sources)
+        // .pipe(plug.print()) // list the files in sources
         .pipe(plug.jshint(jshintrcFile))
         .pipe(plug.jshint.reporter('jshint-stylish', {verbose: true}));
 }

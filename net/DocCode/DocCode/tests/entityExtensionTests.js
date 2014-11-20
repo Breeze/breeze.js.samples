@@ -424,6 +424,7 @@
 
     /*********************************************************
     * unmapped properties are not persisted
+    * (although they are sent to the server in the payload)
     *********************************************************/
     test("unmapped properties are not persisted", function () {
         expect(9);
@@ -655,12 +656,11 @@
 
 
     /*********************************************************
-    * can add unmapped readonly ES5 property via constructor
+    * can add unmapped readonly ES5 defined property via constructor
     * add breeze exports/imports just fine
     *********************************************************/
-    test("can add unmapped readonly ES5 property via constructor", function () {
-        expect(4);
-        "use strict";
+    test("can add unmapped readonly ES5 defined property via constructor", function () {
+        expect(5);
         var store = cloneModuleMetadataStore();
 
         var Customer = function () { };
@@ -681,6 +681,9 @@
             CompanyName: "test cust"
         });
 
+        var propInfo = cust.entityType.getProperty('foo');
+        ok(propInfo != null, "'Customer.foo' is known to metadata ");
+
         equal(cust.foo(), 42, "'cust.foo' should return 42");
 
         var exported = em.exportEntities([cust], false); // no metadata
@@ -696,6 +699,61 @@
         equal(cust2.foo(), 42, "imported 'cust2.foo' should return 42 after import");
     });
 
+
+    /*********************************************************
+    * can add ES5 definedProperty to ctor that is invisible to Breeze
+    * by adding to prototype AFTER registering cto.
+    * Breeze would not see it and would not export or import it
+    * This example wraps a Date property in an "AsString" property
+    * so that the wrapped data property is read/write as a string, not a date object.
+    *********************************************************/
+    test("can add hidden ES5 defined wrapper property (Date) via constructor", function () {
+        expect(5);
+
+        var store = cloneModuleMetadataStore();
+
+        var Order = function () { };
+
+        // register it FIRST, then add the property
+        store.registerEntityTypeCtor('Order', Order);
+        addorderDateAsStringProperty(Order);
+
+        var em = newEm(store);
+        var testDate = new Date(2014,0,1,13,30); // 1/1/2014 1:30 pm
+
+        var order = em.createEntity('Order', {
+            CompanyName: "test cust",
+            OrderDate: testDate
+        });
+
+        equal(order.OrderDate().value, testDate.value,
+            "'order.OrderDate' should return " + testDate);
+        equal(order.orderDateAsString, testDate.toString(),
+            "'order.orderDateAsString' should return " + testDate.toString());
+
+        var testDate2 = new Date(); // now
+        // update OrderDate by way of the wrapper property
+        order.orderDateAsString = testDate2.toString();
+
+        equal(order.OrderDate().value, testDate2.value,
+            "after update, 'order.OrderDate' should return " + testDate2);
+        equal(order.orderDateAsString, testDate2.toString(),
+            "after update, 'order.orderDateAsString' should return " + testDate2.toString());
+
+        var propInfo = order.entityType.getProperty('orderDateAsString');
+        ok(propInfo == null, "'Order.orderDateAsString' is not known to metadata ");
+    });
+
+    function addorderDateAsStringProperty(orderCtor) {
+
+        // now add the wrapper property to the prototype
+        Object.defineProperty(orderCtor.prototype, 'orderDateAsString', {
+            get: function () { return this.OrderDate().toString(); },
+            set: function (value) { this.OrderDate(value); },
+            enumerable: true,
+            configurable: true
+        });
+    }
 
     /*********************************************************
     * knockout computed property via constructor
@@ -1306,6 +1364,33 @@
         breeze.config.initializeAdapterInstance("modelLibrary", this.priorAdapterName, true);
     }
 
+    /*********************************************************
+    * can add unmapped 'foo' property directly to EntityType
+    * Fails until defect #2646 is cured
+    *********************************************************/
+    test("can add unmapped 'foo' property directly to EntityType", function () {
+        expect(4);
+        var store = cloneModuleMetadataStore();
+        assertFooPropertyDefined(store, false);
+
+        var customerType = store.getEntityType('Customer');
+        var fooProp = new breeze.DataProperty({
+            name: 'foo',
+            defaultValue: 42,
+            isUnmapped: true,  // !!!
+        });
+        customerType.addProperty(fooProp);
+
+        assertFooPropertyDefined(store, true);
+
+        var cust = store.getEntityType('Customer').createEntity();
+
+        equal(cust.foo, 42,
+            "'cust.foo' should return the default=42");
+
+        equal(cust._backingStore.foo, 42,
+            "'cust._backingStore.foo' should return the default=42");
+    });
     /*********************************************************
     * unmapped property can be set by server class calculated property
     *********************************************************/

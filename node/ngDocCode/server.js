@@ -29,7 +29,7 @@ app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // All other requests result in sending of index.html
-app.use( function(req, res, next) {
+app.use(function(req, res, next) {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 

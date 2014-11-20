@@ -55,7 +55,7 @@ describe("query_xtras:", function () {
                     );
                     var orderLabel ='{0}-{1} order has {2} chai product details'
                         .format(o.OrderID, cust.CompanyName, chaiItems.length);
-                    expect(chaiItems.length).above(0, orderLabel)
+                    expect(chaiItems.length).above(0, orderLabel);
                 });
             }
         });
@@ -66,7 +66,7 @@ describe("query_xtras:", function () {
             // expects a 'companyName' URL query string parameter
             // Hack the query string rather than use .withParameters
             // it's up to you to get it right.
-            var query = EntityQuery.from('CustomersStartingWith/?companyName=qu')
+            var query = EntityQuery.from('CustomersStartingWith/?companyName=qu');
 
             em.executeQuery(query).then(success).then(done, done);
 

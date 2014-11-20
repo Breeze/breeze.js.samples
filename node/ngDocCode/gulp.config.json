@@ -7,7 +7,7 @@
     "css": [
         "./public/stylesheets/style.css"
     ],
-    "app": [
+    "js": [
         "app/**/*.module.js",
         "app/**/*.js"
     ],

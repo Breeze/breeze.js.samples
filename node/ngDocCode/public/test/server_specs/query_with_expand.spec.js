@@ -63,23 +63,24 @@ describe("query_with_expand:", function () {
         }
     });
 
-    it("include related child entities and their children, e.g. an Order's  Details and their Products", function (done) {
-        // Get Alfreds' first Order and its related entities
-        EntityQuery.from("Orders")
-            .where('CustomerID', '==', ash.alfredsID)
-            .expand('OrderDetails.Product') // dotted navigation (a two-legged expand) gets both
-            .using(em).execute().then(success).then(done, done);
+    it("include related child entities and their children, e.g. an Order's  Details and their Products", 
+        function (done) {
+            // Get Alfreds' first Order and its related entities
+            EntityQuery.from("Orders")
+                .where('CustomerID', '==', ash.alfredsID)
+                .expand('OrderDetails.Product') // dotted navigation (a two-legged expand) gets both
+                .using(em).execute().then(success).then(done, done);
 
-        function success(data){
-            var order = data.results[0] || {};
-            var oid = order.OrderID;
-            // an child OrderDetails in cache
-            expect(order).has.property('OrderDetails')
-                .that.has.length.above(0,'OrderDetails of '+oid);
-            order.OrderDetails.forEach(function(od){
-                expect(od).has.property('Product',undefined,
-                    'Product of Detail {0}-{1}'.format(oid, od.ProductID)).that.exist;
-            });
-        }
+            function success(data){
+                var order = data.results[0] || {};
+                var oid = order.OrderID;
+                // an child OrderDetails in cache
+                expect(order).has.property('OrderDetails')
+                    .that.has.length.above(0,'OrderDetails of '+oid);
+                order.OrderDetails.forEach(function(od){
+                    expect(od).has.property('Product',undefined,
+                        'Product of Detail {0}-{1}'.format(oid, od.ProductID)).that.exist;
+                });
+            }
     });
 });

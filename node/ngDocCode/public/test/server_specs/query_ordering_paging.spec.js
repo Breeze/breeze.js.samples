@@ -96,7 +96,7 @@ describe("query_ordering_paging:", function () {
                         // same supplier
                         if (left.UnitPrice === right.UnitPrice){
                             // same price, ProductID
-                            return left.ProductID < right.ProductID ? -1 : 1
+                            return left.ProductID < right.ProductID ? -1 : 1;
                         } else {
                             return left.UnitPrice < right.UnitPrice ? 1 : -1; // descending unit price
                         }
@@ -169,7 +169,7 @@ describe("query_ordering_paging:", function () {
             rootQuery.skip(10).take(5).inlineCount()
                 .using(em).execute()
                 .then(function(data){
-                    expect(data.inlineCount).to.equal(productIds.length)
+                    expect(data.inlineCount).to.equal(productIds.length);
                 })
                 .then(done, done);
 
@@ -197,7 +197,7 @@ describe("query_ordering_paging:", function () {
             }
 
             function assertCountsAreEqual(data) {
-                expect(data.inlineCount).to.equal(expectedCount)
+                expect(data.inlineCount).to.equal(expectedCount);
             }
 
         });
@@ -253,9 +253,10 @@ describe("query_ordering_paging:", function () {
         });
 
         map.sort(function (left, right) {
+            var lessThan;
             if (!ignoreLn && left.ln !== right.ln) {
                 // different last name
-                var lessThan = lnDesc ? 1 : -1;
+                lessThan = lnDesc ? 1 : -1;
                 return (left.ln < right.ln) ? lessThan : -lessThan;
             } else if ( ignoreFn || left.fn === right.fn) {
                 return 0; // same name

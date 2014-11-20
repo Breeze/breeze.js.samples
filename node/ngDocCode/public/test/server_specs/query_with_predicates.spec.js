@@ -392,9 +392,12 @@ describe("query_with_predicates:", function () {
     ////// helpers //////
 
     function logPredicate(predicate, entityType){
-        return; // don't log now but could if/when want to see the query's OData query string
-        console.log('query_with_predicates: OData query string is "$filter=' +
+        return; 
+        /* Don't log now but could if/when want to see the query's OData query string
+        var msg = 'query_with_predicates: OData query string is "$filter=' +
             predicate.toODataFragment(entityType)+'" for predicate "'+
             predicate.toString()+ '"');
+        console.log(msg);
+        */
     }
 });
