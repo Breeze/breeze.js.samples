@@ -630,7 +630,7 @@ describe('entityExtension:', function() {
             actual && actual.push(action.ctor);
         };
 
-        var initFn = function (c) { // initializer
+        var initFn = function (c) {
             if (c.CompanyName !== null) {
                 // CompanyName setting must have happened so record
                 // that initial values were used before initFn was called
