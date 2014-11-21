@@ -9,6 +9,7 @@ var compress = require('compression');
 var cors = require('cors');
 var debug = require('debug')('ngDocCode');
 var favicon = require('serve-favicon');
+var isDevEnv = app.get('env') === 'development';
 var logger = require('morgan');
 var port = process.env.PORT || 3456;
 var staticFiles = express.static;
@@ -30,17 +31,13 @@ app.use(function(req, res, next) {
     res.sendFile('./index.html');
 });
 
-// error handlers
-
 // Error handler
-// if dev, send err with stacktrace
-// else just send error message.
-var isDevEnv = app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.send(isDevEnv ? err.toString() : err.message);
+    // if in development, send err with stacktrace
+    // else just send error message.
+    var info = isDevEnv ? err.toString() : err.message;
+    res.status(err.status || 500).send(info);
 });
-}
 
 app.listen(port, function() {
     var msg = 'Express server listening on port ' + port;

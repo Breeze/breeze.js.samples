@@ -3,7 +3,6 @@
 describe('entityExtension:', function() {
     'use strict';
 
-    var em;
     var EntityManager = breeze.EntityManager;
     var EntityQuery = breeze.EntityQuery;
     var EntityState = breeze.EntityState;
@@ -22,7 +21,6 @@ describe('entityExtension:', function() {
             moduleMetadataStore.fetchMetadata(todoService))
         .then(function(){ done(); }, done);
     });
-
 
     /*********************************************************
     * add untracked property directly to customer instance
@@ -108,7 +106,7 @@ describe('entityExtension:', function() {
     * can define unmapped 'foo' property directly on EntityType
     * Fails until defect #2646 is cured    
     *********************************************************/
-    it("can define unmapped 'foo' property directly on EntityType", function () {
+    it.skip("can define unmapped 'foo' property directly on EntityType D#2646", function () {
         var store = cloneModuleMetadataStore();
         assertFooPropertyDefined(store, false);
 
@@ -499,203 +497,201 @@ describe('entityExtension:', function() {
         var propInfo = customerType.getProperty('foo');
         expect(propInfo).to.equal(null, 
             "'foo' property should be unknown to the customer type");
-
     });
 
     /*********************************************************
-    * initializer called by importEntities
+    * initializer is called by importEntities
     *********************************************************/
-    it("initializer called by importEntities"); /*, function () {
-        // ARRANGE
-        // Start with clean metadataStore copy; no registrations
-        var store = cloneModuleMetadataStore();
+    it("initializer is called by importEntities", function () {
 
         // define and register employee initializer
-        store.registerEntityTypeCtor("Employee", null, employeeFooInitializer);
+        var employeeInitializer = function initializer (employee) {
+            employee.foo = 'Foo ' + employee.LastName;
+        };
+
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Employee', null, employeeInitializer);
 
         // define manager using prepared test store
-        var em1 = new breeze.EntityManager({
+        var em1 = new EntityManager({
             serviceName: northwindService,
             metadataStore: store
         });
 
-        var emp = createEmployee42();
-        em1.attachEntity(emp);
+        var emp = em1.createEntity('Employee', {
+            EmployeeID: 42,
+            LastName: 'Test'
+        });
+
+        // export cached entities with their metadata
         var exportData = em1.exportEntities();
+
+        // Emulate launching a separate disconnected app
+        // and loading data from local browser storage  (exportData)
 
         // Create em2 with with registration only
         // expecting metadata from import to fill in the entityType gaps
-        // Emulate launching a disconnected app
-        // and loading data from local browser storage 
-
         var em2 = new breeze.EntityManager(northwindService);
-        em2.metadataStore.registerEntityTypeCtor("Employee", null, employeeFooInitializer);
 
-        // Create em2 with copy constructor
-        // In this path, em2 all entityType metadata + registration
-        // Not realistic.
+        // Must add initializer as it is not part of metadata export.
+        em2.metadataStore.registerEntityTypeCtor('Employee', null, employeeInitializer);
 
-        //var em2 = em1.createEmptyCopy(); // has ALL metadata
-
-        // ACTION
+        // Import as if from browser storage
         em2.importEntities(exportData);
 
-        // ASSERT
-        var emp2 = em2.findEntityByKey(emp.entityAspect.getKey());
+        // Get from cache by key (either of two ways)
+        //var emp2 = em2.getEntityByKey(emp.entityAspect.getKey());
+        var emp2 = em2.getEntityByKey('Employee', 42); 
 
-        ok(emp2 !== null, "should find imported 'emp' in em2");
-        ok(emp2 && emp2.foo,
-            "emp from em2 should have 'foo' property from initializer");
-        equal(emp2 && emp2.foo, "Foo Test",
-           "emp from em2 should have expected foo value");
-        ok(emp2 && emp2.fooComputed,
-          "emp from em2 should have 'fooComputed' observable from initializer");
-        equal(emp2 && emp2.fooComputed && emp2.fooComputed(), "Foo Test",
-           "emp from em2 should have expected fooComputed value");
+        expect(emp2).to.not.equal(null, 
+            "should find imported emp2 with id==42");
 
-        function createEmployee42() {
-            var employeeType = store.getEntityType("Employee");
-            var employee = employeeType.createEntity();
-            employee.EmployeeID(42);
-            employee.LastName("Test");
-            return employee;
-        }
+        expect(emp2).has.property('foo').that.equal('Foo Test',
+            "'emp2.foo' untracked initializer property should be 'Foo Test'");
     });
 
-    function employeeFooInitializer (employee) {
-        employee.foo = "Foo " + employee.LastName();
-        employee.fooComputed = ko.computed(function () {
-            return "Foo " + employee.LastName();
-        }, this);
-    };
-*/
+    /*********************************************************
+    * unmapped property is preserved after export/import
+    *********************************************************/
+    it("unmapped property is preserved after export/import", function () {
+
+        var Customer = function () {
+            this.unmappedProperty = "";
+        };
+
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Customer', Customer);
+
+        // create EntityManager with extended metadataStore
+        var em1 = newEm(store);
+
+        // create a new customer defined by that extended metadata
+        var cust1 = em1.createEntity('Customer', {CustomerID: ash.newGuidComb()});
+
+        // Set the property we added
+        cust1.unmappedProperty = 'Hi, I\'m unmapped';
+
+        // export and import into new manager (em2)
+        var exportData = em1.exportEntities();
+        var em2 = newEm(store);
+        var cust2 = em2.importEntities(exportData).entities[0];
+
+        expect(cust2.unmappedProperty).to.equal('Hi, I\'m unmapped',
+            "cust2.unmappedProperty value should be restored after import");
+    });
 
     /*********************************************************
-    * unmapped property (and only unmapped property) preserved after export/import
+    * initializer property is NOT preserved after export/import
     *********************************************************/
-    it("unmapped property preserved after export/import"); /*,
-        function () {
-            var store = cloneModuleMetadataStore();
+    it("initializer property is NOT preserved after export/import", function () {
 
-            var Customer = function () {
-                this.unmappedProperty = "";
-            };
+        var customerInitializer = function (customer) {
+            customer.initializerProperty = '';
+        };
 
-            var customerInitializer = function (customer) {
-                customer.initializerProperty =
-                    customer.foo || "new initializerProperty";
-            };
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Customer', null, customerInitializer);
 
-            store.registerEntityTypeCtor('Customer', Customer, customerInitializer);
+        // create EntityManager with extended metadataStore
+        var em1 = newEm(store);
 
-            // create EntityManager with extended metadataStore
-            var em1 = newEm(store);
+        // create a new customer defined by that extended metadata
+        var cust1 = em1.createEntity('Customer', {CustomerID: ash.newGuidComb()});
 
-            // create a new customer defined by that extended metadata
-            var cust1 = em1.createEntity('Customer', {CustomerID: ash.newGuidComb()});
+        // Set the property we added
+        cust1.initializerProperty = 'Hi, I\'m the initializerProperty';
 
-            // Set the 'properties' we added
-            cust1.unmappedProperty("Hi, I'm unmapped");
-            cust1.initializerProperty = "Hi, I'm the initializerProperty";
-            cust1.adHocProperty = 42; // can always add another property; it's JavaScript
+        // export and import into new manager (em2)
+        var exportData = em1.exportEntities();
+        var em2 = newEm(store);
+        var cust2 = em2.importEntities(exportData).entities[0];
 
-            var exportData = em1.exportEntities();
+        expect(cust2.initializerProperty).to.equal('',
+            "cust2.initializerProperty's value should NOT be restored after import.");
 
-            var em2 = newEm(store);
-            em2.importEntities(exportData);
-            var cust2 = em2.getEntities()[0];
+        expect(cust1.initializerProperty).to.equal('Hi, I\'m the initializerProperty',
+            "cust1.initializerProperty's value is still set.");
+    });
 
-            // Only cust2.unmappedProperty should be preserved
-            equal(cust2.unmappedProperty(), "Hi, I'm unmapped",
-                "cust2.unmappedProperty's value should be restored after import");
-            equal(cust2.initializerProperty, "new initializerProperty",
-                "cust2.initializerProperty's value should NOT be restored after import; it is '{0}' "
-                .format(cust2.initializerProperty));
-            ok(typeof cust2.adHocProperty === "undefined",
-                "cust2.adHocProperty should be undefined");
-
-        });
-/*
     /*********************************************************
-    * createEntity sequence is ctor, init-vals, init-er, add
+    * createEntity sequence is ctor, init-vals, init-fn, add
     *********************************************************/
+    it("createEntity sequence is ctor, init-vals, init-fn, add", function () {
+        // ARRANGE
+        var actual;
+        var action = {
+            ctor: "constructor",
+            initVals: "initialValues",
+            initFn: "initializer",
+            attach: "added to manager"
+        };
 
-    it("createEntity sequence is ctor, init-vals, init-er, add"); /*,
-        function () {
-            // ARRANGE
-            var expected = {
-                ctor: "constructor",
-                initVals: "initialValues",
-                initer: "initializer",
-                attach: "added to manager"
-            };
-            var actual = [];
-            var store = cloneModuleMetadataStore();
-            store.registerEntityTypeCtor(
-                'Customer',
-                function () { // ctor
-                    actual.push(expected.ctor);
-                },
-                function (c) { // initializer
-                    if (c.CompanyName !== null) {
-                        // CompanyName setting must have happened before this initializer
-                        actual.push(expected.initVals);
-                    }
-                    actual.push(expected.initer);
-                });
-            actual = []; // reset after registration
+        var ctor = function ctor () {
+            actual && actual.push(action.ctor);
+        };
 
-            var em = newEm(store);
-            em.entityChanged.subscribe(function (args) {
-                if (args.entityAction === breeze.EntityAction.Attach) {
-                    actual.push(expected.attach);
-                }
-            });
+        var initFn = function (c) { // initializer
+            if (c.CompanyName !== null) {
+                // CompanyName setting must have happened so record
+                // that initial values were used before initFn was called
+                actual.push(action.initVals);
+            }
+            actual.push(action.initFn);
+        };
 
-            // ACT
-            var cust = em.createEntity('Customer', {
-// ReSharper restore UnusedLocals
-                CustomerID: ash.newGuidComb(),
-                CompanyName: expected[1]
-            });
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Customer', ctor, initFn);
+        var em = newEm(store);
 
-            // ASSERT
-            var exp = [];
-            for (var prop in expected) { exp.push(expected[prop]);}
-            deepEqual(actual, exp,
-                "Call sequence should be: "+exp.join(", "));
+        // Listen for entity cache 'Attach' event
+        em.entityChanged.subscribe(function (args) {
+            if (args.entityAction === breeze.EntityAction.Attach) {
+                actual.push(action.attach);
+            }
         });
-*/
+
+        actual = [];
+
+        // ACT
+        var cust = em.createEntity('Customer', {
+            CustomerID: ash.newGuidComb(),
+            CompanyName: 'Acme'
+        });
+
+        // ASSERT
+        expect(actual[0]).to.equal(action.ctor,    'ctor called 1st');
+        expect(actual[1]).to.equal(action.initVals,'initial values 2nd');
+        expect(actual[2]).to.equal(action.initFn,  'initializer 3rd');
+        expect(actual[3]).to.equal(action.attach,  'attach-to-mgr 4th');
+    });
 
     /*********************************************************
     * can define custom temporary key generator
     * must conform to the keygenerator-interface
     * http://www.breezejs.com/sites/all/apidocs/classes/~keyGenerator-interface.html
     *********************************************************/
-    it("can define custom temporary key generator"); /*,
-        function () {
-            var em = newEm();
+    it("can define custom temporary key generator", function () {
+        var em = newEm();
 
-            // add statics for testing the key generator
-            var tempIds = TestKeyGenerator.tempIds = [];
+        // add statics for testing the key generator
+        var tempIds = TestKeyGenerator.tempIds = [];
 
-            em.setProperties({ keyGeneratorCtor: TestKeyGenerator });
+        em.setProperties({ keyGeneratorCtor: TestKeyGenerator });
 
-            // Order has an integer key.
-            // temporary keys are assigned when added to an EntityManager
-            var o1 = em.createEntity('Order');
-            var o2 = em.createEntity('Order');
+        // Order has an integer key.
+        // temporary keys are assigned when added to an EntityManager
+        var o1 = em.createEntity('Order');
+        var o2 = em.createEntity('Order');
 
-            // Customer has a client-assigned Guid key
-            // A new Customer does not add its key to the tempIds
-            em.createEntity('Customer',{CustomerID: ash.newGuidComb()});
+        // Customer has a client-assigned Guid key
+        // A new Customer does not add its key to the tempIds
+        em.createEntity('Customer',{CustomerID: ash.newGuidComb()});
 
-            equal(tempIds.length, 2, "should have 2 tempIds");
-            equal(o1.OrderID(), tempIds[0], "o1 should have temp key " + tempIds[0]);
-            equal(o2.OrderID(), tempIds[1], "o2 should have temp key " + tempIds[1]);
+        expect(tempIds).to.have.length(2, "should have 2 tempIds");
+        expect(o1.OrderID).to.equal(tempIds[0], "o1 should have temp key " + tempIds[0]);
+        expect(o2.OrderID).to.equal(tempIds[1], "o2 should have temp key " + tempIds[1]);
+    });
 
-        });
-    */
     function TestKeyGenerator() {
         var self = this;
         this.nextNumber = -1000;
@@ -726,29 +722,28 @@ describe('entityExtension:', function() {
     }
 
     /*********************************************************
-    * If a store-generated key and the key value is the default value
+    * If key is store-generated and the given key value is the default value
     * the default value is replaced by client-side temporary key generator
     *********************************************************/
+    it("store-gen keys w/ default values are re-set by key generator upon add to manager", 
+        function () {
+            var em = newEm();
 
-    it("store-gen keys w/ default values are re-set by key generator upon add to manager"); /*, 
-    function () {
-        var em = newEm();
-
+            // implicit default key value
             var o1 = em.createEntity('Order');
-            var o1Id = o1.OrderID();
-            ok(o1Id !== 0,
-                "o1's default key should be replaced w/ new temp key; it is " + o1Id);
+            expect(o1.OrderID).to.be.below(0,
+                "o1's default key should be replaced by negative temp key; it is " + o1.OrderID);
 
-            var orderEntityType = em.metadataStore.getEntityType("Order");
-            var o2 = orderEntityType.createEntity();
-            o2.OrderID(42); // set to other than default value (0 for ints)
-            em.addEntity(o2); // now add to the manager
+            // explicit default key value
+            var o2 = em.createEntity('Order', { OrderID: 0 });
+            expect(o2.OrderID).to.be.below(0,
+                "o2's explict '0' key should be replaced by negative temp key; it is " + o2.OrderID);
 
-            equal(o2.OrderID(), 42,
-                "o2's key, 42, should not be replaced w/ new temp key when added.");
+            // a non-default key value
+            var o3 = em.createEntity('Order', { OrderID: 42 });
+            expect(o3.OrderID).to.equal(42,
+                "o3's non-zero key is retained; it is " + o3.OrderID);
         });
-    */
-
 
     /*********************************************************
     * helpers

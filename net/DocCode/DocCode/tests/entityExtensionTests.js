@@ -957,71 +957,64 @@
                 "orderCount should be 1 after pushing newOrder");
         });
     /*********************************************************
-    * initializer called by importEntities
+    * initializer is called by importEntities
     *********************************************************/
-    test("initializer called by importEntities", function () {
+    test("initializer is called by importEntities", function () {
         expect(5);
-        // ARRANGE
-        // Start with clean metadataStore copy; no registrations
-        var store = cloneModuleMetadataStore();
 
         // define and register employee initializer
-        store.registerEntityTypeCtor("Employee", null, employeeFooInitializer);
+        var employeeInitializer = function initializer(employee) {
+            employee.foo = 'Foo ' + employee.LastName();
+            employee.fooComputed = ko.computed(function () {
+                return 'Foo ' + employee.LastName();
+            }, this);
+        };
+
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Employee', null, employeeInitializer);
 
         // define manager using prepared test store
-        var em1 = new breeze.EntityManager({
+        var em1 = new EntityManager({
             serviceName: northwindService,
             metadataStore: store
         });
 
-        var emp = createEmployee42();
-        em1.attachEntity(emp);
+        var emp = em1.createEntity('Employee', {
+            EmployeeID: 42,
+            LastName: 'Test'
+        });
+
+        // export cached entities with their metadata
         var exportData = em1.exportEntities();
 
-        /* Create em2 with with registration only
-        * expecting metadata from import to fill in the entityType gaps
-        * Emulate launching a disconnected app
-        * and loading data from local browser storage */
+        // Emulate launching a separate disconnected app
+        // and loading data from local browser storage  (exportData)
 
+        // Create em2 with with registration only
+        // expecting metadata from import to fill in the entityType gaps
         var em2 = new breeze.EntityManager(northwindService);
-        em2.metadataStore.registerEntityTypeCtor("Employee", null, employeeFooInitializer);
 
-        /* Create em2 with copy constructor
-        * In this path, em2 all entityType metadata + registration
-        * Not realistic. */
+        // Must add initializer as it is not part of metadata export.
+        em2.metadataStore.registerEntityTypeCtor('Employee', null, employeeInitializer);
 
-        //var em2 = em1.createEmptyCopy(); // has ALL metadata
-
-        // ACTION
+        // Import as if from browser storage
         em2.importEntities(exportData);
 
-        // ASSERT
-        var emp2 = em2.findEntityByKey(emp.entityAspect.getKey());
+        // Get from cache by key (either of two ways)
+        //var emp2 = em2.getEntityByKey(emp.entityAspect.getKey());
+        var emp2 = em2.getEntityByKey('Employee', 42);
 
-        ok(emp2 !== null, "should find imported 'emp' in em2");
+        ok(emp2 !== null, "should find imported emp2 with id==42");
         ok(emp2 && emp2.foo,
-            "emp from em2 should have 'foo' property from initializer");
+            "emp2 should have 'foo' property from initializer");
         equal(emp2 && emp2.foo, "Foo Test",
-           "emp from em2 should have expected foo value");
+            "'emp2.foo' untracked non-KO initializer property should be 'Foo Test'");
         ok(emp2 && emp2.fooComputed,
-          "emp from em2 should have 'fooComputed' observable from initializer");
+            "emp2 should have 'fooComputed' observable from initializer");
         equal(emp2 && emp2.fooComputed && emp2.fooComputed(), "Foo Test",
-           "emp from em2 should have expected fooComputed value");
+            "'emp2.fooComputed' untracked initializer property should be 'Foo Test'");
 
-        function createEmployee42() {
-            var employeeType = store.getEntityType("Employee");
-            var employee = employeeType.createEntity();
-            employee.EmployeeID(42);
-            employee.LastName("Test");
-            return employee;
-        }
     });
-    function employeeFooInitializer (employee) {
-        employee.foo = "Foo " + employee.LastName();
-        employee.fooComputed = ko.computed(function () {
-            return "Foo " + employee.LastName();
-        }, this);
-    };
 
     /*********************************************************
     * Can create employee after registering addhasValidationErrorsProperty initializer
@@ -1174,54 +1167,56 @@
         });
 
     /*********************************************************
-    * createEntity sequence is ctor, init-vals, init-er, add
+    * createEntity sequence is ctor, init-vals, init-fn, add
     *********************************************************/
-    test("createEntity sequence is ctor, init-vals, init-er, add",
-        function () {
-            expect(1);
-            /* Arrange */
-            var expected = {
-                ctor: "constructor",
-                initVals: "initialValues",
-                initer: "initializer",
-                attach: "added to manager"
-            };
-            var actual = [];
-            var store = cloneModuleMetadataStore();
-            store.registerEntityTypeCtor(
-                'Customer',
-                function () { // ctor
-                    actual.push(expected.ctor);
-                },
-                function (c) { // initializer
-                    if (c.CompanyName !== null) {
-                        // CompanyName setting must have happened before this initializer
-                        actual.push(expected.initVals);
-                    }
-                    actual.push(expected.initer);
-                });
-            actual = []; // reset after registration
+    test("createEntity sequence is ctor, init-vals, init-fn, add", function () {
+        // ARRANGE
+        var actual;
+        var action = {
+            ctor: "constructor",
+            initVals: "initialValues",
+            initFn: "initializer",
+            attach: "added to manager"
+        };
 
-            var em = newEm(store);
-            em.entityChanged.subscribe(function (args) {
-                if (args.entityAction === breeze.EntityAction.Attach) {
-                    actual.push(expected.attach);
-                }
-            });
+        var ctor = function ctor() {
+            actual && actual.push(action.ctor);
+        };
 
-            /* ACT */
-            var cust = em.createEntity('Customer', {
-// ReSharper restore UnusedLocals
-                CustomerID: testFns.newGuidComb(),
-                CompanyName: expected[1]
-            });
+        var initFn = function (c) { // initializer
+            if (c.CompanyName !== null) {
+                // CompanyName setting must have happened so record
+                // that initial values were used before initFn was called
+                actual.push(action.initVals);
+            }
+            actual.push(action.initFn);
+        };
 
-            /* ASSERT */
-            var exp = [];
-            for (var prop in expected) { exp.push(expected[prop]);}
-            deepEqual(actual, exp,
-                "Call sequence should be: "+exp.join(", "));
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('Customer', ctor, initFn);
+        var em = newEm(store);
+
+        // Listen for entity cache 'Attach' event
+        em.entityChanged.subscribe(function (args) {
+            if (args.entityAction === breeze.EntityAction.Attach) {
+                actual.push(action.attach);
+            }
         });
+
+        actual = [];
+
+        // ACT
+        var cust = em.createEntity('Customer', {
+            CustomerID: testFns.newGuidComb(),
+            CompanyName: 'Acme'
+        });
+
+        // ASSERT
+        equal(actual[0], action.ctor,    'ctor called 1st');
+        equal(actual[1], action.initVals,'initial values 2nd');
+        equal(actual[2], action.initFn,  'initializer 3rd');
+        equal(actual[3], action.attach,  'attach-to-mgr 4th');
+    });
 
     /*********************************************************
     * query sequence is ctor, init-er, merge
@@ -1329,25 +1324,27 @@
     }
 
     /*********************************************************
-    * If a store-generated key and the key value is the default value
+    * If key is store-generated and the given key value is the default value
     * the default value is replaced by client-side temporary key generator
     *********************************************************/
-    test("store-gen keys w/ default values are re-set by key generator upon add to manager", function () {
-        expect(2);
-        var em = newEm();
+    test("store-gen keys w/ default values are re-set by key generator upon add to manager",
+        function () {
+            var em = newEm();
 
+            // implicit default key value
             var o1 = em.createEntity('Order');
-            var o1Id = o1.OrderID();
-            ok(o1Id !== 0,
-                "o1's default key should be replaced w/ new temp key; it is " + o1Id);
+            ok(o1.OrderID() < 0,
+                "o1's default key should be replaced by negative temp key; it is " + o1.OrderID());
 
-            var orderEntityType = em.metadataStore.getEntityType("Order");
-            var o2 = orderEntityType.createEntity();
-            o2.OrderID(42); // set to other than default value (0 for ints)
-            em.addEntity(o2); // now add to the manager
+            // explicit default key value
+            var o2 = em.createEntity('Order', { OrderID: 0 });
+            ok(o2.OrderID() < 0,
+                "o2's explict '0' key should be replaced by negative temp key; it is " + o2.OrderID());
 
-            equal(o2.OrderID(), 42,
-                "o2's key, 42, should not be replaced w/ new temp key when added.");
+            // a non-default key value
+            var o3 = em.createEntity('Order', { OrderID: 42 });
+            equal(o3.OrderID(), 42,
+                "o3's non-zero key is retained; it is " + o3.OrderID());
         });
 
     module("entityExtensionTests - backingstore", {

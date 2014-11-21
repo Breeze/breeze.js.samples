@@ -3,12 +3,13 @@
 describe('entityExtensionAsync:', function() {
     'use strict';
 
-    var em;
     var EntityManager = breeze.EntityManager;
     var EntityQuery = breeze.EntityQuery;
     var EntityState = breeze.EntityState;
     var MetadataStore = breeze.MetadataStore;
     var moduleMetadataStore = new MetadataStore();
+    var nancyQuery = EntityQuery.from('Employees')
+                                .where('EmployeeID', 'eq', ash.nancyID);
     var northwindService = ash.northwindServiceName;
     var todoService = ash.todosServiceName;
 
@@ -20,88 +21,93 @@ describe('entityExtensionAsync:', function() {
         breeze.Q.all(
             moduleMetadataStore.fetchMetadata(northwindService),
             moduleMetadataStore.fetchMetadata(todoService))
-        .then(done, done);
+        .then(function() { done(); }, done);
     });
 
+    describe("when querying with a custom ctor", function(){
+        var emp;
+        before(function(done){
 
-    /*********************************************************
-    * Changes to properties within ctor do NOT change EntityState
-    * Doesn't matter if they are mapped or unmapped
-    *********************************************************/
-    it("changes to properties within ctor should not change EntityState"); /*, function (done) {
-        var store = cloneModuleMetadataStore();
-        var employeeCtor = function () {
-            // Mapped properties
-            this.FirstName = "Jolly";
-            this.LastName = "Rodger";
-            // Unmapped property
-            this.FunkyName = "Funky";
-        };
-        store.registerEntityTypeCtor("Employee", employeeCtor);
+            var employeeCtor = function () {           
+                this.FirstName = 'Jolly'; // Mapped property           
+                this.FunkyName = 'Fresh'; // Unmapped property
+            };
 
-        var em = newEm(store);
+            var store = cloneModuleMetadataStore();
+            store.registerEntityTypeCtor('Employee', employeeCtor);
 
-        EntityQuery.from('Employees').top(1)
-            .using(em).execute()
-            .then(success).fail(handleFail).fin(start);
+            newEm(store)
+                .executeQuery(nancyQuery)
+                .then(function(data){ emp = data.results[0]; })
+                .then(done, done);
+        })
 
-        function success(data) {
-            var emp = data.results[0];
-            var stateName = emp.entityAspect.entityState.name;
-            equal(stateName, EntityState.Unchanged.name,
+        it("the ctor does not change the EntityState", function () {
+            var aspect = emp.entityAspect;
+            expect(aspect.entityState.isUnchanged()).to.equal(true,
                 "queried entity whose ctor sets properties should remain Unchanged");
-            notEqual(emp.FirstName(), "Jolly",
-                "queried entity's initial FirstName should be overridden by query; is " + emp.FirstName());
-            deepEqual(emp.entityAspect.originalValues, {},
-                "queried entity should have no 'originalValues' and therefore no initial values to 'restore'.");
-        }
+            expect(aspect.originalValues).to.be.empty;               
+        });
+
+        it("queried values overwrite the ctor default property value", function () {
+            expect(emp.FirstName).to.not.equal('Jolly',
+                "queried value should overwrite ctor default FirstName; is " + emp.FirstName);           
+        });
+
+        it("unmapped property values are retained", function () {
+            expect(emp.FunkyName).to.equal('Fresh',
+                "unmapped 'FunkyName' should have stayed 'Fresh'");           
+        });
     });
-*/
-    /*********************************************************
-    * changes to properties within custom initializer should not change EntityState
-    * even if change is to mapped property
-    *********************************************************/
-    it("changes to properties within custom initializer should not change EntityState"); /*, function (done) {
-        var store = cloneModuleMetadataStore();
-        var employeeInitializer = function (emp) {
-            emp.FirstName("Jolly"); // change a mapped property
-        };
-        store.registerEntityTypeCtor("Employee", null, employeeInitializer);
 
-        var em = newEm(store);
+    describe("when querying with an initializer", function(){
+        var emp;
+        before(function(done){
 
-        EntityQuery.from('Employees').top(1)
-            .using(em).execute()
-            .then(success).fail(handleFail).fin(start);
+            var employeeInitializer = function (emp) {           
+                emp.FirstName = 'Jolly'; // Mapped property           
+                emp.FunkyName = 'Fresh'; // Untracked property
+            };
 
-        function success(data) {
-            var emp = data.results[0];
-            var stateName = emp.entityAspect.entityState.name;
-            equal(stateName, EntityState.Unchanged.name,
-                "queried entity whose initer set a mapped property should remain Unchanged");
-            equal(emp.FirstName(), "Jolly",
-                "queried entity's FirstName should be overridden by initer; is " + emp.FirstName());
-            deepEqual(emp.entityAspect.originalValues, {},
-                "queried entity should have no 'originalValues' and therefore no initial values to 'restore'.");
-        }
+            var store = cloneModuleMetadataStore();
+            store.registerEntityTypeCtor('Employee', null, employeeInitializer);
+
+            newEm(store)
+                .executeQuery(nancyQuery)
+                .then(function(data){ emp = data.results[0]; })
+                .then(done, done);
+        })
+
+        it("the initializer does not change the EntityState", function () {
+            var aspect = emp.entityAspect;
+            expect(aspect.entityState.isUnchanged()).to.equal(true,
+                "queried entity whose initializer sets properties should remain Unchanged");
+            expect(aspect.originalValues).to.be.empty;               
+        });
+
+        it("initialized property values should overwrite queried values", function () {
+            expect(emp.FirstName).to.equal('Jolly',
+                "init'er should overwrite queried FirstName; is " + emp.FirstName);           
+        });
+
+        it("untracked property values are retained", function () {
+            expect(emp.FunkyName).to.equal('Fresh',
+                "untracked 'FunkyName' should have stayed 'Fresh'");           
+        });
     });
 
     /*********************************************************
     * unmapped properties are not persisted
     * (although they are sent to the server in the payload)
     *********************************************************/
-    it("unmapped properties are not persisted"); /*, function (done) {
-        var store = cloneModuleMetadataStore();
+    it("unmapped properties are not persisted", function (done) {
 
         var TodoItemCtor = function () {
-            this.foo = 0;
+            this.foo = 123;
         };
-        store.registerEntityTypeCtor("TodoItem", TodoItemCtor);
 
-        var todoType = store.getEntityType("TodoItem");
-        var fooProp = todoType.getProperty('foo');
-        ok(fooProp && fooProp.isUnmapped,
-            "'foo' should be an unmapped property after registration");
+        var store = cloneModuleMetadataStore();
+        store.registerEntityTypeCtor('TodoItem', TodoItemCtor);
 
         // Create manager that uses this extended TodoItem
         var manager = new EntityManager({
@@ -109,65 +115,73 @@ describe('entityExtensionAsync:', function() {
             metadataStore: store
         });
 
-        // Add new Todo
-        var todo = manager.createEntity(todoType.name);
+        // create new Todo
+        var todo = manager.createEntity('TodoItem');
         var operation, description; // testing capture vars
 
         saveAddedTodo()
             .then(saveModifiedTodo)
             .then(saveDeletedTodo)
-            .fail(handleFail)
-            .fin(start);
+            .then(done, done);
 
         function saveAddedTodo() {
-            changeDescription("add");
-            todo.foo(42);
+            changeDescription('add');
+            todo.foo = 42;
             return manager.saveChanges().then(saveSucceeded);
         }
         function saveModifiedTodo() {
-            changeDescription("update");
-            todo.foo(84);
+            changeDescription('update');
+            todo.foo = 84;
             return manager.saveChanges().then(saveSucceeded);
         }
         function saveDeletedTodo() {
-            changeDescription("delete");
-            todo.foo(21);
+            changeDescription('delete');
+            todo.foo = 21;
             todo.entityAspect.setDeleted();
             return manager.saveChanges().then(saveSucceeded);
         }
 
         function changeDescription(op) {
             operation = op;
-            description = op + " entityExtensionTest";
-            todo.Description(description);
+            description = op + ' entityExtensionAsync';
+            todo.Description = description;
         }
+
         function saveSucceeded() {
 
-            notEqual(todo.foo(), 0, "'foo' retains its '{0}' value after '{1}' save succeeded but ..."
-                .format(todo.foo(), operation));
+            expect(todo.foo).to.not.equal(0, 
+                "'foo' should have retained its '{0}' value after '{1}' save succeeded"
+                .format(todo.foo, operation));
 
             // clear the cache and requery the Todo
             manager.clear();
-            return EntityQuery.fromEntities(todo).using(manager).execute().then(requerySucceeded);
-
+            return EntityQuery
+                .fromEntities(todo)
+                .using(manager).execute()
+                .then(requerySucceeded);
         }
+
         function requerySucceeded(data) {
-            if (data.results.length === 0) {
+            todo = data.results[0];
+        
+            if (todo == null) {
                 if (operation === "delete") {
-                    ok(true, "todo should be gone from the database after 'delete' save succeeds.");
-                }else {
-                    ok(false, "todo should still be in the database after '{0}' save.".format(operation));
+                    // OK because todo should be gone from the database after 'delete' save succeeds
+                } else {
+                    expect(1).to.equal(0, 
+                      "todo should still be in the database after '"+operation+"' save.");
                 }
                 return;
             }
 
-            todo = data.results[0];
-            equal(todo.foo(), 0, "'foo' should have reverted to '0' after cache-clear and re-query.");
-            equal(todo.Description(), description,
-                    "'Description' should be '{0}' after {1} succeeded and re-query".format(description, operation));
+            expect(todo.foo).to.equal(123, 
+                "foo should have reverted to '123' after cache-clear and re-query.");
+
+            expect(todo.Description, description,
+                "Description should be '{0}' after '{1}' save succeeded and re-query."
+                .format(description, operation));
         }
     });
-*/
 
     /*********************************************************
     * unmapped property can be set by server class calculated property
@@ -411,4 +425,20 @@ describe('entityExtensionAsync:', function() {
         });
     */
 
+    /////////////  Helpers /////////////////////
+    function cloneModuleMetadataStore() {
+        return cloneStore(moduleMetadataStore);
+    }
+
+    function cloneStore(source) {
+        var metaExport = source.exportMetadata();
+        return new MetadataStore().importMetadata(metaExport);
+    }
+
+    function newEm(metadataStore) {
+        return new EntityManager({
+            serviceName: northwindService,
+            metadataStore: metadataStore || moduleMetadataStore
+        });
+    }
 });

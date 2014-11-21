@@ -88,7 +88,7 @@ Web Storm is a nice IDE for development and debugging. You can run the tests ins
 
 1. [ctrl-F5] to launch or click the "Play" icon in the upper right toolbar.
 
-1. (*optional*) browse to `http://localhost:9876/` for in-browser debugging.
+1. (*optional*) browse to `http://localhost:9876/debug.html` and open the Developer Tools [F12] for in-browser debugging.
 
 #### Run as node application
 
