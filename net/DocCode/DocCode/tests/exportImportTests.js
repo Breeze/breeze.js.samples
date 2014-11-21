@@ -379,6 +379,70 @@
 
         });
 
+    test("can re-import and merge an added entity w/ PERM key that was changed in another manager", function () {
+        // D#2647 Reported https://github.com/Breeze/breeze.js/issues/49
+        expect(2);
+        var em1 = newEm();
+        var em2 = newEm();
+
+        // Customer has client-assigned keys
+        var cust1 = em1.createEntity('Customer', {
+            CustomerID: breeze.core.getUuid(),
+            CompanyName: 'Added Company',
+            ContactName: 'Unforgettable'
+        });
+
+        // export cust1 to em2 (w/o metadata); becomes cust2
+        var exported = em1.exportEntities([cust1], false);
+        var cust2 = em2.importEntities(exported).entities[0];
+
+        // change a property of the Customer while in em2;
+        cust2.setProperty('CompanyName', 'Added Company + 1');
+
+        // re-import customer from em2 back to em1 with OverwriteChanges
+        exported = em2.exportEntities([cust2], false);
+        em1.importEntities(exported, { mergeStrategy: breeze.MergeStrategy.OverwriteChanges });
+
+        equal(cust1.getProperty('ContactName'), 'Unforgettable', "'ContactName' unchanged");
+        equal(cust1.getProperty('CompanyName'), 'Added Company + 1',
+          "'CompanyName' in em1 reflects change made in em2 and reimported to em1");
+    });
+
+    test("re-imported new entity w/ TEMP key that was changed in another manager is added, not merged", function () {
+        // This question was raised in https://github.com/Breeze/breeze.js/issues/49
+        expect(4);
+        var em1 = newEm();
+        var em2 = newEm();
+
+        // Employee has store-generated temp keys
+        var emp1 = em1.createEntity('Employee', {
+            FirstName: 'Ima',
+            LastName: 'Unforgettable'
+        });
+
+        // export emp1 to em2 (w/o metadata); becomes emp2
+        var exported = em1.exportEntities([emp1], false);
+        var emp2 = em2.importEntities(exported).entities[0];
+
+        // change a property of the Employee while in em2;
+        emp2.setProperty('FirstName', 'Ima B.');
+
+        // re-import Employee from em2 back to em1 with OverwriteChanges
+        exported = em2.exportEntities([emp2], false);
+        var emp1b = em1.importEntities(exported,
+                      // strategy doesn't matter actually
+                      { mergeStrategy: breeze.MergeStrategy.OverwriteChanges })
+                      .entities[0];
+
+        notEqual(emp1.getProperty('EmployeeID'), emp1b.getProperty('EmployeeID'),
+          "re-imported employee is not the same as the original.");
+        equal(emp1.getProperty('FirstName'), 'Ima',
+          "'emp1.FirstName' is unchanged");
+        equal(emp1b.getProperty('FirstName'), 'Ima B.',
+          "'emp1b.FirstName' reflects change made in em2 and reimported to em1.");
+        equal(em1.getChanges().length, 2, "em1 now has TWO new entities.");
+    });
+
     /*********************************************************
     * Temporary key values may not be preserved upon import
     ********************************************************/
