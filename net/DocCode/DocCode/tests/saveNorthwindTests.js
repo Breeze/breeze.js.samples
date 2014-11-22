@@ -140,8 +140,8 @@
             var details = (order && order.OrderDetails()) || [];
             equal(details.length, 3, 'requery of saved new Order graph came with the expected 3 details');
 
-            var gotExpectedDetails = details.every(function (od) {
-                return od.UnitPrice() === 42.42;
+            var gotExpectedDetails = details.every(function (d) {
+                return d.UnitPrice() === 42.42;
             });
             ok(gotExpectedDetails, 'every OrderDetail has the expected UnitPrice of 42.42');
         }

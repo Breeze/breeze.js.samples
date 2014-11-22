@@ -41,7 +41,7 @@
         getValidationErrMsgs: getValidationErrMsgs,
         gotResults: specHelper.gotResults,
         gotNoResults: specHelper.gotNoResults,
-        promiseSaveFailed: promiseSaveFailed,
+        handleSaveFailed: handleSaveFailed,
         importMetadata: importMetadata,
         importNorthwindMetadata: importNorthwindMetadata,
         inheritancePurge: inheritancePurge, // empty the Inheritance Model db completely
@@ -190,9 +190,9 @@
      * get $http from active angular application module
      *********************************************************/
     function get$http(){
-        var $http;
-        inject(function(_$http_){ $http = _$http_; });
-        return $http;
+        var http;
+        $injector.invoke(function($http){ http = $http; });
+        return http;
     }
 
     /*********************************************************
@@ -306,18 +306,19 @@
         importMetadata(metadataStore, ash.northwindMetadata, ash.northwindServiceName );
     }
 
-    /**************************************************
-     * Pure Web API calls aimed at the InheritanceController
-     * Does NOT STOP/START the test runner!
-     **************************************************/
     function inheritancePurge() {
-        var $http = get$http();
-        return $http.post(ash.inheritanceServiceName + '/purge',{});
+        return webApiCommand(ash.inheritanceServiceName, 'purge');
     }
 
+    /**************************************************
+     * Reset the Inheritance controller (the data it governs)
+     * Usage:
+     *   afterEach(function (done) {
+     *      ash.inheritanceReset().then(done, done);
+     *   });
+     **************************************************/
     function inheritanceReset() {
-        var $http = get$http();
-        return $http.post(ash.inheritanceServiceName + '/reset',{});
+        return webApiCommand(ash.inheritanceServiceName, 'reset');
     }
 
     function morphStringProp(entity, propName) {
@@ -393,15 +394,19 @@
     }
 
     /**************************************************
-     * Pure Web API calls aimed at the NorthwindController
-     * Does NOT STOP/START the test runner!
+     * Reset the Northwind controller (the data it governs)    
+     * Usage:
+     *   afterEach(function (done) {
+     *      ash.northwindReset().then(done, done);
+     *   });
      **************************************************/
     function northwindReset(fullReset) {
-        var $http = get$http();
-        var queryString = fullReset ? '/?options=fullreset' : '';
-        return $http.post(ash.northwindServiceName + '/reset' + queryString,{
-            headers: { 'X-UserSessionId': ash.userSessionId }
-        });
+        var command = fullReset ? 'reset/?options=fullreset' : 'reset';
+        return webApiCommand(
+                ash.northwindServiceName, 
+                command,
+                {headers: {'X-UserSessionId': ash.userSessionId}}
+            );
     }
 
     function output(text) {
@@ -446,14 +451,14 @@
     }
 
     /*********************************************************
-     * Callback for promise success and failures in Mocha
-     * NASTY. See https://github.com/mad-eye/meteor-mocha-web/issues/70
+     * Callback for saveChanges promise failure
      *********************************************************/
-        // Usage:  manager.saveChanges.catch(promiseSaveFailed(done))
-    function promiseSaveFailed(done) {
+    // Usage:  
+    //    manager.saveChanges().catch(handleSaveFailed).then(done, done);
+    function handleSaveFailed() {
         return function(error){
             error.message = 'Save failed: ' + getSaveErrorMessages(error);
-            done(error);
+            throw error; // re-throw the error
         };
     }
 
@@ -526,18 +531,19 @@
         return function(){return tester;};
     }
 
-    /**************************************************
-     * Pure Web API calls aimed at the TodosController
-     * Does NOT STOP/START the test runner!
-     **************************************************/
     function todosPurge() {
-        var $http = get$http();
-        return $http.post(ash.todosServiceName + '/purge',{});
+        return webApiCommand(ash.todosServiceName, 'purge');
     }
 
+    /**************************************************
+     * Reset the Todos controller (the data it governs)    
+     * Usage:
+     *   afterEach(function (done) {
+     *      ash.todosReset().then(done, done);
+     *   });
+     **************************************************/
     function todosReset() {
-        var $http = get$http();
-        return $http.post(ash.todosServiceName + '/reset',{});
+        return webApiCommand(ash.todosServiceName, 'reset');
     }
 
     function useAngularAdapters(){
@@ -546,6 +552,28 @@
         // NB: during tests, Breeze uses different Ng service instances!
         $injector = angular.injector(['ng', 'breeze.angular']);
         $injector.invoke(function(breeze){});
+    }
+
+    /**************************************************
+     * Pure Web API commands to a controller (POST)
+     * Does NOT STOP/START the test runner!
+     * Typically embedded in a service/command wrapper method
+     *
+     * Usage:
+     *   function todoReset(){
+     *       return webApiCommand(ash.todoServiceName, 'reset');
+     *   }
+     *
+     *   afterEach(function (done) {
+     *      ash.todoReset().then(done, done);
+     *   });     
+     **************************************************/
+    function webApiCommand(serviceName, command, config) {
+        var $http = get$http();
+        return $http
+            .post(serviceName + '/' + command, {}, config)
+            .then(function(res){           
+             }); // break here to examine response;
     }
 
 })( );

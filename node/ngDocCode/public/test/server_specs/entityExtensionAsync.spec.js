@@ -44,7 +44,7 @@ describe('entityExtensionAsync:', function() {
                 .executeQuery(nancyQuery)
                 .then(function(data){ emp = data.results[0]; })
                 .then(done, done);
-        })
+        });
 
         it("the ctor does not change the EntityState", function () {
             var aspect = emp.entityAspect;
@@ -80,7 +80,7 @@ describe('entityExtensionAsync:', function() {
                 .executeQuery(nancyQuery)
                 .then(function(data){ emp = data.results[0]; })
                 .then(done, done);
-        })
+        });
 
         it("the initializer does not change the EntityState", function () {
             var aspect = emp.entityAspect;
@@ -168,22 +168,21 @@ describe('entityExtensionAsync:', function() {
         function requerySucceeded(data) {
             todo = data.results[0];
         
-            if (todo == null) {
-                if (operation === "delete") {
-                    // OK because todo should be gone from the database after 'delete' save succeeds
-                } else {
-                    expect(1).to.equal(0, 
-                      "todo should still be in the database after '"+operation+"' save.");
-                }
-                return;
+            if (operation === "delete") {
+                expect(todo == null).to.equal(true,
+                    "should not fetch todo after 'delete' save succeeds");
+
+            } else {
+                expect(todo != null).to.equal(true,
+                    "todo should still be in the database after '"+operation+"' save.");
+
+                expect(todo.foo).to.equal(123, 
+                    "foo should have reverted to '123' after cache-clear and re-query.");
+
+                expect(todo.Description, description,
+                    "Description should be '{0}' after '{1}' save succeeded and re-query."
+                    .format(description, operation));
             }
-
-            expect(todo.foo).to.equal(123, 
-                "foo should have reverted to '123' after cache-clear and re-query.");
-
-            expect(todo.Description, description,
-                "Description should be '{0}' after '{1}' save succeeded and re-query."
-                .format(description, operation));
         }
     });
 
@@ -225,7 +224,7 @@ describe('entityExtensionAsync:', function() {
                     var fn = this.FirstName;
                     return ln ? fn + ' ' + ln : fn;
                 }
-            })
+            });
 
             var store = cloneModuleMetadataStore();
             store.registerEntityTypeCtor('Employee', EmployeeCtor);
