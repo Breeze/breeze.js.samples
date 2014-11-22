@@ -107,15 +107,14 @@
 
     });
 
-    asyncTest("save new Orders and OrderDetails in one transaction", function () {
+    asyncTest("can save new Order and its OrderDetails in one transaction", function () {
         expect(3);
         var em = newNorthwindEm();
         var order = em.createEntity('Order', { ShipName: 'Add OrderGraphTest' });
-        var orderID = order.OrderID();
 
-        em.createEntity('OrderDetail', { OrderID: orderID, ProductID: 1, UnitPrice: 42.42 });
-        em.createEntity('OrderDetail', { OrderID: orderID, ProductID: 2, UnitPrice: 42.42 });
-        em.createEntity('OrderDetail', { OrderID: orderID, ProductID: 3, UnitPrice: 42.42 });
+        em.createEntity('OrderDetail', { Order: order, ProductID: 1, UnitPrice: 42.42 });
+        em.createEntity('OrderDetail', { Order: order, ProductID: 2, UnitPrice: 42.42 });
+        em.createEntity('OrderDetail', { Order: order, ProductID: 3, UnitPrice: 42.42 });
 
         em.saveChanges()
           .catch(handleSaveFailed)
@@ -123,8 +122,10 @@
 
         function requery() {
             // get the permanent key from the updated Order entity
-            orderID = order.OrderID();
+            var orderID = order.OrderID();
+
             em.clear(); // clear the cache because we want to be sure
+
             return EntityQuery.from('Orders')
             .where('OrderID', 'eq', orderID)
             .expand('OrderDetails')
@@ -134,13 +135,15 @@
 
         function confirmOrderGraph(data) {
             var order = data.results[0];
-            equal(order.ShipName(), 'Add OrderGraphTest', "re-queried order.ShipName as expected");
+            equal(order.ShipName(), 'Add OrderGraphTest', "'ShipName' of the re-queried order is expected value");
+
             var details = (order && order.OrderDetails()) || [];
-            equal(details.length, 3, 'requery of saved new Order graph came with 3 details');
+            equal(details.length, 3, 'requery of saved new Order graph came with the expected 3 details');
+
             var gotExpectedDetails = details.every(function (od) {
                 return od.UnitPrice() === 42.42;
             });
-            ok(gotExpectedDetails, 'every OrderDetail had the expected UnitPrice of 42.42');
+            ok(gotExpectedDetails, 'every OrderDetail has the expected UnitPrice of 42.42');
         }
     });
 
