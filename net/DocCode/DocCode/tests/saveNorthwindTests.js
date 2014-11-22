@@ -9,6 +9,7 @@
     // Classes we'll need from the breeze namespaces
     var EntityQuery = breeze.EntityQuery;
     var newGuidComb = testFns.newGuidComb;
+    var handleFail = testFns.handleFail;
     var handleSaveFailed = testFns.handleSaveFailed;
 
     /*********************************************************
@@ -106,6 +107,43 @@
 
     });
 
+    asyncTest("save new Orders and OrderDetails in one transaction", function () {
+        expect(3);
+        var em = newNorthwindEm();
+        var order = em.createEntity('Order', { ShipName: 'Add OrderGraphTest' });
+        var orderID = order.OrderID();
+
+        em.createEntity('OrderDetail', { OrderID: orderID, ProductID: 1, UnitPrice: 42.42 });
+        em.createEntity('OrderDetail', { OrderID: orderID, ProductID: 2, UnitPrice: 42.42 });
+        em.createEntity('OrderDetail', { OrderID: orderID, ProductID: 3, UnitPrice: 42.42 });
+
+        em.saveChanges()
+          .catch(handleSaveFailed)
+          .then(requery).catch(handleFail).fin(start);
+
+        function requery() {
+            // get the permanent key from the updated Order entity
+            orderID = order.OrderID();
+            em.clear(); // clear the cache because we want to be sure
+            return EntityQuery.from('Orders')
+            .where('OrderID', 'eq', orderID)
+            .expand('OrderDetails')
+            .using(em).execute()
+            .then(confirmOrderGraph);
+        }
+
+        function confirmOrderGraph(data) {
+            var order = data.results[0];
+            equal(order.ShipName(), 'Add OrderGraphTest', "re-queried order.ShipName as expected");
+            var details = (order && order.OrderDetails()) || [];
+            equal(details.length, 3, 'requery of saved new Order graph came with 3 details');
+            var gotExpectedDetails = details.every(function (od) {
+                return od.UnitPrice() === 42.42;
+            });
+            ok(gotExpectedDetails, 'every OrderDetail had the expected UnitPrice of 42.42');
+        }
+    });
+
     /*
      * This test removed when we made InternationalOrder a subclass of Order
      * Restore it if/when decide to demo IO as a separate entity related in 1..(0,1)
@@ -141,16 +179,18 @@
     });
      */
 
-    asyncTest("delete of Product clears its related Category before save", function () {
+    asyncTest("delete of Product clears its related Category BEFORE save", function () {
         expect(4);
         var em = newNorthwindEm();
 
         EntityQuery.from('Products').top(1)
             .expand('Category')
             .using(em).execute()
-            .then(doDelete).fail(handleSaveFailed).fin(start);
+            .then(prepDelete).catch(handleFail).fin(start);
 
-        function doDelete(data) {
+        // Don't dare actually save because
+        // this demo lacks ability to restore the db after deletes.
+        function prepDelete(data) {
             var product = data.results[0];
             ok(product != null, "should have a product");
             if (product) {
@@ -168,16 +208,18 @@
 
     });
 
-    asyncTest("delete of Order clears its related entities before save", function () {
+    asyncTest("delete of Order clears its related entities BEFORE save", function () {
         expect(10);
         var em = newNorthwindEm();
 
         EntityQuery.from('Orders').top(1)
             .expand('Customer, Employee, OrderDetails')
             .using(em).execute()
-            .then(doDelete).fail(handleSaveFailed).fin(start);
+            .then(prepDelete).fail(handleFail).fin(start);
 
-        function doDelete(data) {
+        // Don't dare actually save because
+        // this demo lacks ability to restore the db after deletes.
+        function prepDelete(data) {
             var order = data.results[0];
             ok(order != null, "should have an order");
             if (order) {
