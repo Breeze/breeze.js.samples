@@ -1,6 +1,6 @@
 using System.Web.Http;
 
-[assembly: WebActivator.PreApplicationStartMethod(
+[assembly: WebActivatorEx.PreApplicationStartMethod(
     typeof(Todo.App_Start.BreezeWebApiConfig), "RegisterBreezePreStart")]
 namespace Todo.App_Start {
   ///<summary>
