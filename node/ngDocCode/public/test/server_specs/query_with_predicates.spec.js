@@ -269,9 +269,9 @@ describe("query_with_predicates:", function () {
 
     it("an ANY predicate", function (done) {
 
-        // Get first Order with any OrderDetail for product with the known "chai" ID
+        // Get first Order with any OrderDetail for product with the known 'Chai'
         // Instead of 'any' can say 'some' or use FilterQueryOp.Any
-        var pred = new Predicate('OrderDetails', 'any', 'ProductID',  '==', ash.chaiProductID);
+        var pred = new Predicate('OrderDetails', 'any', 'ProductID', '==', ash.chaiProductID);
 
         logPredicate(pred, orderType);
 
@@ -287,6 +287,32 @@ describe("query_with_predicates:", function () {
                 return od.ProductID ===  ash.chaiProductID;
             });
             expect(chaiOrderDetail).is.not.empty;
+        }
+    });
+
+    it("an ANY predicate through a many-to-many mapping table", function (done) {
+
+        // Get first Order with an OrderDetail that has a product named "chai"
+        // OrderDetail is the mapping table in this scenario:
+        //     Order <-(1,M)-> OrderDetail <-(M,1)-> Product
+
+        var pred = new Predicate('OrderDetails', 'any', 
+                                 'Product.ProductName', 'eq', 'Chai');
+
+        logPredicate(pred, orderType);
+
+        EntityQuery.from('Orders')
+            .where(pred)
+            .top(1)
+            .expand('OrderDetails.Product')
+            .using(em).execute().then(success).then(done, done);
+
+        function success(data){
+            var order = data.results[0] || {};
+            var hasChai = order.OrderDetails.some(function(od){
+                return od.Product.ProductName ===  'Chai';
+            });
+            expect(hasChai).to.be.true;
         }
     });
 
@@ -381,7 +407,7 @@ describe("query_with_predicates:", function () {
         function success(data){
             var customer = data.results[0] || {};
             // customer orders whose every OrderDetail has a UnitPrice > 200
-            var matchingOrders = customer.Orders.filter(function(o){
+            var matchingOrders = customer.Orders.some(function(o){
                 var count = o.OrderDetails.length;
                 return count === o.OrderDetails.filter( function(od){ return od.UnitPrice > 200; }).length;
             });
