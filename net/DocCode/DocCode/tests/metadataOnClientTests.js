@@ -3,9 +3,8 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
-    var MetadataStore = breeze.MetadataStore;
     var Validator = breeze.Validator;
 
     var northwindService = testFns.northwindServiceName;
@@ -21,20 +20,16 @@
         namingConvention: camelCaseConvention
     });
 
-    var handleFail = testFns.handleFail;
-    var verifyQuery = testFns.verifyQuery;
-
     //#region Client-defined metadata Tests
 
-    var clientStore, serverStore, serviceName;
+    var clientStore, serverStore;
 
     module("metadataTests (client defined metadata)", { setup: clientDefinedMetadataSetup });
 
     function clientDefinedMetadataSetup() {
-        serviceName = northwindService;
         serverStore = metadataStoreSetup(
-            northwindMetadataStore, northwindMetadata, serviceName, postProcessNorthwindServerStore);
-        clientStore = testFns.metadataOnClient.createProductMetadataStore(serviceName);
+            northwindMetadataStore, northwindMetadata, northwindService, postProcessNorthwindServerStore);
+        clientStore = testFns.metadataOnClient.createProductMetadataStore(northwindService);
     }
 
     // tweak serverStore based on intentional client differences
@@ -142,9 +137,8 @@
     module("metadataTests (client defined DTO metadata)", { setup: clientDefinedDtoMetadataSetup });
 
     function clientDefinedDtoMetadataSetup() {
-        serviceName = northwindDtoService;
-        serverStore = metadataStoreSetup(northwindDtoMetadataStore, northwindDtoMetadata, serviceName)
-        clientStore = testFns.metadataOnClient.createDtoMetadataStore(serviceName);
+        serverStore = metadataStoreSetup(northwindDtoMetadataStore, northwindDtoMetadata, northwindDtoService);
+        clientStore = testFns.metadataOnClient.createDtoMetadataStore(northwindDtoService);
     }
 
     /*********************************************************
@@ -174,8 +168,7 @@
     module("metadataTests (client defined Employee metadata)", { setup: clientDefinedEmployeeMetadataSetup });
 
     function clientDefinedEmployeeMetadataSetup() {
-        serviceName = '<no_server>';
-        clientStore = testFns.metadataOnClient.createEmployeeMetadataStore(serviceName);
+        clientStore = testFns.metadataOnClient.createEmployeeMetadataStore('<no_server>');
     }
 
     /*********************************************************
@@ -216,6 +209,45 @@
 
     //#endregion
 
+    //#region client-defined CCJS metadata Tests
+
+    module("metadataTests (client defined CCJS metadata)", { setup: clientDefinedCCJSMetadataSetup });
+    // See ccjs.model.metadata.js
+    function clientDefinedCCJSMetadataSetup() {
+        var dataService = new breeze.DataService({
+            serviceName: '< no_server >',
+            hasServerMetadata: false
+        });
+        clientStore = new breeze.MetadataStore();
+        clientStore.addDataService(dataService);
+        testFns.ccjsFillMetadataStore(clientStore);
+    }
+
+    test("can create a Session", function () {
+        var manager = createManagerWithClientMetadata();
+        var session = manager.createEntity('Session', {
+            title: "Metadata by Hand with Metadata-Helper",
+            description: "Learn how to write Breeze metadata on the client with the Metadata-Helper"
+        });
+        expectAddedEntity(session);
+    });
+
+    test("can create a Session with a Speaker (Person)", function () {
+        var manager = createManagerWithClientMetadata();
+        var person = manager.createEntity('Person', {
+            firstName: 'Ward',lastName: 'Bell'
+        });
+        var session = manager.createEntity('Session', {
+            title: "Metadata by Hand with Metadata-Helper",
+            description: "Learn how to write Breeze metadata on the client with the Metadata-Helper",
+            speaker: person
+        });
+        expectAddedEntity(session);
+        equal(session.getProperty('speaker').getProperty('id'),
+            person.getProperty('id'), "Session's speaker should be same as the person created");
+    });
+    //#endregion
+
     //#region Client-defined Metadata Test Helpers
 
     /* ----- Client-defined Metadata helpers -------*/
@@ -228,10 +260,10 @@
 
     function createManagerWithClientMetadata() {
         return new breeze.EntityManager({
-            serviceName: serviceName,
+            dataService: clientStore.dataServices[0],
             metadataStore: clientStore
         });
-    } 
+    }
 
     function createTestLocation() {
         var Location = clientStore.getEntityType('Location');
@@ -249,8 +281,6 @@
     }
 
     function expectTypesToMatch(client, server) {
-        var ok = true;
-        var problems = [];
         equal(client.name, server.name,
             "both type names (shortName + namespace) should be "+server.name);
         equal(client.defaultResourceName, server.defaultResourceName,
@@ -263,7 +293,7 @@
         var cdps = sortByName(client.dataProperties).map(copySafeProperties);
         var sdps = sortByName(server.dataProperties).map(copySafeProperties);
         deepEqual(cdps, sdps, "dataProperties should match");
-        
+
         var cnps = sortByName(client.navigationProperties).map(copySafeProperties);
         var snps = sortByName(server.navigationProperties).map(copySafeProperties);
         deepEqual(cnps, snps, "navigationProperties should match");

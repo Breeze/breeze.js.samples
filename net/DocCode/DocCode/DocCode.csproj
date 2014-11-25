@@ -125,8 +125,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\breeze.intellisense.js" />
+    <Content Include="Scripts\breeze.ajaxrestinterceptor.js" />
     <Content Include="Scripts\breeze.debug.js" />
+    <Content Include="Scripts\breeze.getEntityGraph.js" />
+    <Content Include="Scripts\breeze.metadata-helper.js" />
     <Content Include="Scripts\breeze.min.js" />
+    <Content Include="Scripts\breeze.savequeuing.js" />
     <Content Include="Scripts\jquery-2.0.3.js" />
     <None Include="Scripts\jquery-2.0.3.intellisense.js">
       <DependentUpon>jquery-2.0.3.js</DependentUpon>
@@ -148,6 +152,7 @@
     <Content Include="Scripts\_references.js" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="tests\helpers\ccjs.model.metadata.js" />
     <Content Include="tests\jQueryAjaxAdapterTests.js" />
     <Content Include="tests\apiDirectTests.js" />
     <Content Include="tests\basicTodoTests.js" />

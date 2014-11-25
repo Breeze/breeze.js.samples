@@ -1,9 +1,25 @@
-﻿/********************************************************** 
+﻿/**********************************************************
  * Example of defining metadata on the client in JavaScript
  * Used by metadataTests.js
  **********************************************************/
 (function (testFns) {
     "use strict";
+
+    testFns.metadataOnClient = {
+        createDtoMetadataStore: createDtoMetadataStore,
+        createProductMetadataStore: createProductMetadataStore,
+        createEmployeeMetadataStore: createEmployeeMetadataStore,
+
+        addCategoryType: addCategoryType,
+        addCustomerDtoType: addCustomerDtoType,
+        addLocationComplexType: addLocationComplexType,
+        addOrderDtoType: addOrderDtoType,
+        addOrderDetailDtoType: addOrderDetailDtoType,
+        addProductDtoType: addProductDtoType,
+        addProductType: addProductType,
+        addSupplierType: addSupplierType
+    };
+    //////////////////////////////////////////
 
     // Convenience variables
     var DT = breeze.DataType;
@@ -13,28 +29,11 @@
 
     // Breeze Labs: breeze.metadata.helper.js
     var helper = new breeze.config.MetadataHelper();
+
+    // Helper convenience methods
     var addDataService      = helper.addDataService.bind(helper);
-    var addTypeToStore = helper.addTypeToStore.bind(helper);
+    var addTypeToStore      = helper.addTypeToStore.bind(helper);
     var setDefaultNamespace = helper.setDefaultNamespace.bind(helper);
-
-    testFns.metadataOnClient = {
-        createDtoMetadataStore: createDtoMetadataStore,
-
-        addCategoryType        : addCategoryType,
-        addLocationComplexType : addLocationComplexType,
-        addProductType         : addProductType,
-        addSupplierType        : addSupplierType,
-
-        createProductMetadataStore: createProductMetadataStore,
-
-        addCustomerDtoType    : addCustomerDtoType,
-        addOrderDtoType       : addOrderDtoType,
-        addOrderDetailDtoType : addOrderDetailDtoType,
-        addProductDtoType: addProductDtoType,
-
-        createEmployeeMetadataStore: createEmployeeMetadataStore
-    };
-
 
     // Creates a metadataStore with 3 Northwind Product EntityTypes:
     // Product, Category, Supplier and a LocationComplexType
@@ -73,7 +72,7 @@
             }
         };
 
-        return et = addTypeToStore(store, et);
+        return addTypeToStore(store, et);
     }
     //#endregion
 
@@ -92,7 +91,7 @@
             }
         };
 
-        return et = addTypeToStore(store, et);
+        return addTypeToStore(store, et);
     }
 
     //#endregion
@@ -133,7 +132,7 @@
             }
         };
 
-        return et = addTypeToStore(store, et);
+        return addTypeToStore(store, et);
     }
     //#endregion
 
@@ -178,7 +177,7 @@
             }
         };
 
-        return et = addTypeToStore(store, et);
+        return addTypeToStore(store, et);
     }
     //#endregion
 
@@ -225,7 +224,7 @@
             }
         };
 
-        return et = addTypeToStore(store, et);
+        return addTypeToStore(store, et);
     }
 
     //#endregion
@@ -263,7 +262,7 @@
             }
         };
 
-        return et = addTypeToStore(store, et);
+        return addTypeToStore(store, et);
     }
 
     //#endregion
@@ -299,7 +298,7 @@
             }
         };
 
-        return et = addTypeToStore(store, et);
+        return addTypeToStore(store, et);
     }
 
     //#endregion
@@ -318,7 +317,7 @@
 
         };
 
-        return et = addTypeToStore(store, et);
+        return addTypeToStore(store, et);
     }
     //#endregion
 
@@ -360,7 +359,7 @@
                 }
             };
 
-            return et = addTypeToStore(store, et);
+            return addTypeToStore(store, et);
         }
 
         //#endregion
@@ -380,7 +379,7 @@
                 }
             };
 
-            return et = addTypeToStore(store, et);
+            return addTypeToStore(store, et);
         }
 
         //#endregion
@@ -400,7 +399,7 @@
                 }
             };
 
-            return et = addTypeToStore(store, et);
+            return addTypeToStore(store, et);
         }
 
         //#endregion
@@ -408,7 +407,7 @@
 
 
 
-    //private helper methods 
+    //private helper methods
 
     function createMetadataStore() {
         return new breeze.MetadataStore({ namingConvention: camelCaseConvention });
