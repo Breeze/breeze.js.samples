@@ -35,11 +35,11 @@
     module("saveQueuing", moduleOptions);
 
     /*********************************************************
-    * overwrites value in added entity that is changed while saving
+    * overwrites same value in added entity that is changed while saving
     * when that save completes before the modified entity is saved
     * This is standard behavior, w/ or w/o saveQueuing
     *********************************************************/
-    asyncTest("save overwrites value of entity modified while saving", function () {
+    asyncTest("the save response overwrites changes to entity made during save", function () {
         expect(2);
 
         var todo = em.createEntity('TodoItem', { Description: 'Test' });
@@ -59,11 +59,45 @@
     });
 
     /*********************************************************
+    * Cannot delete an ADDED entity while it's being saved
+    * This is standard behavior, w/ or w/o saveQueuing,
+    * although the exception will be thrown when setDeleted called 
+    * in Breeze v.1.5.2
+    *********************************************************/
+    asyncTest("cannot delete an ADDED entity while it's being saved", function () {
+        expect(1);
+
+        var startCalled = false;
+        var todo = em.createEntity('TodoItem', { Description: 'Test' });
+        em.saveChanges()
+          .then(success).catch(failedDuringPostSave)
+          .finally(function(){
+            if (!startCalled) { start(); }
+          });
+
+        try {
+            todo.entityAspect.setDeleted();
+        } catch(e){
+            ok(true, 'setDeleted() threw exception: '+e.message);
+            startCalled = true;
+            start();
+        }
+
+        function success(data) {
+            ok(false, "save should have failed");
+        }
+        function failedDuringPostSave(error){
+            if (error.innerError) {error = error.innerError;}
+            ok(true, "post save processing should have failed; msg was "+error.message);
+        }
+    });
+
+    /*********************************************************
     * saves value in added entity that is changed while save in progress
     * then saved again before first save returns.
     * This test would fail in the 2nd assert in saveQueuing v.1; works in v.2
     *********************************************************/
-    asyncTest("saves modified value of added entity when saved before 1st save completes", function () {
+    asyncTest("can save modified value during save of ADDED entity", function () {
         expect(2);
 
         var todo = em.createEntity('TodoItem', { Description: 'Test' });
@@ -87,11 +121,11 @@
     });
 
     /*********************************************************
-    * saves value in modified entity that is changed while save in progress
+    * saves same value in modified entity that is changed while save in progress
     * then saved again before first save returns.
     * This test would fail in the 2nd assert in saveQueuing v.1; works in v.2
     *********************************************************/
-    asyncTest("saves modified value of modified entity when saved before 1st save completes", function () {
+    asyncTest("saves SAME modified value of MODIFIED entity when saved before 1st save completes", function () {
         expect(2);
 
         var todo = em.createEntity('TodoItem', { Description: 'Test' });
@@ -119,14 +153,57 @@
                 equal(aspect.entityState.name, 'Unchanged',
                     "double modified Todo was saved and now is Unchanged");
                 equal(todo.getProperty('Description'), 'Test mod 2',
-                    "description has the 2nd modified value");
+                    "description has the value modified during save");
             }
         }
     });
+
     /*********************************************************
-    * second save w/ savequeuing does not resave
+    * saves different value in modified entity that is changed while save in progress
+    * then saved again before first save returns.
+    * This test would fail in the 2nd assert in saveQueuing v.1; works in v.2
     *********************************************************/
-    asyncTest("Second save w/ savequeuing does not resave", function () {
+    asyncTest("saves DIFFERENT modified value of MODIFIED entity when saved before 1st save completes", function () {
+        expect(3);
+
+        var todo = em.createEntity('TodoItem', { 
+            Description: 'Test',
+            IsDone: false
+        });
+        em.saveChanges()
+          .then(modAndSave)
+          .catch(handleFail).finally(start);
+
+        function modAndSave(){
+            // modify the existing Todo
+            todo.setProperty('Description', 'Test mod 1');
+
+            // save the first mod
+            em.saveChanges().catch(handleFail);
+
+            // modify different property while the save is in progress
+            todo.setProperty('IsDone', true);
+
+            // save immediately, before first save response
+            return em.saveChanges()
+              .then(success).catch(handleFail);
+
+            // After second save
+            function success(data) {
+                var aspect = todo.entityAspect;
+                equal(aspect.entityState.name, 'Unchanged',
+                    "double modified Todo was saved and now is Unchanged");
+                equal(todo.getProperty('Description'), 'Test mod 1',
+                    "description has the original modified value");
+                equal(todo.getProperty('IsDone'), true,
+                    "isDone has the value modified during save");            }
+        }
+    });
+
+    /*********************************************************
+    * second save w/ savequeuing does not resave an added entity
+    *********************************************************/
+    asyncTest("second save does not duplicate-save the added entity", function () {
         expect(4);
 
         var description = 'Test'+testFns.newGuid().toString();
@@ -164,7 +241,6 @@
 
     /*********************************************************
     * Two [add+save] events are in two separate saves
-    * The saves are in order
     *********************************************************/
     asyncTest("Two [add+save] events are in two separate saves", function () {
         expect(6);
@@ -311,6 +387,7 @@
             ok(false, "the 2nd save should have failed");
         }
         function secondSaveFailed(error) {
+            if (error.innerError) {error = error.innerError;}
             ok(true,
                 "the 2nd save should have failed, the error was '{0}'"
                 .format(error.message));
@@ -319,8 +396,9 @@
             ok(false, "the 3rd save should have been aborted");
         }
         function thirdSaveFailed(error) {
-            var expected = /queued save failed/i;
-            ok(expected.test(error.message),
+            var expectedErr = /queued save failed/i.test(error.message);
+            if (error.innerError) {error = error.innerError;}            
+            ok(expectedErr,
                 "the 3rd save should have aborted with "+
                 "queued save termination error: '{0}'"
                 .format(error.message));
