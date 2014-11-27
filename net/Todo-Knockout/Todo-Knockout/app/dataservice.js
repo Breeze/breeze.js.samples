@@ -13,7 +13,7 @@ app.dataservice = (function (breeze, logger) {
     return {
         addPropertyChangeHandler: addPropertyChangeHandler,
         createTodo: createTodo,
-        deleteTodo: deleteTodo,
+        deleteTodoAndSave: deleteTodoAndSave,
         getTodos: getTodos,
         hasChanges: hasChanges,
         purge: purge,
@@ -48,8 +48,17 @@ app.dataservice = (function (breeze, logger) {
         return manager.createEntity('TodoItem', initialValues);
     }
 
-    function deleteTodo(todoItem) {
-        todoItem && todoItem.entityAspect.setDeleted();
+    function deleteTodoAndSave(todoItem) {
+        if (todoItem) {
+            var aspect = todoItem.entityAspect;
+            if (aspect.isBeingSaved && aspect.entityState.isAdded()) {
+                // wait to delete added entity while it is being saved  
+                setTimeout(function () { deleteTodoAndSave (todoItem); }, 100);
+                return;          
+            } 
+            aspect.setDeleted();
+            saveChanges();
+        }
     }
 
     function getTodos(includeArchived) {

@@ -19,13 +19,13 @@
 
     /*=========== SaveQueuing Module ===================*/
     var moduleOptions = {
-        setup: function () { 
+        setup: function () {
             ajaxSpy = sinon.spy(ajaxAdapter, 'ajax');
-            testFns.populateMetadataStore(newEm); 
+            testFns.populateMetadataStore(newEm);
             em = newEm();
             em.enableSaveQueuing(true); // <--
         },
-        teardown: function () { 
+        teardown: function () {
             // reset Todos db and adapter after each test because
             // we're messing them up
             ajaxSpy.restore();
@@ -73,7 +73,7 @@
         todo.setProperty('Description', 'Test mod');
 
         // save immediately, before first save response
-        return em.saveChanges()          
+        return em.saveChanges()
           .then(success).catch(handleFail).finally(start);
 
         // After second save
@@ -107,10 +107,10 @@
             em.saveChanges().catch(handleFail);
 
             // modify it again while the save is in progress
-            todo.setProperty('Description', 'Test mod 2'); 
-                      
+            todo.setProperty('Description', 'Test mod 2');
+
             // save immediately, before first save response
-            return em.saveChanges()          
+            return em.saveChanges()
               .then(success).catch(handleFail);
 
             // After second save
@@ -292,7 +292,7 @@
         .then(thirdSaveSucceeded)
         .catch(thirdSaveFailed);
 
-        equal(em.getChanges().length, 3, "three pending changes while first save is in flight")
+        equal(em.getChanges().length, 3, "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
             .then(postSave, postSave)

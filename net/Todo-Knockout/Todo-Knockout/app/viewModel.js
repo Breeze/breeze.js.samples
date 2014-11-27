@@ -120,11 +120,10 @@
 
     function editEnd(item) { item.isEditing(false); }
 
-    function deleteItem (item) {
+    function deleteItem(item) {
         vm.items.remove(item);
-        dataservice.deleteTodo(item);
-        save(true);
-    }
+        dataservice.deleteTodoAndSave(item);
+    };
 
     function getStateOfItems() {
         var itemsDone = [], itemsLeft = [];

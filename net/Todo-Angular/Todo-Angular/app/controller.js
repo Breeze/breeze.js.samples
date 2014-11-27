@@ -90,8 +90,7 @@
 
         function deleteItem(item) {
             removeItem(item);
-            dataservice.deleteTodo(item);
-            save(true);
+            dataservice.deleteTodoAndSave(item);
         };
 
         function editBegin(todoItem) {
