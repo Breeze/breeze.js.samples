@@ -166,7 +166,7 @@ function analyzejshint(sources, overrideRcFile) {
     log('Running JSHint');
     return gulp
         .src(sources)
-        // .pipe(plug.print()) // list the files in sources
+        //.pipe(plug.print()) // list the files in sources
         .pipe(plug.jshint(jshintrcFile))
         .pipe(plug.jshint.reporter('jshint-stylish', {verbose: true}));
 }

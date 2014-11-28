@@ -25,6 +25,7 @@ module.exports = function (config) {
             './bower_components/breezejs/labs/breeze.angular.js',
             './bower_components/breezejs/labs/breeze.getEntityGraph.js',
             './bower_components/breezejs/labs/breeze.metadata-helper.js',
+            './bower_components/breezejs/labs/breeze.savequeuing.js',
 
             './public/test/lib/bindPolyfill.js', // for phantom.js
 

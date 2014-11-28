@@ -1,59 +1,49 @@
-// ReSharper disable UnusedParameter
-// ReSharper disable InconsistentNaming
-(function (testFns) {
+/* jshint -W117, -W030, -W109 */
+describe('saveQueuing:', function() {
     "use strict";
 
-    /*********************************************************
-    * Breeze configuration and module setup
-    *********************************************************/
     var ajaxAdapter = breeze.config.getAdapterInstance('ajax');
     var ajaxSpy, em;
 
-    // Classes we'll need from the breeze namespaces
     var EntityQuery = breeze.EntityQuery;
-    var handleFail = testFns.handleFail;
+    var handleFail = ash.handleFail;
+    var newEm = ash.newEmFactory(ash.todosServiceName);
+    var Q = breeze.Q;
 
-    // Target the Todos service
-    var serviceName = testFns.todosServiceName;
-    var newEm = testFns.newEmFactory(serviceName);
+    ash.serverIsRunningPrecondition();
 
-    /*=========== SaveQueuing Module ===================*/
-    var moduleOptions = {
-        setup: function () {
-            ajaxSpy = sinon.spy(ajaxAdapter, 'ajax');
-            testFns.populateMetadataStore(newEm);
-            em = newEm();
-            em.enableSaveQueuing(true); // <--
-        },
-        teardown: function () {
-            // reset Todos db and adapter after each test because
-            // we're messing them up
-            ajaxSpy.restore();
-            testFns.teardown_todosReset();
-        }
-    };
-    module("saveQueuing", moduleOptions);
+    beforeEach(function(){
+        ajaxSpy = sinon.spy(ajaxAdapter, 'ajax');
+        em = newEm();
+        em.enableSaveQueuing(true); // <--
+    });
+
+    afterEach(function(done){
+        // reset Todos db and adapter after each test because
+        // we're messing them up
+        ajaxSpy.restore();
+        ash.todosReset().then(done, done);
+    });
 
     /*********************************************************
     * overwrites same value in added entity that is changed while saving
     * when that save completes before the modified entity is saved
     * This is standard behavior, w/ or w/o saveQueuing
     *********************************************************/
-    asyncTest("the save response overwrites changes to entity made during save", function () {
-        expect(2);
+    it("the save response overwrites changes to entity made during save", function (done) {
 
         var todo = em.createEntity('TodoItem', { Description: 'Test' });
         em.saveChanges()
-          .then(success).catch(handleFail).finally(start);
+          .then(success).then(done, done);
 
         // make change while save is in progress
-        todo.setProperty('Description', 'Test mod');
+        todo.Description = 'Test mod';
 
         function success(data) {
             var aspect = todo.entityAspect;
-            equal(aspect.entityState.name, 'Unchanged',
+            expect(aspect.entityState.name).to.equal('Unchanged',
                 "added Todo was saved and now is Unchanged");
-            equal(todo.getProperty('Description'), 'Test',
+            expect(todo.Description).to.equal('Test',
                 "description has the saved (not the modified) value");
         }
     });
@@ -64,31 +54,28 @@
     * although the exception will be thrown when setDeleted called 
     * in Breeze v.1.5.2
     *********************************************************/
-    asyncTest("cannot delete an ADDED entity while it's being saved", function () {
-        expect(1);
+    it("cannot delete an ADDED entity while it's being saved", function (done) {
 
         var startCalled = false;
         var todo = em.createEntity('TodoItem', { Description: 'Test' });
         em.saveChanges()
           .then(success).catch(failedDuringPostSave)
-          .finally(function(){
-            if (!startCalled) { start(); }
-          });
+          .then(done, done);
 
         try {
             todo.entityAspect.setDeleted();
         } catch(e){
-            ok(true, 'setDeleted() threw exception: '+e.message);
+            // console.log('setDeleted() threw exception: '+e.message);
             startCalled = true;
             start();
         }
 
         function success(data) {
-            ok(false, "save should have failed");
+            expect(false).to.equal(true, "save should have failed");
         }
         function failedDuringPostSave(error){
             if (error.innerError) {error = error.innerError;}
-            ok(true, "post save processing should have failed; msg was "+error.message);
+            //console.log("post save processing should have failed; msg was "+error.message));
         }
     });
 
@@ -97,25 +84,25 @@
     * then saved again before first save returns.
     * This test would fail in the 2nd assert in saveQueuing v.1; works in v.2
     *********************************************************/
-    asyncTest("can save modified value during save of ADDED entity", function () {
-        expect(2);
+    it("can save modified value during save of ADDED entity", function (done) {
 
         var todo = em.createEntity('TodoItem', { Description: 'Test' });
         em.saveChanges().catch(handleFail);
 
         // make change while save is in progress
-        todo.setProperty('Description', 'Test mod');
+        todo.Description = 'Test mod';
 
         // save immediately, before first save response
         return em.saveChanges()
-          .then(success).catch(handleFail).finally(start);
+          .then(success)
+          .then(done, done);
 
         // After second save
         function success(data) {
             var aspect = todo.entityAspect;
-            equal(aspect.entityState.name, 'Unchanged',
+            expect(aspect.entityState.name).to.equal('Unchanged',
                 "modified Todo was saved and now is Unchanged");
-            equal(todo.getProperty('Description'), 'Test mod',
+            expect(todo.Description).to.equal('Test mod',
                 "description has the modified value, changed between saves");
         }
     });
@@ -125,23 +112,22 @@
     * then saved again before first save returns.
     * This test would fail in the 2nd assert in saveQueuing v.1; works in v.2
     *********************************************************/
-    asyncTest("saves SAME modified value of MODIFIED entity when saved before 1st save completes", function () {
-        expect(2);
+    it("saves SAME modified value of MODIFIED entity when saved before 1st save completes", function (done) {
 
         var todo = em.createEntity('TodoItem', { Description: 'Test' });
         em.saveChanges()
           .then(modAndSave)
-          .catch(handleFail).finally(start);
+          .then(done, done);
 
         function modAndSave(){
             // modify the existing Todo
-            todo.setProperty('Description', 'Test mod 1');
+            todo.Description = 'Test mod 1';
 
             // save the first mod
             em.saveChanges().catch(handleFail);
 
             // modify it again while the save is in progress
-            todo.setProperty('Description', 'Test mod 2');
+            todo.Description = 'Test mod 2';
 
             // save immediately, before first save response
             return em.saveChanges()
@@ -150,9 +136,9 @@
             // After second save
             function success(data) {
                 var aspect = todo.entityAspect;
-                equal(aspect.entityState.name, 'Unchanged',
+                expect(aspect.entityState.name).to.equal('Unchanged',
                     "double modified Todo was saved and now is Unchanged");
-                equal(todo.getProperty('Description'), 'Test mod 2',
+                expect(todo.Description).to.equal('Test mod 2',
                     "description has the value modified during save");
             }
         }
@@ -163,8 +149,7 @@
     * then saved again before first save returns.
     * This test would fail in the 2nd assert in saveQueuing v.1; works in v.2
     *********************************************************/
-    asyncTest("saves DIFFERENT modified value of MODIFIED entity when saved before 1st save completes", function () {
-        expect(4);
+    it("saves DIFFERENT modified value of MODIFIED entity when saved before 1st save completes", function (done) {
 
         var todo = em.createEntity('TodoItem', {
             Description: 'Test',
@@ -174,27 +159,27 @@
           .then(modAndSave)
           .then(requery)
           .then(success)
-          .catch(handleFail).finally(start);
+          .then(done, done);
 
         function modAndSave(){
             // modify the existing Todo
-            todo.setProperty('Description', 'Test mod 1');
+            todo.Description = 'Test mod 1';
 
             // save the first mod
             em.saveChanges().catch(handleFail);
 
-            equal(todo.getProperty('IsDone'), false,
+            expect(todo.IsDone).to.equal(false,
                 "isDone is false while 1st save in progress, just before mod");
 
             // modify different property while the 1st save is in progress
-            todo.setProperty('IsDone', true);
+            todo.IsDone = true;
 
             // save now, before the first save response
             return em.saveChanges();
         }
 
         // 2nd save callback
-        function requery(sr){
+        function requery(sr){ 
             em.clear(); // paranoia.
             return breeze.EntityQuery.from('Todos')
                 .where('Id', 'eq', todo.getProperty('Id'))
@@ -204,11 +189,11 @@
         function success(data) {
             todo = data.results[0];
             var aspect = todo.entityAspect;
-            equal(aspect.entityState.name, 'Unchanged',
+            expect(aspect.entityState.name).to.equal('Unchanged',
                 "double modified Todo was saved, requeried, and is Unchanged");
-            equal(todo.getProperty('Description'), 'Test mod 1',
+            expect(todo.Description).to.equal('Test mod 1',
                 "description has the modified value, 'Test mod 1'");
-            equal(todo.getProperty('IsDone'), true,
+            expect(todo.IsDone).to.equal(true,
                 "isDone has the value modified (true) during 1st save");
         }
     });
@@ -216,10 +201,9 @@
     /*********************************************************
     * second save w/ savequeuing does not resave an added entity
     *********************************************************/
-    asyncTest("second save does not duplicate-save the added entity", function () {
-        expect(4);
+    it("second save does not duplicate-save the added entity", function (done) {
 
-        var description = 'Test'+testFns.newGuid().toString();
+        var description = 'Test' + ash.newGuid().toString();
         description=description.substr(0,30); // max allowed
         em.createEntity('TodoItem', { Description: description });
 
@@ -229,15 +213,14 @@
         Q.all([save1, save2])
          .then(requery)
          .then(success)
-         .catch(handleFail)
-         .finally(start);
+         .then(done, done);
 
         function requery(results){
-            equal(ajaxSpy.callCount, 1,
+            expect(ajaxSpy.callCount, 1,
                 'ajax should only have been called once .. for a single save');
 
             var urlCalled = ajaxSpy.args[0][0].url;
-            ok(/SaveChanges/.test(urlCalled),
+            expect(urlCalled).to.match(/SaveChanges/,
                 "should have called SaveChanges; was "+urlCalled);
 
             return EntityQuery.from('Todos')
@@ -246,17 +229,17 @@
         }
 
         function success(data) {
-            equal(data.results.length, 1,
+            expect(data.results.length).to.equal(1,
                 "Re-queried exactly one TodoItem w/ that description.");
-            equal(em.getEntities().length, 1, "Only one entity in cache");
+            expect(em.getEntities().length).to.equal(1, 
+                "Only one entity in cache");
         }
     });
 
     /*********************************************************
     * Two [add+save] events are in two separate saves
     *********************************************************/
-    asyncTest("Two [add+save] events are in two separate saves", function () {
-        expect(6);
+    it("Two [add+save] events are in two separate saves", function (done) {
 
         var todo1 = em.createEntity('TodoItem', { Description: "DeleteMe 1" });
 
@@ -270,34 +253,33 @@
             .then(secondSaveSucceeded)
             .catch(handleFail);
 
-        equal(em.getChanges().length, 2, "two pending changes while first save is in flight");
+        expect(em.getChanges().length, 2, "two pending changes while first save is in flight");
 
         Q.all([save1, save2])
             .then(bothSucceeded)
-            .catch(handleFail)
-            .finally(start);
+            .then(done, done);
 
         function firstSaveSucceeded(saveResult) {
             var savedCount = saveResult.entities.length;
-            equal(savedCount, 1,
+            expect(savedCount).to.equal(1,
                     "1st save should save a single Todo");
-            equal(saveResult.entities[0].getProperty('Description'),
-                    todo1.getProperty('Description'),
+            expect(saveResult.entities[0].Description)
+                .to.equal(todo1.Description,
                     "1st save should be 'todo1'");
             return saveResult;
         }
 
         function secondSaveSucceeded(saveResult) {
-            var savedCount = saveResult.entities.length;
-            equal(savedCount, 1,
+            expect(saveResult.entities.length).to.equal(1,
                     "2nd save should save a single Todo");
-            equal(saveResult.entities[0].getProperty('Description'),
-                  todo2.getProperty('Description'),
+            expect(saveResult.entities[0].Description)
+                .to.equal(todo2.Description,
                     "2nd save should be 'todo2'");
             return saveResult;
         }
         function bothSucceeded (results) {
-            ok(!em.hasChanges(), "should have no more pending changes");
+            expect(em.hasChanges()).to.equal(false,
+                "should have no more pending changes");
         }
     });
 
@@ -305,10 +287,9 @@
     * Queued saves will be combined but will not double-save
     * Here the 2nd and 3rd are combined while #1 is in-flight
     *********************************************************/
-    asyncTest("Queued saves will be combined", function () {
-        expect(7);
+    it("Queued saves will be combined", function (done) {
 
-        var description = 'Test'+testFns.newGuid().toString();
+        var description = 'Test' + ash.newGuid().toString();
         description=description.substr(0,28); // max allowed is 30
 
         em.createEntity('TodoItem', { Description: description + '-1' });
@@ -320,28 +301,28 @@
         em.createEntity('TodoItem', { Description: description + '-3' });
         var save3 = em.saveChanges();
 
-        equal(em.getChanges().length, 3, "three pending changes while first save is in flight");
+        expect(em.getChanges().length).to.equal(3, 
+            "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
             .then(requery)
             .then(confirm)
-            .catch(handleFail)
-            .finally(start);
+            .then(done, done);
 
         function requery(results){
             var entities = em.getEntities();
-            equal(entities.length, 3, 'should have exactly 3 in cache');
-            equal(em.getChanges().length, 0, "should have no more pending changes");
+            expect(entities.length, 3, 'should have exactly 3 in cache');
+            expect(em.getChanges().length, 0, "should have no more pending changes");
 
-            equal(ajaxSpy.callCount, 2,
+            expect(ajaxSpy.callCount).to.equal(2,
                 'ajax should have been called twice');
 
             var urlCalled = ajaxSpy.args[0][0].url;
-            ok(/SaveChanges/.test(urlCalled),
+            expect(urlCalled).to.match(/SaveChanges/,
                 "1st time should have been SaveChanges; was "+urlCalled);
 
             urlCalled = ajaxSpy.args[1][0].url;
-            ok(/SaveChanges/.test(urlCalled),
+            expect(urlCalled).to.match(/SaveChanges/,
                 "2nd time should have been SaveChanges; was "+urlCalled);
 
             return EntityQuery.from('Todos')
@@ -351,15 +332,15 @@
 
         function confirm(data) {
             var results = data.results;
-            equal(results.length, 3, 'should have requeried 3 entities');
+            expect(results.length).to.equal(3, 
+                'should have re-queried 3 entities');
         }
     });
 
     /*********************************************************
     * Failure in a middle save aborts the rest
     *********************************************************/
-    asyncTest("Failure in a middle save aborts the rest", function () {
-        expect(9);
+    it("Failure in a middle save aborts the rest", function (done) {
 
         var todo1 = em.createEntity('TodoItem', { Description: "DeleteMe 1" });
         var save1 = em.saveChanges()
@@ -382,55 +363,58 @@
         .then(thirdSaveSucceeded)
         .catch(thirdSaveFailed);
 
-        equal(em.getChanges().length, 3, "three pending changes while first save is in flight");
+        expect(em.getChanges().length).to.equal(3, 
+            "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
             .then(postSave, postSave)
-            .finally(start);
+            .then(done, done);
 
         function firstSaveSucceeded(saveResult) {
             var savedCount = saveResult.entities.length;
-            equal(savedCount, 1,
+            expect(savedCount).to.equal(1,
                     "1st save should save a single Todo");
-            equal(saveResult.entities[0].getProperty('Description'),
-                  todo1.getProperty('Description'),
+            expect(saveResult.entities[0].Description)
+                .to.equal(todo1.Description(),
                     "1st save should be 'todo1'");
             return saveResult;
         }
 
         function secondSaveSucceeded(saveResult) {
-            ok(false, "the 2nd save should have failed");
+            expect(true).to.equal(false, "the 2nd save should have failed");
         }
         function secondSaveFailed(error) {
             if (error.innerError) {error = error.innerError;}
-            ok(true,
-                "the 2nd save should have failed, the error was '{0}'"
-                .format(error.message));
+            //console.log(
+            //   "the 2nd save should have failed, the error was '{0}'"
+            //    .format(error.message));
         }
         function thirdSaveSucceeded(saveResult) {
-            ok(false, "the 3rd save should have been aborted");
+            expect(true).to.equal(false, 
+                "the 3rd save should have been aborted");
         }
         function thirdSaveFailed(error) {
-            var expectedErr = /queued save failed/i.test(error.message);
+            var msg = error.message;
             if (error.innerError) {error = error.innerError;}            
-            ok(expectedErr,
+            expected(msg).to.match(/queued save failed/i,
                 "the 3rd save should have aborted with "+
                 "queued save termination error: '{0}'"
                 .format(error.message));
         }
         function postSave(results) {
-            ok(typeof results[1] === 'undefined' &&
-                typeof results[2] === 'undefined',
+            expect(typeof results[1] === 'undefined' &&
+                typeof results[2] === 'undefined')
+            .to.equal(true,
                 "the 2nd and 3rd save promise results should be undefined " +
                 "because failed saves were caught and errors not re-thrown");
 
-            equal(todo1.entityAspect.entityState.name, "Unchanged",
+            expect(todo1.entityAspect.entityState.name).to.equal("Unchanged",
                 "'todo1' was saved and is in the 'Unchanged' state.");
 
             var changes = em.getChanges();
-            ok(changes.indexOf(todo2) > -1,
+            expect(changes.indexOf(todo2)).to.be.above(-1,
                 "todo2 is among the pending changes");
-            ok(changes.indexOf(todo3) > -1,
+            expect(changes.indexOf(todo3)).to.be.above(-1,
                 "todo3 is among the pending changes");
         }
     });
@@ -438,8 +422,7 @@
     /*********************************************************
     * Failure in first save aborts the rest
     *********************************************************/
-    asyncTest("Failure in first save aborts the rest", function () {
-        expect(6);
+    it("Failure in first save aborts the rest", function (done) {
 
         // fake a change to non-existent entity
         // save should fail
@@ -462,41 +445,44 @@
             .then(laterSaveSucceeded)
             .catch(laterSaveFailed);
 
-        equal(em.getChanges().length, 3, "three pending changes while first save is in flight");
+        expect(em.getChanges().length).to.equal(3, 
+            "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
-         .then(allSucceeded)
-         .finally(start); 
+         .then(allDone)
+         .then(done, done); 
 
         function firstSaveSucceeded(saveResult) {
-            ok(false, "the 1st save should have failed");
+            expect(true).to.equal(false, 
+                "the 1st save should have failed");
         }
         function firstSaveFailed(error) {
-            ok(true,
-               "the 1st save should have failed, the error was '{0}'"
-               .format(error.message));
+            //console.log("the 1st save should have failed, the error was '{0}'"
+            //   .format(error.message));
         }
         function laterSaveSucceeded(saveResult) {
-            ok(false, "any save after the 1st should have been aborted");
+            expect(true).to.equal(false, 
+                "any save after the 1st should have been aborted");
         }
         function laterSaveFailed(error) {
-            var expected = /queued save failed/i;
-            ok(expected.test(error.message),
+            expect(error.message).to.match(/queued save failed/i,
                "any save after the 1st should have aborted with " +
                "queued save termination error: '{0}'"
                .format(error.message));
         }
 
-        function allSucceeded(results) {
-            ok(results.reduce(
+        function allDone(results) {
+            var allResultsUndefined = results.reduce(
                     function(p, c) { return p && typeof c === 'undefined'; },
-                    true),
+                    true);
+
+            expect(allResultsUndefined).to.equal(true,
                 "all save promise results should be undefined because " +
                 "failed saves were caught and errors not re-thrown");
 
-            equal(em.getChanges().length, 3,
+            expect(em.getChanges().length).to.equal(3,
                 "all three entities should still have pending changes");
         }
     });
 
-})(docCode.testFns);
+});
