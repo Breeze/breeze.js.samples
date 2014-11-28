@@ -164,14 +164,16 @@
     * This test would fail in the 2nd assert in saveQueuing v.1; works in v.2
     *********************************************************/
     asyncTest("saves DIFFERENT modified value of MODIFIED entity when saved before 1st save completes", function () {
-        expect(3);
+        expect(4);
 
-        var todo = em.createEntity('TodoItem', { 
+        var todo = em.createEntity('TodoItem', {
             Description: 'Test',
             IsDone: false
         });
         em.saveChanges()
           .then(modAndSave)
+          .then(requery)
+          .then(success)
           .catch(handleFail).finally(start);
 
         function modAndSave(){
@@ -181,22 +183,33 @@
             // save the first mod
             em.saveChanges().catch(handleFail);
 
-            // modify different property while the save is in progress
+            equal(todo.getProperty('IsDone'), false,
+                "isDone is false while 1st save in progress, just before mod");
+
+            // modify different property while the 1st save is in progress
             todo.setProperty('IsDone', true);
 
-            // save immediately, before first save response
-            return em.saveChanges()
-              .then(success).catch(handleFail);
+            // save now, before the first save response
+            return em.saveChanges();
+        }
 
-            // After second save
-            function success(data) {
-                var aspect = todo.entityAspect;
-                equal(aspect.entityState.name, 'Unchanged',
-                    "double modified Todo was saved and now is Unchanged");
-                equal(todo.getProperty('Description'), 'Test mod 1',
-                    "description has the original modified value");
-                equal(todo.getProperty('IsDone'), true,
-                    "isDone has the value modified during save");            }
+        // 2nd save callback
+        function requery(sr){ 
+            em.clear(); // paranoia.
+            return breeze.EntityQuery.from('Todos')
+                .where('Id', 'eq', todo.getProperty('Id'))
+                .using(em).execute();
+        }
+
+        function success(data) {
+            todo = data.results[0];
+            var aspect = todo.entityAspect;
+            equal(aspect.entityState.name, 'Unchanged',
+                "double modified Todo was saved, requeried, and is Unchanged");
+            equal(todo.getProperty('Description'), 'Test mod 1',
+                "description has the modified value, 'Test mod 1'");
+            equal(todo.getProperty('IsDone'), true,
+                "isDone has the value modified (true) during 1st save");
         }
     });
 
