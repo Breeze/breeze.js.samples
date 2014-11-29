@@ -182,7 +182,7 @@ describe('saveQueuing:', function() {
         function requery(sr){ 
             em.clear(); // paranoia.
             return breeze.EntityQuery.from('Todos')
-                .where('Id', 'eq', todo.getProperty('Id'))
+                .where('Id', 'eq', todo.Id)
                 .using(em).execute();
         }
 

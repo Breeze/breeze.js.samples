@@ -30,7 +30,7 @@
         var eventName = "WIP";
         var isRestoring = false;
         var manager = undefined;
-        var propChangeAction = breeze.PropertyChange;
+        var propChangeAction = breeze.EntityAction.PropertyChange;
         var priorTimeout = undefined;
         var stashName = "wip";
         var stashTypes = [];
@@ -53,7 +53,7 @@
 
         function entityChanged(changeArgs){
             if (isRestoring || stopped) {return;} // ignore WIP service's own changes.
-            var action = changeArgs.action;
+            var action = changeArgs.entityAction;
 
 
             if (action === propChangeAction ){
