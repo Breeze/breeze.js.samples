@@ -61,13 +61,14 @@
     /*********************************************************
     * Cannot delete an ADDED entity while it's being saved
     * This is standard behavior, w/ or w/o saveQueuing,
-    * although the exception will be thrown when setDeleted called 
-    * in Breeze v.1.5.2
+    * The exception is thrown when setDeleted() called
+    * as of Breeze v.1.5.2
     *********************************************************/
     asyncTest("cannot delete an ADDED entity while it's being saved", function () {
-        expect(1);
+        expect(2);
 
         var startCalled = false;
+        var setDeletedThrew = false;
         var todo = em.createEntity('TodoItem', { Description: 'Test' });
         em.saveChanges()
           .then(success).catch(failedDuringPostSave)
@@ -77,18 +78,17 @@
 
         try {
             todo.entityAspect.setDeleted();
-        } catch(e){
+        } catch (e) {
+            setDeletedThrew = true;
             ok(true, 'setDeleted() threw exception: '+e.message);
-            startCalled = true;
-            start();
         }
 
         function success(data) {
-            ok(false, "save should have failed");
+            ok(setDeletedThrew, "save should have failed after catching setDeleted() error.");
         }
         function failedDuringPostSave(error){
             if (error.innerError) {error = error.innerError;}
-            ok(true, "post save processing should have failed; msg was "+error.message);
+            ok(false, "post save processing failed; msg was "+error.message);
         }
     });
 

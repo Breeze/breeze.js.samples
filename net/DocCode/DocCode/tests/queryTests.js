@@ -597,11 +597,11 @@
                 console.log("Order of parallel query responses was " + JSON.stringify(arrived));
 
                 // regardless, the promise responses are in the same order as the queries
-                responses.forEach(function(res, rix){
-                    var qix = queries.indexOf(res.query)
+                responses.forEach(function(res, rix) {
+                    var qix = queries.indexOf(res.query);
                     equal(qix, rix, 'response ' + rix + ' was for query ' +
-                          qix + ' ' + res.query.wherePredicate.toString());
-                })
+                        qix + ' ' + res.query.wherePredicate.toString());
+                });
             })
             .catch(handleFail)
             .finally(start);

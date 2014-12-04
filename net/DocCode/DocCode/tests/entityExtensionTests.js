@@ -12,24 +12,12 @@
     var EntityQuery = breeze.EntityQuery;
     var EntityState = breeze.EntityState;
 
-    var moduleMetadataStore = new MetadataStore();
+    var moduleMetadataStore; // see getModuleMetadataStoreSetup
     var northwindService = testFns.northwindServiceName;
     var todoService = testFns.todosServiceName;
     var handleFail = testFns.handleFail;
 
-    module("entityExtensionTests", { setup: moduleMetadataStoreSetup });
-
-    // Populate the moduleMetadataStore with Northwind service metadata
-    function moduleMetadataStoreSetup() {
-        if (!moduleMetadataStore.isEmpty()) return; // got it already
-
-        stop(); // going async for metadata ...
-        Q.all(
-            moduleMetadataStore.fetchMetadata(northwindService),
-            moduleMetadataStore.fetchMetadata(todoService))
-        .fail(handleFail)
-        .fin(start);
-    }
+    module("entityExtensionTests", getModuleConfig('ko'));
 
     /*********************************************************
     * add untracked property directly to customer instance
@@ -1181,11 +1169,11 @@
             attach: "added to manager"
         };
 
-        var ctor = function ctor() {
+        function ctor() {
             actual && actual.push(action.ctor);
         };
 
-        var initFn = function (c) { // initializer
+        function initFn(c) { // initializer
             if (c.CompanyName !== null) {
                 // CompanyName setting must have happened so record
                 // that initial values were used before initFn was called
@@ -1223,7 +1211,7 @@
     /*********************************************************
     * query result processing sequence is ctor, init-er, attach
     *********************************************************/
-    asyncTest("query result processing sequence is ctor, init-fn, attach", function (done) {
+    asyncTest("query result processing sequence is ctor, init-fn, attach", function () {
         expect(3);
 
         // ARRANGE
@@ -1234,11 +1222,11 @@
             attach: "attach on query"
         };
 
-        var ctor = function ctor() {
+        function ctor() {
             actual && actual.push(action.ctor);
         };
 
-        var initFn = function (c) {
+        function initFn(c) {
             actual.push(action.initFn);
         };
 
@@ -1351,19 +1339,8 @@
                 "o3's non-zero key is retained; it is " + o3.OrderID());
         });
 
-    module("entityExtensionTests - backingstore", {
-        setup: backingStoreSetup,
-        teardown: restoreModelAdapter
-    });
-
-    function backingStoreSetup() {
-        this.priorAdapterName = breeze.config.getAdapterInstance("modelLibrary").name;
-        breeze.config.initializeAdapterInstance("modelLibrary", "backingStore", true);
-        moduleMetadataStoreSetup();
-    }
-    function restoreModelAdapter() {
-        breeze.config.initializeAdapterInstance("modelLibrary", this.priorAdapterName, true);
-    }
+    //////////////////
+    module("entityExtensionTests - backingStore", getModuleConfig('backingStore'));
 
     /*********************************************************
     * can add unmapped 'foo' property directly to EntityType
@@ -1521,17 +1498,48 @@
         }
         return fooProp;
     }
+
     function cloneModuleMetadataStore() {
         return cloneStore(moduleMetadataStore);
     }
+
     function cloneStore(source) {
         var metaExport = source.exportMetadata();
         return new MetadataStore().importMetadata(metaExport);
     }
+
+    function getModuleConfig(modelLibrary) {
+        var firstTime = true;
+        var origAdapterName = breeze.config.getAdapterInstance("modelLibrary").name;
+        return {
+            setup:    moduleMetadataStoreSetup,
+            teardown: restoreModelAdapter
+        };
+
+        // Populate the moduleMetadataStore with service metadata
+        function moduleMetadataStoreSetup() {
+            breeze.config.initializeAdapterInstance("modelLibrary", modelLibrary, true);
+            if (!firstTime) return; // got metadata already
+
+            firstTime = true;
+            moduleMetadataStore = new MetadataStore();
+            stop(); // going async for metadata ...
+            Q.all([
+                moduleMetadataStore.fetchMetadata(northwindService),
+                moduleMetadataStore.fetchMetadata(todoService)
+            ]).fail(handleFail).fin(start);
+        }
+
+        function restoreModelAdapter() {
+            breeze.config.initializeAdapterInstance("modelLibrary", origAdapterName, true);
+        }
+    }
+
     function newEm(metadataStore) {
         return new EntityManager({
             serviceName: northwindService,
             metadataStore: metadataStore || moduleMetadataStore
         });
     }
+
 })(docCode.testFns);

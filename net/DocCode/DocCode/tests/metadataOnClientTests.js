@@ -246,6 +246,33 @@
         equal(session.getProperty('speaker').getProperty('id'),
             person.getProperty('id'), "Session's speaker should be same as the person created");
     });
+
+    test("can create a Speaker (Person) with multiple Sessions", function () {
+        var manager = createManagerWithClientMetadata();
+        var person = manager.createEntity('Person', {
+            firstName: 'Ward',lastName: 'Bell'
+        });
+        
+        var session1 = manager.createEntity('Session', {
+            title: "Metadata by Hand with Metadata-Helper",
+            description: "Learn how to write Breeze metadata on the client with the Metadata-Helper",
+            speaker: person
+        });
+        
+        var session2 = manager.createEntity('Session', {
+            title: "Breeze: our gift to the world",
+            description: "Learn how Breeze solves world peace and cures diseases",
+            speaker: person
+        });
+        
+        // get those sessions by navigating from the person w/ `sessions` property
+        var navSessions = person.getProperty('speakerSessions');
+        equal(navSessions.length, 2, "person should have two related sessions");
+        ok(navSessions.indexOf(session1) > -1, 
+          'should include session1');
+        ok(navSessions.indexOf(session2) > -1, 
+            'should include session2');  
+    }); 
     //#endregion
 
     //#region Client-defined Metadata Test Helpers
