@@ -24,7 +24,7 @@
         };
 
         var db = $window.localStorage;
-        var delay = 3000; // debounce for 3 seconds
+        var delay = 2000; // debounce for 2 seconds
         var disabled = undefined;
         var entityChangedToken = undefined;
         var eventName = "WIP";
@@ -34,6 +34,7 @@
         var priorTimeout = undefined;
         var stashName = "wip";
         var stashTypes = [];
+        var stateChangeAction = breeze.EntityAction.EntityStateChange;
         var stopped = false;
         var stashCount = undefined;
 
@@ -56,7 +57,7 @@
             var action = changeArgs.entityAction;
 
 
-            if (action === propChangeAction ){
+            if (action === propChangeAction || action === stateChangeAction ){
                 $timeout.cancel(priorTimeout);
                 priorTimeout = $timeout(stash, delay, true);
             }
