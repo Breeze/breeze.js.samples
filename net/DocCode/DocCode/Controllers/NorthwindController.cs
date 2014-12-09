@@ -65,6 +65,18 @@ namespace DocCode.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, _repository.Customers);
         }
 
+        [HttpPost]
+        [EnableBreezeQuery]
+        // For breeze labs "breeze.ajaxpost" tests
+        public HttpResponseMessage CustomersWithFilterOptions(JObject options) {
+          // for debugging
+          var queryParams = Request.GetQueryNameValuePairs();
+
+          // do the job
+          return Request.CreateResponse(HttpStatusCode.OK,
+            _repository.CustomersWithFilterOptions(options));
+        }
+
         [HttpGet]
         public IQueryable<Order> OrdersForProduct(int productID = 0)
         {

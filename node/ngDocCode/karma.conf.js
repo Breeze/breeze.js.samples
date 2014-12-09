@@ -23,6 +23,7 @@ module.exports = function (config) {
 
             './bower_components/breezejs/breeze.debug.js',
             './bower_components/breezejs/labs/breeze.angular.js',
+            './bower_components/breezejs/labs/breeze.ajaxPost.js',
             './bower_components/breezejs/labs/breeze.getEntityGraph.js',
             './bower_components/breezejs/labs/breeze.metadata-helper.js',
             './bower_components/breezejs/labs/breeze.savequeuing.js',

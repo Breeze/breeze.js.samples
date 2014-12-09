@@ -48,7 +48,33 @@ namespace DocCode.DataAccess
             get { return ForCurrentUser(Context.Customers).Include("Orders"); }
         }
 
-        public IQueryable<Order> OrdersForProduct(int productID = 0)
+      public IQueryable<Customer> CustomersWithFilterOptions(JObject options)
+      {
+        var query = ForCurrentUser(Context.Customers);
+        if (options == null) { return query; }
+
+        if (options["CompanyName"] != null)
+        {
+          var companyName = (string) options["CompanyName"];
+          if (!String.IsNullOrEmpty(companyName))
+          {
+            query = query.Where(c => c.CompanyName == companyName);
+          }
+        }
+
+        if (options["Ids"] != null)
+        {
+          var ids = options["Ids"].Select(id => (Guid) (dynamic) id).ToList();
+          if (ids.Count > 0)
+          {
+            query = query.Where(c => ids.Contains(c.CustomerID));
+          }
+        }
+
+        return query;
+      }
+
+      public IQueryable<Order> OrdersForProduct(int productID = 0)
         {
             var query = ForCurrentUser(Context.Orders);
 
