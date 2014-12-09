@@ -8,10 +8,19 @@ describe("query_with_post:", function () {
 
     ash.serverIsRunningPrecondition();
 
-    beforeEach(function () {
+    beforeEach(module(
+        'breeze.angular', 
+        specHelper.$httpBackend,
+        specHelper.$q
+    ));
+
+    beforeEach(inject(function (breeze) {
+        // injecting breeze ensures fresh breeze 
+        // angular ajax Adapter before every test
         breeze.ajaxpost(); // add POST option to ajax adapter
         em = newEm();      // fresh EntityManager before each test
-    });
+    }));
+
     ///////////////////////////
 
     describe("POST query for customers", function () {
