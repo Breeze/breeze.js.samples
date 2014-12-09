@@ -20,11 +20,11 @@
     test("purge the Todos Db", function () {
         expect(1);
         stop(); // going async
-        testFns.todosPurge()
+        testFns.todosPurge() // returns a jQuery promise (grrr)
             .then(function (msg) {
-                ok(0 < msg.indexOf("purge"), msg);
+                ok(-1 < msg.indexOf("purge"), msg);
             })
-            .fail(testFns.handleFail).fin(start);
+            .fail(testFns.handleFail).always(start);
     });
 
 
@@ -35,11 +35,11 @@
     test("reset the Todos Db", function () {
         expect(1);
         stop();
-        testFns.todosReset()
+        testFns.todosReset() // returns a jQuery promise (grrr)
             .then(function (msg) {
-                ok(0 < msg.indexOf("reset"), msg);
+                ok(-1 < msg.indexOf("reset"), msg);
             })
-            .fail(testFns.handleFail).fin(start);
+            .fail(testFns.handleFail).always(start);
     });
 
 })(docCode.testFns);
