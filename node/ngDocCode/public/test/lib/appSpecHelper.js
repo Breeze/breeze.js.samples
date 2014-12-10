@@ -29,6 +29,7 @@
         alfredsOrderDetailKey: { OrderID: 10643, ProductID: 28 },
         // AjaxAdapterTestInterceptor: AjaxAdapterTestInterceptor.js
         assertIsSorted: assertIsSorted,
+        asyncModule: specHelper.asyncModule,
         breeze: breeze,
         chaiProductID: 1, // Chai product ID
         customerResultsToStringArray: customerResultsToStringArray,

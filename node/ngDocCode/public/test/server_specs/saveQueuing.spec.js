@@ -51,12 +51,13 @@ describe('saveQueuing:', function() {
     /*********************************************************
     * Cannot delete an ADDED entity while it's being saved
     * This is standard behavior, w/ or w/o saveQueuing,
-    * although the exception will be thrown when setDeleted called 
-    * in Breeze v.1.5.2
+    * The exception is thrown when setDeleted() called
+    * as of Breeze v.1.5.2
     *********************************************************/
     it("cannot delete an ADDED entity while it's being saved", function (done) {
 
         var startCalled = false;
+        var setDeletedThrew = false;
         var todo = em.createEntity('TodoItem', { Description: 'Test' });
         em.saveChanges()
           .then(success).catch(failedDuringPostSave)
@@ -64,18 +65,19 @@ describe('saveQueuing:', function() {
 
         try {
             todo.entityAspect.setDeleted();
-        } catch(e){
-            // console.log('setDeleted() threw exception: '+e.message);
-            startCalled = true;
-            start();
+        } catch (e) {
+            setDeletedThrew = true;
         }
 
         function success(data) {
-            expect(false).to.equal(true, "save should have failed");
+            expect(setDeletedThrew).to.equal(true, 
+                "save should have failed after catching setDeleted() error.");
         }
+
         function failedDuringPostSave(error){
             if (error.innerError) {error = error.innerError;}
-            //console.log("post save processing should have failed; msg was "+error.message));
+            expect(true).to.equal(false, 
+                "post save processing failed; msg was "+error.message);
         }
     });
 
@@ -375,7 +377,7 @@ describe('saveQueuing:', function() {
             expect(savedCount).to.equal(1,
                     "1st save should save a single Todo");
             expect(saveResult.entities[0].Description)
-                .to.equal(todo1.Description(),
+                .to.equal(todo1.Description,
                     "1st save should be 'todo1'");
             return saveResult;
         }
@@ -396,12 +398,15 @@ describe('saveQueuing:', function() {
         function thirdSaveFailed(error) {
             var msg = error.message;
             if (error.innerError) {error = error.innerError;}            
-            expected(msg).to.match(/queued save failed/i,
+            expect(msg).to.match(/queued save failed/i,
                 "the 3rd save should have aborted with "+
                 "queued save termination error: '{0}'"
                 .format(error.message));
         }
         function postSave(results) {
+            expect(typeof results[0]).to.equal('object',
+                "1st save promise succeeded and has results");
+
             expect(typeof results[1] === 'undefined' &&
                 typeof results[2] === 'undefined')
             .to.equal(true,
