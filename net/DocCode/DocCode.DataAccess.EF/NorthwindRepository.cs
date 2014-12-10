@@ -64,7 +64,7 @@ namespace DocCode.DataAccess
 
         if (options["Ids"] != null)
         {
-          var ids = options["Ids"].Select(id => (Guid) (dynamic) id).ToList();
+          var ids = options["Ids"].Select(id => (Guid) id).ToList();
           if (ids.Count > 0)
           {
             query = query.Where(c => ids.Contains(c.CustomerID));
