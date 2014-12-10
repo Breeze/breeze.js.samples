@@ -66,7 +66,6 @@ namespace DocCode.Controllers
         }
 
         [HttpPost]
-        [EnableBreezeQuery]
         // For breeze labs "breeze.ajaxpost" tests
         public HttpResponseMessage CustomersWithFilterOptions(JObject options) {
           // for debugging
