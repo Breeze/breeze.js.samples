@@ -1,20 +1,32 @@
-/*jshint -W079, -W101, -W117*/
+/*jshint -W079, -W117 */
 (function() {
+
     var specHelper = {
         $httpBackend: $httpBackendReal,
         $q: $qReal,
+        appModule: appModule,
         asyncModule: asyncModule,
+        fakeLogger: fakeLogger,
         fakeRouteProvider: fakeRouteProvider,
-        flush: flush,        
-        injector: injector,
+        fakeToastr: fakeToastr,
         gotResults: gotResults,
-        gotNoResults: gotNoResults,
+        gotNoResults: gotNoResults,        
+        injector: injector,
         replaceAccentChars: replaceAccentChars,
         verifyNoOutstandingHttpRequests: verifyNoOutstandingHttpRequests
     };
     window.specHelper = specHelper;
 
+    /**
+     * Define a test application module with faked logger for use with ngMidwayTester
+     *
+     * Useage: 
+     *    tester = ngMidwayTester('testerApp', {mockLocationPaths: false});
+     */ 
+    angular.module('testerApp', ['app', fakeLogger]);     
+
     ////////////////////////
+    /*jshint -W101 */
     /**
      *  Replaces the ngMock'ed $httpBackend with the real one from ng thus
      *  restoring the ability to issue AJAX calls to the backend with $http.
@@ -23,12 +35,12 @@
      *  while restoring $http calls that pass through to the server
      *
      *  Note that $q remains ngMocked so you must flush $http calls ($rootScope.$digest).
-     *  The specHelper.flush() function is available for this purpose.
+     *  Use $rootScope.$apply() for this purpose.
      * 
      *  Could restore $q with $qReal in which case don't need to flush. 
      * 
      *  Inspired by this StackOverflow answer:
-     *    http://stackoverflow.com/questions/20864764/e2e-mock-httpbackend-doesnt-actually-passthrough-for-me/26992327?iemail=1&noredirect=1#26992327
+     *    http://stackoverflow.com/questions/20864764/e2e-mock-httpbackend-doesnt-actually-passthrough-for-me/26992327?iemail=1&noredirect=1#26992327 
      *
      *  Usage:
      *  
@@ -36,7 +48,7 @@
      *
      *    beforeEach(module(specHelper.$httpBackend, 'app');
      *
-     *    beforeEach(inject(function( _myService_) {
+     *    beforeEach(inject(function(_myService_) {
      *        myService = _myService_;
      *    }));
      * 
@@ -48,17 +60,18 @@
      *            .then(done, done);
      * 
      *        // because not using $qReal, must flush the $http and $q queues
-     *        specHelper.flush();
+     *        $rootScope.$apply;
      *    });        
      */
+    /*jshint +W101 */
     function $httpBackendReal($provide) {
         $provide.provider('$httpBackend', function() {
+            /*jshint validthis:true */
             this.$get = function() {
                 return angular.injector(['ng']).get('$httpBackend');
             };
         });
     }
-
 
     /**
      *  Replaces the ngMock'ed $q with the real one from ng thus 
@@ -75,7 +88,7 @@
      *
      *    beforeEach(module(specHelper.$q, specHelper.$httpBackend, 'app');
      *
-     *    beforeEach(inject(function( _myService_) {
+     *    beforeEach(inject(function(_myService_) {
      *        myService = _myService_;
      *    }));
      * 
@@ -91,6 +104,7 @@
      */
     function $qReal($provide) {
         $provide.provider('$q', function() {
+            /*jshint validthis:true */        
             this.$get = function() {
                 return angular.injector(['ng']).get('$q');
             };
@@ -98,20 +112,61 @@
     }
 
     /**
+     * Prepare ngMocked application feature module 
+     * along with faked toastr and routehelper
+     * Especially useful for controller testing
+     * Use it as you would the ngMocks#module method
+     * 
+     *  Useage:
+     *     beforeEach(specHelper.appModule('app.avengers'));
+     *
+     *     Equivalent to:
+     *       beforeEach(module(
+     *          'app.avengers',
+     *          specHelper.fakeToastr, 
+     *          specHelper.fakeRouteHelperProvider)
+     *       );
+     */
+    function appModule() {
+        var args = Array.prototype.slice.call(arguments, 0); 
+        args = args.concat(fakeToastr, fakeRouteHelperProvider);
+        angular.mock.module.apply(angular.mock, args);
+    }
+
+    /**
      * Prepare ngMocked module definition that makes real $http and $q calls
+     * Also adds fakeLogger to the end of the definition
      * Use it as you would the ngMocks#module method
      * 
      *  Useage:
      *     beforeEach(specHelper.asyncModule('app'));
      *
-     *     // Equivalent to:
-     *     //   beforeEach(module(specHelper.$q, specHelper.$httpBackend, 'app', specHelper.fakeLogger));
+     *     Equivalent to:
+     *       beforeEach(module('app', specHelper.$httpBackend, specHelper.$q, specHelper.fakeToastr));
      */
-    function asyncModule(){
+    function asyncModule() {
         var args = Array.prototype.slice.call(arguments, 0);
-        args.unshift($qReal, $httpBackendReal); // prepend real replacements for mocks
+        args = args.concat($httpBackendReal, $qReal, fakeToastr);      
         // build and return the ngMocked test module
-        return angular.mock.module.apply(angular.mock.module, args); 
+        return angular.mock.module.apply(angular.mock, args); 
+    }
+
+    function fakeLogger($provide) {
+        $provide.value('logger', sinon.stub({
+            info: function() {},
+            error: function() {},
+            warning: function() {},
+            success: function() {}
+        }));
+    }
+
+    function fakeToastr($provide) {
+        $provide.constant('toastr', sinon.stub({
+            info: function() {},
+            error: function() {},
+            warning: function() {},
+            success: function() {}
+        }));
     }
 
     function fakeRouteProvider($provide) {
@@ -134,13 +189,6 @@
                 };
             };
         });
-    }
-
-    /**
-     * Flush the pending $http and $q queues with a digest cycle
-     */
-    function flush(fn){
-        inject(function ($rootScope){ $rootScope.$apply(fn);});
     }
 
     /**
@@ -175,26 +223,6 @@
         expect(data.results).is.empty;
     }
 
-    // Replaces the accented characters of many European languages w/ unaccented chars
-    // Use it in JavaScript string sorts where such characters may be encountered
-    // Matches the default string comparers of most databases.
-    // Ex: replaceAccentChars(a.Name) < replaceAccentChars(b.Name)
-    // instead of:            a.Name  <                    b.Name
-    function replaceAccentChars(s) {
-        var r = s.toLowerCase();
-        r = r.replace(new RegExp(/[àáâãäå]/g), 'a');
-        r = r.replace(new RegExp(/æ/g), 'ae');
-        r = r.replace(new RegExp(/ç/g), 'c');
-        r = r.replace(new RegExp(/[èéêë]/g), 'e');
-        r = r.replace(new RegExp(/[ìíîï]/g), 'i');
-        r = r.replace(new RegExp(/ñ/g), 'n');
-        r = r.replace(new RegExp(/[òóôõö]/g), 'o');
-        r = r.replace(new RegExp(/œ/g), 'oe');
-        r = r.replace(new RegExp(/[ùúûü]/g), 'u');
-        r = r.replace(new RegExp(/[ýÿ]/g), 'y');
-        return r;
-    }
-
     /**
      * inject selected services into the windows object during test
      * then remove them when test ends.
@@ -218,7 +246,7 @@
             params = arguments[0];
         }
         else {
-            params = Array.prototype.slice.call(arguments);
+            params = Array.prototype.slice.call(arguments, 0);
         }
 
         annotation = params.join('\',\''); // might need to annotate
@@ -243,19 +271,52 @@
             // todo: tolerate component names that are invalid JS identifiers, e.g. 'burning man'
         });
 
-        var fn = 'function(' + params.join(',') + '){' + body + '}';
+        var fn = 'function(' + params.join(',') + ') {' + body + '}';
 
         if (mustAnnotate) {
             fn = '[\'' + annotation + '\',' + fn + ']';
         }
 
         var exp = 'inject(' + fn + ');' +
-            'afterEach(function(){' + cleanupBody + '});'; // remove from window.
+                  'afterEach(function() {' + cleanupBody + '});'; // remove from window.
 
+        //Function(exp)(); // the assigned vars will be global. `afterEach` will remove them
         /* jshint evil:true */
-        new Function(exp)(); // the assigned vars will be global. `afterEach` will remove them
+        new Function(exp)();
+
+        // Alternative that would not touch window but would require eval()!!
+        // Don't do `Function(exp)()` and don't do afterEach cleanup
+        // Instead do ..
+        //     return exp;
+        //
+        // Then caller must say something like:
+        //     eval(specHelper.injector('$log', 'foo'));
     }
 
+    // Replaces the accented characters of many European languages w/ unaccented chars
+    // Use it in JavaScript string sorts where such characters may be encountered
+    // Matches the default string comparers of most databases.
+    // Ex: replaceAccentChars(a.Name) < replaceAccentChars(b.Name)
+    // instead of:            a.Name  <                    b.Name
+    function replaceAccentChars(s) {
+        var r = s.toLowerCase();
+        r = r.replace(new RegExp(/[àáâãäå]/g), 'a');
+        r = r.replace(new RegExp(/æ/g), 'ae');
+        r = r.replace(new RegExp(/ç/g), 'c');
+        r = r.replace(new RegExp(/[èéêë]/g), 'e');
+        r = r.replace(new RegExp(/[ìíîï]/g), 'i');
+        r = r.replace(new RegExp(/ñ/g), 'n');
+        r = r.replace(new RegExp(/[òóôõö]/g), 'o');
+        r = r.replace(new RegExp(/œ/g), 'oe');
+        r = r.replace(new RegExp(/[ùúûü]/g), 'u');
+        r = r.replace(new RegExp(/[ýÿ]/g), 'y');
+        return r;
+    }
+
+    /**
+     *  Assert that there are no outstanding HTTP requests after test is complete
+     *  For use with ngMocks; doesn't work for midway tests
+     */
     function verifyNoOutstandingHttpRequests () {
         afterEach(inject(function($httpBackend) {
             $httpBackend.verifyNoOutstandingExpectation();

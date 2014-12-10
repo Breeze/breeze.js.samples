@@ -8,11 +8,7 @@ describe("query_with_post:", function () {
 
     ash.serverIsRunningPrecondition();
 
-    beforeEach(module(
-        'breeze.angular', 
-        specHelper.$httpBackend,
-        specHelper.$q
-    ));
+    beforeEach(specHelper.asyncModule('breeze.angular'));
 
     beforeEach(inject(function (breeze) {
         // injecting breeze ensures fresh breeze 
