@@ -274,7 +274,7 @@ describe("query_xtras:", function () {
              var cust = em.createEntity('Customer', 
                 {CustomerID: ash.alfredsID, CompanyName: 'Acme'}, UNCHANGED);
 
-            EntityQuery.fromEntities([cust])
+            EntityQuery.fromEntities(cust) // can skip the array if only one
                 .using(em).execute()
                 .then(function() {
                      expect(cust.CompanyName).to.match(/Alfreds/i,
