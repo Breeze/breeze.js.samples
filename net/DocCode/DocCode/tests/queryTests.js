@@ -11,6 +11,7 @@
     var EntityType = breeze.EntityType;
     var FilterQueryOp = breeze.FilterQueryOp;
     var Predicate = breeze.Predicate;
+    var UNCHANGED = breeze.EntityState.Unchanged;
 
     // We'll use this "alfred's predicate" a lot
     // e.g. to find Orders that belong to the Alfred's customer
@@ -1457,8 +1458,7 @@
             ok(territories[0], "should have a territory");
             var categories = lookups[0];
             ok(categories[0], "should have a category");
-            equal(categories[0].entityAspect.entityState.name,
-                breeze.EntityState.Unchanged.name,
+            equal(categories[0].entityAspect.entityState.name, UNCHANGED.name,
                 "first category should be unchanged entity in cache");
         }
     });
@@ -1484,7 +1484,7 @@
             ok(lookups.territories.length, "should have lookups.territories");
             ok(lookups.categories.length, "should have lookups.categories");
             equal(lookups.categories[0].entityAspect.entityState.name,
-                breeze.EntityState.Unchanged.name,
+                UNCHANGED.name,
                 "first lookups.category should be unchanged entity in cache");
         }
     });
@@ -2284,6 +2284,125 @@
             }
         });
 
+    /*** Query Xtras ***/
+
+     module("queryTests (refresh)", testFns.getModuleOptions(newEm));
+
+     asyncTest("can refresh an unmodified Employee entity", function () {
+         var em = newEm();
+         var emp1 = em.createEntity('Employee', {
+             EmployeeID: 1,
+             FirstName: 'Eeny',
+             LastName: 'Beany'
+         }, UNCHANGED);
+
+         EntityQuery.fromEntities([emp1])
+             .using(em).execute()
+             .then(function () {
+                 ok(emp1.getProperty('FirstName').indexOf('Nancy') === 0,
+                   "should update FirstName from db");
+             })
+             .catch(handleFail).finally(start);
+     });
+
+     asyncTest("can refresh an unmodified Customer entity", function () {
+         var em = newEm();
+         var cust = em.createEntity('Customer',
+             { CustomerID: alfredsID, CompanyName: 'Acme' }, UNCHANGED);
+
+         EntityQuery.fromEntities([cust])
+             .using(em).execute()
+             .then(function () {
+                 ok(cust.getProperty('CompanyName').indexOf('Alfreds') === 0,
+                   "should update CompanyName from db");
+             })
+             .catch(handleFail).finally(start);
+     });
+
+     asyncTest("can refresh unmodified entities of the same type", function () {
+         var em = newEm();
+         var emp1 = em.createEntity('Employee', {
+             EmployeeID: 1,
+             FirstName: 'Eeny',
+             LastName: 'Beany'
+         }, UNCHANGED);
+
+         var emp2 = em.createEntity('Employee', {
+             EmployeeID: 2,
+             FirstName: 'Meeny',
+             LastName: 'Beany'
+         }, UNCHANGED);
+
+         EntityQuery.fromEntities([emp1, emp2])
+             .using(em).execute()
+             .then(function () {
+                 ok(emp1.getProperty('FirstName').indexOf('Nancy') === 0,
+                   "should update FirstName from db");
+                 ok(emp2.getProperty('FirstName').indexOf('Andrew') === 0,
+                   "should update FirstName from db");
+             })
+             .catch(handleFail).finally(start);
+     });
+
+     // D#2655
+     asyncTest("can refresh unmodified entities of different types", function () {
+         var em = newEm();
+         var emp1 = em.createEntity('Employee', {
+             EmployeeID: 1,
+             FirstName: 'Eeny',
+             LastName: 'Beany'
+         }, UNCHANGED);
+
+         var cust = em.createEntity('Customer',
+             { CustomerID: alfredsID, CompanyName: 'Acme' }, UNCHANGED);
+
+         EntityQuery.fromEntities([emp1, cust])
+             .using(em).execute()
+             .then(function () {
+                 ok(emp1.getProperty('FirstName').indexOf('Nancy') === 0,
+                   "should update CompanyName from db");
+                 ok(cust.getProperty('CompanyName').indexOf('Alfreds') === 0,
+                   "should update CompanyName from db");
+             })
+             .catch(handleFail).finally(start);
+     });
+
+     asyncTest("will NOT refresh a modified entity", function () {
+         var em = newEm();
+         var emp1 = em.createEntity('Employee', {
+             EmployeeID: 1,
+             FirstName: 'Eeny',
+             LastName: 'Beany'
+         }, UNCHANGED);
+         emp1.setProperty('FirstName', 'Changed');
+
+         EntityQuery.fromEntities([emp1])
+             .using(em).execute()
+             .then(function () {
+                 ok(emp1.getProperty('FirstName').indexOf('Nancy') === -1,
+                   "should NOT update FirstName from db");
+             })
+             .catch(handleFail).finally(start);
+     });
+
+     asyncTest("will refresh a modified entity if 'OverwriteChanges'", function () {
+         var em = newEm();
+         var emp1 = em.createEntity('Employee', {
+             EmployeeID: 1,
+             FirstName: 'Eeny',
+             LastName: 'Beany'
+         }, UNCHANGED);
+         emp1.setProperty('FirstName', 'Changed');
+
+         EntityQuery.fromEntities([emp1])
+             .using(breeze.MergeStrategy.OverwriteChanges)
+             .using(em).execute()
+             .then(function () {
+                 ok(emp1.getProperty('FirstName').indexOf('Nancy') === 0,
+                   "shouldupdate FirstName from db");
+             })
+             .catch(handleFail).finally(start);
+     });
     /*********************************************************
     * Test helpers
     *********************************************************/
@@ -2303,7 +2422,7 @@
          var customer = manager.createEntity('Customer', {
              CustomerID: id,
              CompanyName: "Test Customer"
-         }, breeze.EntityState.Unchanged);
+         }, UNCHANGED);
          return customer;
     }
 

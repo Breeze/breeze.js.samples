@@ -246,6 +246,119 @@ describe("query_xtras:", function () {
             .then(done,done);
     });
 
+    describe("when refreshing cached entities", function() {
+        var emp1;
+        var UNCHANGED = breeze.EntityState.Unchanged;
+
+        beforeEach(function() {
+            // simulate an unchanged employee in cache
+            emp1 = em.createEntity('Employee', {
+              EmployeeID: 1,
+              FirstName: 'Eeny',
+              LastName: 'Beany'
+            }, UNCHANGED);
+        });
+
+        it("can refresh an unmodified Employee entity", function(done) {
+            // Using 'fromEntities method'
+            EntityQuery.fromEntities([emp1])
+                .using(em).execute()
+                .then(function() {
+                    expect(emp1.FirstName).to.match(/Nancy/i,
+                      "should update FirstName from db");
+                })
+                .then(done, done);
+        });
+
+        it("can refresh an unmodified Customer entity", function(done) {
+             var cust = em.createEntity('Customer', 
+                {CustomerID: ash.alfredsID, CompanyName: 'Acme'}, UNCHANGED);
+
+            EntityQuery.fromEntities([cust])
+                .using(em).execute()
+                .then(function() {
+                     expect(cust.CompanyName).to.match(/Alfreds/i,
+                      "should update CompanyName from db");
+                })
+                .then(done, done);
+        });
+
+        it("can refresh unmodified entities of the same type", function(done) {
+            var names = ['Meeny', 'Miney', 'Moe'];
+            var emps = makeFakeEmps(names);
+            EntityQuery.fromEntities(emps)
+                .using(em).execute()
+                .then(function() {
+                    emps.forEach(function(e, i) {
+                        expect(e.FirstName).to.not.equal(
+                            names[i], "should update FirstName from db");
+                    });
+                })
+                .then(done, done);
+        });
+
+        // D#2655
+        it("can refresh unmodified entities of different types", function(done) {
+            var cust = em.createEntity('Customer', 
+                {CustomerID: ash.alfredsID, CompanyName: 'Acme'}, UNCHANGED);
+
+            EntityQuery.fromEntities([emp1, cust])
+                .using(em).execute()
+                .then(function() {
+                    expect(emp1.FirstName).to.match(/Nancy/i,
+                      "should update FirstName from db");
+                    expect(cust.CompanyName).to.match(/Alfreds/i,
+                      "should update CompanyName from db");
+                })
+                .then(done, done);
+        });
+
+        it("will NOT refresh a modified entity", function(done) {
+            emp1.FirstName = 'Changed';
+            expect(emp1.entityAspect.entityState.isModified())
+                .to.be.true;
+
+            EntityQuery.fromEntities([emp1])
+                .using(em).execute()
+                .then(function() {
+                    expect(emp1.FirstName).to.equal('Changed',
+                      "should NOT update with FirstName from db");
+                })
+                .then(done, done);
+        });
+
+        it("will refresh a modified entity if 'OverwriteChanges'", function(done) {
+            emp1.FirstName = 'Changed';
+            expect(emp1.entityAspect.entityState.isModified())
+                .to.be.true;
+
+            EntityQuery.fromEntities([emp1])
+                .using(breeze.MergeStrategy.OverwriteChanges)
+                .using(em).execute()
+                .then(function() {
+                    expect(emp1.FirstName).to.match(/Nancy/i,
+                      "should update with FirstName from db");
+                })
+                .then(done, done);
+        });
+
+        // fake a few entities with known IDs
+        function makeFakeEmps(names) {
+            var emps = [];
+            names.forEach(function (name, i){
+                var e = {
+                  EmployeeID: i + 2,
+                  FirstName: name,
+                  LastName: 'Beany'
+                };
+                emps.push(
+                    em.createEntity('Employee', e, UNCHANGED)
+                );
+            });
+            return emps;
+        }  
+    });
+
     describe("breeze wires-up related entities", function () {
         var eQuery, etQuery, oQuery;
 
