@@ -161,9 +161,6 @@ gulp.task('default', ['sampleSolutionsBuild', 'zip'] , function() {
 
 });
 
-
-
-
 function msBuildSolution(solutionFileName, done) {
   var baseName = path.basename(solutionFileName);
   var rootCmd = _msBuildCmd + '"' + baseName +'"' + _msBuildOptions + ' /t:'

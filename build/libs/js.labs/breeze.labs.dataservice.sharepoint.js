@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Breeze Labs SharePoint 2013 OData DataServiceAdapter
  *
  *  v.0.6.0

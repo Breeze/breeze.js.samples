@@ -1,4 +1,4 @@
-﻿//#region Copyright, Version, and Description
+//#region Copyright, Version, and Description
 /*
  * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.
  * Use, reproduction, distribution, and modification of this code is subject to the terms and
@@ -37,6 +37,7 @@
  * LIMITATIONS
  * - Saves all pending changes; no support for saving selected entities
  * - Can't queue save options
+ * - Can't handle changes to the primary key (dangerous in any case)
  * - Assumes promises. Does not support the (deprecated) success and fail callbacks
  * - Does not queue saveOptions. The first one is re-used for all queued saves.
  * - The saveResult is the saveResult of the LAST completed save
