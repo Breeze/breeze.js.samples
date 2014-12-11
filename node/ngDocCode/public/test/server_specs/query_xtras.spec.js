@@ -246,7 +246,7 @@ describe("query_xtras:", function () {
             .then(done,done);
     });
 
-    describe("when refreshing cached entities", function() {
+    describe("when refreshing cached entities with 'EntityQuery.fromEntities'", function() {
         var emp1;
         var UNCHANGED = breeze.EntityState.Unchanged;
 
@@ -298,19 +298,14 @@ describe("query_xtras:", function () {
         });
 
         // D#2655
-        it("can refresh unmodified entities of different types", function(done) {
+        it("can NOT refresh entities of different types", function() {
             var cust = em.createEntity('Customer', 
                 {CustomerID: ash.alfredsID, CompanyName: 'Acme'}, UNCHANGED);
 
-            EntityQuery.fromEntities([emp1, cust])
-                .using(em).execute()
-                .then(function() {
-                    expect(emp1.FirstName).to.match(/Nancy/i,
-                      "should update FirstName from db");
-                    expect(cust.CompanyName).to.match(/Alfreds/i,
-                      "should update CompanyName from db");
-                })
-                .then(done, done);
+            expect(function(){
+               var q = EntityQuery.fromEntities([emp1, cust]); 
+            }).to.throw(/not of type/, 
+                "raised error because not all entities are the same type");
         });
 
         it("will NOT refresh a modified entity", function(done) {

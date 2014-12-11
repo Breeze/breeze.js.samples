@@ -2345,7 +2345,7 @@
      });
 
      // D#2655
-     asyncTest("can refresh unmodified entities of different types", function () {
+     test("'EntityQuery.fromEntities' can NOT refresh entities of different types", function () {
          var em = newEm();
          var emp1 = em.createEntity('Employee', {
              EmployeeID: 1,
@@ -2356,15 +2356,9 @@
          var cust = em.createEntity('Customer',
              { CustomerID: alfredsID, CompanyName: 'Acme' }, UNCHANGED);
 
-         EntityQuery.fromEntities([emp1, cust])
-             .using(em).execute()
-             .then(function () {
-                 ok(emp1.getProperty('FirstName').indexOf('Nancy') === 0,
-                   "should update CompanyName from db");
-                 ok(cust.getProperty('CompanyName').indexOf('Alfreds') === 0,
-                   "should update CompanyName from db");
-             })
-             .catch(handleFail).finally(start);
+         throws(function() {
+             var q = EntityQuery.fromEntities([emp1, cust]);
+         }, /not of type/, "raised error because not all entities are the same type");
      });
 
      asyncTest("will NOT refresh a modified entity", function () {
