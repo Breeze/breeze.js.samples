@@ -16,7 +16,7 @@ echo Copying breeze client files into the project
 @echo on
 XCOPY "%1..\..\..\build\libs\js\breeze.min.js" "%1Scripts" /Y 
 XCOPY "%1..\..\..\build\libs\js\breeze.debug.js" "%1Scripts" /Y 
-
+XCOPY "%1..\..\..\build\libs\js.adapters\breeze.modelLibrary.backbone.js" "%1Scripts" /Y
 @echo off
 @echo.
 @echo CONFIRM that all files copied successfully 
