@@ -181,8 +181,11 @@
     test("orders with freight cost over 100", function () {
         expect(1);
         var query = EntityQuery.from("Orders")
+
             .where("Freight", FilterQueryOp.GreaterThan, 100);
         //  .where("Freight", ">", 100); // alternative to FilterQueryOp
+        //  .where("Freight", "greaterThan", 100); // using the name of the FilterQueryOp itself
+
 
         verifyQuery(newEm, query, "freight orders query");
     });
@@ -198,10 +201,24 @@
         var query = EntityQuery.from("Orders")
             .where("OrderDate", FilterQueryOp.GreaterThanOrEqual, testDate);
         //  .where("OrderDate", ">=", testDate); // alternative to FilterQueryOp
+        //  .where("OrderDate", "GreaterThanOrEqual", testDate);
 
         verifyQuery(newEm, query, "date orders query");
     });
+    /*********************************************************
+    * orders placed on or after 1/1/1998, using moment.js
+    * This query mimics on in Brian Noyce' PluralSight course
+    * both in using moment.js AND in using the FilterQueryOp's symbol name
+    *********************************************************/
+    test("orders placed on or after 1/1/1998 (using moment.js)", function () {
+        expect(1);
+        // Make sure date is in UTC (like the datetimes in the database)
+        var testDate = moment.utc([1998, 0, 1]); // month counts from zero!
 
+        var query = EntityQuery.from("Orders")
+            .where("OrderDate", "GreaterThanOrEqual", testDate);
+        verifyQuery(newEm, query, "date orders query");
+    });
     /*********************************************************
     * no orders placed exactly on 1/1/1998 at 9am GMT.
     *********************************************************/
@@ -2357,7 +2374,7 @@
              { CustomerID: alfredsID, CompanyName: 'Acme' }, UNCHANGED);
 
          throws(function() {
-             var q = EntityQuery.fromEntities([emp1, cust]);
+             EntityQuery.fromEntities([emp1, cust]);
          }, /not of type/, "raised error because not all entities are the same type");
      });
 

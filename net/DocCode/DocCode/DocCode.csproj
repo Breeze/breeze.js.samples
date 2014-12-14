@@ -146,6 +146,10 @@
       <DependentUpon>knockout-2.3.0.debug.js</DependentUpon>
     </Content>
     <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\moment.js" />
+    <Content Include="Scripts\moment.min.js"> 
+      <DependentUpon>moment.js</DependentUpon>
+    </Content>
     <Content Include="Scripts\q.js" />
     <Content Include="Scripts\q.min.js" />
     <Content Include="Scripts\qunit.js" />

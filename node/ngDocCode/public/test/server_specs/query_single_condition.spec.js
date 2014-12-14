@@ -105,6 +105,31 @@ describe("query_single_condition:", function () {
         }
     });
 
+    /*********************************************************
+    * orders placed on or after 1/1/1998, using moment.js
+    * This query mimics on in Brian Noyce' PluralSight course
+    * both in using moment.js AND in using the FilterQueryOp's symbol name
+    *********************************************************/
+    it("where date property is on or after (using moment.js)", function (done) {
+
+        // Make sure date is in UTC (like the datetimes in the database)
+        // testDate is 1/1/1998 at midnight GMT
+        var testDate = moment.utc([1998, 0, 1]); // month counts from zero!
+
+        EntityQuery.from('Orders')
+            .where("OrderDate", "GreaterThanOrEqual", testDate)
+            .using(em).execute()
+            .then(success).then(done, done);
+
+        function success(data){
+            gotResults(data);
+            data.results.forEach(function (o) {
+                expect(o.OrderDate).to.be.at.least(testDate,
+                    'OrderDate of order {0} to {1} is {2}'
+                        .format(o.OrderID, o.ShipName, o.OrderDate.toUTCString()));
+            });
+        }
+    });
     it("where date property is exactly equal", function (done) {
 
         // Make sure date is in UTC (like the datetimes in the database)

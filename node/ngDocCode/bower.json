@@ -1,6 +1,6 @@
 {
     "name": "BreezeJS-ngDocCode-Sample",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "BreezeJS exploratory tests in Angular",
     "authors": [
         "Ward Bell"
@@ -15,14 +15,14 @@
         "tests"
     ],
     "dependencies": {
-        "angular": "~1.2.24",
-        "angular-mocks": "~1.2.24",
-        "angular-route": "~1.2.24",
-        "angular-animate": "~1.2.24",
-        "angular-sanitize": "~1.2.24",
+        "angular": "~1.3.6",
+        "angular-mocks": "~1.3.6",
+        "angular-route": "~1.3.6",
+        "angular-animate": "~1.3.6",
+        "angular-sanitize": "~1.3.6",
 
         "breezejs": "~1.5.2",
-
+        "moment":   "~2.8.4",
         "sinon": "http://sinonjs.org/releases/sinon-1.12.1.js"
     },
     "exportsOverride": {  

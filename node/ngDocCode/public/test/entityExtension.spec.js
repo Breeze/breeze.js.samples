@@ -16,10 +16,10 @@ describe('entityExtension:', function() {
             done(); // got it already
             return; 
         }
-        breeze.Q.all(
+        breeze.Q.all([
             moduleMetadataStore.fetchMetadata(northwindService),
-            moduleMetadataStore.fetchMetadata(todoService))
-        .then(function(){ done(); }, done);
+            moduleMetadataStore.fetchMetadata(todoService)
+        ]).then(function(resolveds) { done(); }, done);
     });
 
     /*********************************************************

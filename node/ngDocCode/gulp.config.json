@@ -52,7 +52,9 @@
         "./bower_components/breezejs/labs/breeze.ajaxPost.js",
         "./bower_components/breezejs/labs/breeze.getEntityGraph.js",
         "./bower_components/breezejs/labs/breeze.metadata-helper.js",
-        "./bower_components/breezejs/labs/breeze.savequeuing.js"
+        "./bower_components/breezejs/labs/breeze.savequeuing.js",
+
+        "./bower_components/moment/moment.js"
     ],
    "vendorcss": [
         "./node_modules/mocha/mocha.css"
