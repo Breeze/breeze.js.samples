@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
-using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace Northwind.DtoModels
 {
@@ -18,12 +17,15 @@ namespace Northwind.DtoModels
             modelBuilder.Configurations.Add(new OrderDtoConfiguration());
             modelBuilder.Configurations.Add(new OrderDetailDtoConfiguration());
             modelBuilder.Configurations.Add(new ProductDtoConfiguration());
+            modelBuilder.Configurations.Add(new SupplierDtoConfiguration());
         }
 
         //  Dto versions of these Northwind Model classes
+        public DbSet<Category> Categories { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Supplier> Suppliers { get; set; }
     }
 }
 
@@ -37,7 +39,9 @@ namespace Northwind.DtoModels
     {
         public CustomerDtoConfiguration()
         {
-             Property(c => c.CompanyName).IsRequired().HasMaxLength(40);
+            Property(c => c.CustomerID)
+              .HasDatabaseGeneratedOption(DatabaseGeneratedOption.None);
+            Property(c => c.CompanyName).IsRequired().HasMaxLength(40);
         }
     }
 
@@ -66,6 +70,13 @@ namespace Northwind.DtoModels
         public ProductDtoConfiguration()
         {
             Property(p => p.ProductName).IsRequired().HasMaxLength(40);       
+        }
+    }
+
+    internal class SupplierDtoConfiguration : EntityTypeConfiguration<Supplier>
+    {
+        public SupplierDtoConfiguration() {
+            Property(s => s.CompanyName).IsRequired().HasMaxLength(40);
         }
     }
 }

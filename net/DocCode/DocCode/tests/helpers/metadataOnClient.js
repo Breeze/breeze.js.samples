@@ -313,8 +313,22 @@
             dataProperties: {
                 productID: { dataType: DT.Int32, isPartOfKey: true },
                 productName: { maxLength: 40, isNullable: false },
+                categoryID: { dataType: DT.Int32, isNullable: false },
+                supplierID: { dataType: DT.Int32, isNullable: false },
             },
 
+            navigationProperties: {
+              category: {
+                entityTypeName: "Category",
+                associationName: "Product_Category",
+                foreignKeyNames: ["categoryID"]
+              },
+              supplier: {
+                entityTypeName: "Supplier",
+                associationName: "Product_Supplier", // not needed but server version has it
+                foreignKeyNames: ["supplierID"]
+              }
+          }
         };
 
         return addTypeToStore(store, et);

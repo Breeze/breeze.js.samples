@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Breeze.ContextProvider;
-// using Breeze.ContextProvider.EF6;
 using Northwind.Models;
 
-namespace DocCode.DataAccess
-{
+namespace DocCode.DataAccess {
+    using SaveMap = Dictionary<Type, List<EntityInfo>>;
+
     internal class NorthwindEntitySaveGuard
     {
         /// <summary>
@@ -60,6 +61,16 @@ namespace DocCode.DataAccess
             return true;
         }
 
+        public SaveMap BeforeSaveEntities(SaveMap saveMap) 
+        {
+          return saveMap; // Nothing to do
+        }
+
+        public void AfterSaveEntities(SaveMap saveMap, List<KeyMapping> keyMappings)
+        {
+          // Nothing to do
+        }
+        
         /// <summary>
         /// DbContext for reading entities from the database during validations
         /// </summary>
@@ -77,35 +88,36 @@ namespace DocCode.DataAccess
 
         private string CanSaveExistingEntity(EntityInfo arg)
         {
-            var type = arg.Entity.GetType();
-            if (type == typeof(Customer))
-            {
-                return ExistingCustomerSaveGuard(arg);
-            } else
-            if (type == typeof(Employee))
-            {
-                return ExistingEmployeeSaveGuard(arg);
-            } else
-            if (type == typeof(Order))
-            {
-                return ExistingOrderSaveGuard(arg);
-            } else
-            if (type == typeof(OrderDetail))
-            {
-                return ExistingOrderDetailSaveGuard(arg);
-            } else
-            if (type == typeof(Product)) {
-              return ExistingProductSaveGuard(arg);
-            } else
-            if (type == typeof(InternationalOrder))
-            {
-                return ExistingInternationalOrderSaveGuard(arg);
-            } else
-            if (type == typeof(User))
-            {
-                return ExistingUserSaveGuard(arg);
-            }
-            return "is is not a saveable type";
+          var type = arg.Entity.GetType();
+
+          if (type == typeof(Customer))
+          {
+              return ExistingCustomerSaveGuard(arg);
+          }
+          if (type == typeof(Employee))
+          {
+            return ExistingEmployeeSaveGuard(arg);
+          }
+          if (type == typeof(Order))
+          {
+            return ExistingOrderSaveGuard(arg);
+          }
+          if (type == typeof(OrderDetail))
+          {
+            return ExistingOrderDetailSaveGuard(arg);
+          }
+          if (type == typeof(Product)) {
+            return ExistingProductSaveGuard(arg);
+          }
+          if (type == typeof(InternationalOrder))
+          {
+            return ExistingInternationalOrderSaveGuard(arg);
+          }
+          if (type == typeof(User))
+          {
+            return ExistingUserSaveGuard(arg);
+          }
+          return "is is not a saveable type";
         }
 
         private string ExistingEntityGuard(ISaveable entity, object id)

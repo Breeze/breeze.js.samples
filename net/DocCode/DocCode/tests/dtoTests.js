@@ -1,5 +1,5 @@
-/**************************************************************
- * Tests related to the "DTO" documentation
+﻿/**************************************************************
+ * Tests related to the 'DTO' documentation
  * Explore a variety of approaches for fetching and saving data
  * that are not shaped or mapped directly to the server-side entities
  * DTOs are one ... but only one ... of the ways to cope
@@ -8,172 +8,306 @@
 // ReSharper disable InconsistentNaming
 // ReSharper disable AssignedValueIsNeverUsed
 (function (testFns) {
-    "use strict";
+  'use strict';
 
-    /*********************************************************
-    * Breeze configuration and module setup
-    *********************************************************/
-    var extend = breeze.core.extend;
-    var EntityQuery = breeze.EntityQuery;
+  /*********************************************************
+  * Breeze configuration and module setup
+  *********************************************************/
+  var EntityQuery = breeze.EntityQuery;
+  var handleFail = testFns.handleFail;
 
-    var waitForTestPromises = testFns.waitForTestPromises;
-    var handleFail = testFns.handleFail;
-    var handleSaveFailed = testFns.handleSaveFailed;
-    var reportRejectedPromises = testFns.reportRejectedPromises;
+  // Target the Northwind service by default
+  var northwindDtoService = testFns.northwindDtoServiceName;
+  var newEm = testFns.newEmFactory(northwindDtoService);
 
-    // When targeting the Foo controller
-    var fooDataService = new breeze.DataService({
-        serviceName: "api",
-        hasServerMetadata: false
-    });
-    function newFooEm() {
-        return new breeze.EntityManager({ dataService: fooDataService });
+  var moduleOptions = testFns.getModuleOptions(newEm);
+
+  /************************** QUERIES *************************/
+
+  module('dto queries', moduleOptions);
+
+  asyncTest('can get ALL DTO customers', function () {
+    expect(7);
+
+    EntityQuery.from('Customers')
+      .using(newEm()).execute()
+      .then(success).catch(handleFail).finally(start);
+
+    function success(data) {
+      ok(data.results.length > 0, 'got ' + data.results.length + ' DTO customers');
+      var cust1 = data.results[0];
+      ok(cust1.getProperty('CustomerID')  !== undefined, 'DTO customer has a CustomerID');
+      ok(cust1.getProperty('CompanyName') !== undefined, 'DTO customer has a CompanyName');
+
+      // Properties of a DTO customer that is not in the server-side Customer
+      ok(cust1.getProperty('OrderCount')  !== undefined, 'DTO customer has an OrderCount!');
+      ok(cust1.getProperty('FragusIndex') !== undefined, 'DTO customer has a FragusIndex!');
+
+      // Properties of a server-side customer that are not in the CustomerDTO
+      var keys = Object.keys(cust1);
+      ok(keys.indexOf('ContactName') === -1, 'DTO customer does NOT have a ContactName');
+      ok(keys.indexOf('City') === -1,        'DTO customer does NOT have a City');
     }
 
-    // Target the Northwind service by default
-    var northwindService = testFns.northwindServiceName;
-    var newNorthwindEm = testFns.newEmFactory(northwindService);
+  });
 
-    var moduleOptions = testFns.getModuleOptions(newNorthwindEm);
+  asyncTest('can page a few DTO customers', function () {
+    expect(1);
 
-    /************************** QUERIES *************************/
+    EntityQuery.from('Customers')
+      .take(3).skip(2)
+      .orderBy('CompanyName') // can sort on it because same property name as in EF model
+      .using(newEm()).execute()
+      .then(success).catch(handleFail).finally(start);
 
-    module("dtoTests", moduleOptions);
-
-    //#region Foo queries
-
-    /*********************************************************
-    * can query an arbitrary object from a vanilla Web API controller
-    *********************************************************/
-    asyncTest("can query all Foos from a vanilla Web API controller", function () {
-        expect(1);
-        newFooEm().executeQuery("foos")
-            .then(success).fail(handleFail).fin(start);
-
-        function success(data) {
-            var foos = data.results, len = foos.length;
-            ok(len, "Expected 'Foos' and got " + len);
-        }
-    });
-    asyncTest("can filter Foos from a vanilla Web API controller", function () {
-        expect(2);
-        newFooEm().executeQuery("foos/?$filter=ID le 3")
-            .then(success).fail(handleFail).fin(start);
-
-        function success(data) {
-            var foos = data.results, len = foos.length;
-            ok(len, "Expected 'Foos' and got " + len);
-            var foosWithIdOver3 = foos.filter(function(f) { return f.ID > 3; });
-            equal(foosWithIdOver3.length, 0, "Should have no 'Foo' with ID>3.");
-        }
-    });
-    asyncTest("can get a Foo by ID from a vanilla Web API controller", function () {
-        expect(2);
-        newFooEm().executeQuery("foos/1")
-            .then(success).fail(handleFail).fin(start);
-
-        function success(data) {
-            var foos = data.results, len = foos.length;
-            equal(len, 1, "Expected one 'Foo' and got " + len);
-            equal(data.results[0].ID, 1, "Should have raw 'Foo' with ID eq 1.");
-        }
-    });
-
-    /*********************************************************
-    * can get Foos metadata from a dedicated metadata controller
-    *********************************************************/
-    asyncTest("can get Foos metadata from a dedicated metadata controller", function () {
-        expect(1);
-        var store = new breeze.MetadataStore();
-        store.fetchMetadata("breeze/FoosMetadata")
-            .then(success).fail(handleFail).fin(start);
-
-        function success(data) {
-            var fooType = store.getEntityType('Foo');
-            ok(fooType, "Got metadata; has 'Foo' entity type with data properties: "+
-            fooType.dataProperties.map(function (p) { return "'" + p.name + "'"; }).join(", "));
-        }
-    });
-    //#endregion
-
-    /*********************************************************
-    * can fetch a hash of entities (Lookups)
-    *********************************************************/
-    asyncTest("can fetch a hash of entities", function () {
-        expect(6);
-        newNorthwindEm().executeQuery("Lookups")
-            .then(success).fail(handleFail).fin(start);
-
-        function success(data) {
-            var bag = data.results[0], propNames = [];
-            ok(bag, "expected to get an object, 'the hash'.");
-            ok(bag.entityAspect == undefined,
-                "the hash should not be an entity.");
-            for (var prop in bag) {
-                propNames.push(prop);
-            };
-            equal(propNames.length, 3,
-                "expected hash to have 3 members and got " + propNames.join(", "));
-            propNames.forEach(function (propName) {
-                var ex = null;
-                try {
-                    bag[propName][0].entityAspect.entityState.isUnchanged();
-                } catch(ex) {}
-                ok(!ex, "expected '" +propName+ "' be an array containing Unchanged entities.");
-            });
-
-        }
-    });
-
-
-    /************************** SAVES *************************/
-    // This CustomerID guid is known to be new in the Northwind db
-    var newCustomerID = testFns.newGuidComb();
-    var alfredsID = testFns.wellKnownData.alfredsID;
-
-    module("dtoTests - saves", {
-        setup: function () {
-            testFns.populateMetadataStore(newNorthwindEm);
-        },
-        teardown: function() {
-            testFns.teardown_northwindReset();
-        }
-    });
-
-    asyncTest("can save a new Customer entity with hidden CustomerID_OLD", function () {
-        expect(1);
-        // Create and initialize entity to save
-        var em = newNorthwindEm();
-        var entity = em.createEntity('Customer',
-            {
-                CustomerID: newCustomerID
-            }
-        );
-        entity.CompanyName("Test " + new Date().toISOString());
-
-        // Act and Assert
-        entitySaveTester(entity, /*shouldSave*/ true);
-
-    });
-
-    /************************** TEST HELPERS *************************/
-    function entitySaveTester(entity, shouldSave) {
-        var typeName = entity.entityType.shortName;
-        var operation = entity.entityAspect.entityState.name;
-        var msgPart = " save the " + operation + " " + typeName;
-
-        var manager = entity.entityAspect.entityManager;
-        manager.saveChanges([entity])
-        .then(function (saveResults) {
-            var prefix = shouldSave ? "should" : "should not";
-            ok(shouldSave, prefix + " have been able to" + msgPart +
-                " with key: " + JSON.stringify(entity.entityAspect.getKey().values));
-        })
-        .fail(function (error) {
-            var prefix = shouldSave ? "should not" : "should";
-            ok(!shouldSave, "server " + prefix + " have rejected " + msgPart +
-                " with the error: " + error.message);
-        }).fin(start);
+    function success(data) {
+      equal(data.results.length, 3, 'got the expected number (3) of DTO customers');
     }
+
+  });
+
+  asyncTest('can filter for DTO customers by CompanyName', function () {
+    expect(1);
+
+    EntityQuery.from('Customers')
+    // can filter on it because same property name as in EF model
+      .where('CompanyName', 'startsWith', 'C')
+      .using(newEm()).execute()
+      .then(success).catch(handleFail).finally(start);
+
+    function success(data) {
+      ok(data.results.length > 0, 'got some DTO customers starting w/ "C"');
+    }
+
+  });
+
+  asyncTest('can NOT filter for DTO customers by ContactName', function () {
+    expect(1);
+
+    EntityQuery.from('Customers')
+      // can't filter on it because not a property of CustomerDTO
+      .where('ContactName', 'startsWith', 'C')
+      .using(newEm()).execute()
+      .then(success).catch(fail).finally(start);
+
+    function fail(err) {
+      ok(/must be a valid property.*ContactName/.test(err.message),
+        'should complain about invalid property; failed w/ message: ' + err.message);
+    }
+
+    function success(data) {
+      ok(false,
+        'should NOT be able to filter by a property that isn\'t in the DTO');
+    }
+
+  });
+
+  asyncTest('query for Orders returns their details', function () {
+    expect(6);
+
+    EntityQuery.from('Orders').take(1)
+      .using(newEm()).execute()
+      .then(success).catch(handleFail).finally(start);
+
+    function success(data) {
+      equal(data.results.length, 1, 'got the DTO Order');
+      var order = data.results[0];
+
+      // Properties of a server-side order that are not in the OrderDTO
+      var keys = Object.keys(order);
+      ok(keys.indexOf('ShipName') === -1, 'DTO order does NOT have a ShipName');
+      ok(keys.indexOf('ShipTo') === -1,   'DTO order does NOT have a ShipTo');
+
+      var details = order.getProperty('OrderDetails');
+      ok(details.length > 1, 'DTO Order has ' + details.length + ' OrderDetails');
+
+      var detail1 = details[0];
+      ok(detail1['entityAspect'] !== undefined, 'an Order.OrderDetails element is an entity');
+      // OrderDTO lacks a Product navigation property
+      ok(detail1['Products'] === undefined, 'DTO OrderDetail does NOT have a Products navprop');
+    }
+
+  });
+
+  asyncTest('cannot query a type that isn\'t in the DTO model', function() {
+
+    EntityQuery.from('Employees')
+      .using(newEm()).execute()
+      .then(success).catch(fail).finally(start);
+
+    function fail(err) {
+      ok(/no.*resource/i.test(err.message),
+        'should complain about query resource; failed w/ message: ' + err.message);
+    }
+
+    function success(data) {
+      ok(false,
+        'should NOT be able query "Employees" which are not in the DTO model');
+    }
+  });
+
+  ///// Save Tests ////
+
+  var newGuidComb = testFns.newGuidComb;
+  var handleSaveFailed = testFns.handleSaveFailed;
+
+  module('dto saves', {
+    setup: function () {
+      testFns.populateMetadataStore(newEm);
+    },
+    teardown: function () {
+      testFns.teardown_northwindReset(); // restore original db state after each test
+    }
+  });
+
+  asyncTest('can save a new CustomerDTO entity', function () {
+    expect(3);
+    var em = newEm();
+    var customer = em.createEntity('Customer', {
+      CustomerID: newGuidComb(),
+      CompanyName: 'Test1 ' + new Date().toISOString()
+    });
+
+    em.saveChanges()
+      .then(confirmSaved).catch(handleSaveFailed).finally(start);
+
+    function confirmSaved(saveResult) {
+      ok(saveResult.entities.length > 0, 'expected saved entities in saveResult');
+      ok(saveResult.entities[0] === customer,
+        'saveResult customerDTO is same object as saved `customer` (paranoia)');
+      var state = customer.entityAspect.entityState;
+      ok(state.isUnchanged(),
+        'added CustomerDTO should be unchanged after save; state is ' + state.name);
+    }
+
+  });
+
+  asyncTest('can modify my own CustomerDTO', function () {
+    expect(2);
+    var timestamp = new Date().toISOString();
+    var em = newEm();
+
+    var customer = em.createEntity('Customer', {
+      CustomerID: newGuidComb(),
+      CompanyName: 'Test2A ' + timestamp
+    });
+
+    em.saveChanges().then(modifyCustomer).catch(handleSaveFailed).finally(start);
+
+    function modifyCustomer(saveResults) {
+      var saved = saveResults.entities[0];
+      ok(saved && saved === customer,
+          'save of added CustomerDTO should have succeeded');
+      customer.CompanyName('Test2M ' + timestamp);
+      return em.saveChanges().then(confirmSaved);
+    }
+
+    function confirmSaved(saveResults) {
+      var saved = saveResults.entities[0];
+      ok(saved && saved === customer,
+          'save of modified CustomerDTO, "{0}", should have succeeded'
+          .format(saved && saved.CompanyName()));
+    }
+
+  });
+
+  asyncTest('can delete my own CustomerDTO', function () {
+    expect(3);
+    var timestamp = new Date().toISOString();
+    var em = newEm();
+
+    var customer = em.createEntity('Customer', {
+      CustomerID: newGuidComb(),
+      CompanyName: 'Test3A ' + timestamp
+    });
+
+    em.saveChanges().then(deleteCustomer).catch(handleSaveFailed).finally(start);
+
+    function deleteCustomer(saveResults) {
+      var saved = saveResults.entities[0];
+      ok(saved && saved === customer,
+          'save of added CustomerDTO should have succeeded');
+      customer.entityAspect.setDeleted();
+      return em.saveChanges()
+      .then(confirmCustomerSaved);
+    }
+
+    function confirmCustomerSaved(saveResults) {
+      var saved = saveResults.entities[0];
+      ok(saved && saved === customer,
+          'save of deleted CustomerDTO, "{0}", should have succeeded'
+          .format(saved && saved.CompanyName()));
+
+      var state = customer.entityAspect.entityState.name;
+      equal(state, breeze.EntityState.Detached.name,
+          'CustomerDTO object should be Detached');
+    }
+  });
+
+  // Product has a store-generated key; make sure ProductDTO works too
+  asyncTest('can save a new ProductDTO entity', function () {
+    expect(4);
+
+    var em = newEm();
+    var product = em.createEntity('Product', {
+      ProductName: 'Test1 ' + new Date().toISOString(),
+      CategoryID: 1,
+      SupplierID: 2
+    });
+
+    em.saveChanges()
+      .then(confirmSaved).catch(handleSaveFailed).finally(start);
+
+    function confirmSaved(saveResult) {
+      ok(saveResult.entities.length > 0, 'expected saved entities in saveResult');
+      ok(saveResult.entities[0] === product,
+        'saveResult productDTO is same object as saved `product` (paranoia)');
+      ok(product.getProperty('ProductID') > 0, 'productID is a permanent key value');
+      var state = product.entityAspect.entityState;
+      ok(state.isUnchanged(),
+        'added ProductDTO should be unchanged after save; state is ' + state.name);
+
+      var keyMappings = saveResult.keyMappings;
+    }
+  });
+
+  asyncTest('cannot save an unsavable DTO type', function() {
+
+    var em = newEm();
+
+    // Although may save a product, should not be saved
+    // because category fails causing entire save to fail
+    var product = em.createEntity('Product', {
+      ProductName: 'Test1 ' + new Date().toISOString(),
+      CategoryID: 1,
+      SupplierID: 2
+    });
+
+    // May NOT save a category
+    var category = em.createEntity('Category', {
+      CategoryName: 'Test1 ' + new Date().toISOString()
+    });
+
+    em.saveChanges()
+      .then(success).catch(fail).finally(start);
+
+    function fail(err) {
+      ok(/Cannot save changes to type/.test(err.message),
+        'should complain about invalid type; failed w/ message: ' + err.message);
+
+      var state = category.entityAspect.entityState.name;
+      equal(state, breeze.EntityState.Added.name, '' +
+        'the category entity should remain in the Added state after failed save; is ' + state);
+
+      state = product.entityAspect.entityState.name;
+      equal(state, breeze.EntityState.Added.name, '' +
+        'the product entity should remain in the Added state after failed save; is ' + state);
+    }
+
+    function success(data) {
+      ok(false,
+        'should NOT be able save when a "Category" DTO is in the change-set');
+    }
+  });
 
 })(docCode.testFns);
