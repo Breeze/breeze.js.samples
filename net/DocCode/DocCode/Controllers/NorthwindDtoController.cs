@@ -45,6 +45,12 @@ namespace DocCode.Controllers
             return _repository.SaveChanges(saveBundle);
         }
 
+        // ~/breeze/northwindDto/Categories
+        [HttpGet]
+        public IQueryable<Category> Categories() {
+          return _repository.Categories;
+        }
+
         // ~/breeze/northwindDto/Customers
         [HttpGet]
         public IQueryable<Customer> Customers() {
@@ -70,6 +76,11 @@ namespace DocCode.Controllers
             return _repository.Products;
         }
 
+        // ~/breeze/northwindDto/Suppliers
+        [HttpGet]
+        public IQueryable<Supplier> Suppliers() {
+          return _repository.Suppliers;
+        }
         /// <summary>
         /// Get the UserSessionId from value in the request header
         /// </summary>

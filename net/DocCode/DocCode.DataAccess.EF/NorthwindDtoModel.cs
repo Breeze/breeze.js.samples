@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace Northwind.DtoModels
 {
+    public class Category
+    {
+        public int CategoryID { get; set; }
+        public string CategoryName { get; set; }
+    }
+
     public class Customer
     {
         public Guid CustomerID { get; set; }
@@ -45,5 +51,16 @@ namespace Northwind.DtoModels
     {
         public int ProductID { get; set; }
         public string ProductName { get; set; }
+        public int SupplierID { get; set; }
+        public int CategoryID { get; set; }
+
+        public Category Category { get; set; }
+        public Supplier Supplier { get; set; }
+    }
+
+    public class Supplier
+    {
+        public int SupplierID { get; set; }
+        public string CompanyName { get; set; }
     }
 }

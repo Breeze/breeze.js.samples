@@ -27,6 +27,7 @@ docCode.testFns = (function () {
         assertIsSorted: assertIsSorted,
         breeze: breeze,
         ensureIsEm: ensureIsEm,
+        entitySaveTester: entitySaveTester,
         foosMetadataServiceName: "breeze/FoosMetadata",
         getModuleOptions: getModuleOptions,
         getNextIntId: getNextIntId,
@@ -435,6 +436,26 @@ docCode.testFns = (function () {
                 data.first = count ? data.results[0] : null;
                 return Q.fcall(function () { return data; });
             });
+    }
+
+    function entitySaveTester(masterEntity, shouldSave) {
+      var typeName = masterEntity.entityType.shortName;
+      var operation = masterEntity.entityAspect.entityState.name;
+      var msgPart = " save the " + operation + " " + typeName;
+
+      var manager = masterEntity.entityAspect.entityManager;
+      manager.saveChanges()
+      .then(function (saveResults) {
+        var prefix = shouldSave ? "should" : "should not";
+        ok(shouldSave, prefix + " have been able to" + msgPart +
+            " with key: " + JSON.stringify(masterEntity.entityAspect.getKey().values));
+      })
+      .catch(function (error) {
+        var prefix = shouldSave ? "should not" : "should";
+        ok(!shouldSave, "server " + prefix + " have rejected " + msgPart +
+            " with the error: " + error.message);
+      })
+      .finally(start);
     }
 
     //////// Teardown + Purge + Reset //////

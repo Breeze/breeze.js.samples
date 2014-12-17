@@ -6,11 +6,11 @@
     /*********************************************************
     * Breeze configuration and module setup
     *********************************************************/
-    // Classes we'll need from the breeze namespaces
     var EntityQuery = breeze.EntityQuery;
     var newGuidComb = testFns.newGuidComb;
     var handleFail = testFns.handleFail;
     var handleSaveFailed = testFns.handleSaveFailed;
+    var entitySaveTester = testFns.entitySaveTester;
 
     /*********************************************************
     * Northwind Saves
@@ -18,8 +18,6 @@
     // Target the Northwind service by default
     var northwindService = testFns.northwindServiceName;
     var newNorthwindEm = testFns.newEmFactory(northwindService);
-
-    var alfredsID = testFns.wellKnownData.alfredsID;
 
     module("saveNorthwindTests", {
         setup: function () {
@@ -134,10 +132,10 @@
         }
 
         function confirmOrderGraph(data) {
-            var order = data.results[0];
-            equal(order.ShipName(), 'Add OrderGraphTest', "'ShipName' of the re-queried order is expected value");
+            var o = data.results[0];
+            equal(o.ShipName(), 'Add OrderGraphTest', "'ShipName' of the re-queried order is expected value");
 
-            var details = (order && order.OrderDetails()) || [];
+            var details = (o && o.OrderDetails()) || [];
             equal(details.length, 3, 'requery of saved new Order graph came with the expected 3 details');
 
             var gotExpectedDetails = details.every(function (d) {
@@ -255,23 +253,4 @@
         }
     });
 
-    /************************** TEST HELPERS *************************/
-    function entitySaveTester(masterEntity, shouldSave) {
-        var typeName = masterEntity.entityType.shortName;
-        var operation = masterEntity.entityAspect.entityState.name;
-        var msgPart = " save the " + operation + " " + typeName;
-
-        var manager = masterEntity.entityAspect.entityManager;
-        manager.saveChanges()
-        .then(function (saveResults) {
-            var prefix = shouldSave ? "should" : "should not";
-            ok(shouldSave, prefix + " have been able to" + msgPart +
-                " with key: " + JSON.stringify(masterEntity.entityAspect.getKey().values));
-        })
-        .fail(function (error) {
-            var prefix = shouldSave ? "should not" : "should";
-            ok(!shouldSave, "server " + prefix + " have rejected " + msgPart +
-                " with the error: " + error.message);
-        }).fin(start);
-    }
 })(docCode.testFns);
