@@ -66,7 +66,6 @@
 
   });
 
-
   asyncTest("can filter for DTO customers by CompanyName", function () {
     expect(1);
 
@@ -129,6 +128,9 @@
     }
 
   });
+
+  // TODO Tests:
+  // asyncTest("cannot query a type that isn't in the DTO model", function () { });
 
   ///// Save Tests ////
 
@@ -256,4 +258,9 @@
       var keyMappings = saveResult.keyMappings;
     }
   });
+
+  // TODO Tests:
+  // asyncTest("cannot save a type that isn't in the DTO model", function () { });
+  // asyncTest("cannot save an unsavable DTO type that isn't in the DTO model", function () { });
+
 })(docCode.testFns);

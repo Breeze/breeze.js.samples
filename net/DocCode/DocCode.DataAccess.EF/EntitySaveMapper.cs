@@ -3,46 +3,42 @@ using System.Collections.Generic;
 
 // ReSharper disable once CheckNamespace
 namespace Breeze.ContextProvider {
+  using SaveMap                   = Dictionary<Type, List<EntityInfo>>;
+  using BeforeSaveEntityDelegate  = Func<EntityInfo, bool>;
+  using EntityInfoCreator         = Func<Object, EntityState, EntityInfo>;
 
   /// <summary>
-  /// Interface for class that translates data between a client-facing <see cref="CType"/> entity  
-  /// and a server-side <see cref="CType"/> entity. 
+  /// Interface for class that translates data between a client-facing entity  
+  /// and a server-side entity. 
   /// as when translating from client-facing DTOs to the server-side persisted entity type.
   /// </summary>
   /// <remarks>
   /// See <see cref="EntitySaveMapper{STYPE, CTYPE} "/> for details
   /// </remarks>
   public interface IEntitySaveMapper {
-    /// <summary>
-    /// Get the entity type of the Client-facing entity (typically the DTO)
-    /// </summary>
-    Type CType { get;  }
-    /// <summary>
-    /// Get the entity type of the Server-side entity (the persisted entity)
-    /// </summary>
-    Type SType { get; }
 
     /// <summary>
-    /// Convert the SaveMap <see cref="EntityInfo"/> entries of the <see cref="CType"/>
-    /// into EntityInfo entries for the <see cref="SType"/>.
+    /// Convert the SaveMap <see cref="EntityInfo"/> entries of the client type
+    /// into EntityInfo entries for the server type.
     /// </summary>
     /// <remarks>
-    /// See <see cref="EntitySaveMapper{STYPE, CTYPE}.ConvertSaveMap "/> for details
+    /// See <see cref="EntitySaveMapper{STYPE, CTYPE}.ConvertBeforeSaveMap "/> for details
     /// </remarks>
-    Dictionary<Type, List<EntityInfo>> ConvertSaveMap(
-      Func<Object, EntityState, EntityInfo> entityInfoCreator,
-      Dictionary<Type, List<EntityInfo>> saveMap,
-      Func<EntityInfo, bool> beforeSaveEntity = null);
+    SaveMap ConvertBeforeSaveMap(
+      SaveMap saveMap,
+      EntityInfoCreator entityInfoCreator,
+      BeforeSaveEntityDelegate beforeSaveEntity = null);
 
     /// <summary>
-    /// Convert the <see cref="SaveResult"/> returned by <see cref="ContextProvider.SaveChanges"/>
-    /// from <see cref="SType"/> entities into the <see cref="CType"/> entities
-    /// that the client is expecting.
+    /// Convert the post-save server entities into client entities.
     /// </summary>
     /// <remarks>
-    /// See <see cref="EntitySaveMapper{STYPE, CTYPE}.ConvertSaveResult "/> for details
+    /// See <see cref="EntitySaveMapper{STYPE, CTYPE}.ConvertAfterSaveMap "/> for details
     /// </remarks>
-    SaveResult ConvertSaveResult(SaveResult saveResult);
+    SaveMap ConvertAfterSaveMap(
+      SaveMap saveMap,
+      List<KeyMapping> keyMappings,
+      EntityInfoCreator entityInfoCreator);
   }
 
   /// <summary>
@@ -55,34 +51,36 @@ namespace Breeze.ContextProvider {
     /// one or more <see cref="IEntitySaveMapper"/> instances.
     /// </summary>
     /// <remarks>
-    /// See <see cref="EntitySaveMapper{STYPE, CTYPE}.ConvertSaveMap "/> for details
+    /// See <see cref="EntitySaveMapper{STYPE, CTYPE}.ConvertBeforeSaveMap "/> for details
     /// </remarks>
-    public static Dictionary<Type, List<EntityInfo>> ConvertSaveMap(
-      this Dictionary<Type, List<EntityInfo>> saveMap,
-      Func<Object, EntityState, EntityInfo> entityInfoCreator, 
-      Func<EntityInfo, bool> beforeSaveEntity,
+    public static SaveMap ConvertBeforeSaveMap(
+      this SaveMap saveMap,
+      EntityInfoCreator entityInfoCreator, 
+      BeforeSaveEntityDelegate beforeSaveEntity,
       params IEntitySaveMapper[] saveMappers) {
 
-      foreach (var saveMapper in saveMappers) {
-        saveMapper.ConvertSaveMap(entityInfoCreator, saveMap, beforeSaveEntity);
-      }
-      return saveMap;
+        foreach (var saveMapper in saveMappers) {
+          saveMapper.ConvertBeforeSaveMap(saveMap, entityInfoCreator, beforeSaveEntity);
+        }
+        return saveMap;
     }
 
     /// <summary>
-    /// Convert a <see cref="SaveResult"/> with
-    /// one or more <see cref="IEntitySaveMapper"/> instances.
+    /// Convert the post-save server entities into client entities.
     /// </summary>
     /// <remarks>
-    /// See <see cref="EntitySaveMapper{STYPE, CTYPE}.ConvertSaveMap "/> for details
+    /// See <see cref="EntitySaveMapper{STYPE, CTYPE}.ConvertAfterSaveMap "/> for details
     /// </remarks>
-    public static SaveResult ConvertSaveResult(
-      this SaveResult saveResult, params IEntitySaveMapper[] saveMappers) {
+    public static SaveMap ConvertAfterSaveMap(
+      this SaveMap saveMap,
+      List<KeyMapping> keyMappings,
+      EntityInfoCreator entityInfoCreator,
+      params IEntitySaveMapper[] saveMappers) {
 
-          foreach (var saveMapper in saveMappers) {
-            saveMapper.ConvertSaveResult(saveResult);
-          }
-          return saveResult;
+        foreach (var saveMapper in saveMappers) {
+          saveMapper.ConvertAfterSaveMap(saveMap, keyMappings, entityInfoCreator);
+        }
+        return saveMap;
     }
   }
 
@@ -116,13 +114,13 @@ namespace Breeze.ContextProvider {
     /// Convert the SaveMap <see cref="EntityInfo"/> entries of the <see cref="CType"/>
     /// into EntityInfo entries for the <see cref="SType"/>.
     /// </summary>
+    /// <param name="saveMap">
+    /// The "SaveMap" passed into the <see cref="ContextProvider.BeforeSaveEntities"/> method.
+    /// </param>
     /// <param name="entityInfoCreator">
     /// Function that creates a new <see cref="EntityInfo"/> for a
     /// given entity and optional <see cref="EntityState"/>.
     /// See <see cref="ContextProvider.CreateEntityInfo"/>.
-    /// </param>
-    /// <param name="saveMap">
-    /// The "SaveMap" passed into the <see cref="ContextProvider.BeforeSaveEntities"/> method.
     /// </param>
     /// <param name="beforeSaveEntity">
     /// Optional function to validate an individual entity before it can save;
@@ -138,10 +136,10 @@ namespace Breeze.ContextProvider {
     /// override or delegate method.
     /// </para>
     /// </remarks>
-    public Dictionary<Type, List<EntityInfo>> ConvertSaveMap(
-        Func<Object, EntityState, EntityInfo> entityInfoCreator,
-        Dictionary<Type, List<EntityInfo>> saveMap,
-        Func<EntityInfo, bool> beforeSaveEntity = null) {
+    public SaveMap ConvertBeforeSaveMap(
+        SaveMap saveMap,
+        EntityInfoCreator entityInfoCreator,
+        BeforeSaveEntityDelegate beforeSaveEntity = null) {
 
       List<EntityInfo> cGroup, sGroup;
 
@@ -157,12 +155,15 @@ namespace Breeze.ContextProvider {
       }
 
       foreach (var cEntityInfo in cGroup) {
-        var sEntity = MapEntityToServer((CTYPE)cEntityInfo.Entity);
+        var sEntity = MapEntityToServer(cEntityInfo);
+        if (sEntity == null) { continue; }
+
         var mappedEntityInfo = entityInfoCreator(sEntity, cEntityInfo.EntityState);
         mappedEntityInfo.OriginalValuesMap = MapOriginalValues(cEntityInfo.OriginalValuesMap);
         mappedEntityInfo.AutoGeneratedKey = MapAutoGeneratedKey(sEntity, cEntityInfo.AutoGeneratedKey);
         mappedEntityInfo.ForceUpdate = cEntityInfo.ForceUpdate;
 
+        // TODO: Fix this deficiency
         // Unfortunately, UnmappedValuesMap is "protected internal" right now so can't copy
         //mappedEntityInfo.UnmappedValuesMap = entityInfo.UnmappedValuesMap;
 
@@ -174,15 +175,24 @@ namespace Breeze.ContextProvider {
     }
 
     /// <summary>
-    /// Convert the <see cref="SaveResult"/> returned by <see cref="ContextProvider.SaveChanges"/>
-    /// from <see cref="SType"/> entities into the <see cref="CType"/> entities
+    /// Convert the post-save <see cref="SType"/> entities into the <see cref="CType"/> entities
     /// that the client is expecting.
     /// </summary>
-    /// <param name="saveResult">
+    /// <param name="saveMap">
     /// The <see cref="SaveResult"/> returned by <see cref="ContextProvider.SaveChanges"/>
     /// </param>
+    /// <param name="keyMappings">
+    /// The <see cref="SaveResult"/> returned by <see cref="ContextProvider.SaveChanges"/>
+    /// </param>
+    /// <param name="entityInfoCreator">
+    /// Function that creates a new <see cref="EntityInfo"/> for a
+    /// given entity and optional <see cref="EntityState"/>.
+    /// See <see cref="ContextProvider.CreateEntityInfo"/>.
+    /// </param>
     /// <remarks>
-    /// Convert the <see cref="SaveResult.Entities"/> and <see cref="SaveResult.KeyMappings"/>.
+    /// Converts the <see cref="SType"/> entities in the "SaveMap" and <see cref="KeyMapping"/> list 
+    /// passed to the <see cref="ContextProvider.AfterSaveEntities"/> after
+    /// the <see cref="ContextProvider.SaveChangesCore"/>.
     /// It uses the <see cref="MapEntityToClient"/> to convert the <see cref="SType"/> entities into
     /// corresponding <see cref="CType"/> entities.
     /// Use <see cref="MapEntityToClient"/> to convert the <see cref="SType"/> entities in
@@ -192,43 +202,62 @@ namespace Breeze.ContextProvider {
     /// where it can fixup the SaveResult before it is serialized to the client.
     /// </para>
     /// </remarks>
-    public SaveResult ConvertSaveResult(SaveResult saveResult) {
-      var saved = saveResult.Entities;
-      for (var i = 0; i < saved.Count; i++) {
-        var entity = saved[i] as STYPE;
-        if (entity != null) {
-          saved[i] = MapEntityToClient(entity);
+    public SaveMap ConvertAfterSaveMap(
+      SaveMap saveMap, List<KeyMapping> keyMappings, EntityInfoCreator entityInfoCreator) {
+
+      List<EntityInfo> cGroup, sGroup;
+
+      if (saveMap.TryGetValue(SType, out sGroup)) {
+        saveMap.Remove(sType); // don't return SType entities to client
+      } else {
+        return saveMap;        // this SType is not in the saveMap
+      }
+
+      if (!saveMap.TryGetValue(cType, out cGroup)) {
+        cGroup = new List<EntityInfo>();
+        saveMap.Add(cType, cGroup);
+      }
+
+      foreach (var sEntityInfo in sGroup) {
+        var cEntity = MapEntityToClient(sEntityInfo);
+        if (cEntity != null)
+        {
+          var mappedEntityInfo = entityInfoCreator(cEntity, sEntityInfo.EntityState);
+          // No other conversions are needed.
+          cGroup.Add(mappedEntityInfo);       
         }
       }
+
       var sName = SType.FullName;
       var cName = CType.FullName;
-      saveResult.KeyMappings.ForEach(km =>
-      {
-        if (km.EntityTypeName == sName) { km.EntityTypeName = cName; }       
+      keyMappings.ForEach(km => {
+        if (km.EntityTypeName == sName) { km.EntityTypeName = cName; }
       });
-      return saveResult;
+      return saveMap;
     }
 
     protected readonly Type sType = typeof (STYPE);
     protected readonly Type cType = typeof(CTYPE);
 
     /// <summary>
-    /// Map a server <see cref="SType"/> to client <see cref="CType"/> entity.
+    /// Map the server <see cref="SType"/> entity in a <see cref="EntityInfo"/>  
+    /// to a client <see cref="CType"/> entity.
     /// </summary>
     /// <remarks>
-    /// Needed by <see cref="ConvertSaveResult"/>.
+    /// Needed by <see cref="ConvertAfterSaveMap"/>.
     /// All <see cref="EntitySaveMapper{STYPE, CTYPE}"/> classes must implement.
     /// </remarks>
-    protected abstract CTYPE MapEntityToClient(STYPE sEntity);
+    protected abstract CTYPE MapEntityToClient(EntityInfo info);
 
     /// <summary>
-    /// Map a client <see cref="CType"/> to server <see cref="SType"/> entity.
+    /// Map the client <see cref="CType"/> entity in a <see cref="EntityInfo"/>  
+    /// to a server <see cref="SType"/> entity.
     /// </summary>
     /// <remarks>
-    /// Needed by <see cref="ConvertSaveMap"/>.
+    /// Needed by <see cref="ConvertBeforeSaveMap"/>.
     /// All <see cref="EntitySaveMapper{STYPE, CTYPE}"/> classes must implement.
     /// </remarks>
-    protected abstract STYPE MapEntityToServer(CTYPE cEntity);
+    protected abstract STYPE MapEntityToServer(EntityInfo info);
 
     /// <summary>
     /// Map the client's <see cref="EntityInfo.OriginalValuesMap"/>
@@ -240,18 +269,18 @@ namespace Breeze.ContextProvider {
     }
 
     /// <summary>
-    /// Map the <see cref="AutoGeneratedKey"/> created from client EntityInfo
-    /// to an AutoGeneratedKey for the server entity.
+    /// Map the <see cref="AutoGeneratedKey"/> created from the source EntityInfo
+    /// to an AutoGeneratedKey for the <param name="targetEntity"></param>.
     /// </summary>
     /// <remarks>
-    /// This implementation assumes that the Property name is <see cref="AutoGeneratedKey"/>
+    /// This implementation assumes that the Property name in <see cref="AutoGeneratedKey"/>
     /// is unchanged even though the type of the entity has changed.
     /// </remarks>
-    protected virtual AutoGeneratedKey MapAutoGeneratedKey(STYPE targetEntity, AutoGeneratedKey clientAutoGeneratedKey = null) {
-      if (clientAutoGeneratedKey != null) {
-        clientAutoGeneratedKey.Entity = targetEntity;
+    protected virtual AutoGeneratedKey MapAutoGeneratedKey<T>(T targetEntity, AutoGeneratedKey autoGeneratedKey = null) {
+      if (autoGeneratedKey != null) {
+        autoGeneratedKey.Entity = targetEntity;
       }
-      return clientAutoGeneratedKey;
+      return autoGeneratedKey;
     }
 
   }

@@ -17,8 +17,6 @@ namespace DocCode.DataAccess
         public NorthwindRepository()
         {
             _contextProvider = new EFContextProvider<NorthwindContext>();
-            _entitySaveGuard = new NorthwindEntitySaveGuard();
-            _contextProvider.BeforeSaveEntityDelegate += _entitySaveGuard.BeforeSaveEntity;
         }
 
         public string Metadata
@@ -35,7 +33,12 @@ namespace DocCode.DataAccess
 
         public SaveResult SaveChanges(JObject saveBundle)
         {
+            PrepareSaveGuard();
             return _contextProvider.SaveChanges(saveBundle);
+        }
+
+        public IQueryable<Category> Categories {
+          get { return Context.Categories; }
         }
 
         public IQueryable<Customer> Customers
@@ -48,51 +51,57 @@ namespace DocCode.DataAccess
             get { return ForCurrentUser(Context.Customers).Include("Orders"); }
         }
 
-      public IQueryable<Customer> CustomersWithFilterOptions(JObject options)
-      {
-        var query = ForCurrentUser(Context.Customers);
-        if (options == null) { return query; }
-
-        if (options["CompanyName"] != null)
-        {
-          var companyName = (string) options["CompanyName"];
-          if (!String.IsNullOrEmpty(companyName))
-          {
-            query = query.Where(c => c.CompanyName == companyName);
+        public IQueryable<Customer> CustomersStartingWithA {
+          get {
+            return ForCurrentUser(Context.Customers)
+                .Where(c => c.CompanyName.StartsWith("A"));
           }
         }
 
-        if (options["Ids"] != null)
+        public IQueryable<Customer> CustomersWithFilterOptions(JObject options)
         {
-          var ids = options["Ids"].Select(id => (Guid) id).ToList();
-          if (ids.Count > 0)
+          var query = ForCurrentUser(Context.Customers);
+          if (options == null) { return query; }
+
+          if (options["CompanyName"] != null)
           {
-            query = query.Where(c => ids.Contains(c.CustomerID));
-          }
-        }
-
-        return query;
-      }
-
-      public IQueryable<Order> OrdersForProduct(int productID = 0)
-        {
-            var query = ForCurrentUser(Context.Orders);
-
-            query = query.Include("Customer").Include("OrderDetails");
-
-            return (productID == 0)
-                        ? query
-                        : query.Where(o => o.OrderDetails.Any(od => od.ProductID == productID));
-        }
-
-        public IQueryable<Customer> CustomersStartingWithA
-        {
-            get
+            var companyName = (string) options["CompanyName"];
+            if (!String.IsNullOrEmpty(companyName))
             {
-                return ForCurrentUser(Context.Customers)
-                    .Where(c => c.CompanyName.StartsWith("A"));
+              query = query.Where(c => c.CompanyName == companyName);
             }
+          }
+
+          if (options["Ids"] != null)
+          {
+            var ids = options["Ids"].Select(id => (Guid) id).ToList();
+            if (ids.Count > 0)
+            {
+              query = query.Where(c => ids.Contains(c.CustomerID));
+            }
+          }
+
+          return query;
         }
+
+        public IQueryable<Employee> Employees {
+          get { return ForCurrentUser(Context.Employees); }
+        }
+
+        public IQueryable<EmployeeTerritory> EmployeeTerritories {
+          get { return Context.EmployeeTerritories; }
+        }
+
+        public IQueryable<Order> OrdersForProduct(int productID = 0)
+          {
+              var query = ForCurrentUser(Context.Orders);
+
+              query = query.Include("Customer").Include("OrderDetails");
+
+              return (productID == 0)
+                          ? query
+                          : query.Where(o => o.OrderDetails.Any(od => od.ProductID == productID));
+          }
 
         public IQueryable<Order> Orders
         {
@@ -114,14 +123,6 @@ namespace DocCode.DataAccess
             get { return ForCurrentUser(Context.Orders).Include("OrderDetails"); }
         }
 
-        public IQueryable<Employee> Employees
-        {
-            get { return ForCurrentUser(Context.Employees); }
-        }
-        public IQueryable<EmployeeTerritory> EmployeeTerritories
-        {
-          get { return Context.EmployeeTerritories; }
-        }
         public IQueryable<OrderDetail> OrderDetails
         {
             get { return ForCurrentUser(Context.OrderDetails); }
@@ -130,11 +131,6 @@ namespace DocCode.DataAccess
         public IQueryable<Product> Products
         {
           get { return ForCurrentUser(Context.Products); }
-        }
-
-        public IQueryable<Category> Categories
-        {
-            get { return Context.Categories; }
         }
 
         public IQueryable<Region> Regions
@@ -232,22 +228,32 @@ namespace DocCode.DataAccess
             return deleted.ToString();
         }
 
-        private NorthwindContext Context { get { return _contextProvider.Context; } }
-
         /// <summary>
         /// The current user's UserSessionId, typically set by the controller
         /// </summary>
         /// <remarks>
-        /// If requested, it must exist and be a non-Empty Guid
+        /// Guaranteed to exist and be a non-Empty Guid
         /// </remarks>
-        public Guid UserSessionId
-        {
-            get { return _userSessionId; }
-            set {
-                _userSessionId = (value == Guid.Empty) ? _guestUserSessionId : value;
-                _entitySaveGuard.UserSessionId = _userSessionId;
-            }
+        public Guid UserSessionId {
+          get { return _userSessionId; }
+          set {
+            _userSessionId = (value == Guid.Empty) ? _guestUserSessionId : value;
+          }
         }
+
+        #region Private
+
+        private NorthwindContext Context { get { return _contextProvider.Context; } }
+
+        private void PrepareSaveGuard() {
+          if (_entitySaveGuard == null) {
+            _entitySaveGuard = new NorthwindEntitySaveGuard { UserSessionId = UserSessionId };
+            _contextProvider.BeforeSaveEntityDelegate += _entitySaveGuard.BeforeSaveEntity;
+            _contextProvider.BeforeSaveEntitiesDelegate += _entitySaveGuard.BeforeSaveEntities;
+            _contextProvider.AfterSaveEntitiesDelegate += _entitySaveGuard.AfterSaveEntities;
+          }
+        }
+ 
         private Guid _userSessionId = _guestUserSessionId;
 
         private IQueryable<T> ForCurrentUser<T>(IQueryable<T> query) where T : class, ISaveable
@@ -256,10 +262,11 @@ namespace DocCode.DataAccess
         }
 
         private readonly EFContextProvider<NorthwindContext> _contextProvider;
-        private readonly NorthwindEntitySaveGuard _entitySaveGuard;
+        private NorthwindEntitySaveGuard _entitySaveGuard;
 
         private const string _guestUserSessionIdName = "12345678-9ABC-DEF0-1234-56789ABCDEF0";
         private static readonly Guid _guestUserSessionId = new Guid(_guestUserSessionIdName);
 
+        #endregion
     }
 }
