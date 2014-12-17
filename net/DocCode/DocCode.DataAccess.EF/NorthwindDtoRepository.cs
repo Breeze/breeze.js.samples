@@ -276,7 +276,6 @@ namespace DocCode.DataAccess
   #region ProductMapper
   public class ProductMapper : EntitySaveMapper<Northwind.Models.Product, Product>
   {
-
     protected override Product MapEntityToClient(EntityInfo entityInfo) {
       var p = (Northwind.Models.Product)entityInfo.Entity;
       return new Product
