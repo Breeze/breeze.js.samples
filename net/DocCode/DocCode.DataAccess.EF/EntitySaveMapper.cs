@@ -200,8 +200,8 @@ namespace Breeze.ContextProvider {
           saved[i] = MapEntityToClient(entity);
         }
       }
-      var sName = SType.Name;
-      var cName = CType.Name;
+      var sName = SType.FullName;
+      var cName = CType.FullName;
       saveResult.KeyMappings.ForEach(km =>
       {
         if (km.EntityTypeName == sName) { km.EntityTypeName = cName; }       
