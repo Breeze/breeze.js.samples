@@ -31,7 +31,7 @@ namespace DocCode.DataAccess
           get {
             return Context.Categories.Select(c => new Category
             {
-              CategoryID = c.CategoryID,
+              CategoryID   = c.CategoryID,
               CategoryName = c.CategoryName
             });
           }
@@ -40,9 +40,9 @@ namespace DocCode.DataAccess
         public IQueryable<Customer> Customers
         {
             get { return ForCurrentUser(Context.Customers).Select(c => new Customer {
-                    CustomerID = c.CustomerID,
+                    CustomerID  = c.CustomerID,
                     CompanyName = c.CompanyName,
-                    OrderCount = c.Orders.Count()
+                    OrderCount  = c.Orders.Count()
                 });
             }
         }
@@ -55,10 +55,10 @@ namespace DocCode.DataAccess
           var cust = ForCurrentUser(Context.Customers)
                     .Where(c =>c.CustomerID == id)
                     .Select(c => new Customer {
-                        CustomerID = c.CustomerID,
+                        CustomerID  = c.CustomerID,
                         CompanyName = c.CompanyName,
-                        OrderCount = c.Orders.Count()})
-                     .SingleOrDefault();
+                        OrderCount  = c.Orders.Count()})
+                    .SingleOrDefault();
                
             // Super secret proprietary calculation. Do not disclose to client!
             if (cust != null) { cust.FragusIndex = new Random().Next(100); }
@@ -80,11 +80,11 @@ namespace DocCode.DataAccess
 
                     OrderDetails = o.OrderDetails.Select(od => new OrderDetail
                     {
-                        OrderID = od.OrderID,
-                        ProductID = od.ProductID, 
-                        UnitPrice = od.UnitPrice,
-                        Quantity = od.Quantity,
-                        Discount = od.Discount,
+                        OrderID    = od.OrderID,
+                        ProductID  = od.ProductID, 
+                        UnitPrice  = od.UnitPrice,
+                        Quantity   = od.Quantity,
+                        Discount   = od.Discount,
                         RowVersion = od.RowVersion
                      }).ToList()
 
@@ -95,8 +95,10 @@ namespace DocCode.DataAccess
         public IQueryable<Product> Products
         {
             get { return Context.Products.Select(p => new Product {
-                ProductID = p.ProductID,
-                ProductName = p.ProductName
+                    ProductID   = p.ProductID,
+                    ProductName = p.ProductName,
+                    CategoryID  = p.CategoryID,
+                    SupplierID  = p.SupplierID
                 });
             } 
         }
@@ -128,18 +130,17 @@ namespace DocCode.DataAccess
         public SaveResult SaveChanges(JObject saveBundle) {
 
           // Need a new NorthwindDtoRepository for reading; 
-          // Can't use the existing one for some as yet unexplained reason because
-          // DbContext crashes with null ref exception inside EF when it
+          // Can't use the existing one because for some as yet unexplained reason 
+          // DbContext crashes with nullref exception inside EF when it
           // is also being used for save.
           var readRepo = new NorthwindDtoRepository { UserSessionId = UserSessionId };  
 
-          // can't use the same one in the middle of the save
           _customerMapper = new CustomerMapper(readRepo);
           _productMapper = new ProductMapper();
 
           _contextProvider.BeforeSaveEntitiesDelegate += BeforeSaveEntities;
 
-          // save with server model's "real" contextProvider
+          // save with server model's contextProvider
           var saveResult = _contextProvider.SaveChanges(saveBundle);
 
           // map server entities to client entities
@@ -221,18 +222,14 @@ namespace DocCode.DataAccess
 
       protected override Customer MapEntityToClient(Northwind.Models.Customer c)
       {
+        // Would be dead simple if we didn't have to get the CustomerDTO.OrderCount from the db.
         // Incredibly inefficient if we save a lot of these customers at once but this is a demo
-        // Usually would be dead simple if we didn't have to get the CustomerDTO.OrderCount
-        var cust = repo.CustomerById(c.CustomerID);
-        if (cust == null)
+        // If can't find the customer, maybe we deleted it? Make a customer w/ what we have.
+        var cust = repo.CustomerById(c.CustomerID) ?? new Customer
         {
-          // assume was deleted; just send the minimum
-          cust = new Customer
-          {
-            CustomerID = c.CustomerID,
-            CompanyName = c.CompanyName           
-          };
-        }
+          CustomerID = c.CustomerID,
+          CompanyName = c.CompanyName           
+        };
         return cust;
       }
 
