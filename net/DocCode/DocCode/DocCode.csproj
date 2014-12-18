@@ -131,6 +131,7 @@
     <Content Include="Scripts\breeze.metadata-helper.js" />
     <Content Include="Scripts\breeze.min.js" />
     <Content Include="Scripts\breeze.savequeuing.js" />
+    <Content Include="Scripts\data.js" />
     <Content Include="Scripts\jquery-2.0.3.js" />
     <None Include="Scripts\jquery-2.0.3.intellisense.js">
       <DependentUpon>jquery-2.0.3.js</DependentUpon>
@@ -159,6 +160,7 @@
   <ItemGroup>
     <Content Include="tests\dtoTests.js" />
     <Content Include="tests\helpers\ccjs.model.metadata.js" />
+    <Content Include="tests\iozTests.js" />
     <Content Include="tests\jQueryAjaxAdapterTests.js" />
     <Content Include="tests\apiDirectTests.js" />
     <Content Include="tests\basicTodoTests.js" />
@@ -197,6 +199,7 @@
     <Compile Include="Controllers\FoosController.cs" />
     <Compile Include="Controllers\FoosMetadataController.cs" />
     <Compile Include="Controllers\InheritanceController.cs" />
+    <Compile Include="Controllers\IOZCustomersController.cs" />
     <Compile Include="Controllers\MultiControllers\EmployeesController.cs" />
     <Compile Include="Controllers\MultiControllers\OrderProcess.cs" />
     <Compile Include="Controllers\MultiControllers\SearchController.cs" />
@@ -210,6 +213,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="IOZCustomer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using System.Web.Http;
 using System.Web.Http.Cors;
+using System.Web.Http.OData.Batch;
 
 namespace DocCode
 {
@@ -17,6 +18,18 @@ namespace DocCode
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+
+            System.Web.Http.OData.Builder.ODataConventionModelBuilder builderV3 = new System.Web.Http.OData.Builder.ODataConventionModelBuilder();
+            var entitySetConfigV3 = builderV3.EntitySet<IOZCustomer>("IOZCustomers");
+            entitySetConfigV3.EntityType.HasKey(o => o.Id);
+
+            config.Routes.MapODataRoute(
+                routeName: "odata",
+                routePrefix: "odata",
+                model: builderV3.GetEdmModel(),
+                batchHandler: new DefaultODataBatchHandler(GlobalConfiguration.DefaultServer));
+
         }
     }
 }
