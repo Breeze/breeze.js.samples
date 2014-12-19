@@ -46,6 +46,7 @@
     <Compile Include="NorthwindModel.cs" />
     <Compile Include="ProductDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ODataTodoItem.cs" />
     <Compile Include="TodoItem.cs" />
     <Compile Include="NorthwindModel.UserPartial.cs" />
   </ItemGroup>

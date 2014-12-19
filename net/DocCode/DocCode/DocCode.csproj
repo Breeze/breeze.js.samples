@@ -131,6 +131,10 @@
     <Content Include="Scripts\breeze.metadata-helper.js" />
     <Content Include="Scripts\breeze.min.js" />
     <Content Include="Scripts\breeze.savequeuing.js" />
+    <Content Include="Scripts\datajs-1.1.2.js" />
+    <Content Include="Scripts\datajs-1.1.2.min.js">
+      <DependentUpon>datajs-1.1.2.js</DependentUpon>
+    </Content>
     <Content Include="Scripts\jquery-2.0.3.js" />
     <None Include="Scripts\jquery-2.0.3.intellisense.js">
       <DependentUpon>jquery-2.0.3.js</DependentUpon>
@@ -168,6 +172,7 @@
     <Content Include="tests\metadataOnClientTests.js" />
     <Content Include="tests\multiControllerTests.js" />
     <Content Include="tests\helpers\northwindDtoMetadata.js" />
+    <Content Include="tests\odataTests.js" />
     <Content Include="tests\saveNorthwindTests.js" />
     <Content Include="tests\AjaxAdapterTestInterceptorTests.js" />
     <Content Include="tests\queryXtraTests.js" />
@@ -190,6 +195,7 @@
   <ItemGroup>
     <Compile Include="App_Start\BreezeWebApiConfig.cs" />
     <Compile Include="App_Start\DocCodeWebApiConfig.cs" />
+    <Compile Include="App_Start\ODataWebApiConfig.cs" />
     <Compile Include="App_Start\WriteMetadataScriptFiles.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\CustomBreezeConfig.cs" />
@@ -206,6 +212,7 @@
     <Compile Include="Controllers\MultiControllers\MultiController.cs" />
     <Compile Include="Controllers\NorthwindDtoController.cs" />
     <Compile Include="Controllers\NorthwindController.cs" />
+    <Compile Include="Controllers\ODataTodosController.cs" />
     <Compile Include="Controllers\TodosController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -260,7 +267,7 @@
   <PropertyGroup>
     <PreBuildEvent>"$(ProjectDir)getLibs.cmd" "$(ProjectDir)"</PreBuildEvent>
   </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
