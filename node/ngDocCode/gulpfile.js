@@ -19,6 +19,7 @@ var port = process.env.PORT || 7202;
  * List the available gulp tasks
  */
 gulp.task('help', plug.taskListing);
+gulp.task('default', ['help']);
 
 /**
  * Lint the code, create coverage report, and a visualizer
@@ -140,9 +141,9 @@ gulp.task('autotest', function (done) {
 /**
  * serve the DocCode Web API server
  */
-gulp.task('serve-webapi', function() {
+gulp.task('serve-dev', function() {
 
-    log('Running DocCode Web API server. Browse to http://localhost:58066/breeze/Northwind/employees');
+    log('Running DocCode Web API Data Server.\nTo see data, browse to http://localhost:58066/breeze/Northwind/employees');
     exec = require('child_process').exec;
     exec('powershell -noexit .\\start-webapi.ps1',
         function (error, stdout, stderr) {
@@ -206,7 +207,7 @@ function serve(args) {
 
     var exec;
     if (args.debug) {
-        log('Running node-inspector. Browse to http://localhost:8080/debug?port=5858');
+        log('Running node-inspector. \nBrowse to http://localhost:8080/debug?port=5858');
         exec = require('child_process').exec;
         exec('node-inspector');
         options.nodeArgs = [args.debug + '=5858'];

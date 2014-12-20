@@ -33,8 +33,9 @@
     "build": "./build/",
     "report": "./report/",
     "testharnessjs":[
-        "./node_modules/chai/chai.js",
         "./node_modules/mocha/mocha.js",
+        "./node_modules/chai/chai.js",
+        "./node_modules/mocha-clean/index.js",
         "./bower_components/sinon/index.js",
         "./node_modules/sinon-chai/lib/sinon-chai.js"
     ],

@@ -5,12 +5,13 @@
         $httpBackend: $httpBackendReal,
         $q: $qReal,
         appModule: appModule,
+        assertFail: assertFail,
         asyncModule: asyncModule,
         fakeLogger: fakeLogger,
         fakeRouteProvider: fakeRouteProvider,
         fakeToastr: fakeToastr,
         gotResults: gotResults,
-        gotNoResults: gotNoResults,        
+        gotNoResults: gotNoResults,
         injector: injector,
         replaceAccentChars: replaceAccentChars,
         verifyNoOutstandingHttpRequests: verifyNoOutstandingHttpRequests
@@ -20,10 +21,10 @@
     /**
      * Define a test application module with faked logger for use with ngMidwayTester
      *
-     * Useage: 
+     * Useage:
      *    tester = ngMidwayTester('testerApp', {mockLocationPaths: false});
-     */ 
-    angular.module('testerApp', ['app', fakeLogger]);     
+     */
+    angular.module('testerApp', ['app', fakeLogger]);
 
     ////////////////////////
     /*jshint -W101 */
@@ -36,14 +37,14 @@
      *
      *  Note that $q remains ngMocked so you must flush $http calls ($rootScope.$digest).
      *  Use $rootScope.$apply() for this purpose.
-     * 
-     *  Could restore $q with $qReal in which case don't need to flush. 
-     * 
+     *
+     *  Could restore $q with $qReal in which case don't need to flush.
+     *
      *  Inspired by this StackOverflow answer:
-     *    http://stackoverflow.com/questions/20864764/e2e-mock-httpbackend-doesnt-actually-passthrough-for-me/26992327?iemail=1&noredirect=1#26992327 
+     *    http://stackoverflow.com/questions/20864764/e2e-mock-httpbackend-doesnt-actually-passthrough-for-me/26992327?iemail=1&noredirect=1#26992327
      *
      *  Usage:
-     *  
+     *
      *    var myService;
      *
      *    beforeEach(module(specHelper.$httpBackend, 'app');
@@ -51,17 +52,17 @@
      *    beforeEach(inject(function(_myService_) {
      *        myService = _myService_;
      *    }));
-     * 
+     *
      *    it('should return valid data', function(done) {
      *        myService.remoteCall()
      *            .then(function(data) {
      *                expect(data).toBeDefined();
      *            })
      *            .then(done, done);
-     * 
+     *
      *        // because not using $qReal, must flush the $http and $q queues
      *        $rootScope.$apply;
-     *    });        
+     *    });
      */
     /*jshint +W101 */
     function $httpBackendReal($provide) {
@@ -74,14 +75,14 @@
     }
 
     /**
-     *  Replaces the ngMock'ed $q with the real one from ng thus 
+     *  Replaces the ngMock'ed $q with the real one from ng thus
      *  obviating the need to flush $http and $q queues
      *  at the expense of ability to control $q timing.
      *
      *  This alternative to the ngMidwayTester preserves the other ngMocks features
      *
      *  Usage:
-     *  
+     *
      *    var myService;
      *
      *    // Consider: beforeEach(specHelper.asyncModule('app'));
@@ -91,7 +92,7 @@
      *    beforeEach(inject(function(_myService_) {
      *        myService = _myService_;
      *    }));
-     * 
+     *
      *    it('should return valid data', function(done) {
      *        myService.remoteCall()
      *            .then(function(data) {
@@ -100,11 +101,11 @@
      *            .then(done, done);
      *
      *        // not need to flush
-     *    });        
+     *    });
      */
     function $qReal($provide) {
         $provide.provider('$q', function() {
-            /*jshint validthis:true */        
+            /*jshint validthis:true */
             this.$get = function() {
                 return angular.injector(['ng']).get('$q');
             };
@@ -112,32 +113,50 @@
     }
 
     /**
-     * Prepare ngMocked application feature module 
+     * Prepare ngMocked application feature module
      * along with faked toastr and routehelper
      * Especially useful for controller testing
      * Use it as you would the ngMocks#module method
-     * 
+     *
      *  Useage:
      *     beforeEach(specHelper.appModule('app.avengers'));
      *
      *     Equivalent to:
      *       beforeEach(module(
      *          'app.avengers',
-     *          specHelper.fakeToastr, 
+     *          specHelper.fakeToastr,
      *          specHelper.fakeRouteHelperProvider)
      *       );
      */
     function appModule() {
-        var args = Array.prototype.slice.call(arguments, 0); 
+        var args = Array.prototype.slice.call(arguments, 0);
         args = args.concat(fakeToastr, fakeRouteHelperProvider);
         angular.mock.module.apply(angular.mock, args);
+    }
+
+    /**
+     * Assert a failure in mocha, without condition
+     *
+     *  Useage:
+     *     assertFail('you are hosed')
+     *
+     *     Responds:
+     *       AssertionError: you are hosed
+     *       at Object.assertFail (.../test/lib/specHelper.js:152:15)
+     *       at Context.<anonymous> (.../....spec.js:329:15)
+     *
+     *  OR JUST THROW the chai.AssertionError  and treat this
+     *  as a reminder of how to do it.
+     */
+    function assertFail(message) {
+        throw new chai.AssertionError(message);
     }
 
     /**
      * Prepare ngMocked module definition that makes real $http and $q calls
      * Also adds fakeLogger to the end of the definition
      * Use it as you would the ngMocks#module method
-     * 
+     *
      *  Useage:
      *     beforeEach(specHelper.asyncModule('app'));
      *
@@ -146,9 +165,9 @@
      */
     function asyncModule() {
         var args = Array.prototype.slice.call(arguments, 0);
-        args = args.concat($httpBackendReal, $qReal, fakeToastr);      
+        args = args.concat($httpBackendReal, $qReal, fakeToastr);
         // build and return the ngMocked test module
-        return angular.mock.module.apply(angular.mock, args); 
+        return angular.mock.module.apply(angular.mock, args);
     }
 
     function fakeLogger($provide) {

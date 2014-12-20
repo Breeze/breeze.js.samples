@@ -1,5 +1,5 @@
 // Karma configuration
-
+require('mocha-clean');
 module.exports = function (config) {
     config.set({
 
@@ -27,7 +27,7 @@ module.exports = function (config) {
             './bower_components/breezejs/labs/breeze.getEntityGraph.js',
             './bower_components/breezejs/labs/breeze.metadata-helper.js',
             './bower_components/breezejs/labs/breeze.savequeuing.js',
-            
+
             './bower_components/moment/moment.js',
 
             './public/test/lib/bindPolyfill.js', // for phantom.js
@@ -47,7 +47,7 @@ module.exports = function (config) {
 
         // list of files to exclude
         exclude: [
-            // Uncommment next line to exclude tests that require a server 
+            // Uncommment next line to exclude tests that require a server
             //'./public/test/server_specs/**/*.spec.js'
         ],
 
