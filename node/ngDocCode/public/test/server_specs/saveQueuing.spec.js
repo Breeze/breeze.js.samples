@@ -26,6 +26,74 @@ describe('saveQueuing:', function() {
     });
 
     /*********************************************************
+    * second save of added entity does not duplicate it
+    *********************************************************/
+    it("second save of added entity does not duplicate it", function (done) {
+
+        var description = 'Test' + ash.newGuid().toString();
+        description=description.substr(0,30); // max allowed
+        em.createEntity('TodoItem', { Description: description });
+
+        var save1 = em.saveChanges();
+        var save2 = em.saveChanges();
+
+        Q.all([save1, save2])
+         .then(requery)
+         .then(success)
+         .then(done, done);
+
+        function requery(results){
+            return EntityQuery.from('Todos')
+                .where('Description', 'eq', description)
+                .using(em).execute();
+        }
+
+        function success(data) {
+            expect(data.results.length).to.equal(1,
+                "Re-queried exactly one TodoItem w/ that description.");
+            expect(em.getEntities().length).to.equal(1, "Only one entity in cache");
+        }
+    });
+
+    /*********************************************************
+    * second save w/ savequeuing does not resave an added entity
+    * unless you modify the added entity between saves
+    *********************************************************/
+    it("second save of added entity does not save twice if no change", function (done) {
+
+        var description = 'Test' + ash.newGuid().toString();
+        description=description.substr(0,30); // max allowed
+        em.createEntity('TodoItem', { Description: description });
+
+        var save1 = em.saveChanges();
+        var save2 = em.saveChanges();
+
+        Q.all([save1, save2])
+         .then(requery)
+         .then(success)
+         .then(done, done);
+
+        function requery(results){
+            expect(ajaxSpy.callCount).to.equal(1,
+                'ajax should only have been called once');
+
+            var urlCalled = ajaxSpy.args[0][0].url;
+            expect(urlCalled).to.match(/SaveChanges/, "should have called SaveChanges");
+
+            return EntityQuery.from('Todos')
+                .where('Description', 'eq', description)
+                .using(em).execute();
+        }
+
+        function success(data) {
+            expect(data.results).to.have.length(1,
+                "Re-queried exactly one TodoItem w/ that description.");
+            expect(em.getEntities()).to.have.length(1,
+                "Only one entity in cache");
+        }
+    });
+
+    /*********************************************************
     * overwrites same value in added entity that is changed while saving
     * when that save completes before the modified entity is saved
     * This is standard behavior, w/ or w/o saveQueuing
@@ -45,39 +113,6 @@ describe('saveQueuing:', function() {
                 "added Todo was saved and now is Unchanged");
             expect(todo.Description).to.equal('Test',
                 "description has the saved (not the modified) value");
-        }
-    });
-
-    /*********************************************************
-    * Cannot delete an ADDED entity while it's being saved
-    * This is standard behavior, w/ or w/o saveQueuing,
-    * The exception is thrown when setDeleted() called
-    * as of Breeze v.1.5.2
-    *********************************************************/
-    it("cannot delete an ADDED entity while it's being saved", function (done) {
-
-        var startCalled = false;
-        var setDeletedThrew = false;
-        var todo = em.createEntity('TodoItem', { Description: 'Test' });
-        em.saveChanges()
-          .then(success).catch(failedDuringPostSave)
-          .then(done, done);
-
-        try {
-            todo.entityAspect.setDeleted();
-        } catch (e) {
-            setDeletedThrew = true;
-        }
-
-        function success(data) {
-            expect(setDeletedThrew).to.equal(true, 
-                "save should have failed after catching setDeleted() error.");
-        }
-
-        function failedDuringPostSave(error){
-            if (error.innerError) {error = error.innerError;}
-            expect(true).to.equal(false, 
-                "post save processing failed; msg was "+error.message);
         }
     });
 
@@ -181,7 +216,7 @@ describe('saveQueuing:', function() {
         }
 
         // 2nd save callback
-        function requery(sr){ 
+        function requery(sr){
             em.clear(); // paranoia.
             return breeze.EntityQuery.from('Todos')
                 .where('Id', 'eq', todo.Id)
@@ -197,44 +232,6 @@ describe('saveQueuing:', function() {
                 "description has the modified value, 'Test mod 1'");
             expect(todo.IsDone).to.equal(true,
                 "isDone has the value modified (true) during 1st save");
-        }
-    });
-
-    /*********************************************************
-    * second save w/ savequeuing does not resave an added entity
-    *********************************************************/
-    it("second save does not duplicate-save the added entity", function (done) {
-
-        var description = 'Test' + ash.newGuid().toString();
-        description=description.substr(0,30); // max allowed
-        em.createEntity('TodoItem', { Description: description });
-
-        var save1 = em.saveChanges();
-        var save2 = em.saveChanges();
-
-        Q.all([save1, save2])
-         .then(requery)
-         .then(success)
-         .then(done, done);
-
-        function requery(results){
-            expect(ajaxSpy.callCount, 1,
-                'ajax should only have been called once .. for a single save');
-
-            var urlCalled = ajaxSpy.args[0][0].url;
-            expect(urlCalled).to.match(/SaveChanges/,
-                "should have called SaveChanges; was "+urlCalled);
-
-            return EntityQuery.from('Todos')
-                .where('Description', 'eq', description)
-                .using(em).execute();
-        }
-
-        function success(data) {
-            expect(data.results.length).to.equal(1,
-                "Re-queried exactly one TodoItem w/ that description.");
-            expect(em.getEntities().length).to.equal(1, 
-                "Only one entity in cache");
         }
     });
 
@@ -286,6 +283,77 @@ describe('saveQueuing:', function() {
     });
 
     /*********************************************************
+    * [add + save + (mod add, new add) + save] resaves first entity
+    * Note that the re-save of the first add is a modify save
+    *********************************************************/
+    it("[add + save + (mod add, new add) + save] resaves first entity", function (done) {
+
+        var description = 'Test' + ash.newGuid().toString();
+        description = description.substr(0, 27); // max allowed is 30
+
+        var todo1 = em.createEntity('TodoItem', { Description: description + '-1a' });
+
+        var save1 = em.saveChanges().then(firstSaveSucceeded);
+
+        var todo2 = em.createEntity('TodoItem', { Description: description + '-2a' });
+
+        // make change to todo1 while it is being saved
+        todo1.Description = description + '-1m';
+
+        var save2 = em.saveChanges().then(secondSaveSucceeded);
+
+        expect(em.getChanges()).to.have.length(2, "two pending changes while first save is in flight");
+
+        Q.all([save1, save2])
+            .then(requery)
+            .then(confirm)
+            .then(done, done);
+
+        function firstSaveSucceeded(saveResult) {
+            var saved = saveResult.entities;
+            expect(saved).to.have.length(1, "1st save should save a single Todo");
+            expect(saved).to.include(todo1, 'it should be todo1');
+
+            return saveResult;
+        }
+
+        function secondSaveSucceeded(saveResult) {
+            var ix, stateName;
+            var saved = saveResult.entities;
+            expect(saved).to.have.length(2, "2nd save should save two Todos");
+
+            ix = saved.indexOf(todo1);
+            expect(saved).to.include(todo1, 'one of them is todo1');
+            stateName = getEntityStateOfSavedEntityInAjaxCall(1, ix);
+            expect(stateName).to.equal('Modified', 'todo1 should have been a "Modified" save');
+
+            ix = saved.indexOf(todo2);
+            expect(saved).to.include(todo2, 'one of them is todo2');
+            stateName = getEntityStateOfSavedEntityInAjaxCall(1, ix);
+            expect(stateName).to.equal('Added', 'todo2 should have been a "Added" save');
+
+            expect(em.hasChanges()).to.equal(false, "should have no more pending changes");
+
+            return saveResult;
+        }
+
+        function requery(results) {
+            return EntityQuery.from('Todos')
+              .where('Description', 'startsWith', description)
+              .using(em).execute();
+        }
+
+        function confirm(data) {
+            var results = data.results;
+            expect(results).to.have.length(2, 'should have requeried 2 Todos');
+
+            var desc = todo1.Description;
+            expect(desc).to.match(/-1m$/,
+              'todo1 should have the modified description; is ' + desc);
+        }
+    });
+
+    /*********************************************************
     * Queued saves will be combined but will not double-save
     * Here the 2nd and 3rd are combined while #1 is in-flight
     *********************************************************/
@@ -303,7 +371,7 @@ describe('saveQueuing:', function() {
         em.createEntity('TodoItem', { Description: description + '-3' });
         var save3 = em.saveChanges();
 
-        expect(em.getChanges().length).to.equal(3, 
+        expect(em.getChanges().length).to.equal(3,
             "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
@@ -334,9 +402,94 @@ describe('saveQueuing:', function() {
 
         function confirm(data) {
             var results = data.results;
-            expect(results.length).to.equal(3, 
+            expect(results.length).to.equal(3,
                 'should have re-queried 3 entities');
         }
+    });
+
+    /*********************************************************
+    * After save, the added entities have empty originalValues
+    *********************************************************/
+    it("the added entities have empty originalValues after save", function (done) {
+
+      var description = 'Test' + ash.newGuid().toString();
+      description=description.substr(0,27); // max allowed is 30
+
+      em.createEntity('TodoItem', { Description: description + '-1a' });
+      var save1 = em.saveChanges();
+
+      em.createEntity('TodoItem', { Description: description + '-2a' });
+      var save2 = em.saveChanges();
+
+      em.createEntity('TodoItem', { Description: description + '-3a' });
+      var save3 = em.saveChanges();
+
+      Q.all([save1, save2, save3])
+          .then(confirm).then(done, done);
+
+      function confirm() {
+        var todos = em.getEntities();
+        expect(todos).to.have.length(3, 'should have only the 3 added todos in cache');
+
+        var noneHaveOriginalValues = todos.every(function (e) {
+          return Object.keys(e.entityAspect.originalValues).length === 0;
+        });
+
+        expect(noneHaveOriginalValues).to.equal(true,
+          'none of the saved entities have originalValues after save.');
+      }
+    });
+
+    /*********************************************************
+    * Cannot delete an ADDED or MODIFIED entity while it's being saved
+    * This is standard behavior, w/ or w/o saveQueuing,
+    * The exception is thrown when setDeleted() called
+    * as of Breeze v.1.5.2
+    *********************************************************/
+    it("cannot delete an added entity while it's being saved", function (done) {
+
+        var todo = em.createEntity('TodoItem', { Description: 'Test' });
+        em.saveChanges()
+          .then(function() { done(); }, done);
+
+        var msgSuffix = ' to delete an added entity that is being saved';
+        // try to delete the added entity before the save returns
+        try {
+          todo.entityAspect.setDeleted();
+        } catch (err) {
+          expect(err.message).to.match(/cannot.*being saved/i, 'should throw when try' + msgSuffix);
+          return;
+        }
+        throw new AssertionError('can setDeleted when should not be able' + msgSuffix);
+    });
+
+    it("cannot delete a modified entity while it's being saved", function (done) {
+
+      var todo = em.createEntity('TodoItem', {
+        Description: 'Test',
+        IsDone: false
+      });
+
+      em.saveChanges()
+        .then(modifyAndSaveAndDelete)
+        .then(done, done);
+
+      function modifyAndSaveAndDelete() {
+        todo.Description = 'Test mod';
+        em.saveChanges();
+
+        var msgSuffix = ' to delete a modified entity that is being saved';
+
+        // try to delete the modified entity before the modify save returns
+        try {
+          todo.entityAspect.setDeleted();
+        } catch (err) {
+          expect(err.message).to.match(/cannot.*being saved/i, 'should throw when try' + msgSuffix);
+          return;
+        }
+        throw new AssertionError('can setDeleted when should not be able' + msgSuffix);
+      }
+
     });
 
     /*********************************************************
@@ -365,7 +518,7 @@ describe('saveQueuing:', function() {
         .then(thirdSaveSucceeded)
         .catch(thirdSaveFailed);
 
-        expect(em.getChanges().length).to.equal(3, 
+        expect(em.getChanges().length).to.equal(3,
             "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
@@ -392,12 +545,12 @@ describe('saveQueuing:', function() {
             //    .format(error.message));
         }
         function thirdSaveSucceeded(saveResult) {
-            expect(true).to.equal(false, 
+            expect(true).to.equal(false,
                 "the 3rd save should have been aborted");
         }
         function thirdSaveFailed(error) {
             var msg = error.message;
-            if (error.innerError) {error = error.innerError;}            
+            if (error.innerError) {error = error.innerError;}
             expect(msg).to.match(/queued save failed/i,
                 "the 3rd save should have aborted with "+
                 "queued save termination error: '{0}'"
@@ -450,15 +603,15 @@ describe('saveQueuing:', function() {
             .then(laterSaveSucceeded)
             .catch(laterSaveFailed);
 
-        expect(em.getChanges().length).to.equal(3, 
+        expect(em.getChanges().length).to.equal(3,
             "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
          .then(allDone)
-         .then(done, done); 
+         .then(done, done);
 
         function firstSaveSucceeded(saveResult) {
-            expect(true).to.equal(false, 
+            expect(true).to.equal(false,
                 "the 1st save should have failed");
         }
         function firstSaveFailed(error) {
@@ -466,7 +619,7 @@ describe('saveQueuing:', function() {
             //   .format(error.message));
         }
         function laterSaveSucceeded(saveResult) {
-            expect(true).to.equal(false, 
+            expect(true).to.equal(false,
                 "any save after the 1st should have been aborted");
         }
         function laterSaveFailed(error) {
@@ -490,4 +643,10 @@ describe('saveQueuing:', function() {
         }
     });
 
+    //////// helpers ////////////
+
+    function getEntityStateOfSavedEntityInAjaxCall(call, entityIndex) {
+        entityIndex = (entityIndex == null) ? 0 : entityIndex;
+        return JSON.parse(ajaxSpy.getCall(call).args[0].data).entities[entityIndex].entityAspect.entityState;
+    }
 });
