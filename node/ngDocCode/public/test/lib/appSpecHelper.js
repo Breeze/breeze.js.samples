@@ -29,13 +29,13 @@
         alfredsOrderDetailKey: { OrderID: 10643, ProductID: 28 },
         // AjaxAdapterTestInterceptor: AjaxAdapterTestInterceptor.js
         assertIsSorted: assertIsSorted,
-        asyncModule: specHelper.asyncModule,
+        asyncModule: bard.asyncModule,
         breeze: breeze,
         chaiProductID: 1, // Chai product ID
         customerResultsToStringArray: customerResultsToStringArray,
         emptyGuid: '00000000-0000-0000-0000-000000000000',
         ensureIsEm: ensureIsEm,
-        fakeRouteProvider: specHelper.fakeRouteProvider,
+        fakeRouteProvider: bard.fakeRouteProvider,
         foosMetadataServiceName: serverRoot + 'breeze/FoosMetadata',
         getNextIntId: getNextIntId,
         getParserForUrl: getParserForUrl,
@@ -48,7 +48,7 @@
         inheritancePurge: inheritancePurge, // empty the Inheritance Model db completely
         inheritanceReset: inheritanceReset, // reset to known state
         inheritanceServiceName: 'breeze/inheritance',
-        injector: specHelper.injector,
+        injector: bard.injector,
         morphString: morphString,
         morphStringProp: morphStringProp,
         nancyID: 1, // Northwind 'Nancy Davolio' employee ID
@@ -65,7 +65,7 @@
         // northwindTestData: northwindTestData.js
         output: output,
         preFetchMetadataStore: preFetchMetadataStore,
-        replaceAccentChars: specHelper.replaceAccentChars,
+        replaceAccentChars: bard.replaceAccentChars,
         reportRejectedPromises: reportRejectedPromises,
         rootUri: getRootUri(),
         serverIsRunningPrecondition: serverIsRunningPrecondition,
@@ -76,7 +76,7 @@
         todosReset: todosReset, // reset to known state
         todosServiceName: serverRoot + 'breeze/todos',
         userSessionId: newGuidComb(),
-        verifyNoOutstandingHttpRequests: specHelper.verifyNoOutstandingHttpRequests
+        verifyNoOutstandingHttpRequests: bard.verifyNoOutstandingHttpRequests
     };
     window.ash = window.appSpecHelper = ash;
 
@@ -556,7 +556,7 @@
     }
 
     function useAngularAdapters(){
-        // initialize an injector we can use inside appSpecHelper.
+        // initialize an injector we can use inside appbard.
         // and initialize Breeze to use Angular
         // NB: during tests, Breeze uses different Ng service instances!
         $injector = angular.injector(['ng', 'breeze.angular']);
