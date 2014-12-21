@@ -40,8 +40,8 @@
         getNextIntId: getNextIntId,
         getParserForUrl: getParserForUrl,
         getValidationErrMsgs: getValidationErrMsgs,
-        gotResults: specHelper.gotResults,
-        gotNoResults: specHelper.gotNoResults,
+        gotResults: gotResults,
+        gotNoResults: gotNoResults,
         handleSaveFailed: handleSaveFailed,
         importMetadata: importMetadata,
         importNorthwindMetadata: importNorthwindMetadata,
@@ -271,6 +271,14 @@
         }
     }
 
+    function gotResults (data) {
+        expect(data.results).is.not.empty;
+    }
+
+    function gotNoResults(data) {
+        expect(data.results).is.empty;
+    }
+
     // Import metadata into an entityManager or metadataStore
     // and optionally set the store's dataService
     // Usage:
@@ -395,7 +403,7 @@
     }
 
     /**************************************************
-     * Reset the Northwind controller (the data it governs)    
+     * Reset the Northwind controller (the data it governs)
      * Usage:
      *   afterEach(function (done) {
      *      ash.northwindReset().then(done, done);
@@ -404,7 +412,7 @@
     function northwindReset(fullReset) {
         var command = fullReset ? 'reset/?options=fullreset' : 'reset';
         return webApiCommand(
-                ash.northwindServiceName, 
+                ash.northwindServiceName,
                 command,
                 {headers: {'X-UserSessionId': ash.userSessionId}}
             );
@@ -454,7 +462,7 @@
     /*********************************************************
      * Callback for saveChanges promise failure
      *********************************************************/
-    // Usage:  
+    // Usage:
     //    manager.saveChanges().catch(handleSaveFailed).then(done, done);
     function handleSaveFailed() {
         return function(error){
@@ -537,7 +545,7 @@
     }
 
     /**************************************************
-     * Reset the Todos controller (the data it governs)    
+     * Reset the Todos controller (the data it governs)
      * Usage:
      *   afterEach(function (done) {
      *      ash.todosReset().then(done, done);
@@ -567,13 +575,13 @@
      *
      *   afterEach(function (done) {
      *      ash.todoReset().then(done, done);
-     *   });     
+     *   });
      **************************************************/
     function webApiCommand(serviceName, command, config) {
         var $http = get$http();
         return $http
             .post(serviceName + '/' + command, {}, config)
-            .then(function(res){           
+            .then(function(res){
              }); // break here to examine response;
     }
 

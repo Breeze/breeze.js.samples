@@ -5,20 +5,28 @@ var del = require('del');
 var glob = require('glob');
 var karma = require('karma').server;
 var merge = require('merge-stream');
-var paths = require('./gulp.config.json');
+var config = require('./gulp.config.json');
 //var plato = require('plato');
-var plug = require('gulp-load-plugins')();
+var $ = require('gulp-load-plugins')();
 var reload = browserSync.reload;
 
-var colors = plug.util.colors;
-var env = plug.util.env;
-var log = plug.util.log;
-var port = process.env.PORT || 7202;
-
+var colors = $.util.colors;
+var env = $.util.env;
+var log = $.util.log;
+var port = process.env.PORT || config.defaultPort;
+/**
+ * env variables can be passed in to alter the behavior, when present.
+ * Example: gulp serve-dev
+ *
+ * --verbose  : Various tasks will produce more output to the console.
+ * --nosync   : Don't launch the browser with browser-sync when serving code.
+ * --debug    : Launch debugger with node-inspector.
+ * --debug-brk: Launch debugger and break on 1st line with node-inspector.
+ */
 /**
  * List the available gulp tasks
  */
-gulp.task('help', plug.taskListing);
+gulp.task('help', $.taskListing);
 gulp.task('default', ['help']);
 
 /**
@@ -28,13 +36,13 @@ gulp.task('default', ['help']);
 gulp.task('analyze', function() {
     log('Analyzing source with JSHint, JSCS'); // , and Plato');
 
-    var jshSources = [].concat(paths.js, paths.specs, paths.specHelpers, paths.nodejs, [
+    var jshSources = [].concat(config.js, config.specs, config.specHelpers, config.nodejs, [
          '!./public/test/lib/northwindDtoMetadata.js',
          '!./public/test/lib/northwindMetadata.js'
         ]);
 
     var jshint = analyzejshint(jshSources);
-    var jscs = analyzejscs([].concat(paths.js, paths.nodejs));
+    var jscs = analyzejscs([].concat(config.js, config.nodejs));
 
     return merge(jshint, jscs);
 });
@@ -47,33 +55,33 @@ gulp.task('analyze', function() {
 gulp.task('build-index', function() {
         log('building index.html');
 
-        var index = paths.servertemplates + 'index.html';
-        var stream = gulp
+        var index = config.servertemplates + 'index.html';
+        return gulp
 
             // inject the files into index.html
             .src([index])
-            .pipe(inject([].concat(paths.testharnessjs), 'inject-testharness'))
-            .pipe(inject([].concat(paths.vendorjs), 'inject-vendor'))
-            .pipe(inject([].concat(paths.js)))
-            .pipe(inject([].concat(paths.specHelpers), 'inject-specHelpers'))
-            .pipe(inject([].concat(paths.specs), 'inject-specs'))
-            .pipe(inject([].concat(paths.vendorcss), 'inject-vendor'))
-            .pipe(inject([].concat(paths.css)))
+            .pipe(inject([].concat(config.testharnessjs), 'inject-testharness'))
+            .pipe(inject([].concat(config.vendorjs), 'inject-vendor'))
+            .pipe(inject([].concat(config.js)))
+            .pipe(inject([].concat(config.specHelpers), 'inject-specHelpers'))
+            .pipe(inject([].concat(config.specs), 'inject-specs'))
+            .pipe(inject([].concat(config.vendorcss), 'inject-vendor'))
+            .pipe(inject([].concat(config.css)))
 
 
-            .pipe(gulp.dest(paths.server)); // write the index.html file changes
-            //.pipe(gulp.dest(paths.build)); // write the index.html file changes
+            .pipe(gulp.dest(config.server)); // write the index.html file changes
+            //.pipe(gulp.dest(config.build)); // write the index.html file changes
 
 
     function inject(path, name) {
-            //var pathGlob = paths.build + path;
+            //var pathGlob = config.build + path;
             var options = {
-                //ignorePath: paths.build.substring(1),
+                //ignorePath: config.build.substring(1),
                 addRootSlash: false,
                 read: false
             };
             if (name) { options.name = name; }
-            return plug.inject(gulp.src(path), options);
+            return $.inject(gulp.src(path), options);
         }
     });
 
@@ -84,10 +92,10 @@ gulp.task('build-index', function() {
  * @return {Stream}
  */
 gulp.task('clean', function(cb) {
-    log('Cleaning: ' + plug.util.colors.blue(paths.build));
+    log('Cleaning: ' + $.util.colors.blue(config.build));
 
-    var delPaths = [].concat(paths.build, paths.report);
-    del(delPaths, cb);
+    var delconfig = [].concat(config.build, config.report);
+    del(delconfig, cb);
 });
 
 /**
@@ -96,9 +104,9 @@ gulp.task('clean', function(cb) {
 gulp.task('watch', function() {
     log('Watching all files');
 
-    var css = ['gulpfile.js'].concat(paths.css, paths.vendorcss);
-    var images = ['gulpfile.js'].concat(paths.images);
-    var js = ['gulpfile.js'].concat(paths.js);
+    var css = ['gulpfile.js'].concat(config.css, config.vendorcss);
+    var images = ['gulpfile.js'].concat(config.images);
+    var js = ['gulpfile.js'].concat(config.js);
 
     gulp
         .watch(js, ['js', 'vendorjs'])
@@ -138,22 +146,6 @@ gulp.task('autotest', function (done) {
 });
 
 
-/**
- * serve the DocCode Web API server
- */
-gulp.task('serve-dev', function() {
-
-    log('Running DocCode Web API Data Server.\nTo see data, browse to http://localhost:58066/breeze/Northwind/employees');
-    exec = require('child_process').exec;
-    exec('powershell -noexit .\\start-webapi.ps1',
-        function (error, stdout, stderr) {
-            console.log('stdout: ' + stdout);
-            console.log('stderr: ' + stderr);
-            if (error !== null) {
-                console.log('exec error: ' + error);
-            }
-        });
-});
 ////////////////
 
 /**
@@ -167,9 +159,9 @@ function analyzejshint(sources, overrideRcFile) {
     log('Running JSHint');
     return gulp
         .src(sources)
-        //.pipe(plug.print()) // list the files in sources
-        .pipe(plug.jshint(jshintrcFile))
-        .pipe(plug.jshint.reporter('jshint-stylish', {verbose: true}));
+        //.pipe($.print()) // list the files in sources
+        .pipe($.jshint(jshintrcFile))
+        .pipe($.jshint.reporter('jshint-stylish', {verbose: true}));
 }
 
 /**
@@ -181,60 +173,127 @@ function analyzejscs(sources) {
     log('Running JSCS');
     return gulp
         .src(sources)
-        .pipe(plug.jscs('./.jscsrc'));
+        .pipe($.jscs('./.jscsrc'));
 }
 
 /**
- * Start the node server using nodemon.
- * Optionally start the node debugging.
- * @param  {Object} args - debugging arguments
- * @return {Stream}
+ * serve the DocCode Web API server
  */
-function serve(args) {
-    var options = {
-        script: paths.server + 'server.js',
+gulp.task('start-webapi', function() {
+
+    log('Running DocCode Web API Data Server.\nTo see data, browse to http://localhost:58066/breeze/Northwind/employees');
+    exec = require('child_process').exec;
+    exec('powershell -noexit .\\start-webapi.ps1',
+        function (error, stdout, stderr) {
+            console.log('stdout: ' + stdout);
+            console.log('stderr: ' + stderr);
+            if (error !== null) {
+                console.log('exec error: ' + error);
+            }
+        });
+});
+/**
+ * start the test app server in the dev environment
+ */
+gulp.task('serve-dev', function() {
+    serve(true /*isDev*/);
+});
+
+
+/**
+ * serve the build environment
+ * --debug-brk or --debug
+ * --nosync
+ * @param  {Boolean} isDev - dev or build mode
+ */
+function serve(isDev) {
+    isDev = (isDev == null) || isDev;
+    log('env: '+JSON.stringify(env));
+    log('debug: '+env.debug);
+    log('debugBrk: '+env.debugBrk);
+    var debug = env.debug || env.debugBrk;
+    var exec;
+    var nodeOptions = {
+        script: config.server + 'server.js',
         delayTime: 1,
-        ext: 'html js',
-        env: {'NODE_ENV': args.mode},
-        watch: [
-            'gulpfile.js',
-            'package.json',
-            'gulp.config.json',
-            paths.server,
-            paths.client
-        ]
+        env: {
+            'PORT': port,
+            'NODE_ENV': isDev ? 'dev' : 'build'
+        },
+        watch: [config.server]
     };
 
-    var exec;
-    if (args.debug) {
-        log('Running node-inspector. \nBrowse to http://localhost:8080/debug?port=5858');
+    if (debug) {
+        log('Running node-inspector.\nBrowse to http://localhost:8080/debug?port=5959');
         exec = require('child_process').exec;
         exec('node-inspector');
-        options.nodeArgs = [args.debug + '=5858'];
+        nodeOptions.nodeArgs = [debug + '=5959'];
     }
 
-    return plug.nodemon(options)
-        .on('start', function() {
-            startBrowserSync();
-        })
-        //.on('change', tasks)
+    addWatchForFileReload(isDev);
+
+    return $.nodemon(nodeOptions)
+        .on('start', function() { startBrowserSync(); })
         .on('restart', function() {
             log('restarted!');
+            setTimeout(function() {
+                browserSync.notify('reloading now ...');
+                browserSync.reload({stream: false});
+            }, 1000); //TODO: move to the config file
         });
+}
+////////////////
+
+/**
+ * Add watches to build and reload using browserSync
+ * @param  {Boolean} isDev - dev or build mode
+ */
+function addWatchForFileReload(isDev) {
+    if (isDev) {
+        //gulp.watch([config.less], ['styles', browserSync.reload]);
+        gulp.watch([config.client + '**/*'], browserSync.reload)
+            .on('change', function(event) { changeEvent(event); });
+    }
+    else {
+        gulp.watch([config.js, config.html], ['html', browserSync.reload])
+            .on('change', function(event) { changeEvent(event); });
+    }
+}
+
+/**
+ * When files change, log it
+ * @param  {Object} event - event that fired
+ */
+function changeEvent(event) {
+    var srcPattern = new RegExp('/.*(?=/' + config.source + ')/');
+    log('File ' + event.path.replace(srcPattern, '') + ' ' + event.type);
 }
 
 /**
  * Start BrowserSync
- * @return {Stream}
+ * --nosync will avoid browserSync
  */
 function startBrowserSync() {
-    if (!env.browserSync) { return; }
+    if (env.nosync || browserSync.active) {
+        return;
+    }
 
-    log('Starting BrowserSync');
-
+    log('Starting BrowserSync on port ' + port);
     browserSync({
         proxy: 'localhost:' + port,
-        files: [paths.client + '/**/*.*']
+        port: 3001,
+        ghostMode: { // these are the defaults t,f,t,t
+            clicks: true,
+            location: false,
+            forms: true,
+            scroll: true
+        },
+        injectChanges: true,
+        logFileChanges: true,
+        logLevel: 'debug',
+        logPrefix: 'ng-DocCode',
+        notify: true,
+        reloadDelay: 1000
     });
 }
 
@@ -256,7 +315,7 @@ function startTests(singleRun, done) {
         savedEnv.PORT = 8888;
         child = fork('./server.js', childProcessCompleted);
     } else {
-        excludeFiles.push('./public/test/midway/**/*.spec.js');
+        //excludeFiles.push('./public/test/midway/**/*.spec.js');
     }
 
     karma.start({

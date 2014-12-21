@@ -1,4 +1,4 @@
-# ngDocCode - Breeze/Angular exploratory tests 
+# ngDocCode - Breeze/Angular exploratory tests
 
 Demonstrates through automated tests how BreezeJS works within an Angular application.
 
@@ -71,15 +71,15 @@ Web Storm is a nice IDE for development and debugging. You can run the tests ins
 1. Create a Web Storm configuration for "karma" (one time setup)
 
 	* [ctrl-shift-A], "Edit Configurations"
-	
+
     * click the "+" icon to create a new configuration
 
     * Select the "Karma" default template
-    
+
     * Name it (e.g, "Karma")
-    
+
 	* For "Configuation file" navigate to `karma.conf.js` at root level
-	
+
     * Click [OK].
 
 1. Start the data server (see **["*Starting the Server*"](#startServer)**).
@@ -97,15 +97,15 @@ You can also run the tests in a browser with a node/express server.
 1. Create a Web Storm configuration for "App" (one time setup)
 
 	* [ctrl-shift-A], "Edit Configurations"
-	
+
     * click the "+" icon to create a new configuration
 
     * Select the "Node.js" default template
-    
+
     * Name it (e.g, "App")
-    
+
 	* For "JavaScript file" enter `server.js`
-	
+
     * Click [OK].
 
 1. Start the data server (see **["*Starting the Server*"](#startServer)**).
@@ -142,20 +142,20 @@ Once the Karma server is running.
 The folders and files of most interest are:
 
     /public
-        /app                  -- client app (empty for now)                     
+        /app                  -- client app (empty for now)
 		/test                 -- all mocha tests (AKA "specs")
 			/lib              -- helpers and test data
             /server-specs     -- specs that require the data server
             ...spec.js        -- specs that don't call the data server
     index.html                -- mocha test page
     server.js                 -- node server
-	
+
 
 The tests (called "specs") are all in the `public/test` folder.
 
 Specs are written with **mocha** (the testrunner), **chai** (using *expect* assertions), **sinon** (for mocking), and the **ngMidwayTester** (for angular tests that make AJAX calls to the server).
 
-Specs at the **`test`** folder level do not call the data server. Most of these tests are synchronous. 
+Specs at the **`test`** folder level do not call the data server. Most of these tests are synchronous.
 
 Specs in the **`server_specs`** sub-folder are async "midway" tests that require a running data server. See the **["*Starting the Server*" section](#startServer)**.
 
@@ -172,8 +172,8 @@ Please disable it or remove it from your Chrome extensions.
 <a name="startServer"></a>
 ## Starting the Server
 
-The midway tests talk to a local test server which must already be running.
- 
+Most of these tests talk to a local data server which must already be running.
+
 The DocCode Web API server is the current default server and the only server available at this time.
 
 
@@ -184,14 +184,14 @@ Until then we still need .NET and this companion
 project. Make sure you build it first so the binaries are in place.
 
 
-The *start-webapi.ps1* PowerShell script cranks up an IISExpress for the Web API server located at 
-*../net/DocCode/DocCode*.  
+The *start-webapi.ps1* PowerShell script cranks up an IISExpress for the Web API server located at
+*../net/DocCode/DocCode*.
 
 You can run this script from a command window: `powershell -noexit .\start-webapi`
-    
+
 >You might create a shortcut for this purpose.
 >
->There is also a gulp task to do it: `gulp serve-webapi`
+>There is also a gulp task to do it: `gulp start-webapi`
 
 You should see the PowerShell window open and stay open. It says:
 
@@ -200,7 +200,7 @@ You should see the PowerShell window open and stay open. It says:
 
 The server is running on `http://localhost:58066`
 
-Confirm that it works by opening a browser and navigating to [`http://localhost:58066/breeze/Northwind/employees`](http://localhost:58066/breeze/Northwind/employees). 
+Confirm that it works by opening a browser and navigating to [`http://localhost:58066/breeze/Northwind/employees`](http://localhost:58066/breeze/Northwind/employees).
 After a pause to start the server, it should display the JSON result of an "all employees" query. The PowerShell window should display each request to that server.
 
 Close the PowerShell window to shut down the server when you're done.

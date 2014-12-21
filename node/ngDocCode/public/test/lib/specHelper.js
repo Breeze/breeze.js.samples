@@ -8,13 +8,15 @@
         assertFail: assertFail,
         asyncModule: asyncModule,
         fakeLogger: fakeLogger,
+        fakeRouteHelperProvider: fakeRouteHelperProvider,
         fakeRouteProvider: fakeRouteProvider,
+        fakeStateProvider: fakeStateProvider,
         fakeToastr: fakeToastr,
-        gotResults: gotResults,
-        gotNoResults: gotNoResults,
         injector: injector,
+        mockService: mockService,
         replaceAccentChars: replaceAccentChars,
-        verifyNoOutstandingHttpRequests: verifyNoOutstandingHttpRequests
+        verifyNoOutstandingHttpRequests: verifyNoOutstandingHttpRequests,
+        wrapWithDone: wrapWithDone
     };
     window.specHelper = specHelper;
 
@@ -142,7 +144,7 @@
      *
      *     Responds:
      *       AssertionError: you are hosed
-     *       at Object.assertFail (.../test/lib/specHelper.js:152:15)
+     *       at Object.assertFail (..../test/lib/specHelper.js:153:15)
      *       at Context.<anonymous> (.../....spec.js:329:15)
      *
      *  OR JUST THROW the chai.AssertionError  and treat this
@@ -188,6 +190,26 @@
         }));
     }
 
+    function fakeRouteHelperProvider($provide) {
+        $provide.provider('routehelper', function() {
+            /* jshint validthis:true */
+            this.config = {
+               $routeProvider: undefined,
+               docTitle: 'Testing'
+            };
+            this.$get = function() {
+                return {
+                    configureRoutes: sinon.stub(),
+                    getRoutes: sinon.stub().returns([]),
+                    routeCounts: {
+                        errors: 0,
+                        changes: 0
+                    }
+                };
+            };
+        });
+    }
+
     function fakeRouteProvider($provide) {
         /**
          * Stub out the $routeProvider so we avoid
@@ -210,8 +232,42 @@
         });
     }
 
+    function fakeStateProvider($provide) {
+        /**
+         * Stub out the $stateProvider so we avoid
+         * all routing calls, including the default state
+         * which runs on every test otherwise.
+         * Make sure this goes before the inject in the spec.
+         */
+        $provide.provider('$state', function() {
+            /* jshint validthis:true */
+            this.state = sinon.stub();
+
+            this.$get = function() {
+                return {
+                    // current: {},  // fake before each test as needed
+                    // state:  {}  // fake before each test as needed
+                    // more? You'll know when it fails :-)
+                };
+            };
+        });
+        $provide.provider('$urlRouter', function() {
+            /* jshint validthis:true */
+            this.otherwise = sinon.stub();
+
+            this.$get = function() {
+                return {
+                    // current: {},  // fake before each test as needed
+                    // states:  {}  // fake before each test as needed
+                    // more? You'll know when it fails :-)
+                };
+            };
+        });
+    }
+
     /**
      * Inspired by Angular; that's how they get the parms for injection
+     * Todo: no longer used by `injector`. Remove?
      */
     function getFnParams (fn) {
         var fnText;
@@ -234,44 +290,45 @@
         return params;
     }
 
-    function gotResults (data) {
-        expect(data.results).is.not.empty;
-    }
-
-    function gotNoResults(data) {
-        expect(data.results).is.empty;
-    }
-
     /**
      * inject selected services into the windows object during test
-     * then remove them when test ends.
+     * then remove them when test ends with an `afterEach`.
      *
      * spares us the repetition of creating common service vars and injecting them
      *
-     * See avengers-route.spec for example
+     * injector arguments may take one of 3 forms:
+     *
+     *    function    - This fn will be passed to ngMocks.inject.
+     *                  Annotations extracted after inject does its thing.
+     *    [strings]   - same string array you'd use to set fn.$inject
+     *    (...string) - string arguments turned into a string array
+     *
      */
     function injector () {
-        var annotation,
-            body = '',
+        var body = '',
             cleanupBody = '',
-            mustAnnotate = false,
             params;
 
-        if (typeof arguments[0] === 'function') {
-            params = getFnParams(arguments[0]);
+        var first = arguments[0];
+
+        if (typeof first === 'function') {
+            // use ngMocks.inject to execute the injector function
+            inject(first);
+            // ngMocks.inject prepares fn.$inject for us
+            params = first.$inject;
         }
-        // else from here on assume that arguments are all strings
-        else if (angular.isArray(arguments[0])) {
-            params = arguments[0];
+        else if (angular.isArray(first)) {
+            params = first; // assume is an array of strings
         }
-        else {
+        else { // assume all args are strings
             params = Array.prototype.slice.call(arguments, 0);
         }
 
-        annotation = params.join('\',\''); // might need to annotate
+        // we will annotate the generated fn with this string.
+        var annotation = '\'' + params.join('\',\'') + '\',';
 
         angular.forEach(params, function(name, ix) {
-            var _name,
+            var _name_,
                 pathName = name.split('.'),
                 pathLen = pathName.length;
 
@@ -279,12 +336,11 @@
                 // name is a path like 'block.foo'. Can't use as identifier
                 // assume last segment should be identifier name, e.g. 'foo'
                 name = pathName[pathLen - 1];
-                mustAnnotate = true;
             }
 
-            _name = '_' + name + '_';
-            params[ix] = _name;
-            body += name + '=' + _name + ';';
+            _name_ = '_' + name + '_';
+            params[ix] = _name_;
+            body += name + '=' + _name_ + ';';
             cleanupBody += 'delete window.' + name + ';';
 
             // todo: tolerate component names that are invalid JS identifiers, e.g. 'burning man'
@@ -292,24 +348,103 @@
 
         var fn = 'function(' + params.join(',') + ') {' + body + '}';
 
-        if (mustAnnotate) {
-            fn = '[\'' + annotation + '\',' + fn + ']';
-        }
+        fn = '[' + annotation + fn + ']';
 
         var exp = 'inject(' + fn + ');' +
                   'afterEach(function() {' + cleanupBody + '});'; // remove from window.
 
-        //Function(exp)(); // the assigned vars will be global. `afterEach` will remove them
         /* jshint evil:true */
         new Function(exp)();
+    }
 
-        // Alternative that would not touch window but would require eval()!!
-        // Don't do `Function(exp)()` and don't do afterEach cleanup
-        // Instead do ..
-        //     return exp;
-        //
-        // Then caller must say something like:
-        //     eval(specHelper.injector('$log', 'foo'));
+    /**
+     * Mocks out a service with sinon stubbed functions
+     * that return the values specified in the config
+     *
+     * If the config value is `undefined`,
+     * stub the service method with a dummy that doesn't return a value
+     *
+     * If the config value is a function, set service property with it
+     *
+     * If a service member is a property, not a function,
+     * set it with the config value
+
+     * If a service member name is not a key in config,
+     * follow the same logic as above to set its members
+     * using the config._default value (which is `undefined` if omitted)
+     *
+     * If there is a config entry that is NOT a member of the service
+     * add mocked function to the service using the config value
+     *
+     * Usage:
+     *   Given this DoWork service:
+     *      {
+     *          doWork1:  an async function,
+     *          doWork2:  a function,
+     *          doWork3:  an async function,
+     *          doWork4:  a function,
+     *          isActive: true
+     *      }
+     *
+     *   Given this config:
+     *      {
+     *          doWork1:  $q.when([{name: 'Bob'}, {name: 'Sally'}]),
+     *          doWork2:  undefined,
+     *          //doWork3: not in config therefore will get _default value
+     *          doWork4:  an alternate doWork4 function
+     *          doWork5:  $q.reject('bad boy!')
+     *          isActive: false,
+     *          _default: $q.when([])
+     *      }
+     *
+     *   Service becomes
+     *      {
+     *          doWork1:  a stub returning $q.when([{name: 'Bob'}, {name: 'Sally'}]),
+     *          doWork2:  do-nothing stub,
+     *          doWork3:  a stub returning $q.when([]),
+     *          doWork4:  an alternate doWork4 function,
+     *          doWork5:  a stub returning $q.reject('bad boy!'),
+     *          isActive: false,
+     *      }
+     */
+    function mockService(service, config) {
+
+        var serviceKeys = Object.keys(service);
+        var configKeys  = Object.keys(config);
+
+        serviceKeys.forEach(function(key) {
+            var value = configKeys.indexOf(key) > -1 ?
+                 config[key] : config._default;
+
+            if (typeof service[key] === 'function') {
+                if (typeof value === 'function') {
+                    service[key] = value;
+                } else {
+                    sinon.stub(service, key, function() {
+                        return value;
+                    });
+                }
+            } else {
+                service[key] = value;
+            }
+        });
+
+        // for all unused config entries add a sinon stubbed
+        // async method that returns the config value
+        configKeys.forEach(function(key) {
+            if (serviceKeys.indexOf(key) === -1) {
+                var value = config[key];
+                if (typeof value === 'function') {
+                    service[key] = value;
+                } else {
+                    service[key] = sinon.spy(function() {
+                        return value;
+                    });
+                }
+            }
+        });
+
+        return service;
     }
 
     // Replaces the accented characters of many European languages w/ unaccented chars
@@ -341,5 +476,26 @@
             $httpBackend.verifyNoOutstandingExpectation();
             $httpBackend.verifyNoOutstandingRequest();
         }));
+    }
+
+    /**
+     * Returns a function that execute a callback function
+     * (typically a fn making asserts) within a try/catch
+     * The try/catch then calls the ambient "done" function
+     * in the appropriate way for both success and failure
+     *
+     * Useage:
+     *    // When the DOM is ready, assert got the dashboard view
+     *    tester.until(elemIsReady, wrap(hasDashboardView, done));
+     */
+    function wrapWithDone(callback, done) {
+        return function() {
+            try {
+                callback();
+                done();
+            } catch (err) {
+                done(err);
+            }
+        };
     }
 })();
