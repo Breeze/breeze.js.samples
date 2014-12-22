@@ -408,6 +408,53 @@ describe('saveQueuing:', function() {
     });
 
     /*********************************************************
+    * A change that wasn't saved will not be saved by a queued save
+    * Should only save entities with pending changes at the time
+    * that saveChanges is called. Subsequent changes should
+    * remain pending and not be saved by a queued save.
+    *********************************************************/
+    it("A change that wasn't saved will not be saved by a queued save", function (done) {
+
+      var description = 'Test' + ash.newGuid().toString();
+      description = description.substr(0, 27); // max allowed is 30
+
+      em.createEntity('TodoItem', { Description: description + '-1a' });
+      var save1 = em.saveChanges();
+
+      em.createEntity('TodoItem', { Description: description + '-2a' });
+      var save2 = em.saveChanges();
+
+      var todo3 = em.createEntity('TodoItem', { Description: description + '-3a' });
+
+      // NOT calling save on todo3; therefore it should NOT be saved
+
+      expect(em.getChanges().length).to.equal(3, "three pending changes while first save is in flight");
+
+      Q.all([save1, save2])
+          .then(requery)
+          .then(confirm)
+          .then(done, done);
+
+      function requery(results) {
+        var entities = em.getEntities();
+        expect(entities.length).to.equal(3, 'should have exactly 3 in cache');
+        expect(em.getChanges().length).to.equal(1, "should have one more pending changes");
+
+        var stateName = todo3.entityAspect.entityState.name;
+        expect(stateName).to.equal('Added', 'todo3 remains in the "Added" state');
+
+        return EntityQuery.from('Todos')
+            .where('Description', 'startsWith', description)
+            .using(em).execute();
+      }
+
+      function confirm(data) {
+        var results = data.results;
+        expect(results.length).to.equal(2, 'should have requeried 2 entities');
+      }
+    });
+
+    /*********************************************************
     * After save, the added entities have empty originalValues
     *********************************************************/
     it("the added entities have empty originalValues after save", function (done) {
@@ -640,6 +687,69 @@ describe('saveQueuing:', function() {
 
             expect(em.getChanges().length).to.equal(3,
                 "all three entities should still have pending changes");
+        }
+    });
+
+    /*********************************************************
+    * Validation error in later queued save aborts earlier queued saves
+    *********************************************************/
+    it("Validation error in later queued save aborts earlier queued saves", function (done) {
+
+        var todo1 = em.createEntity('TodoItem', { Description: 'Test 1' });
+        var save1 = em.saveChanges()
+            .catch(firstSaveFailed);
+
+        // queue second save of two valid entities
+        todo1.Description = 'Test 1m';
+        var todo2 = em.createEntity('TodoItem', { Description: 'Test 2' });
+        var save2 = em.saveChanges();
+
+        // invalid because todo3 lacks required Description
+        var todo3 = em.createEntity('TodoItem');
+        todo3.entityAspect.validateEntity();
+        var errors = todo3.entityAspect.getValidationErrors();
+        expect(errors.length).to.equal(1,
+            'todo3 should have one validation error: ' + errors[0].errorMessage);
+
+        // try save ... which should fail for todo3
+        // but also fails for todo1 and todo2
+        var save3 = em.saveChanges();
+
+        Q.all([save1, save2, save3])
+           .then(allPassed)
+           .catch(reviewFailed)
+           .then(done, done);
+
+        function firstSaveFailed(error) {
+          throw new AssertionError("the 1st save should have succeeded, error was " + error.message);
+        }
+        function allPassed(resolvedValues) { // BAD!
+          throw new AssertionError('all saves passed but 2nd/3rd should have failed');
+        }
+
+        function reviewFailed(error) {
+            expect(error.message).to.match(/queued save failed/i,
+                 "any save after the 1st should have aborted with " +
+                 "queued save termination error: '{0}'"
+                 .format(error.message));
+
+            // `error.failedSaveMemo` is the saveMemo that prompted this save
+            // `error.pendingSaveMemo` holds unsaved changes accumulated since that save.
+            // You may try to recover using this info. Good luck with that.
+            // It is gone forever after this moment.
+            var failedSaveMemo = error.failedSaveMemo;
+            expect(!!failedSaveMemo).to.equal(true,
+                'can access the `failedSaveMemo` on the `error`');
+
+            var memoKeys = Object.keys(failedSaveMemo.entityMemos);
+            expect(memoKeys).to.have.length(1,
+                '`saveMemo.entityMemos` has the pending changes to Todo1');
+
+            var queuedChanges = failedSaveMemo.queuedChanges;
+            expect(queuedChanges).to.contain(todo2,
+                '`saveMemo.queuedChanges` holds todo2');
+            expect(queuedChanges).to.contain(todo3,
+                '`saveMemo.queuedChanges` holds todo3');
         }
     });
 
