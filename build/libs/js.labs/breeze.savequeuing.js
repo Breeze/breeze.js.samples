@@ -5,7 +5,7 @@
  * conditions of the IdeaBlade Breeze license, available at http://www.breezejs.com/license
  *
  * Author: Ward Bell
- * Version: 2.0.2
+ * Version: 2.0.3
  * --------------------------------------------------------------------------------
  * Adds "Save Queuing" capability to new EntityManagers
  * "Save Queuing" automatically queues and defers an EntityManager.saveChanges call
@@ -75,19 +75,18 @@
   EntityManager.prototype.enableSaveQueuing = enableSaveQueuing;
 
   function enableSaveQueuing(enable) {
+    var em = this; // `this` EntityManager
+    var saveQueuing = em._saveQueueing ||
+        (em._saveQueuing = new SaveQueuing(em));
 
-    // Ensure `this` EntityManager has a _saveQueuing object
-    if (!this._saveQueuing) {
-      this._saveQueuing = new SaveQueuing(this);
-    }
-
-    enable = enable === undefined ? true : enable;
+    enable = (enable === undefined) ? true : enable;
+    saveQueuing._isEnabled = enable;
     if (enable) {
       // delegate to save changes queuing
-      this.saveChanges = saveChangesWithQueuing;
+      em.saveChanges = saveChangesWithQueuing;
     } else {
       // revert to the native EntityManager.saveChanges
-      this.saveChanges = this._saveQueuing.baseSaveChanges;
+      em.saveChanges = em._saveQueuing.baseSaveChanges;
     }
   };
 
@@ -106,7 +105,7 @@
         // note that save is in progress; then save
         saveQueuing.isSaving = true;
         saveQueuing.saveOptions = saveOptions;
-        return saveQueuing.innerSaveChanges(entities, saveOptions);
+        return saveQueuing.saveChanges(entities, saveOptions);
       }
     } catch (err) {
       return breeze.Q.reject(err);
@@ -118,20 +117,41 @@
     this.entityManager = entityManager;
     this.baseSaveChanges = entityManager.saveChanges;
     this.isSaving = false;
-    this.queuedDeferred = null;
+    this.nextSaveDeferred = null;
     this.saveMemo = null;
   };
 
   SaveQueuing.prototype.isEnabled = function () {
-    return this.entityManager.saveChanges === saveChangesWithQueuing;
+    return this._isEnabled;
   };
 
-  SaveQueuing.prototype.innerSaveChanges = innerSaveChanges;
   SaveQueuing.prototype.queueSaveChanges = queueSaveChanges;
+  SaveQueuing.prototype.saveChanges = saveChanges;
   SaveQueuing.prototype.saveSucceeded = saveSucceeded;
   SaveQueuing.prototype.saveFailed = saveFailed;
 
-  function innerSaveChanges(entities, saveOptions) {
+  function queueSaveChanges(entities) {
+    var self = this; // `this` is a SaveQueuing
+    var saveMemo = self.nextSaveMemo || (self.nextSaveMemo = new SaveMemo());
+    memoizeChanges(entities);
+    var deferred = self.nextSaveDeferred || (self.nextSaveDeferred = breeze.Q.defer());
+    return deferred.promise;
+
+    function memoizeChanges() {
+      var changes = entities || self.entityManager.getChanges();
+      if (changes.length === 0) { return; }
+      var queuedChanges = saveMemo.queuedChanges;
+      changes.forEach(function (e) {
+        if (!e.entityAspect.isBeingSaved && queuedChanges.indexOf(e) === -1) {
+          queuedChanges.push(e);
+        }
+      });
+
+      saveMemo.updateEntityMemos(changes);
+    }
+  };
+
+  function saveChanges(entities, saveOptions) {
     var self = this; // `this` is a SaveQueuing
     var promise = self.baseSaveChanges.call(self.entityManager, entities, saveOptions || self.saveOptions)
         .then(function (saveResult) { return self.saveSucceeded(saveResult); })
@@ -155,86 +175,83 @@
     }
   };
 
-  function queueSaveChanges(entities) {
-    var self = this; // `this` is a SaveQueuing
-    var memo = self.saveMemo || (self.saveMemo = new SaveMemo());
-    memoizeChanges(entities);
-    var deferred = self.queuedDeferred || (self.queuedDeferred = breeze.Q.defer());
-    return deferred.promise;
-
-    function memoizeChanges() {
-      var changes = entities || self.entityManager.getChanges();
-      if (changes.length === 0) { return; }
-      var queuedChanges = memo.queuedChanges;
-      changes.forEach(function (e) {
-        if (!e.entityAspect.isBeingSaved && queuedChanges.indexOf(e) === -1) {
-          queuedChanges.push(e);
-        }
-      });
-
-      memo.rememberChanges(changes);
-    }
-  };
-
   function saveSucceeded(saveResult) {
     var self = this; // `this` is a SaveQueueing
-    var saveMemo = self.saveMemo;
-    if (saveMemo) {
+    var activeSaveDeferred = self.activeSaveDeferred;
+    var nextSaveDeferred = self.nextSaveDeferred;
+    var nextSaveMemo = self.nextSaveMemo;
+
+
+    // prepare as if nothing queued or left to save
+    self.isSaving = false;
+    self.activeSaveDeferred = null;
+    self.activeSaveMemo = null;
+    self.nextSaveDeferred = null;
+    self.nextSaveMemo = null;
+
+    if (nextSaveMemo) {
       // a save was queued since last save returned
-      saveMemo.pkFixup(saveResult.keyMappings);
-      saveMemo.applyToSavedEntities(self.entityManager, saveResult.entities);
-      if (saveMemo.queuedChanges.length > 0) {
-        // remember the queued changes that triggered this save
-        self.activeSaveMemo = saveMemo;
-        // clear the saveMemo for future queued save changes
-        self.saveMemo = null;
+      nextSaveMemo.pkFixup(saveResult.keyMappings);
+      nextSaveMemo.applyToSavedEntities(self.entityManager, saveResult.entities);
+      // remove detached entities from queuedChanges
+      var queuedChanges = nextSaveMemo.queuedChanges.filter(function (e) {
+        return !e.entityAspect.entityState.isDetached();
+      });
+
+      if (queuedChanges.length > 0) {
         // save again
-        self.innerSaveChanges(saveMemo.queuedChanges);
-        return saveResult;
+        self.isSaving = true;
+        // remember the queued changes that triggered this save
+        self.activeSaveDeferred = nextSaveDeferred;
+        self.activeSaveMemo = nextSaveMemo;
+        self.saveChanges(queuedChanges);
+      } else if (nextSaveDeferred) {
+          var nothingToSaveResult = { entities: [], keyMappings: [] };
+          nextSaveDeferred.resolve(nothingToSaveResult);
       }
     }
-    // nothing queued or left to save
-    self.isSaving = false;
-    self.saveMemo = null;
-    self.activeSaveMemo = null;
-    var deferred = self.queuedDeferred;
-    if (deferred) {
-      self.queuedDeferred = null;
-      deferred.resolve(saveResult);
-    }
-    return saveResult;
+
+    if (activeSaveDeferred) { activeSaveDeferred.resolve(saveResult); }
+    return saveResult;  // for the current promise chain
   };
 
   function saveFailed(error) {
     var self = this; // `this` is a SaveQueueing
     error = new QueuedSaveFailedError(error, self);
+
+    var activeSaveDeferred = self.activeSaveDeferred;
+    var nextSaveDeferred = self.nextSaveDeferred;
+
     self.isSaving = false;
-    self.saveMemo = null;
+    self.activeSaveDeferred = null;
     self.activeSaveMemo = null;
-    var deferred = self.queuedDeferred;
-    if (deferred) {
-      self.queuedDeferred = null;
-      deferred.reject(error);
-    }
-    // so rest of current promise chain can hear error
-    return breeze.Q.reject(error);
+    self.nextSaveDeferred = null;
+    self.nextSaveMemo = null;
+
+    if (activeSaveDeferred) { activeSaveDeferred.reject(error); }
+    if (nextSaveDeferred) { nextSaveDeferred.reject(error); }
+
+    return breeze.Q.reject(error); // let promise chain hear error
   }
 
   ////////// QueuedSaveFailedError /////////
   // Error sub-class thrown when rejecting queued saves.
+  breeze.QueuedSaveFailedError = QueuedSaveFailedError;
+
+  // Error sub-class thrown when rejecting queued saves.
   // `innerError` is the actual save error
   // `failedSaveMemo` is the saveMemo that prompted this save
-  // `pendingSaveMemo` holds queued changes accumulated since that save.
+  // `nextSaveMemo` holds queued changes accumulated since that save.
   // You may try to recover using this info. Good luck with that.
   function QueuedSaveFailedError(errObject, saveQueuing) {
     this.innerError = errObject;
+    this.message = "Queued save failed: " + errObject.message;
     this.failedSaveMemo = saveQueuing.activeSaveMemo;
-    this.pendingSaveMemo = saveQueuing.saveMemo;
+    this.nextSaveMemo = saveQueuing.nextSaveMemo;
   }
 
   QueuedSaveFailedError.prototype = new Error();
   QueuedSaveFailedError.prototype.name = "QueuedSaveFailedError";
-  QueuedSaveFailedError.prototype.message = "Queued save failed";
   QueuedSaveFailedError.prototype.constructor = QueuedSaveFailedError;
 
   ////////// SaveMemo ////////////////
@@ -250,7 +267,7 @@
 
   SaveMemo.prototype.applyToSavedEntities = applyToSavedEntities;
   SaveMemo.prototype.pkFixup = pkFixup;
-  SaveMemo.prototype.rememberChanges = rememberChanges;
+  SaveMemo.prototype.updateEntityMemos = updateEntityMemos;
 
   function applyToSavedEntities(entityManager, savedEntities) {
     var entityMemos = this.entityMemos; // `this` is a SaveMemo
@@ -305,7 +322,7 @@
     return entityKey.entityType.name + '|' + entityKey.values;
   }
 
-  function rememberChanges(changes) {
+  function updateEntityMemos(changes) {
     var entityMemos = this.entityMemos;  // `this` is a SaveMemo
     changes.forEach(function (change) {
       // only update entityMemo for entity being save

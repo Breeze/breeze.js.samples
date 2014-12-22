@@ -28,17 +28,31 @@
         }
     });
 
+    asyncTest("can save nothing", function () {
+      expect(1);
+      newNorthwindEm().saveChanges()
+          .then(function(saveResult) {
+              equal(saveResult.entities.length, 0, 'succeeded in saving nothing');
+          })
+          .catch(handleFail).finally(start);
+    });
+
     asyncTest("can save a new Customer entity", function () {
-        expect(1);
+      expect(1);
+
         // Create and initialize entity to save
         var em = newNorthwindEm();
         var customer = em.createEntity('Customer', {
             CustomerID: newGuidComb(),
-            CompanyName: "Test1 " + new Date().toISOString()
+            CompanyName: 'Test1 ' + new Date().toISOString()
         });
 
-        entitySaveTester(customer, /*shouldSave*/ true);
-
+        em.saveChanges()
+            .then(function (saveResults) {
+                ok(!!saveResults.entities[0], ' should have saved new Customer with CustomerID ' +
+                    customer.getProperty('CustomerID'));
+            })
+            .catch(handleFail).finally(start);
     });
 
     asyncTest("can modify my own Customer entity", function () {

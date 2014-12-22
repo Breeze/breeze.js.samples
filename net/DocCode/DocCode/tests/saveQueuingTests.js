@@ -34,9 +34,9 @@
     };
     module("saveQueuing", moduleOptions);
 
-  /*********************************************************
-  * second save of added entity does not duplicate it
-  *********************************************************/
+    /*********************************************************
+    * second save of added entity does not duplicate it
+    *********************************************************/
     asyncTest("second save of added entity does not duplicate it", function () {
       expect(2);
 
@@ -66,10 +66,10 @@
       }
     });
 
-  /*********************************************************
-  * second save w/ savequeuing does not resave an added entity
-  * unless you modify the added entity between saves
-  *********************************************************/
+    /*********************************************************
+    * second save w/ savequeuing does not resave an added entity
+    * unless you modify the added entity between saves
+    *********************************************************/
     asyncTest("second save of added entity does not save twice if no change", function () {
       expect(5);
 
@@ -509,6 +509,68 @@
     });
 
     /*********************************************************
+    * Can save selected entities (pass entities to SaveChanges)
+    *********************************************************/
+    asyncTest("Can save selected entities (pass entities to SaveChanges)", function () {
+      expect(8);
+
+      var description = 'Test' + testFns.newGuid().toString();
+      description = description.substr(0, 27); // max allowed is 30
+
+      var todo1 = em.createEntity('TodoItem', { Description: description + '-1a' });
+      var todo2 = em.createEntity('TodoItem', { Description: description + '-2a' });
+
+      // should only save todo1
+      var save1 = em.saveChanges([todo1]).then(firstSaveSucceeded);
+      ok(!todo2.entityAspect.isBeingSaved, 'todo2 should not be saving during save1');
+
+      // save of todo2 will be queued, unlike native saveChanges which could save it immediately
+      var save2 = em.saveChanges().then(secondSaveSucceeded);
+
+      var todo3 = em.createEntity('TodoItem', { Description: description + '-3a' });
+
+      // NOT calling save on todo3; therefore it should NOT be saved
+
+      equal(em.getChanges().length, 3, "three pending changes while first save is in flight");
+
+      Q.all([save1, save2])
+          .then(requery)
+          .then(confirm)
+          .catch(handleFail)
+          .finally(start);
+
+      function requery(results) {    
+        var entities = em.getEntities();
+        equal(entities.length, 3, 'should have exactly 3 in cache');
+        equal(em.getChanges().length, 1, "should have one more pending changes");
+
+        var stateName = todo3.entityAspect.entityState.name;
+        equal(stateName, 'Added', 'todo3 remains in the "Added" state');
+
+        return EntityQuery.from('Todos')
+            .where('Description', 'startsWith', description)
+            .using(em).execute();
+      }
+
+      function confirm(data) {
+          var results = data.results;
+          equal(results.length, 2, 'should have requeried 2 entities');
+      }
+
+      function firstSaveSucceeded(saveResult) {
+          ok(saveResult.entities.length === 1 &&
+              saveResult.entities[0] === todo1, '1st save should have only saved todo1');
+          return saveResult;
+      }
+
+      function secondSaveSucceeded(saveResult) {
+          ok(saveResult.entities.length === 1 &&
+              saveResult.entities[0] === todo2, '2nd save should have only saved todo2');
+          return saveResult;
+      }
+    });
+
+    /*********************************************************
     * After save, the added entities have empty originalValues
     *********************************************************/
     asyncTest("the added entities have empty originalValues after save", function () {
@@ -600,6 +662,53 @@
     });
 
     /*********************************************************
+    * Can delete an ADDED or MODIFIED entity 
+    * if it is queued for save but not currently being saved
+    * This is standard behavior, w/ or w/o saveQueuing,
+    *********************************************************/
+    asyncTest("can delete a queued added entity", function () {
+      expect(4);
+
+      em.createEntity('TodoItem', { Description: 'Todo 1' });
+      var save1 = em.saveChanges()
+          .then(firstSaveSucceeded, firstSaveFailed);
+
+      // created while save is in progress
+      var todo2 = em.createEntity('TodoItem', { Description: 'Todo 2' });
+
+      // save-in-progress; todo2 will be queued for next actual save
+      var save2 = em.saveChanges();
+
+      // delete the queued new todo2 before the save returns
+      todo2.entityAspect.setDeleted();
+
+      Q.all([save1, save2])
+          .then(afterSave)
+          .catch(handleFail).finally(start);
+
+      function afterSave(results) {
+        var saved = results[0].entities;
+        equal(saved.length, 1, 'first save succeeded in saving 1st todo');
+
+        saved = results[1].entities;
+        equal(saved.length, 0, 'second save succeeded but saved nothing');
+
+        var stateName = todo2.entityAspect.entityState.name;
+        equal(stateName, 'Detached', 'todo2 should be "Detached"; is ' + stateName);
+      }
+
+      function firstSaveSucceeded(saveResult) {
+        ok(true, "the 1st save should have succeeded");
+        return saveResult;
+      }
+
+      function firstSaveFailed(error) {
+        ok(false, "the 1st save should have succeeded, error was " + error.message);
+        return breeze.Q.reject(error);
+      }
+    });
+
+    /*********************************************************
     * Failure in a middle save aborts the rest
     *********************************************************/
     asyncTest("Failure in a middle save aborts the rest", function () {
@@ -643,7 +752,9 @@
         }
 
         function secondSaveSucceeded(saveResult) {
+            var err = "the 2nd save should have failed";
             ok(false, "the 2nd save should have failed");
+            return Q.reject(err);
         }
         function secondSaveFailed(error) {
             if (error.innerError) {error = error.innerError;}
@@ -656,7 +767,6 @@
         }
         function thirdSaveFailed(error) {
             var expectedErr = /queued save failed/i.test(error.message);
-            if (error.innerError) {error = error.innerError;}            
             ok(expectedErr,
                 "the 3rd save should have aborted with "+
                 "queued save termination error: '{0}'"
@@ -780,7 +890,7 @@
         }
         function firstSaveFailed(error) {
           ok(false, "the 1st save should have succeeded, error was " + error.message);
-          breeze.Q.reject(error);
+          return breeze.Q.reject(error);
         }
         function allPassed(resolvedValues) { // BAD!       
           ok(false, 'all saves passed but 2nd/3rd should have failed');

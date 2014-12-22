@@ -455,6 +455,70 @@ describe('saveQueuing:', function() {
     });
 
     /*********************************************************
+    * Can save selected entities (pass entities to SaveChanges)
+    *********************************************************/
+    it("Can save selected entities (pass entities to SaveChanges)", function (done) {
+
+        var description = 'Test' + ash.newGuid().toString();
+        description = description.substr(0, 27); // max allowed is 30
+
+        var todo1 = em.createEntity('TodoItem', { Description: description + '-1a' });
+        var todo2 = em.createEntity('TodoItem', { Description: description + '-2a' });
+
+        // should only save todo1
+        var save1 = em.saveChanges([todo1]).then(firstSaveSucceeded);
+        expect(!!todo2.entityAspect.isBeingSaved).to.equal(false,
+            'todo2 should not be saving during save1');
+
+        // save of todo2 will be queued, unlike native saveChanges which could save it immediately
+        var save2 = em.saveChanges().then(secondSaveSucceeded);
+
+        var todo3 = em.createEntity('TodoItem', { Description: description + '-3a' });
+
+        // NOT calling save on todo3; therefore it should NOT be saved
+
+        expect(em.getChanges()).to.have.length(3,
+        "three pending changes while first save is in flight");
+
+        Q.all([save1, save2])
+          .then(requery)
+          .then(confirm)
+          .then(done, done);
+
+        function requery(results) {
+            var entities = em.getEntities();
+            expect(entities).to.have.length(3, 'should have exactly 3 in cache');
+            expect(em.getChanges()).to.have.length(1, "should have one more pending changes");
+
+            var stateName = todo3.entityAspect.entityState.name;
+            expect(stateName).to.equal('Added', 'todo3 remains in the "Added" state');
+
+            return EntityQuery.from('Todos')
+                .where('Description', 'startsWith', description)
+                .using(em).execute();
+        }
+
+        function confirm(data) {
+            var results = data.results;
+            expect(results).to.have.length(2, 'should have requeried 2 entities');
+        }
+
+        function firstSaveSucceeded(saveResult) {
+            expect(saveResult.entities.length === 1 &&
+                saveResult.entities[0] === todo1).to.equal(true,
+                '1st save should have only saved todo1');
+            return saveResult;
+        }
+
+        function secondSaveSucceeded(saveResult) {
+            expect(saveResult.entities.length === 1 &&
+                saveResult.entities[0] === todo2).to.equal(true,
+                '2nd save should have only saved todo2');
+            return saveResult;
+        }
+    });
+
+    /*********************************************************
     * After save, the added entities have empty originalValues
     *********************************************************/
     it("the added entities have empty originalValues after save", function (done) {
@@ -536,7 +600,42 @@ describe('saveQueuing:', function() {
         }
         throw new AssertionError('can setDeleted when should not be able' + msgSuffix);
       }
+    });
 
+    /*********************************************************
+    * Can delete an ADDED or MODIFIED entity
+    * if it is queued for save but not currently being saved
+    * This is standard behavior, w/ or w/o saveQueuing,
+    *********************************************************/
+    it("can delete a queued added entity", function (done) {
+
+        em.createEntity('TodoItem', { Description: 'Todo 1' });
+        var save1 = em.saveChanges();
+
+        // created while save is in progress
+        var todo2 = em.createEntity('TodoItem', { Description: 'Todo 2' });
+
+        // save-in-progress; todo2 will be queued for next actual save
+        var save2 = em.saveChanges();
+
+        // delete the queued new todo2 before the save returns
+        todo2.entityAspect.setDeleted();
+
+        Q.all([save1, save2])
+            .then(afterSave)
+            .then(done, done);
+
+        function afterSave(results) {
+            var saved = results[0].entities;
+            expect(saved).to.have.length(1, 'first save succeeded in saving 1st todo');
+
+            saved = results[1].entities;
+            expect(saved).to.have.length(0, 'second save succeeded but saved nothing');
+
+            var stateName = todo2.entityAspect.entityState.name;
+            expect(stateName).to.equal('Detached',
+                'todo2 should be "Detached"; is ' + stateName);
+        }
     });
 
     /*********************************************************
@@ -581,23 +680,19 @@ describe('saveQueuing:', function() {
                     "1st save should be 'todo1'");
             return saveResult;
         }
-
         function secondSaveSucceeded(saveResult) {
-            expect(true).to.equal(false, "the 2nd save should have failed");
+            throw new AssertionError("the 2nd save should have failed");
         }
         function secondSaveFailed(error) {
-            if (error.innerError) {error = error.innerError;}
             //console.log(
             //   "the 2nd save should have failed, the error was '{0}'"
             //    .format(error.message));
         }
         function thirdSaveSucceeded(saveResult) {
-            expect(true).to.equal(false,
-                "the 3rd save should have been aborted");
+            throw new AssertionError("the 3rd save should have been aborted");
         }
         function thirdSaveFailed(error) {
             var msg = error.message;
-            if (error.innerError) {error = error.innerError;}
             expect(msg).to.match(/queued save failed/i,
                 "the 3rd save should have aborted with "+
                 "queued save termination error: '{0}'"
@@ -658,16 +753,14 @@ describe('saveQueuing:', function() {
          .then(done, done);
 
         function firstSaveSucceeded(saveResult) {
-            expect(true).to.equal(false,
-                "the 1st save should have failed");
+            throw new AssertionError("the 1st save should have failed");
         }
         function firstSaveFailed(error) {
             //console.log("the 1st save should have failed, the error was '{0}'"
             //   .format(error.message));
         }
         function laterSaveSucceeded(saveResult) {
-            expect(true).to.equal(false,
-                "any save after the 1st should have been aborted");
+            throw new AssertionError("any save after the 1st should have been aborted");
         }
         function laterSaveFailed(error) {
             expect(error.message).to.match(/queued save failed/i,

@@ -6,8 +6,8 @@ describe("saveNorthwind:", function (done) {
     var EntityQuery = breeze.EntityQuery;
     var handleSaveFailed = ash.handleSaveFailed;
     var newEm = ash.newEmFactory(ash.northwindServiceName);
-    var newGuidComb = ash.newGuidComb; 
-    var timestamp;   
+    var newGuidComb = ash.newGuidComb;
+    var timestamp;
 
     ash.serverIsRunningPrecondition();
 
@@ -21,6 +21,33 @@ describe("saveNorthwind:", function (done) {
     });
 
     /////////////
+
+    it("can save nothing", function (done) {
+        newNorthwindEm().saveChanges()
+            .then(function(saveResult) {
+                expect(saveResult.entities).to.have.length(0,
+                    'succeeded in saving nothing');
+            })
+            .then(done, done);
+    });
+
+    it("can save a new Customer entity", function (done) {
+
+        // Create and initialize entity to save
+        var em = newNorthwindEm();
+        var customer = em.createEntity('Customer', {
+            CustomerID: newGuidComb(),
+            CompanyName: 'Test1 ' + new Date().toISOString()
+        });
+
+        em.saveChanges()
+            .then(function (saveResults) {
+                expect(saveResults.entities).to.have.length(1,
+                    ' should have saved new Customer with CustomerID ' +
+                    customer.getProperty('CustomerID'));
+            })
+            .then(done, done);
+    });
 
     it("can save a new Customer entity", function (done) {
 
@@ -122,17 +149,17 @@ describe("saveNorthwind:", function (done) {
 
         function confirmOrderGraph(data) {
             var order = data.results[0];
-            expect(order.ShipName).to.equal('Add OrderGraphTest', 
+            expect(order.ShipName).to.equal('Add OrderGraphTest',
             	"'ShipName' of the re-queried order is expected value");
 
             var details = (order && order.OrderDetails) || [];
-            expect(details).to.have.length(3, 
+            expect(details).to.have.length(3,
             	'requery of saved new Order graph came with the expected 3 details');
 
             var gotExpectedDetails = details.every(function (d) {
                 return d.UnitPrice === 42.42;
             });
-            expect(gotExpectedDetails).to.equal(true, 
+            expect(gotExpectedDetails).to.equal(true,
             	'every OrderDetail has the expected UnitPrice of 42.42');
         }
     });
@@ -153,7 +180,7 @@ describe("saveNorthwind:", function (done) {
         })
         .catch(function (error) {
             var prefix = shouldSave ? "should not" : "should";
-            expect(shouldSave).to.equal(false, 
+            expect(shouldSave).to.equal(false,
             	"server " + prefix + " have rejected " + msgPart +
                 " with the error: " + error.message);
         })
