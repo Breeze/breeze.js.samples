@@ -82,7 +82,7 @@
 
       Q.all([save1, save2])
        .then(requery)
-       .then(success)
+       .then(afterSaves)
        .catch(handleFail)
        .finally(start);
 
@@ -102,7 +102,7 @@
             .using(em).execute();
       }
 
-      function success(data) {
+      function afterSaves(data) {
         equal(data.results.length, 1,
             "Re-queried exactly one TodoItem w/ that description.");
         equal(em.getEntities().length, 1, "Only one entity in cache");
@@ -509,6 +509,37 @@
     });
 
     /*********************************************************
+    * a queued save of nothing returns the saved nothing resolved promise
+    *********************************************************/
+    asyncTest("a queued save of nothing returns the 'saved nothing' resolved promise", function () {
+      expect(4);
+
+      var todo1 = em.createEntity('TodoItem', { Description: 'Todo 1' });
+
+      var save1 = em.saveChanges();
+      var save2 = em.saveChanges([]);
+
+      Q.all([save1, save2])
+       .then(afterSaves)
+       .catch(handleFail)
+       .finally(start);
+
+      function afterSaves(results) {
+        equal(ajaxSpy.callCount, 1,
+            'ajax should have been called only once (not for the empty save)');
+
+        equal(results[0].entities.indexOf(todo1), 0,
+          'first save should have returned the saved todo1');
+
+        equal(results[1].entities.length, 0,
+          '"empty save" should have returned the "saved nothing" result');
+
+        var stateName = todo1.entityAspect.entityState.name;
+        equal(stateName, 'Unchanged', 'saved todo 1 should be "Unchanged"');
+      }
+    });
+
+    /*********************************************************
     * Can save selected entities (pass entities to SaveChanges)
     *********************************************************/
     asyncTest("Can save selected entities (pass entities to SaveChanges)", function () {
@@ -589,7 +620,8 @@
       var save3 = em.saveChanges();
 
       Q.all([save1, save2, save3])
-          .then(confirm).catch(handleFail).finally(start);
+          .then(confirm)
+          .catch(handleFail).finally(start);
 
       function confirm() {
         var todos = em.getEntities();
@@ -683,10 +715,10 @@
       todo2.entityAspect.setDeleted();
 
       Q.all([save1, save2])
-          .then(afterSave)
+          .then(afterSaves)
           .catch(handleFail).finally(start);
 
-      function afterSave(results) {
+      function afterSaves(results) {
         var saved = results[0].entities;
         equal(saved.length, 1, 'first save succeeded in saving 1st todo');
 
@@ -711,8 +743,9 @@
     /*********************************************************
     * Failure in a middle save aborts the rest
     *********************************************************/
-    asyncTest("Failure in a middle save aborts the rest", function () {
-        expect(9);
+    asyncTest("Failure in a middle save aborts the rest (and have much err info)", function () {
+        expect(13);
+        var error2;
 
         var todo1 = em.createEntity('TodoItem', { Description: "Test 1" });
         var save1 = em.saveChanges()
@@ -738,8 +771,8 @@
         equal(em.getChanges().length, 3, "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
-            .then(postSave, postSave)
-            .finally(start);
+            .then(afterSaves)
+            .then(handleFail).finally(start);
 
         function firstSaveSucceeded(saveResult) {
             var savedCount = saveResult.entities.length;
@@ -757,22 +790,39 @@
             return Q.reject(err);
         }
         function secondSaveFailed(error) {
-            if (error.innerError) {error = error.innerError;}
+            error2 = error; // we'll see this again in thirdSaveFailed
             ok(true,
-                "the 2nd save should have failed, the error was '{0}'"
+                'the 2nd save should have failed, the error was "{0}"'
                 .format(error.message));
+
+          // `error.failedSaveMemo` is the saveMemo that prompted this save
+          // `error.pendingSaveMemo` holds unsaved changes accumulated since that save.
+          // You may try to recover using this info. Good luck with that.
+          // It is gone forever after this moment.
+            var failedSaveMemo = error.failedSaveMemo;
+            ok(failedSaveMemo != null,
+              'can access the `failedSaveMemo` on the 2nd save `error`');
+            if (failedSaveMemo) {
+              equal(Object.keys(failedSaveMemo.entityMemos).length, 1,
+                '`saveMemo.entityMemos` has the pending changes to Todo1');
+              var queuedChanges = failedSaveMemo.queuedChanges;
+              ok(queuedChanges.indexOf(todo2) !== -1,
+                '`saveMemo.queuedChanges` holds todo2');
+              ok(queuedChanges.indexOf(todo3) !== -1,
+                '`saveMemo.queuedChanges` holds todo3');
+            }
+            // DO NOT re-reject as we have "handled" it.
         }
         function thirdSaveSucceeded(saveResult) {
             ok(false, "the 3rd save should have been aborted");
         }
         function thirdSaveFailed(error) {
-            var expectedErr = /queued save failed/i.test(error.message);
-            ok(expectedErr,
-                "the 3rd save should have aborted with "+
-                "queued save termination error: '{0}'"
-                .format(error.message));
+            ok(error === error2,
+                'the 3rd save should have failed with the save error as save #2');
+          // DO NOT re-reject as we have "handled" it.
         }
-        function postSave(results) {
+
+        function afterSaves(results) {
             ok(typeof results[1] === 'undefined' &&
                 typeof results[2] === 'undefined',
                 "the 2nd and 3rd save promise results should be undefined " +
@@ -819,7 +869,7 @@
         equal(em.getChanges().length, 3, "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
-         .then(allfullfilled)
+         .then(afterSaves)
          .finally(start); 
 
         function firstSaveSucceeded(saveResult) {
@@ -841,7 +891,7 @@
                .format(error.message));
         }
 
-        function allfullfilled(results) {
+        function afterSaves(results) {
             ok(results.reduce(
                     function(p, c) { return p && typeof c === 'undefined'; },
                     true),
@@ -857,7 +907,7 @@
     * Validation error in later queued save aborts earlier queued saves
     *********************************************************/
     asyncTest("Validation error in later queued save aborts earlier queued saves", function () {
-        expect(7);
+        expect(8);
 
         var todo1 = em.createEntity('TodoItem', { Description: 'Test 1' });
         var save1 = em.saveChanges()
@@ -866,7 +916,8 @@
         // queue second save of two valid entities
         todo1.setProperty('Description', 'Test 1m');
         var todo2 = em.createEntity('TodoItem', { Description: 'Test 2' });
-        var save2 = em.saveChanges();
+        var save2 = em.saveChanges()
+            .then(secondSaveSucceeded, secondSaveFailed);
 
         // invalid because todo3 lacks required Description
         var todo3 = em.createEntity('TodoItem');
@@ -876,47 +927,44 @@
             'todo3 should have one validation error: ' + errors[0].errorMessage);
 
         // try save ... which should fail for todo3
-        // but also fails for todo1 and todo2
-        var save3 = em.saveChanges();
+        var save3 = em.saveChanges().catch(thirdSaveFailed);
 
         Q.all([save1, save2, save3])
-           .then(allPassed)
-           .catch(reviewFailed)
+           .then(afterSaves)
            .catch(handleFail)
            .finally(start);
 
         function firstSaveSucceeded(saveResult) {
-          ok(true, "the 1st save should have succeeded");
+          ok(saveResult.entities.indexOf(todo1) === 0, "the 1st save should have succeeded");
         }
         function firstSaveFailed(error) {
           ok(false, "the 1st save should have succeeded, error was " + error.message);
           return breeze.Q.reject(error);
         }
-        function allPassed(resolvedValues) { // BAD!       
-          ok(false, 'all saves passed but 2nd/3rd should have failed');
+        function secondSaveSucceeded(saveResult) {
+          ok(saveResult.entities.indexOf(todo2) === 0, "the 2nd save should have succeeded");
         }
-        
-        function reviewFailed(error) {
-          ok(/queued save failed/i.test(error.message),
-             "any save after the 1st should have aborted with " +
-             "queued save termination error: '{0}'"
-             .format(error.message));
+        function secondSaveFailed(error) {
+          ok(false, "the 2nd save should have succeeded, error was " + error.message);
+          return breeze.Q.reject(error);
+        }
 
-          // `error.failedSaveMemo` is the saveMemo that prompted this save
-          // `error.pendingSaveMemo` holds unsaved changes accumulated since that save.
-          // You may try to recover using this info. Good luck with that.
-          // It is gone forever after this moment.
-          var failedSaveMemo = error.failedSaveMemo;
-          ok(failedSaveMemo != null, 'can access the `failedSaveMemo` on the `error`');
-          if (failedSaveMemo) {
-            equal(Object.keys(failedSaveMemo.entityMemos).length, 1,
-              '`saveMemo.entityMemos` has the pending changes to Todo1');
-            var queuedChanges = failedSaveMemo.queuedChanges;
-            ok(queuedChanges.indexOf(todo2) !== -1,
-              '`saveMemo.queuedChanges` holds todo2');
-            ok(queuedChanges.indexOf(todo3) !== -1,
-              '`saveMemo.queuedChanges` holds todo3');
-          }
+        function thirdSaveFailed(error) {
+          ok(/client.*validation error/i.test(error.message),
+             "the 3rd save should have aborted with client validation error: '{0}' "
+             .format(error.message));
+          // DO NOT re-reject; we have handled the expected error.
+          return '3rd save error handled';
+        }
+        function afterSaves(resolvedValues) {
+          ok(!resolvedValues[0] && !resolvedValues[1], 'saves 1 & 2 passed as expected');
+          ok(resolvedValues[2] == '3rd save error handled', '3rd save failed but was handled');
+
+          var errs = todo3.entityAspect.getValidationErrors();
+          equal(errs.length, 1,
+              'todo3 should still have one validation error: ' + errs[0].errorMessage);
+          var stateName = todo3.entityAspect.entityState.name;
+          equal(stateName, 'Added', 'todo3 remains in the "Added" state');
         }
     });
 

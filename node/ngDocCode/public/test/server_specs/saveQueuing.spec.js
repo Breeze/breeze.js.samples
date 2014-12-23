@@ -255,7 +255,7 @@ describe('saveQueuing:', function() {
         expect(em.getChanges().length, 2, "two pending changes while first save is in flight");
 
         Q.all([save1, save2])
-            .then(bothSucceeded)
+            .then(afterSaves)
             .then(done, done);
 
         function firstSaveSucceeded(saveResult) {
@@ -276,7 +276,7 @@ describe('saveQueuing:', function() {
                     "2nd save should be 'todo2'");
             return saveResult;
         }
-        function bothSucceeded (results) {
+        function afterSaves (results) {
             expect(em.hasChanges()).to.equal(false,
                 "should have no more pending changes");
         }
@@ -519,6 +519,36 @@ describe('saveQueuing:', function() {
     });
 
     /*********************************************************
+    * a queued save of nothing returns the saved nothing resolved promise
+    *********************************************************/
+    it("a queued save of nothing returns the 'saved nothing' resolved promise", function (done) {
+
+        var todo1 = em.createEntity('TodoItem', { Description: 'Todo 1' });
+
+        var save1 = em.saveChanges();
+        var save2 = em.saveChanges([]);
+
+        Q.all([save1, save2])
+            .then(afterSaves)
+            .then(done, done);
+
+        function afterSaves(results) {
+            expect(ajaxSpy.callCount).to.equal(1,
+                'ajax should have been called only once (not for the empty save)');
+
+            expect(results[0].entities).to.contain(todo1,
+              'first save should have returned the saved todo1');
+
+            expect(results[1].entities).to.have.length(0,
+              '"empty save" should have returned the "saved nothing" result');
+
+            var stateName = todo1.entityAspect.entityState.name;
+            expect(stateName).to.equal('Unchanged',
+                'saved todo 1 should be "Unchanged"');
+        }
+    });
+
+    /*********************************************************
     * After save, the added entities have empty originalValues
     *********************************************************/
     it("the added entities have empty originalValues after save", function (done) {
@@ -536,7 +566,8 @@ describe('saveQueuing:', function() {
       var save3 = em.saveChanges();
 
       Q.all([save1, save2, save3])
-          .then(confirm).then(done, done);
+          .then(confirm)
+          .then(done, done);
 
       function confirm() {
         var todos = em.getEntities();
@@ -622,10 +653,10 @@ describe('saveQueuing:', function() {
         todo2.entityAspect.setDeleted();
 
         Q.all([save1, save2])
-            .then(afterSave)
+            .then(afterSaves)
             .then(done, done);
 
-        function afterSave(results) {
+        function afterSaves(results) {
             var saved = results[0].entities;
             expect(saved).to.have.length(1, 'first save succeeded in saving 1st todo');
 
@@ -641,7 +672,8 @@ describe('saveQueuing:', function() {
     /*********************************************************
     * Failure in a middle save aborts the rest
     *********************************************************/
-    it("Failure in a middle save aborts the rest", function (done) {
+    it("Failure in a middle save aborts the rest (and have much err info)", function (done) {
+        var error2;
 
         var todo1 = em.createEntity('TodoItem', { Description: "DeleteMe 1" });
         var save1 = em.saveChanges()
@@ -668,7 +700,7 @@ describe('saveQueuing:', function() {
             "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
-            .then(postSave, postSave)
+            .then(afterSaves, afterSaves)
             .then(done, done);
 
         function firstSaveSucceeded(saveResult) {
@@ -684,26 +716,43 @@ describe('saveQueuing:', function() {
             throw new AssertionError("the 2nd save should have failed");
         }
         function secondSaveFailed(error) {
-            //console.log(
-            //   "the 2nd save should have failed, the error was '{0}'"
-            //    .format(error.message));
+            error2 = error; // we'll see this again in thirdSaveFailed
+
+            // `error.failedSaveMemo` is the saveMemo that prompted this save
+            // `error.pendingSaveMemo` holds unsaved changes accumulated since that save.
+            // You may try to recover using this info. Good luck with that.
+            // It is gone forever after this moment.
+            var failedSaveMemo = error.failedSaveMemo;
+            expect(!!failedSaveMemo).to.equal(true,
+                'can access the `failedSaveMemo` on the 2nd save `error`');
+
+            var memoKeys = Object.keys(failedSaveMemo.entityMemos);
+            expect(memoKeys).to.have.length(1,
+                '`saveMemo.entityMemos` has the pending changes to Todo1');
+
+            var queuedChanges = failedSaveMemo.queuedChanges;
+            expect(queuedChanges).to.contain(todo2,
+                '`saveMemo.queuedChanges` holds todo2');
+            expect(queuedChanges).to.contain(todo3,
+                '`saveMemo.queuedChanges` holds todo3');
+            // DO NOT re-reject as we have "handled" it.
         }
         function thirdSaveSucceeded(saveResult) {
             throw new AssertionError("the 3rd save should have been aborted");
         }
         function thirdSaveFailed(error) {
             var msg = error.message;
-            expect(msg).to.match(/queued save failed/i,
-                "the 3rd save should have aborted with "+
-                "queued save termination error: '{0}'"
-                .format(error.message));
+            expect(error).to.equal(error2,
+                'the 3rd save should have failed with the save error as save #2');
+            // DO NOT re-reject as we have "handled" it.
         }
-        function postSave(results) {
+
+        function afterSaves(results) {
             expect(typeof results[0]).to.equal('object',
                 "1st save promise succeeded and has results");
 
             expect(typeof results[1] === 'undefined' &&
-                typeof results[2] === 'undefined')
+                   typeof results[2] === 'undefined')
             .to.equal(true,
                 "the 2nd and 3rd save promise results should be undefined " +
                 "because failed saves were caught and errors not re-thrown");
@@ -749,7 +798,7 @@ describe('saveQueuing:', function() {
             "three pending changes while first save is in flight");
 
         Q.all([save1, save2, save3])
-         .then(allDone)
+         .then(afterSaves)
          .then(done, done);
 
         function firstSaveSucceeded(saveResult) {
@@ -769,7 +818,7 @@ describe('saveQueuing:', function() {
                .format(error.message));
         }
 
-        function allDone(results) {
+        function afterSaves(results) {
             var allResultsUndefined = results.reduce(
                     function(p, c) { return p && typeof c === 'undefined'; },
                     true);
@@ -790,12 +839,13 @@ describe('saveQueuing:', function() {
 
         var todo1 = em.createEntity('TodoItem', { Description: 'Test 1' });
         var save1 = em.saveChanges()
-            .catch(firstSaveFailed);
+            .then(firstSaveSucceeded, firstSaveFailed);
 
         // queue second save of two valid entities
         todo1.Description = 'Test 1m';
         var todo2 = em.createEntity('TodoItem', { Description: 'Test 2' });
-        var save2 = em.saveChanges();
+        var save2 = em.saveChanges()
+            .then(secondSaveSucceeded, secondSaveFailed);
 
         // invalid because todo3 lacks required Description
         var todo3 = em.createEntity('TodoItem');
@@ -805,44 +855,43 @@ describe('saveQueuing:', function() {
             'todo3 should have one validation error: ' + errors[0].errorMessage);
 
         // try save ... which should fail for todo3
-        // but also fails for todo1 and todo2
-        var save3 = em.saveChanges();
+        var save3 = em.saveChanges().catch(thirdSaveFailed);
 
         Q.all([save1, save2, save3])
-           .then(allPassed)
-           .catch(reviewFailed)
+           .then(afterSaves)
            .then(done, done);
 
+        function firstSaveSucceeded(saveResult) {
+          expect(saveResult.entities).to.contain(todo1, "the 1st save should have succeeded");
+        }
         function firstSaveFailed(error) {
           throw new AssertionError("the 1st save should have succeeded, error was " + error.message);
         }
-        function allPassed(resolvedValues) { // BAD!
-          throw new AssertionError('all saves passed but 2nd/3rd should have failed');
+        function secondSaveSucceeded(saveResult) {
+          expect(saveResult.entities).to.contain(todo2, "the 2nd save should have succeeded");
+        }
+        function secondSaveFailed(error) {
+          throw new AssertionError("the 2nd save should have succeeded, error was " + error.message);
+        }
+        function thirdSaveFailed(error) {
+          expect(error.message).to.match(/client.*validation error/i,
+             "the 3rd save should have aborted with client validation error: '{0}' "
+             .format(error.message));
+          // DO NOT re-reject; we have handled the expected error.
+          return '3rd save error handled';
         }
 
-        function reviewFailed(error) {
-            expect(error.message).to.match(/queued save failed/i,
-                 "any save after the 1st should have aborted with " +
-                 "queued save termination error: '{0}'"
-                 .format(error.message));
+        function afterSaves(resolvedValues) {
+          expect(!resolvedValues[0] && !resolvedValues[1]).to.equal(true,
+            'saves 1 & 2 passed as expected');
+          expect(resolvedValues[2]).to.equal('3rd save error handled',
+            '3rd save failed but was handled');
 
-            // `error.failedSaveMemo` is the saveMemo that prompted this save
-            // `error.pendingSaveMemo` holds unsaved changes accumulated since that save.
-            // You may try to recover using this info. Good luck with that.
-            // It is gone forever after this moment.
-            var failedSaveMemo = error.failedSaveMemo;
-            expect(!!failedSaveMemo).to.equal(true,
-                'can access the `failedSaveMemo` on the `error`');
-
-            var memoKeys = Object.keys(failedSaveMemo.entityMemos);
-            expect(memoKeys).to.have.length(1,
-                '`saveMemo.entityMemos` has the pending changes to Todo1');
-
-            var queuedChanges = failedSaveMemo.queuedChanges;
-            expect(queuedChanges).to.contain(todo2,
-                '`saveMemo.queuedChanges` holds todo2');
-            expect(queuedChanges).to.contain(todo3,
-                '`saveMemo.queuedChanges` holds todo3');
+          var errs = todo3.entityAspect.getValidationErrors();
+          expect(errs).to.have.length(1,
+              'todo3 should still have one validation error: ' + errs[0].errorMessage);
+          var stateName = todo3.entityAspect.entityState.name;
+          expect(stateName).to.equal('Added', 'todo3 remains in the "Added" state');
         }
     });
 
