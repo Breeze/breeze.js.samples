@@ -23,7 +23,7 @@ describe("saveNorthwind:", function (done) {
     /////////////
 
     it("can save nothing", function (done) {
-        newNorthwindEm().saveChanges()
+        newEm().saveChanges()
             .then(function(saveResult) {
                 expect(saveResult.entities).to.have.length(0,
                     'succeeded in saving nothing');
@@ -34,7 +34,7 @@ describe("saveNorthwind:", function (done) {
     it("can save a new Customer entity", function (done) {
 
         // Create and initialize entity to save
-        var em = newNorthwindEm();
+        var em = newEm();
         var customer = em.createEntity('Customer', {
             CustomerID: newGuidComb(),
             CompanyName: 'Test1 ' + new Date().toISOString()

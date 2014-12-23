@@ -105,7 +105,7 @@ describe('saveQueuing:', function() {
           .then(success).then(done, done);
 
         // make change while save is in progress
-        todo.Description = 'Test mod';
+        todo.Description = 'Todo mod';
 
         function success(data) {
             var aspect = todo.entityAspect;
@@ -127,7 +127,7 @@ describe('saveQueuing:', function() {
         em.saveChanges().catch(handleFail);
 
         // make change while save is in progress
-        todo.Description = 'Test mod';
+        todo.Description = 'Todo mod';
 
         // save immediately, before first save response
         return em.saveChanges()
@@ -139,7 +139,7 @@ describe('saveQueuing:', function() {
             var aspect = todo.entityAspect;
             expect(aspect.entityState.name).to.equal('Unchanged',
                 "modified Todo was saved and now is Unchanged");
-            expect(todo.Description).to.equal('Test mod',
+            expect(todo.Description).to.equal('Todo mod',
                 "description has the modified value, changed between saves");
         }
     });
@@ -158,13 +158,13 @@ describe('saveQueuing:', function() {
 
         function modAndSave(){
             // modify the existing Todo
-            todo.Description = 'Test mod 1';
+            todo.Description = 'Todo mod 1';
 
             // save the first mod
             em.saveChanges().catch(handleFail);
 
             // modify it again while the save is in progress
-            todo.Description = 'Test mod 2';
+            todo.Description = 'Todo mod 2';
 
             // save immediately, before first save response
             return em.saveChanges()
@@ -175,7 +175,7 @@ describe('saveQueuing:', function() {
                 var aspect = todo.entityAspect;
                 expect(aspect.entityState.name).to.equal('Unchanged',
                     "double modified Todo was saved and now is Unchanged");
-                expect(todo.Description).to.equal('Test mod 2',
+                expect(todo.Description).to.equal('Todo mod 2',
                     "description has the value modified during save");
             }
         }
@@ -200,7 +200,7 @@ describe('saveQueuing:', function() {
 
         function modAndSave(){
             // modify the existing Todo
-            todo.Description = 'Test mod 1';
+            todo.Description = 'Todo mod 1';
 
             // save the first mod
             em.saveChanges().catch(handleFail);
@@ -228,8 +228,8 @@ describe('saveQueuing:', function() {
             var aspect = todo.entityAspect;
             expect(aspect.entityState.name).to.equal('Unchanged',
                 "double modified Todo was saved, requeried, and is Unchanged");
-            expect(todo.Description).to.equal('Test mod 1',
-                "description has the modified value, 'Test mod 1'");
+            expect(todo.Description).to.equal('Todo mod 1',
+                "description has the modified value, 'Todo mod 1'");
             expect(todo.IsDone).to.equal(true,
                 "isDone has the value modified (true) during 1st save");
         }
@@ -240,13 +240,13 @@ describe('saveQueuing:', function() {
     *********************************************************/
     it("Two [add+save] events are in two separate saves", function (done) {
 
-        var todo1 = em.createEntity('TodoItem', { Description: "DeleteMe 1" });
+        var todo1 = em.createEntity('TodoItem', { Description: 'Todo 1' });
 
         var save1 = em.saveChanges()
             .then(firstSaveSucceeded)
             .catch(handleFail);
 
-        var todo2 = em.createEntity('TodoItem', { Description: "DeleteMe 2" });
+        var todo2 = em.createEntity('TodoItem', { Description: 'Todo 2' });
 
         var save2 = em.saveChanges()
             .then(secondSaveSucceeded)
@@ -617,7 +617,7 @@ describe('saveQueuing:', function() {
         .then(done, done);
 
       function modifyAndSaveAndDelete() {
-        todo.Description = 'Test mod';
+        todo.Description = 'Todo mod';
         em.saveChanges();
 
         var msgSuffix = ' to delete a modified entity that is being saved';
@@ -675,26 +675,24 @@ describe('saveQueuing:', function() {
     it("Failure in a middle save aborts the rest (and have much err info)", function (done) {
         var error2;
 
-        var todo1 = em.createEntity('TodoItem', { Description: "DeleteMe 1" });
+        var todo1 = em.createEntity('TodoItem', { Description: 'Todo 1' });
         var save1 = em.saveChanges()
             .then(firstSaveSucceeded)
             .catch(handleFail);
 
-        // fake a change to non-existent entity
-        // save should fail
-        var todo2 = em.createEntity('TodoItem', {
-            Id: 100000, // not a real id
-            Description: "DeleteMe 2"
-        }, breeze.EntityState.Modified);
+        var todo2 = em.createEntity('TodoItem', { Description: 'Todo 2'});
+
+        // fake a server failure upon next save
+        setOneTimeAjaxFailure();
 
         var save2 = em.saveChanges()
             .then(secondSaveSucceeded)
             .catch(secondSaveFailed);
 
-        var todo3 = em.createEntity('TodoItem', { Description: "DeleteMe 3" });
+        var todo3 = em.createEntity('TodoItem', { Description: 'Todo 3'});
         var save3 = em.saveChanges()
-        .then(thirdSaveSucceeded)
-        .catch(thirdSaveFailed);
+            .then(thirdSaveSucceeded)
+            .catch(thirdSaveFailed);
 
         expect(em.getChanges().length).to.equal(3,
             "three pending changes while first save is in flight");
@@ -773,23 +771,21 @@ describe('saveQueuing:', function() {
     *********************************************************/
     it("Failure in first save aborts the rest", function (done) {
 
-        // fake a change to non-existent entity
-        // save should fail
-        em.createEntity('TodoItem', {
-            Id: 100000, // not a real id
-            Description: "DeleteMe 1"
-        }, breeze.EntityState.Modified);
+        em.createEntity('TodoItem', { Description: 'Todo 1'});
+
+        // fake a server failure upon next save
+        setOneTimeAjaxFailure();
 
         var save1 = em.saveChanges()
             .then(firstSaveSucceeded)
             .catch(firstSaveFailed);
 
-        em.createEntity('TodoItem', { Description: "DeleteMe 2" });
+        em.createEntity('TodoItem', { Description: 'Todo 2' });
         var save2 = em.saveChanges()
             .then(laterSaveSucceeded)
             .catch(laterSaveFailed);
 
-        em.createEntity('TodoItem', { Description: "DeleteMe 3" });
+        em.createEntity('TodoItem', { Description: 'Todo 3' });
         var save3 = em.saveChanges()
             .then(laterSaveSucceeded)
             .catch(laterSaveFailed);
@@ -837,13 +833,13 @@ describe('saveQueuing:', function() {
     *********************************************************/
     it("Validation error in later queued save aborts earlier queued saves", function (done) {
 
-        var todo1 = em.createEntity('TodoItem', { Description: 'Test 1' });
+        var todo1 = em.createEntity('TodoItem', { Description: 'Todo 1' });
         var save1 = em.saveChanges()
             .then(firstSaveSucceeded, firstSaveFailed);
 
         // queue second save of two valid entities
-        todo1.Description = 'Test 1m';
-        var todo2 = em.createEntity('TodoItem', { Description: 'Test 2' });
+        todo1.Description = 'Todo 1m';
+        var todo2 = em.createEntity('TodoItem', { Description: 'Todo 2' });
         var save2 = em.saveChanges()
             .then(secondSaveSucceeded, secondSaveFailed);
 
@@ -900,5 +896,22 @@ describe('saveQueuing:', function() {
     function getEntityStateOfSavedEntityInAjaxCall(call, entityIndex) {
         entityIndex = (entityIndex == null) ? 0 : entityIndex;
         return JSON.parse(ajaxSpy.getCall(call).args[0].data).entities[entityIndex].entityAspect.entityState;
+    }
+
+    function setOneTimeAjaxFailure(status, data) {
+        status = (status == null) ? 500 : 500;
+        data = data || {
+          "Message": "An error has occurred.",
+          "ExceptionMessage": "Simulated test server error.",
+          "ExceptionType": "System.Exception",
+          "StackTrace": null,
+        };
+        var headers = function () { return {}; };
+        function interceptor(requestInfo) {
+            requestInfo.config = null; // don't make real ajax call
+            requestInfo.error(data, status, headers, null, status + 'BAD NEWS');
+        }
+        interceptor.oneTime = true;
+        ajaxAdapter.requestInterceptor = interceptor;
     }
 });
