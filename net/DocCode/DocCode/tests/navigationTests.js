@@ -52,7 +52,7 @@
         var customer = lastOrder.Customer(),
             name = "<no customer>";
 
-        ok(customer !== null && (name = customer.CompanyName()), 
+        ok(customer &&  (name = customer.CompanyName()),
             "got Customer from cache named " + name);
 
         var ordersByNavigation = customer.Orders();
@@ -635,6 +635,64 @@
     test("deferred get of OrderDetails for an order via 'fromEntityNavigation'", 8, 
         loadOrderDetailsDeferred(queryOrderDetailsWithFromEntityNavigation));
 
+    /*********************************************************
+    * lazy load OrderDetails and products of several orders via EntityQuery.fromEntityNavigation
+    * This somewhat tortured technique would be appropriate if you didn't want to specify
+    * how the navigation query is implemented such as when writing a lazy loading utility
+    * that lacks awareness of each navigation's implementation.
+    *********************************************************/
+    asyncTest("deferred get of OrderDetails & products for three orders via 'fromEntityNavigation'", function () {
+      expect(7);
+
+      var em = newEm();
+      var orders;
+
+      // Get first 3 Orders ... but not their details
+      EntityQuery.from('Orders').take(3)
+        .using(em).execute()
+        .then(gotOrders)
+        .then(confirmDetails)
+        .catch(handleFail).finally(start);
+
+      function gotOrders(data) {
+        orders = data.results;
+        if (orders.length !== 3) {
+          throw new Error('expected 3 orders, got ' + orders.length);
+        }
+
+        // create an array of filter criteria (`wherePredicate`) for each order
+        var predicates = orders.map(function (order) {
+          return EntityQuery.fromEntityNavigation(order, 'OrderDetails')
+                            .wherePredicate;
+        });
+
+        // OR the predicates together
+        var filter = breeze.Predicate.or(predicates);
+
+        return EntityQuery.from('OrderDetails')
+          .where(filter)
+          .expand('Product') // include the Products for these details
+          .using(em).execute();
+      }
+
+      function confirmDetails(data) {
+        ok(data.results.length > 0, ' navigation query returned results of length ' + data.results.length);
+
+        orders.forEach(function (order) {
+          var oid = order.getProperty('OrderID');
+          var details = order.getProperty('OrderDetails');
+          ok(details.length > 0, 'Order {0} has OrderDetails length: {1}'
+            .format(oid, details.length));
+          var od1 = details[0];
+          if (od1) {
+            var prod = od1.getProperty('Product');
+            ok(prod, 'Order {0}\'s first OrderDetail has a Product entity, "{1}"'
+              .format(oid, prod.getProperty('ProductName')));
+          }
+        });
+      }
+    });
+
     // Get the OrderDetails using EntityQuery.fromEntityNavigation
     function queryOrderDetailsWithFromEntityNavigation(data) {
         var firstOrder = data.first;
@@ -648,7 +706,7 @@
         return firstOrder.entityAspect.entityManager.executeQuery(navQuery)
             .then(assertGotProductsWithOrderDetails);
     }
-    
+
     /*********************************************************
     * A test helper to run the same basic test multiple ways.
     * Loads an order's OrderDetails using the technique 
@@ -690,16 +748,16 @@
         var order = firstDetail.Order();
         ok(order !== null, "OrderDetail.Order returns the parent Order");
 
-        equal(order.entityAspect.entityState, breeze.EntityState.Unchanged,
+        equal(order && order.entityAspect.entityState, breeze.EntityState.Unchanged,
             "order's entityState remains 'Unchanged' after getting its details by query");
 
-        equal(order.OrderDetails().length, details.length,
+        equal(order && order.OrderDetails().length, details.length,
             "Parent Orders's OrderDetails is same length as details retrieved by query");
 
-        var customer = order.Customer();
+        var customer = order && order.Customer();
         ok(customer !== null, "parent Order returns its parent Customer");
 
-        ok(customer.CustomerID() === testFns.wellKnownData.alfredsID,
+        ok(customer && customer.CustomerID() === testFns.wellKnownData.alfredsID,
             "parent Customer by nav is Alfreds (in cache via initial query expand)");
 
         return data;
