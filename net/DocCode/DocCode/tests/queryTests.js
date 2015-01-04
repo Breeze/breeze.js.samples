@@ -1303,6 +1303,8 @@
             .fail(handleFail)
             .fin(start);
     });
+
+
     /*** PROJECTION ***/
 
     module("queryTests (projections)", testFns.getModuleOptions(newEm));
@@ -1420,6 +1422,37 @@
             assertOrdersInCache);
     });
 
+  /*
+   * Use a server-side endpoint (CustomersAnd1998Orders) that returns Customers and
+   * just those of their Orders placed in 1998 using a SERVER-SIDE PROJECTION.
+   * This endpoint projects into a 'CustomerDto' type which is
+   * structurally the same as a Customer. We cast it here with 'toType'
+   */
+    test("names of Customers starting w/ 'C' and their 1998 Orders", function () {
+      expect(5);
+      var query = EntityQuery.from('CustomersAnd1998Orders')
+          .where('CompanyName', 'startsWith', 'C')
+          .orderBy("CompanyName")
+          .toType('Customer'); // Essential ... unless fix JsonResultsAdapter
+
+      verifyQuery(newEm, query,
+          "Customers from 'CustomersAnd1998Orders' projection",
+          showCompanyNamesAndOrderCounts,
+          assertCustomersInCache,
+          assertOrdersInCache,
+          assertAllOrdersIn1998);
+
+      function assertAllOrdersIn1998(data) {
+        var em = data.query.entityManager;
+        var ordersInCache = em.getEntities('Order');
+        var all1998 = ordersInCache.every(function(o) {
+          var ordered = o.getProperty('OrderDate');
+          return ordered && ordered.getFullYear() === 1998;
+        });
+        ok(all1998, 'all cached orders should have been ordered in 1998');
+      }
+    });
+
     function showCompanyNamesAndOrderCounts(data) {
         var names = data.results.map(function (item) {
             return "{0} ({1})".format(item.CompanyName, item.Orders.length);
@@ -1428,23 +1461,23 @@
         ok(true, names.join(", "));
     }
 
+    function assertCustomersInCache(data) {
+      var em = data.query.entityManager;
+      var custCount = em.getEntities('Customer').length;
+      ok(custCount > 0,
+            "should have customers in cache; count = " + custCount);
+    }
+
     function assertCustomersNotInCache(data) {
-        var em = data.query.entityManager;
-        var metadata = em.metadataStore;
-
-        var customerType = metadata.getEntityType("Customer");
-        var customersInCache = em.getEntities(customerType).length;
-
-        ok(customersInCache == 0,
-            "shouldn't have customers in cache; count = " + customersInCache);
+      var em = data.query.entityManager;
+      var custCount = em.getEntities('Customer').length;
+      ok(custCount === 0,
+            "shouldn't have customers in cache; count = " + custCount);
     }
 
     function assertOrdersInCache(data) {
         var em = data.query.entityManager;
-        var metadata = em.metadataStore;
-
-        var orderType = metadata.getEntityType("Order");
-        var ordersInCache = em.getEntities(orderType).length;
+        var ordersInCache = em.getEntities('Order').length;
 
         ok(ordersInCache,
             "should have orders in cache; count = " + ordersInCache);

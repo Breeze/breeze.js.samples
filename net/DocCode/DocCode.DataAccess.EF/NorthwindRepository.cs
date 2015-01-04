@@ -51,6 +51,33 @@ namespace DocCode.DataAccess
             get { return ForCurrentUser(Context.Customers).Include("Orders"); }
         }
 
+        //http://stackoverflow.com/questions/22491332/breeze-filtering-expand-on-server-side
+        private class CustomerDto : Customer { } // EF requires a shadow class to make the LINQ query work
+        public IQueryable<Customer> CustomersAnd1998Orders {
+          get
+          {
+            return ForCurrentUser(Context.Customers)
+            .Select(c => new CustomerDto {
+              CustomerID = c.CustomerID,
+              CompanyName =  c.CompanyName,
+              ContactName =  c.ContactName,
+              ContactTitle = c.ContactTitle,
+              Address = c.Address,
+              City = c.City,
+              Region = c.Region,
+              PostalCode = c.PostalCode,
+              Country = c.Country,
+              Phone =  c.Phone,
+              Fax = c.Fax,
+              RowVersion = c.RowVersion,
+
+              Orders = c.Orders
+                        .Where(o =>  o.OrderDate != null && o.OrderDate.Value.Year == 1998)
+                        .ToList()
+            });
+          }
+        }
+
         public IQueryable<Customer> CustomersStartingWithA {
           get {
             return ForCurrentUser(Context.Customers)

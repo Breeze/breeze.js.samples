@@ -58,6 +58,12 @@ namespace DocCode.Controllers
             return _repository.CustomersAndOrders;
         }
 
+        //http://stackoverflow.com/questions/22491332/breeze-filtering-expand-on-server-side
+        [HttpGet]
+        public IQueryable<Customer> CustomersAnd1998Orders() {
+          return _repository.CustomersAnd1998Orders;
+        }
+
         [HttpGet]
         [EnableBreezeQuery]
         public HttpResponseMessage CustomersAsHRM()
