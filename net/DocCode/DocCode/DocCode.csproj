@@ -114,6 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Data\NorthwindIB.sdf" />
+    <Content Include="App_Data\NorthwindIB.sql" />
     <Content Include="App_Data\readme.txt" />
     <Content Include="Content\qunit.css" />
     <Content Include="favicon.ico" />

@@ -14,7 +14,7 @@
     // query and failure helpers
     var verifyQuery = testFns.verifyQuery;
     var queryForOne = testFns.queryForOne;
-    var handleFail = testFns.handleFail;
+    var handleFail = testFns.handleFail; // async failure callback
 
     // Target the Todos service
     var serviceName = testFns.todosServiceName;
@@ -23,34 +23,33 @@
     module("basicTodoTests", testFns.getModuleOptions(newEm));
 
     /*********************************************************
+    * Get all todos - raw version
+    *********************************************************/
+
+    asyncTest("get all todos (raw)", function () {
+      expect(1);
+      var query = new EntityQuery("Todos");  // query all Todos
+
+      var em = new EntityManager(serviceName);
+
+      em.executeQuery(query)
+          .then(function (data) {
+            var count = data.results.length;
+            ok(count > 0, "all todos query succeeded; count = " + count);
+          })
+          .catch(handleFail)
+          .finally(start); // resume testrunner
+    });
+
+    /*********************************************************
     * Get all todos - condensed
     *********************************************************/
 
     test("get all todos (condensed)", function () {
         expect(1);
-        var query = new EntityQuery("Todos");
+        var query = new EntityQuery("Todos"); // query all Todos
 
         verifyQuery(newEm, query, "all todos query");
-    });
-
-    /*********************************************************
-    * Get all todos - raw version
-    *********************************************************/
-
-    test("get all todos (raw)", function () {
-        expect(1);
-        var query = new EntityQuery("Todos");
-
-        var em = new EntityManager(serviceName);
-
-        stop(); // going async ... tell testrunner to wait
-        em.executeQuery(query)
-            .then(function (data) {
-                var count = data.results.length;
-                ok(count > 0, "all todos query succeeded; count = " + count);
-            })
-            .fail(handleFail)
-            .fin(start); // resume testrunner
     });
 
     /*********************************************************
