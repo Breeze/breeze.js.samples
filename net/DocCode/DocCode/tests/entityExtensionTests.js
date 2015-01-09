@@ -146,6 +146,55 @@
             "'foo' should be a KO 'property' returning 42");
     });
 
+  /*********************************************************
+  * can add function via constructor (not to prototype)
+  * Going to the trouble to get Customer by way of expand because of
+  * https://github.com/Breeze/breeze.js/issues/61
+  **********************************************************/
+    asyncTest("can add function via constructor (not prototype)", function () {
+      expect(2);
+      var store = cloneModuleMetadataStore();
+
+      var Customer = function () {
+        this.foo = function () { return 'foo'; }
+      };
+      store.registerEntityTypeCtor('Customer', Customer);
+
+      var cust = store.getEntityType('Customer').createEntity();
+
+      equal(typeof cust.foo, 'function', "should have 'foo' function via constructor");
+
+      var manager = newEm(store);
+      EntityQuery.from('Orders').take(1).expand('Customer')
+        .using(manager).execute()
+        .then(function (data) {
+          var order = data.results[0];
+          cust = order ? order.getProperty('Customer') : {};
+          equal(typeof cust.foo, 'function',
+            "should have 'foo' function after expand query");
+        })
+        .catch(handleFail).finally(start);
+    });
+
+  /*********************************************************
+  * can add function via constructor (not to prototype)
+  * related to https://github.com/Breeze/breeze.js/issues/61
+  *********************************************************/
+    test("can add function via constructor prototype", function () {
+      expect(1);
+      var store = cloneModuleMetadataStore();
+
+      var Customer = function() {}
+      Customer.prototype.foo = function () { return 'foo'; }
+
+      store.registerEntityTypeCtor('Customer', Customer);
+
+      var cust = store.getEntityType('Customer').createEntity();
+
+      equal(typeof cust.foo, 'function', "should have 'foo' function via constructor");
+
+    });
+
     /*********************************************************
     * can add unmapped 'foo' property directly to EntityType
     *********************************************************/
@@ -158,7 +207,7 @@
         var fooProp = new breeze.DataProperty({
             name: 'foo',
             defaultValue: 42,
-            isUnmapped: true,  // !!!
+            isUnmapped: true  // !!!
         });
         customerType.addProperty(fooProp);
 
@@ -363,13 +412,15 @@
         var originalValues = cust.entityAspect.originalValues;
         var hasOriginalValues = null;
         for (var key in originalValues) {
+          if (originalValues.hasOwnProperty(key)) {
             if (key === 'foo') {
-                hasOriginalValues = true;
-                break;
+              hasOriginalValues = true;
+              break;
             }
+          }
         }
 
-        ok(hasOriginalValues,
+      ok(hasOriginalValues,
             "'originalValues' have 'foo'; it is " + JSON.stringify(originalValues));
     });
 
@@ -1226,7 +1277,7 @@
             actual && actual.push(action.ctor);
         };
 
-        function initFn(c) {
+        function initFn() {
             actual.push(action.initFn);
         };
 
@@ -1355,7 +1406,7 @@
         var fooProp = new breeze.DataProperty({
             name: 'foo',
             defaultValue: 42,
-            isUnmapped: true,  // !!!
+            isUnmapped: true  // !!!
         });
         customerType.addProperty(fooProp);
 
