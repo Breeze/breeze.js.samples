@@ -1,4 +1,4 @@
-﻿//#region Copyright, Version, and Description
+//#region Copyright, Version, and Description
 /*
  * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.
  * Use, reproduction, distribution, and modification of this code is subject to the terms and
@@ -59,9 +59,9 @@
  * touch them at your own risk.
  */
 //#endregion
-(function (definition, window) {
-  if (window.breeze) {
-    definition(window.breeze);
+(function (definition) {
+  if (typeof breeze === "object") {
+    definition(breeze);
   } else if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
     // CommonJS or Node
     var b = require('breeze');
@@ -443,4 +443,4 @@
     }
   }
 
-}, this));
+}));

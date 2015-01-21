@@ -34,7 +34,7 @@ var __hasOwnProperty = uncurry(Object.prototype.hasOwnProperty);
 var __arraySlice = uncurry(Array.prototype.slice);
 var __isES5Supported = function () {
   try {
-    return !!Object.getPrototypeOf && Object.defineProperty({}, 'x', {});
+    return !!(Object.getPrototypeOf && Object.defineProperty({}, 'x', {}));
   } catch (e) {
     return false;
   }
@@ -92,7 +92,7 @@ function __getPropDescriptor(obj, propertyName) {
   }
 }
 
-// Functional extensions 
+// Functional extensions
 
 // can be used like: persons.filter(propEq("firstName", "John"))
 function __propEq(propertyName, value) {
@@ -6102,7 +6102,14 @@ var DataService = (function () {
     json.jsonResultsAdapter = __config._fetchObject(JsonResultsAdapter, json.jsonResultsAdapter);
     return new DataService(json);
   };
-  
+
+  /**
+   Returns a url for this dataService with the specified suffix. This method handles dataService names either
+   with or without trailing '/'s.
+   @method qualifyUrl
+   @param suffix {String} The resulting url.
+   @return {a Url string}
+   **/
   proto.qualifyUrl = function (suffix) {
     var url = this.serviceName;
     // remove any trailing "/"
@@ -10097,22 +10104,22 @@ breeze.NamingConvention = NamingConvention;
     var proto = ctor.prototype = new Predicate();
     proto._initialize('binaryPredicate', {
       'eq': {
-        aliases: ["=="]
+        aliases: ["==", "equals" ]
       },
       'ne': {
-        aliases: ["!=", '~=']
+        aliases: ["!=", "~=", "notequals" ]
       },
       'lt': {
-        aliases: ["<" ]
+        aliases: ["<", "lessthan" ]
       },
       'le': {
-        aliases: ["<=" ]
+        aliases: ["<=", "lessthanorequal" ]
       },
       'gt': {
-        aliases: [">"]
+        aliases: [">", "greaterthan"]
       },
       'ge': {
-        aliases: [">=" ]
+        aliases: [">=", "greaterthanorequal" ]
       },
       'startswith': {
         isFunction: true
@@ -10454,7 +10461,8 @@ breeze.NamingConvention = NamingConvention;
     }
 
     if (!__isString(source)) {
-      if (source != null && __isObject(source) && (!__isDate(source))) {
+      if (source != null && __isObject(source) && !source.toISOString) { 
+        // source is an object but not a Date-like thing such as a JS or MomentJS Date
         if (source.value === undefined) {
           throw new Error("Unable to resolve an expression for: " + source + " on entityType: " + entityType.name);
         }
@@ -11617,8 +11625,12 @@ breeze.Predicate = Predicate;
   }
   
   /**
-  Static method tht creates an EntityQuery that will allow 'requerying' an entity or a collection of entities by primary key. This can be useful
+  Static method that creates an EntityQuery that will allow 'requerying' an entity or a collection of entities by primary key. This can be useful
   to force a requery of selected entities, or to restrict an existing collection of entities according to some filter.
+
+  Works for a single entity or an array of entities of the SAME type.
+  Does not work for an array of entities of different types.
+
   @example
       // assuming 'customers' is an array of 'Customer' entities retrieved earlier.
       var customersQuery = EntityQuery.fromEntities(customers);
@@ -11644,7 +11656,14 @@ breeze.Predicate = Predicate;
       entities = __arraySlice(arguments);
     }
     var firstEntity = entities[0];
-    var q = new EntityQuery(firstEntity.entityType.defaultResourceName);
+    var type = firstEntity.entityType;
+    if (entities.some(function(e){
+      return e.entityType !== type;
+    })) {
+      throw new Error("All 'fromEntities' must be the same type; at least one is not of type " +
+        type.name);
+    }
+    var q = new EntityQuery(type.defaultResourceName);
     var preds = entities.map(function (entity) {
       return buildPredicate(entity);
     });
@@ -11971,26 +11990,7 @@ var FilterQueryOp = (function () {
   aEnum.IsTypeOf = aEnum.addSymbol({ operator: "isof" });
   
   aEnum.resolveSymbols();
-  aEnum._map = function () {
-    var map = {};
-    aEnum.getSymbols().forEach(function (s) {
-      map[s.name.toLowerCase()] = s;
-      map[s.operator.toLowerCase()] = s;
-      if (s.aliases) {
-        s.aliases.forEach(function (alias) {
-          map[alias.toLowerCase()] = s;
-        });
-      }
-    });
-    return map;
-  }();
-  aEnum.from = function (op) {
-    if (aEnum.contains(op)) {
-      return op;
-    } else {
-      return aEnum._map[op.toLowerCase()];
-    }
-  };
+
   return aEnum;
 })();
 
@@ -12001,26 +12001,7 @@ var BooleanQueryOp = (function () {
   aEnum.Not = aEnum.addSymbol({ operator: "not" });
   
   aEnum.resolveSymbols();
-  aEnum._map = (function () {
-    var map = {};
-    aEnum.getSymbols().forEach(function (s) {
-      map[s.name.toLowerCase()] = s;
-      map[s.operator.toLowerCase()] = s;
-      if (s.aliases) {
-        s.aliases.forEach(function (alias) {
-          map[alias.toLowerCase()] = s;
-        });
-      }
-    });
-    return map;
-  })();
-  aEnum.from = function (op) {
-    if (aEnum.contains(op)) {
-      return op;
-    } else {
-      return aEnum._map[op.toLowerCase()];
-    }
-  };
+
   return aEnum;
 })();
 
@@ -12673,28 +12654,28 @@ var EntityManager = (function () {
   @example
       var metadataStore = new MetadataStore();
       var entityManager = new EntityManager( {
-          serviceName: "breeze/NorthwindIBModel", 
-          metadataStore: metadataStore 
+          serviceName: "breeze/NorthwindIBModel",
+          metadataStore: metadataStore
       });
   or
   @example
       return new QueryOptions({
-          mergeStrategy: obj, 
-          fetchStrategy: this.fetchStrategy 
+          mergeStrategy: obj,
+          fetchStrategy: this.fetchStrategy
       });
       var queryOptions = new QueryOptions({
-          mergeStrategy: MergeStrategy.OverwriteChanges, 
-          fetchStrategy: FetchStrategy.FromServer 
+          mergeStrategy: MergeStrategy.OverwriteChanges,
+          fetchStrategy: FetchStrategy.FromServer
       });
       var validationOptions = new ValidationOptions({
-          validateOnAttach: true, 
-          validateOnSave: true, 
+          validateOnAttach: true,
+          validateOnSave: true,
           validateOnQuery: false
       });
       var entityManager = new EntityManager({
-          serviceName: "breeze/NorthwindIBModel", 
-          queryOptions: queryOptions, 
-          validationOptions: validationOptions 
+          serviceName: "breeze/NorthwindIBModel",
+          queryOptions: queryOptions,
+          validationOptions: validationOptions
       });
   @method <ctor> EntityManager
   @param [config] {Object|String} Configuration settings or a service name.
@@ -12846,7 +12827,7 @@ var EntityManager = (function () {
   @example
       var em = new EntityManager( {serviceName: "breeze/NorthwindIBModel" });
       em.entityChanged.subscribe(function(changeArgs) {
-          // This code will be executed any time any entity within the entityManager is added, modified, deleted or detached for any reason. 
+          // This code will be executed any time any entity within the entityManager is added, modified, deleted or detached for any reason.
           var action = changeArgs.entityAction;
           var entity = changeArgs.entity;
           // .. do something to this entity when it is changed.
@@ -12865,9 +12846,9 @@ var EntityManager = (function () {
   @example
       var em = new EntityManager( {serviceName: "breeze/NorthwindIBModel" });
       em.validationErrorsChanged.subscribe(function(changeArgs) {
-              // This code will be executed any time any entity within the entityManager experiences a change to its validationErrors collection. 
+              // This code will be executed any time any entity within the entityManager experiences a change to its validationErrors collection.
               function (validationChangeArgs) {
-                  var entity == validationChangeArgs.entity; 
+                  var entity == validationChangeArgs.entity;
                   var errorsAdded = validationChangeArgs.added;
                   var errorsCleared = validationChangeArgs.removed;
                   // ... do something interesting with the order.
@@ -12970,42 +12951,92 @@ var EntityManager = (function () {
   };
 
   /**
-  Exports an entire EntityManager or just selected entities into a serialized string for external storage.
+  Exports selected entities, all entities of selected types, or an entire EntityManager cache.
   @example
-  This method can be used to take a snapshot of an EntityManager that can be either stored offline or held
-  memory.  This snapshot can be restored or merged into an another EntityManager at some later date.
+  This method takes a snapshot of an EntityManager that can be stored offline or held in memory.
+  Use the `EntityManager.importEntities` method to restore or merge the snapshot
+  into another EntityManager at some later time.
   @example
-      // assume em1 is an EntityManager containing a number of existing entities.
+      // let em1 be an EntityManager containing a number of existing entities.
+      // export every entity in em1.
       var bundle = em1.exportEntities();
-      // can be stored via the web storage api
+      // save to the browser's local storage
       window.localStorage.setItem("myEntityManager", bundle);
-      // assume the code below occurs in a different session.
+      // later retrieve the export
       var bundleFromStorage = window.localStorage.getItem("myEntityManager");
-      var em2 = new EntityManager({
-              serviceName: em1.serviceName, 
-              metadataStore: em1.metadataStore 
-          });
+      // import the retrieved export bundle into another manager
+      var em2 = em1.createEmptyCopy();
       em2.importEntities(bundleFromStorage);
-      // em2 will now have a complete copy of what was in em1
+      // em2 now has a complete, faithful copy of the entities that were in em1
   You can also control exactly which entities are exported.
   @example
-      // assume entitiesToExport is an array of entities to export.
-      var bundle = em1.exportEntities(entitiesToExport);
-      // assume em2 is another entityManager containing some of the same entities possibly with modifications.
+      // get em1's unsaved changes (an array) and export them.
+      var changes = em1.getChanges();
+      var bundle = em1.exportEntities(changes);
+      // merge these entities into em2 which may contains some of the same entities.
+      // do NOT overwrite the entities in em2 if they themselves have unsaved changes.
       em2.importEntities(bundle, { mergeStrategy: MergeStrategy.PreserveChanges} );
+  Metadata are included in an export by default. You may want to exclude the metadata
+  especially if you're exporting just a few entities for local storage.
+  @example
+      var bundle = em1.exportEntities(arrayOfSelectedEntities, {includeMetadata: false});
+      window.localStorage.setItem("goodStuff", bundle);
+  You may still express this option as a boolean value although this older syntax is deprecated.
+  @example
+      // Exclude the metadata (deprecated syntax)
+      var bundle = em1.exportEntities(arrayOfSelectedEntities, false);
+  You can export all entities of one or more specified EntityTypes.
+  @example
+      // Export all Customer and Employee entities (and also exclude metadata)
+      var bundle = em1.exportEntities(['Customer', 'Employee'], {includeMetadata: false});
+  All of the above examples return an export bundle as a string which is the default format.
+  You can export the bundle as JSON if you prefer by setting the `asString` option to false.
+  @example
+      // Export all Customer and Employee entities as JSON and exclude the metadata
+      var bundle = em1.exportEntities(['Customer', 'Employee'],
+                                      {asString: false, includeMetadata: false});
+      // store JSON bundle somewhere ... perhaps indexDb ... and later import as we do here.
+      em2.importEntities(bundle);
   @method exportEntities
-  @param [entities] {Array of entities} The entities to export; all entities are exported if this is omitted or null
-  @param [includeMetadata = true] {Boolean} Whether to include metadata in the export; the default is true
-  @return {String} A serialized version of the exported data.
+  @param [entities] {Array of Entity | Array of EntityType | Array of String}
+    The entities to export or the EntityType(s) of the entities to export;
+    all entities are exported if this parameter is omitted or null.
+  @param [config] {Object | Boolean} Export configuration options
+  @param [config.asString=true] {Boolean} If true (default), return export bundle as a string.
+  @param [config.includeMetadata=true] {Boolean} If true (default), include metadata in the export bundle.
+  @return {String | Object} The export bundle either serialized (default) or as a JSON object.
+  The bundle contains the metadata (unless excluded) and the entity data grouped by type.
+  The entity data include property values, change-state, and temporary key mappings (if any).
+
+  The export bundle is an undocumented, Breeze-internal representation of entity data
+  suitable for export, storage, and import. The schema and contents of the bundle may change in future versions of Breeze.
+  Manipulate it at your own risk with appropriate caution.
   **/
-  proto.exportEntities = function (entities, includeMetadata) {
-    assertParam(includeMetadata, "includeMetadata").isBoolean().isOptional().check();
-    includeMetadata = (includeMetadata == null) ? true : includeMetadata;
+  proto.exportEntities = function (entities, config) {
+    assertParam(entities, "entities").isArray().isEntity()
+    .or().isNonEmptyArray().isInstanceOf(EntityType)
+    .or().isNonEmptyArray().isString()
+    .or().isOptional().check();
+
+    assertParam(config, "config").isObject()
+    .or().isBoolean()
+    .or().isOptional().check();
+
+    if (config == null) {
+      config = { includeMetadata: true, asString: true };
+    } else if (typeof config === 'boolean') { // deprecated
+      config = { includeMetadata: config, asString: true };
+    }
+
+    assertConfig(config)
+        .whereParam("asString").isBoolean().isOptional().withDefault(true)
+        .whereParam("includeMetadata").isBoolean().isOptional().withDefault(true)
+        .applyAll(config);
 
     var exportBundle = exportEntityGroups(this, entities);
     var json = __extend({}, exportBundle, ["tempKeys", "entityGroupMap"]);
 
-    if (includeMetadata) {
+    if (config.includeMetadata) {
       json = __extend(json, this, ["dataService", "saveOptions", "queryOptions", "validationOptions"]);
       json.metadataStore = this.metadataStore.exportMetadata();
     } else {
@@ -13013,7 +13044,7 @@ var EntityManager = (function () {
       json.metadataStoreName = this.metadataStore.name;
     }
 
-    var result = JSON.stringify(json, null, __config.stringifyPad);
+    var result = config.asString ? JSON.stringify(json, null, __config.stringifyPad) : json;
     return result;
   };
 
@@ -13028,8 +13059,8 @@ var EntityManager = (function () {
       var bundle = em1.exportEntities();
       // bundle can be stored in window.localStorage or just held in memory.
       var em2 = new EntityManager({
-          serviceName: em1.serviceName, 
-          metadataStore: em1.metadataStore 
+          serviceName: em1.serviceName,
+          metadataStore: em1.metadataStore
       });
       em2.importEntities(bundle);
       // em2 will now have a complete copy of what was in em1
@@ -13101,7 +13132,9 @@ var EntityManager = (function () {
         Array.prototype.push.apply(entitiesToLink, entities);
       });
       entitiesToLink.forEach(function (entity) {
-        that._linkRelatedEntities(entity);
+        if (!entity.entityAspect.entityState.isDeleted()) {
+          that._linkRelatedEntities(entity);
+        }
       });
     });
     return {
@@ -13295,7 +13328,7 @@ var EntityManager = (function () {
 
   failureFunction([error])
   @param [errorCallback.error] {Error} Any error that occured wrapped into an Error object.
-  @return {Promise} 
+  @return {Promise}
     - Properties on the promise success result
       - schema {Object} The raw Schema object from metadata provider - Because this schema will differ depending on the metadata provider
         it is usually better to access metadata via the 'metadataStore' property of the EntityManager instead of using this 'raw' data.
@@ -13333,7 +13366,7 @@ var EntityManager = (function () {
   @example
       var em = new EntityManager(serviceName);
       var query = new EntityQuery("Orders");
-      em.executeQuery(query, 
+      em.executeQuery(query,
           function(data) {
               var orders = data.results;
               ... query results processed here
@@ -13377,7 +13410,7 @@ var EntityManager = (function () {
   @param [errorCallback.error.httpResponse] {HttpResponse} The HttpResponse returned from the server.
 
 
-  @return {Promise} 
+  @return {Promise}
     - Properties on the promise success result
       - results {Array of Entity}
       - query {EntityQuery} The original query
@@ -13419,7 +13452,7 @@ var EntityManager = (function () {
       var em = new EntityManager(serviceName);
       var query = new EntityQuery("Orders");
       var orders = em.executeQueryLocally(query);
-   
+
   Note that this can also be accomplished using the 'executeQuery' method with
   a FetchStrategy of FromLocalCache and making use of the Promise or callback
   @example
@@ -13575,18 +13608,10 @@ var EntityManager = (function () {
 
     clearServerErrors(entitiesToSave);
 
-    if (this.validationOptions.validateOnSave) {
-      var failedEntities = entitiesToSave.filter(function (entity) {
-        var aspect = entity.entityAspect;
-        var isValid = aspect.entityState.isDeleted() || aspect.validateEntity();
-        return !isValid;
-      });
-      if (failedEntities.length > 0) {
-        var valError = new Error("Client side validation errors encountered - see the entityErrors collection on this object for more detail");
-        valError.entityErrors = createEntityErrors(failedEntities);
-        if (errorCallback) errorCallback(valError);
-        return Q.reject(valError);
-      }
+    var valError = this.saveChangesValidateOnClient(entitiesToSave);
+    if (valError) {
+      if (errorCallback) errorCallback(valError);
+      return Q.reject(valError);
     }
 
     var dataService = DataService.resolve([saveOptions.dataService, this.dataService]);
@@ -13667,6 +13692,37 @@ var EntityManager = (function () {
       return Q.reject(error);
     }
   };
+
+  /**
+  Run the "saveChanges" pre-save client validation logic.
+
+  This is NOT a general purpose validation method.
+  It is intended for utilities that must know if saveChanges
+  would reject the save due to client validation errors.
+
+  It only validates entities if the EntityManager's
+  {{#crossLink "ValidationOptions"}}{{/crossLink}}.validateOnSave is true.
+
+  @method saveChangesValidateOnClient
+  @param entitiesToSave {Array of Entity} The list of entities to save (to validate).
+  @return {Error} Validation error or null if no error
+  **/
+  proto.saveChangesValidateOnClient = function(entitiesToSave) {
+
+    if (this.validationOptions.validateOnSave) {
+      var failedEntities = entitiesToSave.filter(function (entity) {
+        var aspect = entity.entityAspect;
+        var isValid = aspect.entityState.isDeleted() || aspect.validateEntity();
+        return !isValid;
+      });
+      if (failedEntities.length > 0) {
+        var valError = new Error("Client side validation errors encountered - see the entityErrors collection on this object for more detail");
+        valError.entityErrors = createEntityErrors(failedEntities);
+        return valError;
+      }
+    }
+    return null;
+  }
 
   function clearServerErrors(entities) {
     entities.forEach(function (entity) {
@@ -13805,12 +13861,12 @@ var EntityManager = (function () {
   @param typeName {EntityType | String} The EntityType or EntityType name for this key.
   @param keyValues {Object|Array of Object} The values for this key - will usually just be a single value; an array is only needed for multipart keys.
   @param checkLocalCacheFirst {Boolean=false} Whether to check this EntityManager first before going to the server. By default, the query will NOT do this.
-  @return {Promise} 
+  @return {Promise}
     - Properties on the promise success result
       - entity {Object} The entity returned or null
       - entityKey {EntityKey} The entityKey of the entity to fetch.
       - fromCache {Boolean} Whether this entity was fetched from the server or was found in the local cache.
-   
+
   **/
 
   /**
@@ -13829,7 +13885,7 @@ var EntityManager = (function () {
   @async
   @param entityKey {EntityKey} The  {{#crossLink "EntityKey"}}{{/crossLink}} of the Entity to be located.
   @param checkLocalCacheFirst {Boolean=false} Whether to check this EntityManager first before going to the server. By default, the query will NOT do this.
-  @return {Promise} 
+  @return {Promise}
     - Properties on the promise success result
       - entity {Object} The entity returned or null
       - entityKey {EntityKey} The entityKey of the entity to fetch.
@@ -13913,8 +13969,8 @@ var EntityManager = (function () {
           var sameCust1 = data.results[0];
           // cust1 === sameCust1;
           // but cust1.getProperty("CustomerId") != customerId
-          // because the server will have generated a new id 
-          // and the client will have been updated with this 
+          // because the server will have generated a new id
+          // and the client will have been updated with this
           // new id.
       })
 
@@ -13991,7 +14047,7 @@ var EntityManager = (function () {
     entityTypes = checkEntityTypes(this, entityTypes);
     var entityGroups = getEntityGroups(this, entityTypes);
     return entityGroups.some(function (eg) {
-      return eg.hasChanges();
+      return eg && eg.hasChanges();
     });
   };
 
@@ -14308,20 +14364,33 @@ var EntityManager = (function () {
 
   function exportEntityGroups(em, entities) {
     var entityGroupMap;
-    if (entities) {
+    var first = entities && entities[0];
+    if (first) {
       // group entities by entityType and
       // create 'groups' that look like entityGroups.
       entityGroupMap = {};
-      entities.forEach(function (e) {
-        var group = entityGroupMap[e.entityType.name];
-        if (!group) {
-          group = {};
-          group.entityType = e.entityType;
-          group._entities = [];
-          entityGroupMap[e.entityType.name] = group;
-        }
-        group._entities.push(e);
-      });
+      if (first.entityType) {
+        // assume "entities" is an array of entities;
+        entities.forEach(function (e) {
+          var group = entityGroupMap[e.entityType.name];
+          if (!group) {
+            group = {};
+            group.entityType = e.entityType;
+            group._entities = [];
+            entityGroupMap[e.entityType.name] = group;
+          }
+          group._entities.push(e);
+        });
+      } else {
+        // assume "entities" is an array of EntityTypes (or names)
+        var entityTypes = checkEntityTypes(em, entities)
+        entityTypes.forEach(function(et){
+          var group = em._entityGroupMap[et.name];
+          if (group && group._entities.length) {
+            entityGroupMap[et.name] = group;
+          }
+        })
+      }
     } else {
       entityGroupMap = em._entityGroupMap;
     }

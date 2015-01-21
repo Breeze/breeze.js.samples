@@ -1,23 +1,23 @@
 /*
- * Extend breeze with saveErrorMessageService,   
+ * Extend breeze with saveErrorMessageService,
  * a utility service for processing errors returned from a save.
  *
  * Depends on Breeze which it patches
  *
  * `getErrorMessage is its primary method (see example).
  *
- * The default implementation extracts validation error messages and 
- * arranges for server validation errors to be removed from an entity 
+ * The default implementation extracts validation error messages and
+ * arranges for server validation errors to be removed from an entity
  * the next time this entity changes in any way.
  *
  * The service API includes implementation methods that can be overriden (replaced)
  * to change the behavior just described
- * 
- * This extension is not prescriptive! 
+ *
+ * This extension is not prescriptive!
  * It is only one approach to save error message handling.
  * Use it for inspiration.
  *
- * Copyright 2013 IdeaBlade, Inc.  All Rights Reserved.  
+ * Copyright 2013 IdeaBlade, Inc.  All Rights Reserved.
  * Licensed under the MIT License
  * http://opensource.org/licenses/mit-license.php
  * Author: Ward Bell
@@ -30,24 +30,24 @@
  *
  * Example:
  *   return manager.saveChanges().then(saveSucceeded, saveFailed);
- *   
+ *
  *   function saveFailed(error) {
  *       var msg = 'Save failed: ' + breeze.saveErrorMessageService.getErrorMessage(error);
  *       error.message = msg;
  *       logError(msg, error);
  *       throw error;
  *   }
- * 
+ *
 */
-(function (definition, window) {
-    if (window.breeze) {
-        definition(window.breeze);
+(function (definition) {
+    if (typeof breeze === "object") {
+        definition(breeze);
     } else if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
         // CommonJS or Node
         var b = require('breeze');
         definition(b);
     } else if (typeof define === "function" && define["amd"] && !window.breeze) {
-        // Requirejs / AMD 
+        // Requirejs / AMD
         define(['breeze'], definition);
     } else {
         throw new Error("Can't find breeze");
@@ -71,6 +71,12 @@
 	function getErrorMessage(error) {
 		var msg = error.message;
 		var entityErrors = error.entityErrors;
+
+		// Save queuing wraps the error and has the concrete error in the innerError property.
+		if (!entityErrors && error.innerError) {
+		    entityErrors = error.innerError.entityErrors;
+		}
+
 		if (entityErrors && entityErrors.length) {
 			service.reviewServerErrors(entityErrors);
 			return getValidationMessages(entityErrors);
@@ -142,4 +148,4 @@
 			});
 		})(badEntity);
 	}
-}, this));
+}));

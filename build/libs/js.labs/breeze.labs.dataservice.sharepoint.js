@@ -4,54 +4,54 @@
  *  v.0.6.0
  *
  * Registers a SharePoint 2013 OData DataServiceAdapter with Breeze
- * 
+ *
  * REQUIRES breeze.labs.dataservice.abstractrest.js v.0.6.0+
- * 
+ *
  * This adapter cannot get metadata from the server and in general one should
  * not do so because such metadata cover much more of than you want and are huge (>1MB)
  * Better to define the metadata "by hand" on the client.
- * 
+ *
  * W/o need to get metadata, can use AJAX adapter instead of Data.JS.
  *
  * Typical usage in Angular
  *    // configure breeze to use SharePoint OData service
- *    var dsAdapter = breeze.config.initializeAdapterInstance('dataService', 'SharePointOData', true); 
+ *    var dsAdapter = breeze.config.initializeAdapterInstance('dataService', 'SharePointOData', true);
  *
  *    // provide method returning value for the SP OData 'X-RequestDigest' header
  *    dsAdapter.getRequestDigest = function(){return securityService.requestDigest}
  *
  * This adapter has its own JsonResultsAdapter which you could replace.
- * 
+ *
  * The dataservice adapter looks for clientTypeNameToServer and serverTypeNameToClient methods
  * on the JsonResultsAdapter during transformation of entity data to/from the server
  * so it can convert server type names to client EntityType names.
- * These are initialized to the default versions defined here. 
+ * These are initialized to the default versions defined here.
  * You can create and attach alternative type name conversion methods to the JsonResultsAdapter
- * 
- * This adapter memoizes the type names it encounters 
+ *
+ * This adapter memoizes the type names it encounters
  * by adding a 'typeMap' object to the JsonResultsAdapter.
  *
  * By default this adapter permits multiple entities to be saved at a time,
- * each in a separate request that this adapter fires off in parallel. 
+ * each in a separate request that this adapter fires off in parallel.
  * and waits for all to complete.
- * 
+ *
  * If 'saveOnlyOne' == true, the adapter throws an exception
  * when asked to save more than one entity at a time.
- * 
+ *
  * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.
  * Licensed under the MIT License
  * http://opensource.org/licenses/mit-license.php
  * Authors: Ward Bell, Andrew Connell
  */
-(function (definition, window) {
-    if (window.breeze) {
-        definition(window.breeze);
+(function (definition) {
+    if (typeof breeze === "object") {
+        definition(breeze);
     } else if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
         // CommonJS or Node
         var b = require('breeze');
         definition(b);
     } else if (typeof define === "function" && define["amd"] && !window.breeze) {
-        // Requirejs / AMD 
+        // Requirejs / AMD
         define(['breeze'], definition);
     } else {
         throw new Error("Can't find breeze");
@@ -89,7 +89,7 @@
         var query = mappingContext.query;
         var entityType = mappingContext.entityType;
 
-        // get the default select if query lacks a select and 
+        // get the default select if query lacks a select and
         // the result type is known and it has a defaultSelect
         var defaultSelect = !query.selectClause && entityType &&
             entityType.custom && entityType.custom.defaultSelect;
@@ -207,8 +207,8 @@
         // SharePoint OData responses have a response.data instead
         // this code is tricky so be careful changing the response.data parsing.
         var data = err.data = err.response.data,
-            m, 
-            msg = [], 
+            m,
+            msg = [],
             nextErr;
 
         if (data) {
@@ -218,9 +218,9 @@
                 }
                 do {
                     nextErr = data.error || data.innererror;
-                    if (!nextErr) { 
+                    if (!nextErr) {
                         m = data.message || "";
-                        msg.push((typeof m === "string") ? m : m.value); 
+                        msg.push((typeof m === "string") ? m : m.value);
                     }
                     nextErr = nextErr || data.internalexception;
                     data = nextErr;
@@ -271,13 +271,13 @@
             var metadata = node.__metadata;
             if (!metadata) { return; } // every SharePoint entity node has __metadata
 
-            var entityType = node.$entityType; 
+            var entityType = node.$entityType;
             if (entityType){
                 // save result node
                 result.entityType = entityType;
                 result.extraMetadata = metadata;
                 return;
-            }            
+            }
 
             // query node
 
@@ -285,15 +285,15 @@
             entityType = dataServiceAdapter._getNodeEntityType(mappingContext, typeName);
 
             if (entityType) {
-                // ASSUME if #-of-properties on node is >= #-of-props for the type 
-                // that this is the full entity and not a partial projection. 
-                // Therefore we declare that we've received an entity 
+                // ASSUME if #-of-properties on node is >= #-of-props for the type
+                // that this is the full entity and not a partial projection.
+                // Therefore we declare that we've received an entity
                 if (entityType._mappedPropertiesCount <= Object.keys(node).length - 1) {
                     result.entityType = entityType;
                     result.extraMetadata = metadata;
 
                     // Delete node properties that look like nested navigation paths
-                    // Breeze gets confused into thinking such properties contain actual entities. 
+                    // Breeze gets confused into thinking such properties contain actual entities.
                     // Todo: rethink this if/when can include related entities through expand
                     var navPropNames = entityType.navigationProperties.map(function (p) { return p.name; });
                     navPropNames.forEach(function (n) { if (node[n]) { delete node[n]; } });
@@ -361,4 +361,4 @@
         return breeze.MetadataStore.normalizeTypeName(typeName);
     }
 
-}, this));
+}));

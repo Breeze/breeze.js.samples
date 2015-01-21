@@ -36,9 +36,9 @@
  * http://opensource.org/licenses/mit-license.php
  * Authors: Ward Bell
  */
-(function (definition, window) {
-    if (window.breeze) {
-        definition(window.breeze);
+(function (definition) {
+    if (typeof breeze === "object") {
+        definition(breeze);
     } else if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
         // CommonJS or Node
         var b = require('breeze');
@@ -346,7 +346,7 @@
         var originalEntities = saveContext.originalEntities = saveBundle.entities;
         saveContext.tempKeys = [];
 
-        var changeRequestInterceptor = 
+        var changeRequestInterceptor =
             abstractDsaProto._createChangeRequestInterceptor(saveContext, saveBundle);
 
         var requests = originalEntities.map(function (entity, index) {
@@ -450,4 +450,4 @@
         return saved;
     }
 
-}, this));
+}));

@@ -10,14 +10,12 @@ var async = require('async');
 var del = require('del');
 var eventStream = require('event-stream');
 
-// include plug-ins
 var gutil = require('gulp-util');
 var flatten = require('gulp-flatten');
 var rename  = require('gulp-rename');
 var zip = require('gulp-zip');
 
-//var concat  = require('gulp-concat');
-//var newer   = require('gulp-newer');
+// -----------------------------
 
 var _tempDir = './_temp/';
 var _clientDir = '../../breeze.js/'
@@ -33,7 +31,6 @@ var _metadataDir = _clientDir + 'docs/metadata/';
 // var _msBuildCmd = 'C:/Windows/Microsoft.NET/Framework/v4.0.30319/MSBuild.exe ';
 var _msBuildCmd = '"C:/Program Files (x86)/MSBuild/12.0/Bin/MsBuild.exe" '; // vs 2013 version of MsBuild
 var _msBuildOptions = ' /p:Configuration=Release /verbosity:minimal ';
-
 
 var _nugetPackageNames = [
   'Breeze.Client',
@@ -62,14 +59,17 @@ _sampleSolutionFileNames = _sampleSolutionFileNames.filter(function(item) {
   return item.indexOf('zza') == -1;
 });
 
+gulp.task('breezeClientBuild', function(done) {
+  execCommands(['gulp'], { cwd: _clientBuildDir }, done);
+});
 
-gulp.task('getLibs', function() {
+gulp.task('getLibs', ['breezeClientBuild'], function() {
   var destDir = './libs/'
   return eventStream.concat(
-    gulp.src(_clientBuildDir + 'breeze.*.js')
+    gulp.src(_clientBuildDir + 'breeze.*.*')
         .pipe(flatten())
         .pipe(gulp.dest(destDir + 'js')),
-    gulp.src(_clientSrcDir + 'breeze.dataService.mongo.js')
+    gulp.src(_clientBuildDir + 'adapters/*.*')
         .pipe(flatten())
         .pipe(gulp.dest(destDir + 'js.adapters')),
     gulp.src([_clientLabsDir + '*.js', _clientLabsDir + '*.css'])
@@ -79,16 +79,8 @@ gulp.task('getLibs', function() {
         .pipe(flatten())
         .pipe(gulp.dest(destDir + 'server.labs'))
   );
-  // Translated from this
-  /*
-  XCOPY "%1..\..\..\breeze.js\build\*.js" "%1js" /Y
-  XCOPY "%1..\..\..\breeze.js\src\breeze.dataService.mongo.js" "%1js.adapters" /Y
-  XCOPY "%1..\..\..\breeze.js.labs\*.js" "%1js.labs" /Y
-  XCOPY "%1..\..\..\breeze.js.labs\*.css" "%1js.labs" /Y
-  XCOPY "%1..\..\..\breeze.server.labs\*.cs" "%1server.labs" /Y
-  */
+  
 });
-
 
 gulp.task('sampleSolutionsUpdateNugets', function(done) {
   async.each(_sampleSolutionFileNames, function (fileName, cb) {

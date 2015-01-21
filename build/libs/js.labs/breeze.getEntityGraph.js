@@ -1,7 +1,7 @@
 //#region Copyright, Version, and Description
 /*
- * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.  
- * Use, reproduction, distribution, and modification of this code is subject to the terms and 
+ * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.
+ * Use, reproduction, distribution, and modification of this code is subject to the terms and
  * conditions of the IdeaBlade Breeze license, available at http://www.breezejs.com/license
  *
  * Author: Ward Bell
@@ -14,33 +14,34 @@
  * Depends on Breeze which it patches
  *
  * For discussion, see:
- * http://www.breezejs.com/documentation/getentitygraph 
- *  
+ * http://www.breezejs.com/documentation/getentitygraph
+ *
  * For example usage, see:
- * https://github.com/Breeze/breeze.js.samples/tree/master/net/DocCode/DocCode/tests/getEntityGraphTests.js  
+ * https://github.com/Breeze/breeze.js.samples/tree/master/net/DocCode/DocCode/tests/getEntityGraphTests.js
  */
 //#endregion
-(function (definition, window) {
-    if (window.breeze) {
-        definition(window.breeze);
+(function (definition) {
+    if (typeof breeze === "object") {
+        definition(breeze);
     } else if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
         // CommonJS or Node
         var b = require('breeze');
         definition(b);
     } else if (typeof define === "function" && define["amd"] && !window.breeze) {
-        // Requirejs / AMD 
+        // Requirejs / AMD
         define(['breeze'], definition);
     } else {
         throw new Error("Can't find breeze");
     }
 }(function (breeze) {
+    'use strict';
 
     var EntityManager = breeze.EntityManager;
     var proto = EntityManager.prototype;
 
     if (!EntityManager.getEntityGraph) {
         /**
-        Get related entities of root entity (or root entities) as specified by expand. 
+        Get related entities of root entity (or root entities) as specified by expand.
         @example
             var graph = breeze.EntityManager.getEntityGraph(customer, 'Orders.OrderDetails');
             // graph will be the customer, all of its orders and their details even if deleted.
@@ -54,7 +55,7 @@
 
     if (!proto.getEntityGraph) {
         /**
-        Execute query locally and return both the query results and their related entities as specified by the optional expand parameter or the query's expand clause. 
+        Execute query locally and return both the query results and their related entities as specified by the optional expand parameter or the query's expand clause.
         @example
             var query = breeze.EntityQuery.from('Customers')
                         .where('CompanyName', 'startsWith', 'Alfred')
@@ -68,7 +69,7 @@
         **/
 
         /**
-        Get related entities of root entity (or root entities) as specified by expand. 
+        Get related entities of root entity (or root entities) as specified by expand.
         @example
             var graph = manager.getEntityGraph(customer, 'Orders.OrderDetails');
             // graph will be the customer, all of its orders and their details even if deleted.
@@ -248,7 +249,7 @@
                     throw new Error(segment + " is not a navigation property of " + baseTypeName);
                 }
                 navType = nav.entityType;
-                // add derived types 
+                // add derived types
                 var navTypes = navType.getSelfAndSubtypes();
                 var grps = []; // non-empty groups for these types
                 navTypes.forEach(function (t) {
@@ -306,4 +307,4 @@
         }
     }
 
-}, this));
+}));
