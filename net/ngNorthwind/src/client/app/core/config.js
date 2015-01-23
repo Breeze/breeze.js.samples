@@ -6,10 +6,10 @@
     var config = {
 
         // Pick ONE. See README.md
-        apiHost: //'http://sampleservice.breezejs.com/api/',
-                'http://localhost:58066/breeze/',
+        apiHost: //'http://sampleservice.breezejs.com/api/', // remote
+                'http://localhost:58066/breeze/', // local
 
-        appErrorPrefix: '[bzNorthwind Error] ', 
+        appErrorPrefix: '[bzNorthwind Error] ',
         appTitle: 'Breeze Angular Northwind',
         useBreeze: true,
         version: '0.0.0'

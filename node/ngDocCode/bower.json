@@ -20,8 +20,9 @@
     "angular-route": "~1.3.6",
     "angular-animate": "~1.3.6",
     "angular-sanitize": "~1.3.6",
-    "bardjs": "~0.0.1",
-    "breezejs": "~1.5.2",
+    "bardjs": "~0.0.5",
+    "breeze-client": "^1.5",
+    "breeze-client-labs": "^1.5",
     "moment": "~2.8.4",
     "sinon": "http://sinonjs.org/releases/sinon-1.12.1.js"
   },

@@ -2,6 +2,8 @@
 describe("query_with_predicates:", function () {
     'use strict';
 
+    ash.serverIsRunningPrecondition();
+
     var customerType;
     var em;
     var EntityQuery = breeze.EntityQuery;
@@ -10,8 +12,6 @@ describe("query_with_predicates:", function () {
     var newEm = ash.newEmFactory(ash.northwindServiceName);
     var orderType;
     var Predicate = breeze.Predicate;
-
-    ash.serverIsRunningPrecondition();
 
     beforeEach(function () {
         em = newEm(); // fresh EntityManager before each test
@@ -296,7 +296,7 @@ describe("query_with_predicates:", function () {
         // OrderDetail is the mapping table in this scenario:
         //     Order <-(1,M)-> OrderDetail <-(M,1)-> Product
 
-        var pred = new Predicate('OrderDetails', 'any', 
+        var pred = new Predicate('OrderDetails', 'any',
                                  'Product.ProductName', 'eq', 'Chai');
 
         logPredicate(pred, orderType);
@@ -418,7 +418,7 @@ describe("query_with_predicates:", function () {
     ////// helpers //////
 
     function logPredicate(predicate, entityType){
-        return; 
+        return;
         /* Don't log now but could if/when want to see the query's OData query string
         var msg = 'query_with_predicates: OData query string is "$filter=' +
             predicate.toODataFragment(entityType)+'" for predicate "'+

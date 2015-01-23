@@ -3,6 +3,8 @@
 describe('entityExtensionAsync:', function() {
     'use strict';
 
+    ash.serverIsRunningPrecondition();
+
     var EntityManager = breeze.EntityManager;
     var EntityQuery = breeze.EntityQuery;
     var EntityState = breeze.EntityState;
@@ -20,7 +22,7 @@ describe('entityExtensionAsync:', function() {
     beforeEach(function (done) {
         if (!moduleMetadataStore.isEmpty()) {
             done(); // got it already
-            return; 
+            return;
         }
         breeze.Q.all([
             moduleMetadataStore.fetchMetadata(northwindService),
@@ -32,8 +34,8 @@ describe('entityExtensionAsync:', function() {
         var emp;
         before(function(done){
 
-            var employeeCtor = function () {           
-                this.FirstName = 'Jolly'; // Mapped property           
+            var employeeCtor = function () {
+                this.FirstName = 'Jolly'; // Mapped property
                 this.FunkyName = 'Fresh'; // Unmapped property
             };
 
@@ -50,17 +52,17 @@ describe('entityExtensionAsync:', function() {
             var aspect = emp.entityAspect;
             expect(aspect.entityState.isUnchanged()).to.equal(true,
                 "queried entity whose ctor sets properties should remain Unchanged");
-            expect(aspect.originalValues).to.be.empty;               
+            expect(aspect.originalValues).to.be.empty;
         });
 
         it("queried values overwrite the ctor default mapped property value", function () {
             expect(emp.FirstName).to.not.equal('Jolly',
-                "queried value should overwrite ctor default FirstName; is " + emp.FirstName);           
+                "queried value should overwrite ctor default FirstName; is " + emp.FirstName);
         });
 
         it("ctor default unmapped property values are retained", function () {
             expect(emp.FunkyName).to.equal('Fresh',
-                "unmapped 'FunkyName' should have stayed 'Fresh'");           
+                "unmapped 'FunkyName' should have stayed 'Fresh'");
         });
     });
 
@@ -68,8 +70,8 @@ describe('entityExtensionAsync:', function() {
         var emp;
         before(function(done){
 
-            var employeeInitializer = function (emp) {           
-                emp.FirstName = 'Jolly'; // Mapped property           
+            var employeeInitializer = function (emp) {
+                emp.FirstName = 'Jolly'; // Mapped property
                 emp.FunkyName = 'Fresh'; // Untracked property
             };
 
@@ -86,17 +88,17 @@ describe('entityExtensionAsync:', function() {
             var aspect = emp.entityAspect;
             expect(aspect.entityState.isUnchanged()).to.equal(true,
                 "queried entity whose initializer sets properties should remain Unchanged");
-            expect(aspect.originalValues).to.be.empty;               
+            expect(aspect.originalValues).to.be.empty;
         });
 
         it("initialized mapped property values should overwrite queried values", function () {
             expect(emp.FirstName).to.equal('Jolly',
-                "init'er should overwrite queried FirstName; is " + emp.FirstName);           
+                "init'er should overwrite queried FirstName; is " + emp.FirstName);
         });
 
         it("initialized untracked property values are retained", function () {
             expect(emp.FunkyName).to.equal('Fresh',
-                "untracked 'FunkyName' should have stayed 'Fresh'");           
+                "untracked 'FunkyName' should have stayed 'Fresh'");
         });
     });
 
@@ -153,7 +155,7 @@ describe('entityExtensionAsync:', function() {
 
         function saveSucceeded() {
 
-            expect(todo.foo).to.not.equal(0, 
+            expect(todo.foo).to.not.equal(0,
                 "'foo' should have retained its '{0}' value after '{1}' save succeeded"
                 .format(todo.foo, operation));
 
@@ -167,7 +169,7 @@ describe('entityExtensionAsync:', function() {
 
         function requerySucceeded(data) {
             todo = data.results[0];
-        
+
             if (operation === "delete") {
                 expect(todo == null).to.equal(true,
                     "should not fetch todo after 'delete' save succeeds");
@@ -176,7 +178,7 @@ describe('entityExtensionAsync:', function() {
                 expect(todo != null).to.equal(true,
                     "todo should still be in the database after '"+operation+"' save.");
 
-                expect(todo.foo).to.equal(123, 
+                expect(todo.foo).to.equal(123,
                     "foo should have reverted to '123' after cache-clear and re-query.");
 
                 expect(todo.Description, description,
@@ -207,7 +209,7 @@ describe('entityExtensionAsync:', function() {
         function success(data) {
             var emp = data.results[0];
             var fullname = emp.FullName;
-            expect(fullname).to.equal(emp.LastName + ', ' + emp.FirstName, 
+            expect(fullname).to.equal(emp.LastName + ', ' + emp.FirstName,
                 "emp.FullName should have been calculated on the server as 'Last, First'");
         }
     });
@@ -303,7 +305,7 @@ describe('entityExtensionAsync:', function() {
         function success(){
             expect(actual[0]).to.equal(action.ctor,    'ctor called 1st');
             expect(actual[1]).to.equal(action.initFn,  'initializer 2nd');
-            expect(actual[2]).to.equal(action.attach,  'attach 3rd');            
+            expect(actual[2]).to.equal(action.attach,  'attach 3rd');
         }
     });
 

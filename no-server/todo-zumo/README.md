@@ -1,4 +1,4 @@
-<img src="http://www.breezejs.com/sites/default/files/styles/sample_thumbnail/public/samples/BreezeZumo.png" alt="Todo App with Azure" style="float:left; height:70px; margin-right: 8px;"/><h1>The Breeze/Angular Todo-Zumo App</h1>
+<img src="http://www.getbreezenow.com/sites/default/files/samples/BreezeZumo.png" alt="Todo App with Azure" style="float:left; height:70px; margin-right: 8px;"/><h1>The Breeze/Angular Todo-Zumo App</h1>
 
 "**todo-zumo**" is a simple **one-screen Angular Todo app**  that demonstrates features of a Breeze + Angular.
 
@@ -12,17 +12,17 @@ The **Breeze** features of particular interest are:
 
 * Holding the queried TodoItems in cache
 
-* Add, modify and delete cached TodoItems without saving them. 
+* Add, modify and delete cached TodoItems without saving them.
 
 * TodoItem entities track their own change-state; the UI identifies unsaved changes with font colors and strikethroughs.
 
-* Saving a "change-set", a collection of unsaved entities in various states 
+* Saving a "change-set", a collection of unsaved entities in various states
 
-* Automatically stashing unsaved changes to browser local storage (**WIP**=Work in Progress). 
+* Automatically stashing unsaved changes to browser local storage (**WIP**=Work in Progress).
 
 * Re-launching the application restores WIP entities to cache before loading fresh data from the server.
 
-* Talking to a Microsoft Azure Mobile Services node.js server "in the cloud". 
+* Talking to a Microsoft Azure Mobile Services node.js server "in the cloud".
 
 * Talking to a local Microsoft ASP.NET Web API2 server running Entity Framework and SQL Server.
 
@@ -42,10 +42,10 @@ Not a Windows user? It's pretty simple.
 
 * Open the ***getLibs.cmd*** command file in a text editor.
 * Notice that it copies a small number of source files, starting from  <em>..\..\build\libs\</em>,  into the  *vendors*  folder.
-* Create a "vendors" folder (if one doesn't exist) as a sibling of the *app* folder 
+* Create a "vendors" folder (if one doesn't exist) as a sibling of the *app* folder
 * Copy the files manually as described in *getLibs.cmd*.
 
->If you want to run the *Web API server* variation, continue with the Web API server installation instructions [below](#WebAPI). 
+>If you want to run the *Web API server* variation, continue with the Web API server installation instructions [below](#WebAPI).
 
 #Run
 
@@ -58,13 +58,13 @@ You'll need to launch a web application server to host the client-side assets (H
 
     >Windows may ask you to approve running this script; please do so.
 
-1. Open a browser to **http://localhost:8000/**
+1. Open a browser to [**http://localhost:8000/**](http://localhost:8000/)
 
 The application should appear in the browser. **You may have to wait a minute for Azure to revive the sleeping Mobile Service instance**; subsequent browser refreshes will be quite crisp.
 
 When the data are loaded. You can start adding, modifying and deleting TodoItems. It might look like this:
 
-![Todo App with Azure](http://www.breezejs.com/sites/all/images/Todo-Zumo.png)
+![Todo App with Azure](http://www.breezejs.com/sites/default/files/images/Todo-Zumo.png)
 
 Notice that
 
@@ -114,15 +114,15 @@ Now we'll reconfigure the application to target the Web API
 
     >At this point you have two command windows open: the Web API data server on port 58066 and the web app server on port 8000.
 
-1. Open or refresh the browser at **localhost:8000**.
+1. Open or refresh the browser at [**localhost:8000**](http://localhost:8000/).
 
 It should look something like this:
 
-![Todo App with WebAPI](http://www.breezejs.com/sites/all/images/Todo-WebAPI.png)
+![Todo App with WebAPI](http://www.breezejs.com/sites/default/files/images//Todo-WebAPI.png)
 
 Unlike the Azure version, the Web API version expects the server to generate the Breeze metadata (from the Entity Framework model). If you inspect the network traffic, you'll see that the app made a metadata request: `http://localhost:58066/breeze/todos/Metadata`.
 
-You can configure the app to use metadata defined on the *client* instead. 
+You can configure the app to use metadata defined on the *client* instead.
 
 1. Scroll down in *config.js* until you get to `configureForWebApi`
 
@@ -132,7 +132,7 @@ You can configure the app to use metadata defined on the *client* instead.
 
 1. Look at the network traffic; you should **not** see a metadata request.
 
-Now the application uses metadata defined on the client in *model.js* 
+Now the application uses metadata defined on the client in *model.js*
 
 >Note that Azure Mobile Services cannot generate metadata and so *that* version of the application must always use the client-defined metadata.
 

@@ -55,7 +55,7 @@ gulp.task('analyze', function() {
 gulp.task('build-index', function() {
         log('building index.html');
 
-        var index = config.servertemplates + 'index.html';
+        var index = config.server + 'index.html';
         return gulp
 
             // inject the files into index.html

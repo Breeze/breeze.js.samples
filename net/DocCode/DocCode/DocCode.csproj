@@ -125,7 +125,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\breeze.intellisense.js" />
     <Content Include="Scripts\breeze.ajaxrestinterceptor.js" />
     <Content Include="Scripts\breeze.debug.js" />
     <Content Include="Scripts\breeze.getEntityGraph.js" />

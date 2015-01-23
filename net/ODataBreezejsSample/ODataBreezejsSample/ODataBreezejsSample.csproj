@@ -248,10 +248,9 @@
       <DependentUpon>toastr.css</DependentUpon>
     </Content>
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
-    <Content Include="Scripts\breeze.angular.js" />
+    <Content Include="Scripts\breeze.bridge.angular.js" />
     <Content Include="Scripts\breeze.debug.js" />
     <Content Include="Scripts\breeze.directives.js" />
-    <None Include="Scripts\breeze.intellisense.js" />
     <Content Include="Scripts\breeze.min.js" />
     <Content Include="Scripts\datajs-1.1.1.js" />
     <Content Include="Scripts\datajs-1.1.1.min.js" />

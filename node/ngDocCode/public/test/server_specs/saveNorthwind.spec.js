@@ -2,14 +2,14 @@
 describe("saveNorthwind:", function (done) {
     'use strict';
 
+    ash.serverIsRunningPrecondition();
+
     var em;
     var EntityQuery = breeze.EntityQuery;
     var handleSaveFailed = ash.handleSaveFailed;
     var newEm = ash.newEmFactory(ash.northwindServiceName);
     var newGuidComb = ash.newGuidComb;
     var timestamp;
-
-    ash.serverIsRunningPrecondition();
 
     beforeEach(function () {
         em = newEm(); // fresh EntityManager before each test

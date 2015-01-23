@@ -20,20 +20,20 @@ module.exports = function(config) {
         './bower_components/angular-sanitize/angular-sanitize.js',
         './bower_components/angular-ui-router/release/angular-ui-router.js',
         './bower_components/toastr/toastr.js',
-        './bower_components/breezejs/breeze.debug.js',
+        './bower_components/breeze-client/build/breeze.debug.js',
 
         <!-- testing this alternative to the core backingstore adapter -->
         './lib/b00_breeze.modelLibrary.new-backingstore.js',
 
-        './bower_components/breezejs/adapters/breeze.dataService.mongo.js',
-        './bower_components/breezejs/labs/breeze.angular.js',
-        './bower_components/breezejs/labs/breeze.metadata-helper.js',
-        './bower_components/breezejs/labs/breeze.saveErrorExtensions.js',
+        './bower_components/breeze-client/build/adapters/breeze.dataService.mongo.js',
+        './bower_components/breeze-client/build/adapters/breeze.bridge.angular.js',
+        './bower_components/breeze-client-labs/breeze.metadata-helper.js',
+        './bower_components/breeze-client-labs/breeze.saveErrorExtensions.js',
         './bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.min.js',
 
         /* test libraries */
         './bower_components/angular-mocks/angular-mocks.js',
-        './bower_components/breezejs/labs//ngMidwayTester.js',
+        './bower_components/bardjs/dist/bard.js',
         './test/lib/bind-polyfill.js', // Needed for phantomJS
 
         /* application scripts */

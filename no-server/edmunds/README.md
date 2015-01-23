@@ -1,4 +1,4 @@
-<img src="http://www.breezejs.com/sites/all/files/styles/sample_thumbnail/public/samples/edmunds-app-logo_0.png" alt="Edmunds" style="float:left; height:70px; margin-right: 8px;"/><h1>The Edmunds "Not My Server" Sample</h1>
+<img src="http://www.getbreezenow.com/sites/default/files/samples/edmunds-app-logo_0.png" alt="Edmunds" style="float:left; height:70px; margin-right: 8px;"/><h1>The Edmunds "Not My Server" Sample</h1>
 
 This sample application reads the "Make" and "Model" data from the Edmunds.com Vehicle Information service and translates those data into Breeze entities.
 

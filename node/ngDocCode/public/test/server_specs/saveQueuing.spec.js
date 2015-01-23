@@ -2,6 +2,8 @@
 describe('saveQueuing:', function() {
     "use strict";
 
+    ash.serverIsRunningPrecondition();
+
     var ajaxAdapter = breeze.config.getAdapterInstance('ajax');
     var ajaxSpy, em;
 
@@ -9,8 +11,6 @@ describe('saveQueuing:', function() {
     var handleFail = ash.handleFail;
     var newEm = ash.newEmFactory(ash.todosServiceName);
     var Q = breeze.Q;
-
-    ash.serverIsRunningPrecondition();
 
     beforeEach(function(){
         ajaxSpy = sinon.spy(ajaxAdapter, 'ajax');

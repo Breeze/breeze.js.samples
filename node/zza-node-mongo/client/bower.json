@@ -17,12 +17,16 @@
   "dependencies": {
     "angular": "~1.2.16",
     "angular-animate": "~1.2.16",
-    "angular-mocks": "~1.2.16",
     "angular-sanitize": "~1.2.16",
     "angular-ui-bootstrap-bower": "~0.10.0",
     "angular-ui-router": "~0.2.10",
-    "breezejs": "~1.5.0",
+    "breeze-client": "^1.5",
+    "breeze-client-labs": "^1.5",
     "jquery": "~2.1.0",
     "toastr": "~2.0.1"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.2.16",
+    "bardjs": "~0.0.5"
   }
 }

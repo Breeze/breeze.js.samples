@@ -491,14 +491,16 @@
         var notRunningError = new Error('Server '+serviceName+' is NOT running; can\'t run these specs');
 
         before(function(done){
+            var timeoutMax = 121000;
             if (ash.isServerRunning === undefined){
-                this.timeout(32000);
+                this.timeout(timeoutMax);
                 $injector.invoke(function ($http, $rootScope) {
+                    console.log('Waiting for server to start (up to 2 minutes) ...');
                     var url = serviceName+'/employees?$top=0';
                     // fire one in to kick the server... not sure why this is necessary
                     $http.get(url);
                     // Now we really test this one
-                    $http.get(url, {timeout: 30000})// just looking for a response
+                    $http.get(url, {timeout: timeoutMax - 1000})// just looking for a response
                         .then(function(){
                             ash.isServerRunning = true;
                             console.log('Server '+serviceName+' is running');

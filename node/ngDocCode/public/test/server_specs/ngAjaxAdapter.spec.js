@@ -24,13 +24,13 @@
 describe("ngAjaxAdapter:", function () {
     'use strict';
 
+    ash.serverIsRunningPrecondition();
+
     var ajaxAdapter  = breeze.config.getAdapterInstance('ajax');
     var em;
     var EntityQuery = breeze.EntityQuery;
     var newEm = ash.newEmFactory(ash.northwindServiceName);
     var $q = breeze.Q;
-
-    ash.serverIsRunningPrecondition();
 
     beforeEach(function () {
         em = newEm();

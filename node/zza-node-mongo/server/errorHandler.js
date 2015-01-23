@@ -24,7 +24,7 @@ function errorHandler(err, req, res, next) {
         var body = err.message ? {message: err.message} : err;
         if (err.saveResult){ body.saveResult = err.saveResult; }
         var status = err.statusCode || 500;
-        res.send(status, body);
+        res.status(status).send(body);
         logError(err, status, body);
     }
 }

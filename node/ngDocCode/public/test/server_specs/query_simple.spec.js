@@ -2,12 +2,12 @@
 describe("query_simple:", function () {
     'use strict';
 
+    ash.serverIsRunningPrecondition();
+
     var em;
     var EntityQuery = breeze.EntityQuery;
     var gotResults = ash.gotResults;
     var newEm = ash.newEmFactory(ash.northwindServiceName);
-
-    ash.serverIsRunningPrecondition();
 
     beforeEach(function () {
         em = newEm(); // fresh EntityManager before each test

@@ -4,7 +4,6 @@
     "server": "./",
     "source": "public/",
     "htmltemplates": "./public/**/*.html",
-    "servertemplates": "./server_templates/",
 
     "css": [
         "./public/stylesheets/style.css"
@@ -50,12 +49,12 @@
         "./bower_components/angular-sanitize/angular-sanitize.js",
         "./bower_components/bardjs/dist/bard.js",
 
-        "./bower_components/breezejs/breeze.debug.js",
-        "./bower_components/breezejs/labs/breeze.angular.js",
-        "./bower_components/breezejs/labs/breeze.ajaxPost.js",
-        "./bower_components/breezejs/labs/breeze.getEntityGraph.js",
-        "./bower_components/breezejs/labs/breeze.metadata-helper.js",
-        "./bower_components/breezejs/labs/breeze.savequeuing.js",
+        "./bower_components/breeze-client/build/breeze.debug.js",
+        "./bower_components/breeze-client/build/adapters/breeze.bridge.angular.js",
+        "./bower_components/breeze-client-labs/breeze.ajaxPost.js",
+        "./bower_components/breeze-client-labs/breeze.getEntityGraph.js",
+        "./bower_components/breeze-client-labs/breeze.metadata-helper.js",
+        "./bower_components/breeze-client-labs/breeze.savequeuing.js",
 
         "./bower_components/moment/moment.js"
     ],

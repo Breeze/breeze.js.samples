@@ -2,6 +2,8 @@
 describe("query_ordering_paging:", function () {
     'use strict';
 
+    ash.serverIsRunningPrecondition();
+
     var em;
     var EntityQuery = breeze.EntityQuery;
     var gotResults = ash.gotResults;

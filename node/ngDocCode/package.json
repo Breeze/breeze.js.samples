@@ -81,7 +81,6 @@
     "minimist": "^1.1.0",
     "mocha": "^2.0.0",
     "mocha-clean": "^0.4.0",
-    "ng-midway-tester": "wardbell/ngMidwayTester#v2.0.6",
     "phantomjs": "1.9.12",
     "plato": "^1.2.0",
     "q": "^1.0.1",

@@ -2,6 +2,8 @@
 describe("query_xtras:", function () {
     'use strict';
 
+    ash.serverIsRunningPrecondition();
+
     var em;
     var EntityQuery = breeze.EntityQuery;
     var gotResults = ash.gotResults;
@@ -271,7 +273,7 @@ describe("query_xtras:", function () {
         });
 
         it("can refresh an unmodified Customer entity", function(done) {
-             var cust = em.createEntity('Customer', 
+             var cust = em.createEntity('Customer',
                 {CustomerID: ash.alfredsID, CompanyName: 'Acme'}, UNCHANGED);
 
             EntityQuery.fromEntities(cust) // can skip the array if only one
@@ -299,12 +301,12 @@ describe("query_xtras:", function () {
 
         // D#2655
         it("can NOT refresh entities of different types", function() {
-            var cust = em.createEntity('Customer', 
+            var cust = em.createEntity('Customer',
                 {CustomerID: ash.alfredsID, CompanyName: 'Acme'}, UNCHANGED);
 
             expect(function(){
-               var q = EntityQuery.fromEntities([emp1, cust]); 
-            }).to.throw(/not of type/, 
+               var q = EntityQuery.fromEntities([emp1, cust]);
+            }).to.throw(/not of type/,
                 "raised error because not all entities are the same type");
         });
 
@@ -351,7 +353,7 @@ describe("query_xtras:", function () {
                 );
             });
             return emps;
-        }  
+        }
     });
 
     describe("breeze wires-up related entities", function () {

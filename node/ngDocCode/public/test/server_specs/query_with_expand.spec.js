@@ -2,11 +2,11 @@
 describe("query_with_expand:", function () {
     'use strict';
 
+    ash.serverIsRunningPrecondition();
+
     var em;
     var EntityQuery = breeze.EntityQuery;
     var newEm = ash.newEmFactory(ash.northwindServiceName);
-
-    ash.serverIsRunningPrecondition();
 
     beforeEach(function () {
         em = newEm(); // fresh EntityManager before each test
@@ -63,7 +63,7 @@ describe("query_with_expand:", function () {
         }
     });
 
-    it("include related child entities and their children, e.g. an Order's  Details and their Products", 
+    it("include related child entities and their children, e.g. an Order's  Details and their Products",
         function (done) {
             // Get Alfreds' first Order and its related entities
             EntityQuery.from("Orders")

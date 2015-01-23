@@ -40,15 +40,29 @@ The demo reaches out to a .NET Web API server that delivers Northwind data.  You
 
 You have two choices of Web API server: remote and local.
 
+Toggle between them by changing one line of configuration:
+
+* open *~src/client/app/core/config.js*
+* find these lines
+
+        // Pick ONE.
+        apiHost: //'http://sampleservice.breezejs.com/api/', // remote
+                'http://localhost:58066/breeze/', // local
+* comment and uncomment per your choice
+  * if you picked the "remote" server, make sure that it is accessible (see "**Remote server**" below).
+ 
+  * if you picked the "local" server, run that server first (see "**Local server**" instructions below).
+
+<a name="remoteserver"></a>
 ### Remote server
 
-The demo can talk to an IdeaBlade server at `http://sampleservice.breezejs.com/api/northwind/employees`. The serviceName is `/api/northwind/`.
+The demo can talk to a remote IdeaBlade server at `http://sampleservice.breezejs.com/api/northwind/employees`. The serviceName is `/api/northwind/`.
 
 Here's an example query you can run in a browser.
 
 	http://sampleservice.breezejs.com/api/northwind/employees
 
-
+<a name="localserver"></a>
 ### Local server
 
 To run locally, you'll need a pre-built Breeze DocCode Sample in the sibling *DocCode* sample directory.

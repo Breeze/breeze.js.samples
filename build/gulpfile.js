@@ -11,6 +11,7 @@ var del = require('del');
 var eventStream = require('event-stream');
 
 var gutil = require('gulp-util');
+var filter = require('gulp-filter');
 var flatten = require('gulp-flatten');
 var rename  = require('gulp-rename');
 var zip = require('gulp-zip');
@@ -59,6 +60,11 @@ _sampleSolutionFileNames = _sampleSolutionFileNames.filter(function(item) {
   return item.indexOf('zza') == -1;
 });
 
+/**
+ * List the available gulp tasks
+ */
+gulp.task('help', require('gulp-task-listing'));
+
 gulp.task('breezeClientBuild', function(done) {
   execCommands(['gulp'], { cwd: _clientBuildDir }, done);
 });
@@ -74,12 +80,19 @@ gulp.task('getLibs', ['breezeClientBuild'], function() {
         .pipe(gulp.dest(destDir + 'js.adapters')),
     gulp.src([_clientLabsDir + '*.js', _clientLabsDir + '*.css'])
         .pipe(flatten())
+        .pipe(filter([
+              "*.*",
+              "!b00_breeze.modelLibrary.new-backingstore.js",
+              "!breeze.ajaxrestinterceptor.js",
+              "!breeze.to$q.shim.js",
+              "!ngMidwayTester.js"
+        ]))
         .pipe(gulp.dest(destDir + 'js.labs')),
     gulp.src(_serverLabsDir + '*.cs')
         .pipe(flatten())
         .pipe(gulp.dest(destDir + 'server.labs'))
   );
-  
+
 });
 
 gulp.task('sampleSolutionsUpdateNugets', function(done) {
@@ -226,7 +239,7 @@ function execCommands(cmds, options, cb) {
       }
       if (err && options.shouldThrow) throw err;
       cb(err, stdout, stderr);
-    } 
+    }
   });
 }
 

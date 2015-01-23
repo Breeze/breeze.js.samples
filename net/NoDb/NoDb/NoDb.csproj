@@ -119,7 +119,6 @@
     <Content Include="app\todo.viewmodel.js" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\breeze.intellisense.js" />
     <Content Include="Scripts\breeze.debug.js" />
     <Content Include="Scripts\breeze.min.js" />
     <Content Include="Scripts\breeze.savequeuing.js" />

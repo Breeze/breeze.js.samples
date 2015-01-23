@@ -13,20 +13,20 @@ module.exports = function (config) {
         // list of files / patterns to load in the browser
         files: [
 
-            './node_modules/ng-midway-tester/src/ngMidwayTester.js',
-
             './bower_components/angular/angular.js',
             './bower_components/angular-mocks/angular-mocks.js',
             './bower_components/angular-animate/angular-animate.js',
             './bower_components/angular-route/angular-route.js',
             './bower_components/angular-sanitize/angular-sanitize.js',
 
-            './bower_components/breezejs/breeze.debug.js',
-            './bower_components/breezejs/labs/breeze.angular.js',
-            './bower_components/breezejs/labs/breeze.ajaxPost.js',
-            './bower_components/breezejs/labs/breeze.getEntityGraph.js',
-            './bower_components/breezejs/labs/breeze.metadata-helper.js',
-            './bower_components/breezejs/labs/breeze.savequeuing.js',
+            './bower_components/bardjs/dist/bard.js',
+
+            './bower_components/breeze-client/build/breeze.debug.js',
+            './bower_components/breeze-client/build/adapters/breeze.bridge.angular.js',
+            './bower_components/breeze-client-labs/breeze.ajaxPost.js',
+            './bower_components/breeze-client-labs/breeze.getEntityGraph.js',
+            './bower_components/breeze-client-labs/breeze.metadata-helper.js',
+            './bower_components/breeze-client-labs/breeze.savequeuing.js',
 
             './bower_components/moment/moment.js',
 

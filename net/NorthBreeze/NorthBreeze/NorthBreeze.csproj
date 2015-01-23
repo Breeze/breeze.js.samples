@@ -38,7 +38,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="Scripts\breeze.intellisense.js" />
     <Content Include="App\app.js" />
     <Content Include="App\controllers.js" />
     <Content Include="App\dataservice.js" />

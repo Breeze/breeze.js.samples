@@ -3,6 +3,8 @@
 describe('entityExtension:', function() {
     'use strict';
 
+    ash.serverIsRunningPrecondition();
+
     var EntityManager = breeze.EntityManager;
     var EntityQuery = breeze.EntityQuery;
     var EntityState = breeze.EntityState;
@@ -14,7 +16,7 @@ describe('entityExtension:', function() {
     beforeEach(function (done) {
         if (!moduleMetadataStore.isEmpty()) {
             done(); // got it already
-            return; 
+            return;
         }
         breeze.Q.all([
             moduleMetadataStore.fetchMetadata(northwindService),
@@ -91,7 +93,7 @@ describe('entityExtension:', function() {
         assertFooPropertyDefined(store, false);
 
         var Customer = function () {
-            this.foo = 42; 
+            this.foo = 42;
         };
         store.registerEntityTypeCtor('Customer', Customer);
         assertFooPropertyDefined(store, true);
@@ -104,7 +106,7 @@ describe('entityExtension:', function() {
 
     /*********************************************************
     * can define unmapped 'foo' property directly on EntityType
-    * Fails until defect #2646 is cured    
+    * Fails until defect #2646 is cured
     *********************************************************/
     it.skip("can define unmapped 'foo' property directly on EntityType D#2646", function () {
         var store = cloneModuleMetadataStore();
@@ -133,7 +135,7 @@ describe('entityExtension:', function() {
         // Add unmapped 'foo' property via its custom constructor
         var store = cloneModuleMetadataStore();
         var Customer = function() {
-            this.foo = 42; 
+            this.foo = 42;
         };
         store.registerEntityTypeCtor('Customer', Customer);
         assertFooPropertyDefined(store, true);
@@ -161,7 +163,7 @@ describe('entityExtension:', function() {
 
         expect(results.length).to.equal( 1, "cache query returned exactly 1 result.");
         var queriedCust = results[0];
-        expect(queriedCust.foo).to.equal(fooValue, 
+        expect(queriedCust.foo).to.equal(fooValue,
              "cache query returned customer '{0}' with foo==={1}"
                 .format(queriedCust.CompanyName, queriedCust.foo));
     });
@@ -188,12 +190,12 @@ describe('entityExtension:', function() {
 
         cust.foo = "funky";
         var errs = cust.entityAspect.getValidationErrors(fooProp);
-        expect(errs).to.have.length(0, 
+        expect(errs).to.have.length(0,
             "should not have validation errors about 'foo'.");
 
         cust.foo = "funky and fresh";
         errs = cust.entityAspect.getValidationErrors(fooProp);
-        expect(errs).to.have.length(1, 
+        expect(errs).to.have.length(1,
             "should have 1 validation error about 'foo'.");
 
         var errMsg = errs[0].errorMessage;
@@ -276,7 +278,7 @@ describe('entityExtension:', function() {
         var originalTime = new Date(2013, 0, 1);
         var cust = manager.createEntity('Customer', {
               CompanyName: "Acme",
-              lastTouched: originalTime 
+              lastTouched: originalTime
           }, EntityState.Unchanged);
 
 
@@ -288,7 +290,7 @@ describe('entityExtension:', function() {
         cust.entityAspect.rejectChanges();
         //manager.rejectChanges(); // would have same effect. Obviously less granular
 
-        expect(cust.CompanyName).to.equal('Acme', 
+        expect(cust.CompanyName).to.equal('Acme',
             "'CompanyName' data property should be rolled back to 'Acme'");
 
         expect(cust.lastTouched).to.equal(originalTime,
@@ -303,7 +305,7 @@ describe('entityExtension:', function() {
     it("can re-define a mapped data property within constructor", function () {
 
         var CustomerCtor = function () {
-            this.CompanyName = 'Acme'; 
+            this.CompanyName = 'Acme';
         };
 
         var store = cloneModuleMetadataStore();
@@ -343,7 +345,7 @@ describe('entityExtension:', function() {
         // 'foo' is a function; fns are NOT listed as unmapped properties
         // The Breeze customerType knows nothing about it.
         var propInfo = customerType.getProperty("foo");
-        expect(propInfo).to.equal(null, 
+        expect(propInfo).to.equal(null,
             "'foo' should be unknown to the customer type");
     });
 
@@ -412,7 +414,7 @@ describe('entityExtension:', function() {
 
         var cust2 = em.importEntities(exported).entities[0];
 
-        // value still 42 because imported with "MergeStrategy.PreserveChanges" and 
+        // value still 42 because imported with "MergeStrategy.PreserveChanges" and
         // the cached cust is in the 'Added' state
         expect(cust2.foo).to.equal(42, "imported 'cust2.foo' should return 42 after import");
     });
@@ -495,7 +497,7 @@ describe('entityExtension:', function() {
 
         // The Breeze customerType knows nothing about it.
         var propInfo = customerType.getProperty('foo');
-        expect(propInfo).to.equal(null, 
+        expect(propInfo).to.equal(null,
             "'foo' property should be unknown to the customer type");
     });
 
@@ -541,9 +543,9 @@ describe('entityExtension:', function() {
 
         // Get from cache by key (either of two ways)
         //var emp2 = em2.getEntityByKey(emp.entityAspect.getKey());
-        var emp2 = em2.getEntityByKey('Employee', 42); 
+        var emp2 = em2.getEntityByKey('Employee', 42);
 
-        expect(emp2).to.not.equal(null, 
+        expect(emp2).to.not.equal(null,
             "should find imported emp2 with id==42");
 
         expect(emp2).has.property('foo').that.equal('Foo Test',
@@ -725,7 +727,7 @@ describe('entityExtension:', function() {
     * If key is store-generated and the given key value is the default value
     * the default value is replaced by client-side temporary key generator
     *********************************************************/
-    it("store-gen keys w/ default values are re-set by key generator upon add to manager", 
+    it("store-gen keys w/ default values are re-set by key generator upon add to manager",
         function () {
             var em = newEm();
 
@@ -756,7 +758,7 @@ describe('entityExtension:', function() {
             expect(fooProp && fooProp.isUnmapped).to.equal(true,
                 "'foo' property should be defined as unmapped property after registration.");
         } else {
-            expect(!fooProp).to.equal(true, 
+            expect(!fooProp).to.equal(true,
                 "'foo' property should NOT be defined before registration.");
         }
         return fooProp;
