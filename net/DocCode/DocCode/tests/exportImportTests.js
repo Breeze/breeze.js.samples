@@ -158,7 +158,46 @@
         equal(copyCount, expected.unchangedCount,
             "should have restored expected number of unchanged entities");
     });
-    /*********************************************************
+
+  /*********************************************************
+  * Local creation of entity graph does not set `entity.entityAspect.isNavigationPropertyLoaded`
+  *********************************************************/
+    test("Local creation of entity graph does NOT set `entity.entityAspect.isNavigationPropertyLoaded`", function () {
+      expect(2);
+      var em1 = newEm();
+      // priming adds entities to em1 locally, not by query
+      testData.primeTheCache(em1);
+      var cust = em1.getEntities('Customer')[0];
+      var orders = cust.getProperty('Orders');
+      ok(orders.length > 0, '1st cached Customer should have orders');
+      ok(!cust.entityAspect.isNavigationPropertyLoaded('Orders'),
+        '`cust.Orders` property should NOT be loaded');
+    });
+
+  /*********************************************************
+  * Import of entity graph sets `entity.entityAspect.isNavigationPropertyLoaded`
+  * see https://github.com/Breeze/breeze.js/issues/67
+  *********************************************************/
+    test("Import of entity graph does NOT set `entity.entityAspect.isNavigationPropertyLoaded`", function () {
+      expect(2);
+      var em1 = newEm();
+      testData.primeTheCache(em1);
+      var c = em1.getEntities('Customer')[0];
+      var os = c.getProperty('Orders');
+
+      // export/import just this one Customer/Order graph
+      var em2 = em1.createEmptyCopy();
+      var exportData = em1.exportEntities(os.concat(c), { includeMetadata: false });
+      em2.importEntities(exportData);
+
+      var cust = em2.getEntities('Customer')[0];
+      var orders = cust.getProperty('Orders');
+      ok(orders.length > 0, 'imported Customer should have orders');
+      ok(!cust.entityAspect.isNavigationPropertyLoaded('Orders'),
+        '`cust.Orders` property should NOT be loaded');
+    });
+
+  /*********************************************************
    * import of changed entity into empty cache preserves originalValues
    * and therefore can reject changes to restore its original state
    * Failed in v.1.4.6 as reported in defect #2561. Fixed.
@@ -171,7 +210,7 @@
             // Suppose we are editing a customer
             var cust = em.createEntity("Customer", {
                 CustomerID: custId,
-                CompanyName: "Foo",
+                CompanyName: "Foo"
             }, EntityState.Unchanged);
 
             // We change his CompanyName
@@ -354,13 +393,13 @@
         var cust1Id = breeze.core.getUuid();
         var cust1a = em1.createEntity("Customer", {
             CustomerID: cust1Id,
-            CompanyName: "Foo"
+            CompanyName: 'Foo'
         }, EntityState.Unchanged);
 
         // As if em2 queried for same customer
         var cust1b = em2.createEntity("Customer", {
             CustomerID: cust1Id,
-            CompanyName: "Foo"
+            CompanyName: 'Foo'
         }, EntityState.Unchanged);
 
         // then the user changed it but hasn't saved.
@@ -525,8 +564,8 @@
                 var imported = em2.importEntities(exported, {
                     metadataVersionFn: importValidationFn
                 });
-                ok(imported.entities.length == 1 &&
-                   imported.entities[0].CustomerID() == cust.CustomerID(),
+                ok(imported.entities.length === 1 &&
+                   imported.entities[0].CustomerID() === cust.CustomerID(),
                    "imported the Customer successfully");
             } catch(e) {
                 ok(false, "import threw exception, '{0}'.".format(e.message));
