@@ -172,6 +172,7 @@
     <Content Include="tests\metadataOnClientTests.js" />
     <Content Include="tests\multiControllerTests.js" />
     <Content Include="tests\helpers\northwindDtoMetadata.js" />
+    <Content Include="tests\namingConventionTests.js" />
     <Content Include="tests\odataTests.js" />
     <Content Include="tests\saveNorthwindTests.js" />
     <Content Include="tests\AjaxAdapterTestInterceptorTests.js" />

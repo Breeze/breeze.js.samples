@@ -3,7 +3,7 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
     var MetadataStore = breeze.MetadataStore;
 
@@ -52,14 +52,14 @@
             // THIS IS WHAT I WANT TO VERIFY
             var employeeType = em.metadataStore.getEntityType('Employee');
             var navProp = employeeType.getProperty('EmployeeTerritories');
-            
+
             // should be the name of the FK property on the child EmployeeTerritory type
             var fkPropName = navProp.invForeignKeyNames[0];
 
             equal(fkPropName, "EmpID", // Expecting EmployeeTerritory.EmpID
                 "EmployeeTerritory FK for parent Employee should be 'EmpID'");
         }
-        
+
         function queryFail(error) {
             // If this fails with "DirectReports is not a function"
             // know that this is a Breeze failure not EF modeling
@@ -102,29 +102,29 @@
 
     // Populate the northwindMetadataStore with Northwind service metadata
     function northwindMetadataStoreSetup() {
-               
+
         if (!northwindMetadataStore.isEmpty()) return; // got it already
         //loadMetadataFromServer();
         loadMetadataFromScript();
 
-        function loadMetadataFromServer() {
-            stop(); // going async for metadata ...
-            northwindMetadataStore.fetchMetadata(northwindService)
-                .then(assertCanGetTypeFromMetadata)
-                .fail(handleFail)
-                .fin(start);
-        }
+        //function loadMetadataFromServer() {
+        //    stop(); // going async for metadata ...
+        //    northwindMetadataStore.fetchMetadata(northwindService)
+        //        .then(assertCanGetTypeFromMetadata)
+        //        .fail(handleFail)
+        //        .fin(start);
+        //}
 
         function loadMetadataFromScript() {
             testFns.importCsdlMetadata(northwindMetadataStore, northwindMetadata);
-            
+
             // Associate these metadata data with the Northwind service
             northwindMetadataStore.addDataService(
                 new breeze.DataService({ serviceName: northwindService }));
-            
+
             assertCanGetTypeFromMetadata();
         }
-        
+
         function assertCanGetTypeFromMetadata() {
             customerType = northwindMetadataStore.getEntityType("Customer", true);
             if (!customerType) {
@@ -132,7 +132,7 @@
             }
         }
     }
-    
+
     /*********************************************************
     * Customer has no entity level validators
     *********************************************************/
@@ -141,7 +141,7 @@
         var validators = customerType.validators, valCount = validators.length;
         ok(!valCount, "customer type shouldn't have entity validators; count = " + valCount);
     });
-    
+
     /*********************************************************
     * Can export and import a metadataStore
     *********************************************************/
@@ -190,9 +190,9 @@
 
         var testStore = clonenorthwindMetadataStore();
 
-        stop(); // going async 
+        stop(); // going async
         // get Todos service metadata
-        testStore.fetchMetadata(todosServiceName) 
+        testStore.fetchMetadata(todosServiceName)
 
         .then(function () {
 
@@ -206,7 +206,7 @@
         .fail(handleFail)
         .fin(start);
     });
-  
+
     /*********************************************************
     * Can run two queries in parallel for fresh EM w/ empty metadataStore
     * Proves that simultaneous "first time" queries that can both request metadata
@@ -261,12 +261,12 @@
 
         function assertResultsAreEntitiesInCache(data) {
             var user = data.results[0];
-            
+
             if (!user.entityType) {
                 ok(false, "1st result should be an 'EntityType' but is not");
                 return; // must leave, else qunit infinite loop
             }
-        
+
             ok (user.entityType === userPartialType,
                 "1st result should be an 'UserPartial' entity type");
 
@@ -279,7 +279,7 @@
         }
 
     });
-    
+
     function defineUserPartialType(metadataStore) {
         var namespace = metadataStore.getEntityType('User').namespace;
         var type = new breeze.EntityType({
@@ -290,7 +290,7 @@
         var id = new DP({
             nameOnServer: 'Id',
             dataType: breeze.DataType.Int32,
-            isPartOfKey: true,
+            isPartOfKey: true
         });
         type.addProperty(id);
         type.addProperty(new DP({ nameOnServer: 'FirstName' }));
@@ -302,7 +302,7 @@
         return type;
     }
     /*********************************************************
-    * Can project into a client-defined, made-up type 
+    * Can project into a client-defined, made-up type
     *********************************************************/
     test("can project into the 'EmployeePartial' client-defined, made-up type", function () {
         expect(4);
@@ -315,10 +315,10 @@
             .select('EmployeeID, FirstName, LastName, Orders')
             .toType('EmployeePartial')
             .using(em);
-        
+
         stop(); // going async
         query.execute().then(success).fail(handleFail).fin(start);
-        
+
         function success(data) {
             var emp = data.results[0];
             ok(emp, "should get a projected 'Employee'");
@@ -353,139 +353,42 @@
         return type;
     }
 
-    function defineEmployeePartialTypeOld(metadataStore) {
-        var empType = metadataStore.getEntityType('Employee');
+    //function defineEmployeePartialTypeOld(metadataStore) {
+    //    var empType = metadataStore.getEntityType('Employee');
 
-        var type = new breeze.EntityType({
-            shortName: 'EmployeePartial',
-            namespace: empType.namespace
-        });
-        var DP = breeze.DataProperty;
-        var idProperty = new DP({
-            nameOnServer: 'EmployeeID',
-            dataType: breeze.DataType.Int32,
-            isPartOfKey: true,
-        });
-        type.addProperty(idProperty);
-        type.addProperty(new DP({ nameOnServer: 'FirstName' }));
-        type.addProperty(new DP({ nameOnServer: 'LastName' }));
+    //    var type = new breeze.EntityType({
+    //        shortName: 'EmployeePartial',
+    //        namespace: empType.namespace
+    //    });
+    //    var DP = breeze.DataProperty;
+    //    var idProperty = new DP({
+    //        nameOnServer: 'EmployeeID',
+    //        dataType: breeze.DataType.Int32,
+    //        isPartOfKey: true
+    //    });
+    //    type.addProperty(idProperty);
+    //    type.addProperty(new DP({ nameOnServer: 'FirstName' }));
+    //    type.addProperty(new DP({ nameOnServer: 'LastName' }));
 
-        // Get the navigation property from Employee to Orders
-        var assoc = empType.getNavigationProperty('Orders');
+    //    // Get the navigation property from Employee to Orders
+    //    var assoc = empType.getNavigationProperty('Orders');
 
-        type.addProperty(new breeze.NavigationProperty({
-            nameOnServer: 'Orders'
-            , isScalar: false  // it's a collection
-            , entityTypeName: assoc.entityType.name
-            , foreignKeyNames: assoc.inverse.foreignKeyNames
-            , associationName: assoc.associationName
-        }));
+    //    type.addProperty(new breeze.NavigationProperty({
+    //        nameOnServer: 'Orders'
+    //        , isScalar: false  // it's a collection
+    //        , entityTypeName: assoc.entityType.name
+    //        , foreignKeyNames: assoc.inverse.foreignKeyNames
+    //        , associationName: assoc.associationName
+    //    }));
 
-        metadataStore.addEntityType(type);
-        return type;
-    }
-
-    //#endregion
-
-    //#region NamingConvention Tests
-    
-    module("metadataTests (NamingConvention)",
-        { setup: namingConventionMetadataStoreSetup });
-
-    var camelCaseMetadataStore;
-
-    // Populate the namingConventionMetadataStore with Northwind service metadata
-    // Use the camelCase naming convention shipped in Breeze
-    // N.B.: Typically would set the naming convention one for all application managers
-    //       e.g. breeze.NamingConvention.camelCase.setAsDefault();
-    //       Not doing so in these tests in order to avoid cross-test pollution
-    function namingConventionMetadataStoreSetup() {
-        
-        if (camelCaseMetadataStore) return; // got it already
-
-        camelCaseMetadataStore =
-            // use the camelCase naming convention shipped in Breeze
-            new MetadataStore({ namingConvention: breeze.NamingConvention.camelCase });
-
-        var fetchMetadataPromises =
-            [camelCaseMetadataStore.fetchMetadata(northwindService)];
-        
-        if (northwindMetadataStore.isEmpty()) {
-            // don't have default metadataStore; get it too
-            fetchMetadataPromises.push(
-                northwindMetadataStore.fetchMetadata(northwindService));
-        }
-        
-        stop(); // going async for metadata ...
-        Q.all(fetchMetadataPromises) // wait for all metadata fetches to finish
-        .fail(handleFail)
-        .fin(start);
-    }
-
-    // A naming convention that prepends an underscore (_) to every property name.
-    var underscoreNamingConvention = new breeze.NamingConvention({
-        serverPropertyNameToClient: function(serverPropertyName) {
-            return "_" + serverPropertyName;
-        },
-        clientPropertyNameToServer: function(clientPropertyName) {
-            return clientPropertyName.substr(1);
-        }            
-    });
-    /*********************************************************
-    * camelCasing NamingConvention applies to entity creation
-    *********************************************************/
-    test("camelCasing NamingConvention applies to entity creation", function () {
-        expect(4);
-        var defaultCustomerType = northwindMetadataStore.getEntityType("Customer");
-        var defaultCust = defaultCustomerType.createEntity();
-        
-        ok(defaultCust["CompanyName"],
-            "'CompanyName' property should be defined for Customer in default MetadataStore");
-        ok(!defaultCust["companyName"],
-            "'companyName' property should NOT be defined for Customer in default MetadataStore");
-        
-        var camelCustomerType = camelCaseMetadataStore.getEntityType("Customer");
-        var camelCust = camelCustomerType.createEntity();
-        
-        ok(!camelCust["CompanyName"],
-            "'CompanyName' property should NOT be defined for Customer in camelCaseMetadataStore");
-        ok(camelCust["companyName"],
-            "'companyName' property should be defined for Customer in camelCaseMetadataStore");
-
-    });
-    
-    /*********************************************************
-    * query with camelCase
-    *********************************************************/
-    test("query with camelCasing NamingConvention", function () {
-        expect(1);
-        var em = new breeze.EntityManager(
-            {
-                serviceName: northwindService,
-                metadataStore: camelCaseMetadataStore
-            });
-
-        var query = breeze.EntityQuery.from("Customers")
-            // notice using camelCase property name in predicate!
-            .where("companyName", "startsWith", "A");
-
-        stop();
-        em.executeQuery(query)
-            .then(function (data) {
-                ok(data.results.length > 0,
-                    "should have 'camelCase companyName' query results");
-            })
-            .fail(handleFail)
-            .fin(start);
-        //testFns.verifyQuery(em, query, "camelCase companyName query");
-    });
+    //    metadataStore.addEntityType(type);
+    //    return type;
+    //}
 
     //#endregion
 
-    //#region Basic and NamingConvention Test Helpers
-    /*********************************************************
-    * Basic and NamingConvention Test Helpers
-    *********************************************************/
+    //#region Test Helpers
+
     function clonenorthwindMetadataStore() {
         return cloneStore(northwindMetadataStore);
     }
@@ -500,10 +403,6 @@
             serviceName: northwindService,
             metadataStore: metadataStore || northwindMetadataStore
         });
-    }
-
-    function _hasOwnProperty(obj, key) {
-        return Object.prototype.hasOwnProperty.call(obj, key)
     }
     //#endregion
 
