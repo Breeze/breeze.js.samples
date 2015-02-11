@@ -130,6 +130,7 @@
     <Content Include="Scripts\breeze.getEntityGraph.js" />
     <Content Include="Scripts\breeze.metadata-helper.js" />
     <Content Include="Scripts\breeze.min.js" />
+    <Content Include="Scripts\breeze.namingConventionWithDictionary.js" />
     <Content Include="Scripts\breeze.savequeuing.js" />
     <Content Include="Scripts\datajs-1.1.2.js" />
     <Content Include="Scripts\datajs-1.1.2.min.js">

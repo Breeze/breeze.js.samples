@@ -17,8 +17,9 @@ echo Copying breeze client files into the project
 XCOPY "%1..\..\..\build\libs\js\breeze.min.js" "%1Scripts" /Y
 XCOPY "%1..\..\..\build\libs\js\breeze.debug.js" "%1Scripts" /Y
 XCOPY "%1..\..\..\build\libs\js.labs\breeze.ajaxrestinterceptor.js" "%1Scripts" /Y
-XCOPY "%1..\..\..\build\libs\js.labs\breeze.metadata-helper.js" "%1Scripts" /Y
 XCOPY "%1..\..\..\build\libs\js.labs\breeze.getEntityGraph.js" "%1Scripts" /Y
+XCOPY "%1..\..\..\build\libs\js.labs\breeze.metadata-helper.js" "%1Scripts" /Y
+XCOPY "%1..\..\..\build\libs\js.labs\breeze.namingConventionWithDictionary.js" "%1Scripts" /Y
 XCOPY "%1..\..\..\build\libs\js.labs\breeze.savequeuing.js" "%1Scripts" /Y
 
 @echo off

@@ -78,8 +78,14 @@
       'Order:#Northwind.Models': { freightCost: 'Freight' },
       undefined: { foo: 'Bar' }  // translation for expected anonymous type property
     };
-    return new NamingConventionWithDictionary('northwind',
-      breeze.NamingConvention.camelCase, clientToServerDictionary);
+
+    return new breeze.NamingConvention.NamingConventionWithDictionary(
+      'northwind', breeze.NamingConvention.camelCase, clientToServerDictionary);
+
+    // The above comes from Breeze Labs; below is for the version defined in this file
+    // TODO: Remove these lines soon and just use the Breeze Labs version
+    //return new NamingConventionWithDictionary('northwind',
+    //  breeze.NamingConvention.camelCase, clientToServerDictionary);
   }
   //#endregion
 
@@ -271,6 +277,11 @@
     );
   }
 
+  /** NamingConventionWithDictionary NOW IN BREEZE.LABS
+   *  https://github.com/Breeze/breeze.js.labs/blob/master/breeze.namingConventionWithDictionary.js
+   *  Will be removed from this suite shortly
+   **/
+
   /**
   NamingConvention that extends another {{#crossLink "NamingConvention"}}{{/crossLink}}
   by attempting first to translate specific Entity property names using a dictionary.
@@ -288,7 +299,7 @@
       'Order:#Northwind.Models':    {freightCost: 'Freight'},
       undefined: {foo: 'Bar'}  // translation for expected anonymous type property
     };
-    return new NamingConventionWithDictionary('northwind',
+    var convention = new NamingConventionWithDictionary('northwind',
         breeze.NamingConvention.camelCase, clientToServerDictionary);
 
   @method <ctor> NamingConventionWithDictionary
