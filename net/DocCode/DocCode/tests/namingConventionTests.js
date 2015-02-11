@@ -415,8 +415,8 @@
 
     return new breeze.NamingConvention({
       name: 'underscoreCamelCase',
-      serverPropertyNameToClient: serverPropertyNameToClient,
-      clientPropertyNameToServer: clientPropertyNameToServer
+      clientPropertyNameToServer: clientPropertyNameToServer,
+      serverPropertyNameToClient: serverPropertyNameToClient
     });
 
     function clientPropertyNameToServer(propertyName) {
