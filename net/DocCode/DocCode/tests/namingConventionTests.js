@@ -74,7 +74,7 @@
   // e.g.  Client: 'Customer.name' <--> Server: 'Customer.CompanyName'
   function NorthwindNamingConvention() {
     var clientToServerDictionary = {
-      'Customer:#Northwind.Models': {name:'CompanyName', zip: 'PostalCode'},
+      'Customer:#Northwind.Models': {customerName: 'CompanyName', zip: 'PostalCode'},
       'Order:#Northwind.Models': { freightCost: 'Freight' },
       undefined: { foo: 'Bar' }  // translation for expected anonymous type property
     };
@@ -131,8 +131,8 @@
 
     ok(!customer['companyName'],
         'camelCase "Customer.companyName" property should NOT' + suffix);
-    ok(customer['name'],
-        'lookup "Customer.name" property should' + suffix);
+    ok(customer['customerName'],
+        'lookup "Customer.customerName" property should' + suffix);
     ok(customer['zip'],
         'lookup "Customer.zip" property should' + suffix);
     ok(customer['customerID'],
@@ -234,16 +234,16 @@
     // Resource name is unaffected by convention
     var query = breeze.EntityQuery.from('Customers')
         // use underscore spelling for property names in where, orderby, and expand
-        .where('name', 'startsWith', 'A')
-        .orderBy('name')
+        .where('customerName', 'startsWith', 'A')
+        .orderBy('customerName')
         .expand('orders');
 
     em.executeQuery(query)
       .then(function (data) {
         var customer = data.results[0];
         if (customer) {
-          ok(customer['name'],
-            'should return customers with a lookup "name" property');
+          ok(customer['customerName'],
+            'should return customers with a lookup "customerName" property');
           ok(customer['zip'],
             'and with a lookup "zip" property');
 
@@ -284,7 +284,7 @@
   NamingConventionWithDictionary constructor
   @example
     var clientToServerDictionary = {
-      'Customer:#Northwind.Models': {name: 'CompanyName', zip: 'PostalCode'},
+      'Customer:#Northwind.Models': {customerName: 'CompanyName', zip: 'PostalCode'},
       'Order:#Northwind.Models':    {freightCost: 'Freight'},
       undefined: {foo: 'Bar'}  // translation for expected anonymous type property
     };
