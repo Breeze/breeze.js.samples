@@ -340,4 +340,163 @@
   }
 
   //#endregion
+
+  //#region UnderscoreCamelCaseConvention Tests
+  // Described in http://www.getbreezenow.com/documentation/namingconvention
+
+  module('namingConvention tests (UnderscoreCamelCaseConvention)');
+
+  function UnderscoreCamelCaseConvention() {
+
+    return new breeze.NamingConvention({
+      name: 'underscoreCamelCase',
+      serverPropertyNameToClient: serverPropertyNameToClient,
+      clientPropertyNameToServer: clientPropertyNameToServer
+    });
+
+    function clientPropertyNameToServer(propertyName) {
+      return propertyName.replace(/[A-Z]/g, upperToUnderscoreLower);
+    }
+
+    function upperToUnderscoreLower(match) {
+      return '_' + match.toLowerCase();
+    }
+
+    function serverPropertyNameToClient(propertyName) {
+      return propertyName.replace(/_[a-z]/g, underscoreLowerToUpper);
+    }
+
+    function underscoreLowerToUpper(match) {
+      console.log(arguments);
+      console.log(match);
+      return match[1].toUpperCase();
+    }
+  }
+
+  // Don't have a server for this so we'll just test the convention itself
+  var convention = new UnderscoreCamelCaseConvention();
+
+  test('should translate multi-part underscore/lower server name to client camelCase', function () {
+    var src = 'a_can_of_worms';
+    var name = convention.serverPropertyNameToClient(src);
+    equal(name, 'aCanOfWorms', 'should translate server "'+src+'" to camelcase client form; was ' + name);
+  });
+
+  test('should translate multi-part client camelCase to underscore/lower server name', function () {
+    var src = 'aCanOfWorms';
+    var name = convention.clientPropertyNameToServer(src);
+    equal(name, 'a_can_of_worms', 'should translate client "' + src + '"  to "underscore lower" server form; was ' + name);
+  });
+
+  test('should translate one-part underscore/lower server name to client camelCase', function () {
+    var src = 'worms';
+    var name = convention.serverPropertyNameToClient(src);
+    equal(name, 'worms', 'should translate server "' + src + '" to camelcase client form; was ' + name);
+  });
+
+  test('should translate one-part client camelCase to underscore/lower server name', function () {
+    var src = 'worms';
+    var name = convention.clientPropertyNameToServer(src);
+    equal(name, 'worms', 'should translate client "' + src + '" to "underscore lower" server form; was ' + name);
+  });
+
+  test('can make it the default NamingConvention', function () {
+    expect(2);
+    var orig = breeze.NamingConvention.defaultInstance;
+
+    var cvn = new UnderscoreCamelCaseConvention().setAsDefault();
+    var def = breeze.NamingConvention.defaultInstance.name;
+    equal(def, cvn.name, 'new default is ' + def);
+
+    orig.setAsDefault();
+    def = breeze.NamingConvention.defaultInstance.name;
+    equal(def, orig.name, 'restored default is ' +def);
+  });
+
+  // !!! Watch out for these unexpected cases !!!
+  test('should translate lead "_" in server name to client PascalCase', function () {
+    var src = '_worms';
+    var name = convention.serverPropertyNameToClient(src);
+    equal(name, 'Worms', 'should translate server "' + src + '" to PascalCase client form; was ' + name);
+  });
+
+  test('should lead with "_" if translate PascalClient client to server', function () {
+    var src = 'Worms';
+    var name = convention.clientPropertyNameToServer(src);
+    equal(name, '_worms', 'should translate client "' + src + '" to "underscore lower" server form; was ' + name);
+  });
+
+  test('should not translate underscore/upper "First_Name" from server', function () {
+    var src = 'First_Name';
+    var name = convention.serverPropertyNameToClient(src);
+    equal(name, 'First_Name', 'translated server: ' + src + '" to client: ' + name);
+  });
+
+  test('should be confused by underscore/upper "Can_of_Worms" from server', function () {
+    var src = 'Can_of_Worms';
+    var name = convention.serverPropertyNameToClient(src);
+    equal(name, 'CanOf_Worms', 'translated server: ' + src + '" to client: ' + name);
+  });
+  //#endregion
+
+  //#region Other UNTESTED NamingConventions mentioned in the documentation
+  // Described in http://www.getbreezenow.com/documentation/namingconvention
+
+  // ReSharper disable UnusedLocals
+  function BooleanNamingConvention() {
+    return new breeze.NamingConvention({
+      name: 'booleanNamingConvention',
+      serverPropertyNameToClient: serverPropertyNameToClient,
+      clientPropertyNameToServer: clientPropertyNameToServer
+    });
+
+    function clientPropertyNameToServer(clientPropertyName, prop) {
+      if (prop && prop.isDataProperty && prop.dataType === DataType.Boolean) {
+        return clientPropertyName.substr(2);
+      } else {
+        return clientPropertyName.substr(0, 1).toUpperCase() + clientPropertyName.substr(1);
+      }
+    }
+
+    function serverPropertyNameToClient(serverPropertyName, prop) {
+      if (prop && prop.isDataProperty && prop.dataType === DataType.Boolean) {
+        return 'is' + serverPropertyName;
+      } else {
+        return serverPropertyName.substr(0, 1).toLowerCase() + serverPropertyName.substr(1);
+      }
+    }
+  }
+
+  // Removes underscores from server property names
+  // Remembers them in a private dictionary so it can restore them
+  // when translating from client name to server name
+  // Warning: use only with metadata loaded directly from server
+  function NoUnderscoreConvention() {
+
+    var _underscoredNames = {}; // hash of every translated server name
+
+    return new NamingConvention({
+      name: 'noUnderscore',
+      clientPropertyNameToServer: clientPropertyNameToServer,
+      serverPropertyNameToClient: serverPropertyNameToClient
+    });
+
+    function clientPropertyNameToServer(clientPropertyName) {
+      var serverName = _underscoredNames[clientPropertyName];
+      return serverName || clientPropertyName;
+    }
+
+    function serverPropertyNameToClient(serverPropertyName) {
+      if (serverPropertyName.indexOf('_') > -1) {
+        var clientName = serverPropertyName.replace(/_/g, ''); // remove all _
+        // remember this substitution
+        _underscoredNames[clientName] = serverPropertyName;
+        return clientName;
+      }
+      return serverPropertyName;
+    }
+  }
+
+  //#endregion
+
 })(docCode.testFns, docCode.northwindMetadata);
