@@ -432,8 +432,6 @@
     }
 
     function underscoreLowerToUpper(match) {
-      console.log(arguments);
-      console.log(match);
       return match[1].toUpperCase();
     }
   }
