@@ -75,7 +75,8 @@
   function NorthwindNamingConvention() {
     var clientToServerDictionary = {
       'Customer:#Northwind.Models': {name:'CompanyName', zip: 'PostalCode'},
-      'Order:#Northwind.Models':    {freightCost:'Freight'}
+      'Order:#Northwind.Models': { freightCost: 'Freight' },
+      undefined: { foo: 'Bar' }  // translation for expected anonymous type property
     };
     return new NamingConventionWithDictionary('northwind',
       breeze.NamingConvention.camelCase, clientToServerDictionary);
@@ -284,7 +285,8 @@
   @example
     var clientToServerDictionary = {
       'Customer:#Northwind.Models': {name: 'CompanyName', zip: 'PostalCode'},
-      'Order:#Northwind.Models':    {freightCost: 'Freight'}
+      'Order:#Northwind.Models':    {freightCost: 'Freight'},
+      undefined: {foo: 'Bar'}  // translation for expected anonymous type property
     };
     return new NamingConventionWithDictionary('northwind',
         breeze.NamingConvention.camelCase, clientToServerDictionary);
@@ -308,13 +310,15 @@
     });
 
     function clientPropertyNameToServer(name, propDef) {
-        var props = clientToServerDictionary[propDef.parentType.name];
+        var typeName = propDef && propDef.parentType && propDef.parentType.name;
+        var props = clientToServerDictionary[typeName || undefined];
         var newName = props && props[name];
         return newName || sourceConvention.clientPropertyNameToServer(name, propDef);
     }
 
     function serverPropertyNameToClient(name, propDef) {
-      var props = serverToClientDictionary[propDef.parentType.name];
+      var typeName = propDef && propDef.parentType && propDef.parentType.name;
+      var props = serverToClientDictionary[typeName || undefined];
       var newName = props && props[name];
       return newName || sourceConvention.serverPropertyNameToClient(name, propDef);
     }
@@ -340,6 +344,67 @@
   }
 
   //#endregion
+
+  //#region Anonymous type tests
+  /*********************************************************
+  * Anonymous type tests: property name translation when no property definition available
+  *********************************************************/
+  (function () {
+    var convention, nameOnClient, nameOnServer;
+    var cmsg = 'nameOnClient should be "{0}" for server prop "{1}"';
+    var smsg = 'nameOnServer should be "{1}" for client prop "{0}"';
+
+    test('"none" NamingConvention works for anonymous type', function () {
+      expect(2);
+      convention = breeze.NamingConvention.none;
+
+      nameOnClient = convention.serverPropertyNameToClient('foo');
+      equal(nameOnClient, 'foo', cmsg.format('foo', 'foo'));
+
+      nameOnServer = convention.clientPropertyNameToServer('foo');
+      equal(nameOnServer, 'foo', smsg.format('foo', 'foo'));
+    });
+
+    test('"camelCase" NamingConvention works for anonymous type', function () {
+      expect(2);
+      convention = breeze.NamingConvention.camelCase;
+
+      nameOnClient = convention.serverPropertyNameToClient('Foo');
+      equal(nameOnClient, 'foo', cmsg.format('foo', 'Foo'));
+
+      nameOnServer = convention.clientPropertyNameToServer('foo');
+      equal(nameOnServer, 'Foo', smsg.format('foo', 'Foo'));
+    });
+
+    test('"underscore" NamingConvention works for anonymous type', function () {
+      expect(2);
+      convention = new UnderscoreNamingConvention();
+
+      nameOnClient = convention.serverPropertyNameToClient('Foo');
+      equal(nameOnClient, '_Foo', cmsg.format('_Foo', 'Foo'));
+
+      nameOnServer = convention.clientPropertyNameToServer('_Foo');
+      equal(nameOnServer, 'Foo', smsg.format('_Foo', 'Foo'));
+    });
+
+    test('"northwind" NamingConvention (camelCase extended with dictionary) works for anonymous type', function () {
+      expect(4);
+      convention = new NorthwindNamingConvention();
+
+      nameOnClient = convention.serverPropertyNameToClient('Bar');
+      equal(nameOnClient, 'foo', cmsg.format('foo', 'Bar'));
+
+      nameOnServer = convention.clientPropertyNameToServer('foo');
+      equal(nameOnServer, 'Bar', smsg.format('foo', 'Bar'));
+
+      nameOnClient = convention.serverPropertyNameToClient('Zzzz');
+      equal(nameOnClient, 'zzzz', cmsg.format('zzzz', 'Zzzz'));
+
+      nameOnServer = convention.clientPropertyNameToServer('zzzz');
+      equal(nameOnServer, 'Zzzz', smsg.format('zzzz', 'Zzzz'));
+    });
+
+  })();
 
   //#region UnderscoreCamelCaseConvention Tests
   // Described in http://www.getbreezenow.com/documentation/namingconvention
@@ -444,25 +509,30 @@
 
   // ReSharper disable UnusedLocals
   function BooleanNamingConvention() {
+
+    var BOOL = breeze.DataType.Boolean;
+    var camelCase = breeze.NamingConvention.camelCase;
+
     return new breeze.NamingConvention({
       name: 'booleanNamingConvention',
-      serverPropertyNameToClient: serverPropertyNameToClient,
-      clientPropertyNameToServer: clientPropertyNameToServer
+      clientPropertyNameToServer: clientPropertyNameToServer,
+      serverPropertyNameToClient: serverPropertyNameToClient
     });
 
-    function clientPropertyNameToServer(clientPropertyName, prop) {
-      if (prop && prop.isDataProperty && prop.dataType === DataType.Boolean) {
-        return clientPropertyName.substr(2);
+    function clientPropertyNameToServer(name, propDef) {
+      // guard against empty or deficient property definition
+      if (propDef && propDef.isDataProperty && propDef.dataType === BOOL) {
+        return name.substr(2); // strip off the "is"
       } else {
-        return clientPropertyName.substr(0, 1).toUpperCase() + clientPropertyName.substr(1);
+        return camelCase.clientPropertyNameToServer(name);
       }
     }
 
-    function serverPropertyNameToClient(serverPropertyName, prop) {
-      if (prop && prop.isDataProperty && prop.dataType === DataType.Boolean) {
-        return 'is' + serverPropertyName;
+    function serverPropertyNameToClient(name, propDef) {
+      if (propDef && propDef.isDataProperty && propDef.dataType === BOOL) {
+        return 'is' + name;
       } else {
-        return serverPropertyName.substr(0, 1).toLowerCase() + serverPropertyName.substr(1);
+        return camelCase.serverPropertyNameToClient(name);
       }
     }
   }
