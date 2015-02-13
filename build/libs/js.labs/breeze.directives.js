@@ -7,7 +7,7 @@
  *     Make this module a dependency of your app module:
  *       var app = angular.module('app', ['breeze.directives']);
  *
- * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.
+ * Copyright 2015 IdeaBlade, Inc.  All Rights Reserved.
  * Licensed under the MIT License
  * http://opensource.org/licenses/mit-license.php
  * Author: Ward Bell
@@ -30,7 +30,7 @@
     *  This formatter returns the view value rather than the model property value
     *  if the two values are deemed equivalent.
     *
-    *  For explanation and more info, see 
+    *  For explanation and more info, see
     *  http://www.breezejs.com/breeze-labs/breezedirectivesfloat
     *
     *  Install
@@ -50,8 +50,8 @@
             link: function(scope, elm, attr, ngModelCtrl) {
                 if (attr.type === 'radio' || attr.type === 'checkbox') return;
                 ngModelCtrl.$formatters.push(equivalenceFormatter);
-                
-                function equivalenceFormatter(modelValue){ 
+
+                function equivalenceFormatter(modelValue){
                    var viewValue = ngModelCtrl.$viewValue // could have used 'elm.val()'
                    return (+viewValue === +modelValue) ? viewValue : modelValue;
                 }
@@ -131,7 +131,7 @@
 
                 // update the message in the validation template
                 // when a validation error changes on an input control
-                // newValue is either a string or null (null when no bound entity) 
+                // newValue is either a string or null (null when no bound entity)
                 function valErrsChanged(newValue) {
 
                     // HTML5 custom validity
@@ -157,7 +157,7 @@
                 scope.$watch(info.getValErrs, valErrsChanged);
 
                 // update the message in the z_invalid and z_error properties in the scope
-                // when a validation error changes on a non-input control 
+                // when a validation error changes on a non-input control
                 function valErrsChanged(newValue) {
                     var errorMsg = newValue ? newValue : "";
                     scope.z_error = errorMsg;
@@ -169,7 +169,7 @@
     }
 
     // Service to extract validation information from a zValidate data binding
-    // Although built for Angular, it is designed to be used 
+    // Although built for Angular, it is designed to be used
     // in alternative zValidate directive implementations
     function zValidateInfo() {
 
@@ -260,7 +260,7 @@
             // We don't know if it is required yet.
             // Once bound to the entity we can determine whether the data property is required
             // Note: Not bound until *second* call to the directive's link function
-            //       which is why you MUST call 'getIsRequired' 
+            //       which is why you MUST call 'getIsRequired'
             //       inside 'valErrsChanged' rather than in the link function
             var entityType = info.getType();
             if (entityType) { // the bound entity is known
@@ -319,7 +319,7 @@
             if (modelPath) {
                 parsePath(modelPath);
             }
-            // validationPath can override either entity or property path; 
+            // validationPath can override either entity or property path;
             // examples:
             //   'productId'               // property only
             //   'vm.order.delivery'       // entity path and property
@@ -328,8 +328,8 @@
             // optional ','  syntax as {entity, property} path separator
             // so can separate entity path from a complex property path
             // examples:
-            //   'vm.order,address.street' // entity w/ complex prop 
-            //   'vm.order,address[street]' // entity w/ complex indexed prop 
+            //   'vm.order,address.street' // entity w/ complex prop
+            //   'vm.order,address[street]' // entity w/ complex indexed prop
             if (validationPath) {
                 // Look for ',' syntax
                 var paths = validationPath.split(',');
@@ -359,8 +359,8 @@
                 // propertyPath should be 'delivery'
                 // entityPath should be 'vm.order'
                 paths = path.split('.');
-                info.propertyPath = paths.pop(); // property is after last '.' 
-                info.entityPath = paths.join('.'); // path to entity is before last '.'                   
+                info.propertyPath = paths.pop(); // property is after last '.'
+                info.entityPath = paths.join('.'); // path to entity is before last '.'
             }
 
             // extract paths from strings using square-bracket notation, e.g. 'vm.order[delivery]'

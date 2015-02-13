@@ -1,11 +1,11 @@
 /*
  * Breeze Labs SharePoint 2013 OData DataServiceAdapter
  *
- *  v.0.6.0
+ *  v.0.6.1
  *
  * Registers a SharePoint 2013 OData DataServiceAdapter with Breeze
  *
- * REQUIRES breeze.labs.dataservice.abstractrest.js v.0.6.0+
+ * REQUIRES breeze.labs.dataservice.abstractrest.js v.0.6.3+
  *
  * This adapter cannot get metadata from the server and in general one should
  * not do so because such metadata cover much more of than you want and are huge (>1MB)
@@ -38,7 +38,7 @@
  * If 'saveOnlyOne' == true, the adapter throws an exception
  * when asked to save more than one entity at a time.
  *
- * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.
+ * Copyright 2015 IdeaBlade, Inc.  All Rights Reserved.
  * Licensed under the MIT License
  * http://opensource.org/licenses/mit-license.php
  * Authors: Ward Bell, Andrew Connell
@@ -50,7 +50,7 @@
         // CommonJS or Node
         var b = require('breeze');
         definition(b);
-    } else if (typeof define === "function" && define["amd"] && !window.breeze) {
+    } else if (typeof define === "function" && define["amd"]) {
         // Requirejs / AMD
         define(['breeze'], definition);
     } else {
@@ -183,6 +183,7 @@
     }
 
     // Create error object for both query and save responses.
+    // A method on the adapter (`this`)
     // 'context' can help differentiate query and save
     // 'errorEntity' only defined for save response
     function _createErrorFromResponse(response, url, context, errorEntity) {
@@ -196,7 +197,7 @@
         err.status = response.status;
 
         setSPODataErrorMessage(err);
-        proto._catchNoConnectionError(err);
+        this._catchNoConnectionError(err);
         return err;
     }
 
@@ -303,7 +304,7 @@
     }
 
     function executeQuery(mappingContext) {
-        var adapter = this;
+        var adapter = mappingContext.adapter = this;
         mappingContext.entityType = adapter._getEntityTypeFromMappingContext(mappingContext);
         applyDefaultSelect(mappingContext);
         var deferred = adapter.Q.defer();
@@ -320,7 +321,7 @@
             params: mappingContext.query.parameters,
             success: querySuccess,
             error: function (response) {
-                deferred.reject(adapter._createErrorFromResponse(response, url));
+                deferred.reject(adapter._createErrorFromResponse(response, url, mappingContext));
             }
         });
         return deferred.promise;

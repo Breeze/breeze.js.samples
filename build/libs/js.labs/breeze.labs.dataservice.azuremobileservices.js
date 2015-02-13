@@ -1,7 +1,7 @@
 /*
  * Breeze Labs Azure Mobile Services DataServiceAdapter
  *
- *  v.0.6.0
+ *  v.0.6.1
  *
  * Registers an Azure Mobile Services DataServiceAdapter with Breeze
  *
@@ -30,7 +30,7 @@
  * If 'saveOnlyOne' == true, the adapter throws an exception
  * when asked to save more than one entity at a time.
  *
- * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.
+ * Copyright 2015 IdeaBlade, Inc.  All Rights Reserved.
  * Licensed under the MIT License
  * http://opensource.org/licenses/mit-license.php
  * Author: Ward Bell
@@ -42,7 +42,7 @@
         // CommonJS or Node
         var b = require('breeze');
         definition(b);
-    } else if (typeof define === "function" && define["amd"] && !window.breeze) {
+    } else if (typeof define === "function" && define["amd"]) {
         // Requirejs / AMD
         define(['breeze'], definition);
     } else {
@@ -76,6 +76,7 @@
 
     /////////////////
     // Create error object for both query and save responses.
+    // A method on the adapter (`this`)
     // 'context' can help differentiate query and save
     // 'errorEntity' only defined for save response
     function _createErrorFromResponse(response, url, context, errorEntity) {
@@ -86,7 +87,7 @@
         err.status =  data.code || response.status || '???';
         err.statusText = response.statusText || err.status;
         err.message =  data.error || response.message || response.error || err.statusText;
-        proto._catchNoConnectionError(err);
+        this._catchNoConnectionError(err);
         return err;
     }
 
@@ -199,10 +200,10 @@
     }
 
     function executeQuery(mappingContext) {
-        var adapter = this;
+        var adapter = mappingContext.adapter = this;
         mappingContext.entityType = adapter._getEntityTypeFromMappingContext(mappingContext);
         var deferred = adapter.Q.defer();
-        var url = mappingContext.getUrl();//  + 'XXXX'; // deliberate fail
+        var url = mappingContext.getUrl();
         var headers = adapter._getZumoHeaders();
 
         adapter._ajaxImpl.ajax({
@@ -226,7 +227,7 @@
                 };
                 deferred.resolve(rData);
             } catch (e) {
-                // program error means adapter it broken, not SP or the user
+                // program error means adapter is broken, not SP or the user
                 deferred.reject(new Error("Program error: failed while parsing successful query response"));
             }
         }

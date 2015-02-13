@@ -1,6 +1,6 @@
 //#region Copyright, Version, and Description
 /*
- * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.
+ * Copyright 2015 IdeaBlade, Inc.  All Rights Reserved.
  * Use, reproduction, distribution, and modification of this code is subject to the terms and
  * conditions of the IdeaBlade Breeze license, available at http://www.breezejs.com/license
  *
@@ -36,7 +36,7 @@
         // CommonJS or Node
         var b = require('breeze');
         definition(b);
-    } else if (typeof define === "function" && define["amd"] && !window.breeze) {
+    } else if (typeof define === "function" && define["amd"]) {
         // Requirejs / AMD
         define(['breeze'], definition);
     } else {

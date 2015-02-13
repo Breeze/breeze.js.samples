@@ -1,7 +1,7 @@
 /*
  * Breeze Labs Abstract REST DataServiceAdapter
  *
- *  v.0.6.2
+ *  v.0.6.3
  *
  * Extends Breeze with a REST DataService Adapter abstract type
  *
@@ -31,7 +31,7 @@
  * If 'saveOnlyOne' == true, the adapter throws an exception
  * when asked to save more than one entity at a time.
  *
- * Copyright 2014 IdeaBlade, Inc.  All Rights Reserved.
+ * Copyright 2015 IdeaBlade, Inc.  All Rights Reserved.
  * Licensed under the MIT License
  * http://opensource.org/licenses/mit-license.php
  * Authors: Ward Bell
@@ -43,7 +43,7 @@
         // CommonJS or Node
         var b = require('breeze');
         definition(b);
-    } else if (typeof define === "function" && define["amd"] && !window.breeze) {
+    } else if (typeof define === "function" && define["amd"]) {
         // Requirejs / AMD
         define(['breeze'], definition);
     } else {
@@ -68,7 +68,7 @@
         saveChanges: saveChanges,
 
         // Configuration API
-        ChangeRequestInterceptor: abstractDsaProto.changeRequestInterceptor, // default, no-op ctor
+        changeRequestInterceptor: abstractDsaProto.changeRequestInterceptor, // default, no-op ctor
         checkForRecomposition: checkForRecomposition,
         saveOnlyOne: false, // true if may only save one entity at a time.
         ignoreDeleteNotFound: true, // true if should ignore a 404 error from a delete
@@ -78,6 +78,7 @@
         _addKeyMapping: _addKeyMapping,
         _ajaxImpl: undefined, // see initialize()
         _catchNoConnectionError: abstractDsaProto._catchNoConnectionError,
+        _createChangeRequestInterceptor: abstractDsaProto._createChangeRequestInterceptor,
         _changeRequestSucceeded: _changeRequestSucceeded,
         _createErrorFromResponse: _createErrorFromResponse,
         _createChangeRequest: _createChangeRequest,
@@ -121,7 +122,7 @@
     }
 
     function executeQuery(mappingContext) {
-        var adapter = this;
+        var adapter = mappingContext.adapter = this;
         var deferred = adapter.Q.defer();
         var url = mappingContext.getUrl();
         var headers = {
@@ -238,6 +239,7 @@
     }
 
     // Create error object for both query and save responses.
+    // A method on the adapter (`this`)
     // 'context' can help differentiate query and save
     // 'errorEntity' only defined for save response
     function _createErrorFromResponse(response, url, context, errorEntity) {
@@ -247,7 +249,7 @@
         err.status =  response.status || '???';
         err.statusText = response.statusText;
         err.message =  response.message || response.error || response.statusText;
-        fn_.catchNoConnectionError(err);
+        this.catchNoConnectionError(err);
         return err;
     }
 
@@ -347,7 +349,7 @@
         saveContext.tempKeys = [];
 
         var changeRequestInterceptor =
-            abstractDsaProto._createChangeRequestInterceptor(saveContext, saveBundle);
+            adapter._createChangeRequestInterceptor(saveContext, saveBundle);
 
         var requests = originalEntities.map(function (entity, index) {
             var request = adapter._createChangeRequest(saveContext, entity, index);

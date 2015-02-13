@@ -17,7 +17,7 @@
  * It is only one approach to save error message handling.
  * Use it for inspiration.
  *
- * Copyright 2013 IdeaBlade, Inc.  All Rights Reserved.
+ * Copyright 2015 IdeaBlade, Inc.  All Rights Reserved.
  * Licensed under the MIT License
  * http://opensource.org/licenses/mit-license.php
  * Author: Ward Bell
@@ -46,7 +46,7 @@
         // CommonJS or Node
         var b = require('breeze');
         definition(b);
-    } else if (typeof define === "function" && define["amd"] && !window.breeze) {
+    } else if (typeof define === "function" && define["amd"]) {
         // Requirejs / AMD
         define(['breeze'], definition);
     } else {
