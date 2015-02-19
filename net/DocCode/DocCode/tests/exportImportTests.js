@@ -345,6 +345,65 @@
                 .format(selectedCustsCount));
         });
 
+  /*********************************************************
+  * should throw when export Detached entity D#2669
+  *********************************************************/
+    test("cannot export Detached entity", function () {
+      expect(1);
+
+      var em1 = newEm();
+      var cust1 = em1.createEntity('Customer', {
+        CustomerID: breeze.core.getUuid(),
+        CompanyName: 'Foo',
+        ContactName: 'Baz'
+      }, EntityState.Unchanged);
+
+      var cust2 = em1.createEntity('Customer', {
+        CustomerID: breeze.core.getUuid(),
+        CompanyName: 'Bar',
+        ContactName: 'Baz'
+      }, EntityState.Unchanged);
+
+      cust2.entityAspect.setDetached();
+
+      throws(function() {
+        em1.exportEntities([cust1, cust2], { includeMetadata: false });
+      }, 'should throw when export Detached entity');
+    });
+  /*********************************************************
+  * should throw when import a detached entity D#2669
+  *********************************************************/
+    test("cannot import Detached entity", function () {
+      expect(1);
+
+      var em1 = newEm();
+      var cust = em1.createEntity('Customer', {
+        CustomerID: breeze.core.getUuid(),
+        CompanyName: 'Foo',
+        ContactName: 'Baz'
+      }, EntityState.Unchanged);
+
+      var exported = em1.exportEntities([cust], {
+        includeMetadata: false,
+        asString: false // as JSON
+      });
+
+      // Can't export detached entity but we'll monkey-patch
+      // an export to look as if it were detached.
+      var exCust = exported.entityGroupMap[cust.entityType.name].entities[0];
+      exCust.entityAspect.entityState = 'Detached';
+
+      var em2 = em1.createEmptyCopy();
+
+      throws(function () {
+        var imported = em2.importEntities(exported);
+        var state = imported.entities[0].entityAspect.entityState;
+        equal(state.name, breeze.EntityState.Detached,
+          'if importing of detached entity were allowed, its state would be Detached; was ' +
+          state.name);
+      }, 'should throw when import Detached entity');
+    });
+
     /*********************************************************
     * can import entities from one manager to another w/o metadata
     * when both managers are preconditioned with metadata
