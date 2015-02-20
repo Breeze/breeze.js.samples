@@ -405,6 +405,83 @@
     });
 
     /*********************************************************
+    * update master manager after save in an edit manager
+    * see http://stackoverflow.com/questions/28098520/breeze-entitymanager-not-removing-imported-detached-entites
+    *********************************************************/
+    test("can update master manager after save in an edit manager", function() {
+      expect(3);
+
+      var masterEm = newEm();
+      var cust1 = masterEm.createEntity('Customer', {
+        CustomerID: breeze.core.getUuid(),
+        CompanyName: 'Foo',
+        ContactName: 'Baz'
+      }, EntityState.Unchanged);
+
+      var cust2 = masterEm.createEntity('Customer', {
+        CustomerID: breeze.core.getUuid(),
+        CompanyName: 'Bar',
+        ContactName: 'Baz'
+      }, EntityState.Unchanged);
+
+      var exported = masterEm.exportEntities(null, {
+        includeMetadata: false,
+        asString: false // as JSON
+      });
+
+      var editEm = masterEm.createEmptyCopy();
+      var imports = editEm.importEntities(exported);
+
+      // Simulate the relevant part of a saveResult
+      var saveResult = { entities: imports.entities };
+
+      // update the first entity as if save after change
+      var cust = saveResult.entities[0];
+      cust.setProperty('CompanyName', 'Quux');
+      cust.entityAspect.acceptChanges(); // as if saved
+
+      // detach the second entity as if after save of delete
+      cust = saveResult.entities[1];
+      cust.entityAspect.setDetached();
+
+      updateMasterWithSaveResult(masterEm, editEm, saveResult);
+
+      var state = cust1.entityAspect.entityState.name;
+      equal(state, breeze.EntityState.Unchanged.name,
+        'master cust1 should be Unchanged; is ' + state);
+      equal(cust1.getProperty('CompanyName'), 'Quux',
+        'master cust1.CompanyName should be "Quux"');
+
+      state = cust2.entityAspect.entityState.name;
+      equal(state, breeze.EntityState.Detached.name,
+        'master cust1 should be Detached; is ' + state);
+    });
+
+    // Master Manager Save Update function recommended in
+    // http://stackoverflow.com/questions/28098520/breeze-entitymanager-not-removing-imported-detached-entites
+    function updateMasterWithSaveResult(masterEm, sourceEm, saveResult) {
+      var imports = [];
+      var deletes = [];
+      saveResult.entities.forEach(function(entity) {
+        if (entity.entityAspect.entityState.isDetached()) {
+          deletes.push(entity);
+        } else {
+          imports.push(entity);
+        }
+      });
+      var exported = sourceEm.exportEntities(imports, {
+        includeMetadata: false,
+        asString: false // as JSON
+      });
+      masterEm.importEntities(exported);
+
+      deletes.forEach(function(detached) {
+        var entity = masterEm.getEntityByKey(detached.entityAspect.getKey());
+        entity && entity.entityAspect.setDetached();
+      });
+    }
+
+    /*********************************************************
     * can import entities from one manager to another w/o metadata
     * when both managers are preconditioned with metadata
     *********************************************************/
