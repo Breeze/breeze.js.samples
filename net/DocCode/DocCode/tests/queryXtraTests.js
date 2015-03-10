@@ -9,6 +9,7 @@
     * Breeze configuration and module setup
     *********************************************************/
     var handleFail = testFns.handleFail;
+    var EntityQuery = breeze.EntityQuery;
 
     // When targeting the Foo controller
     var fooDataService = new breeze.DataService({
@@ -28,6 +29,85 @@
     /************************** QUERIES *************************/
 
     module("query xtras", moduleOptions);
+
+    //#region "no tracking" queries
+
+    /*********************************************************
+    * simple query w/ "no tracking" does not add to cache
+    *********************************************************/
+      asyncTest('simple query w/ "no tracking" does not add to cache', function () {
+        expect(2);
+        var em = newNorthwindEm();
+        EntityQuery.from('Employees')
+            .noTracking(true)
+            .using(em).execute()
+            .then(success).fail(handleFail).fin(start);
+
+        function success(data) {
+          var emps = data.results, len = emps.length;
+          ok(len, 'Expected "Employees" and got ' + len);
+
+          var cachedEmps = em.getEntities('Employee');
+          len = cachedEmps.length;
+          equal(0, len, 'Expected ZERO cached "Employees" and got ' + len);
+        }
+      });
+
+    /*********************************************************
+     * simple expand query w/ "no tracking" does not add to cache
+     *********************************************************/
+      asyncTest('simple expand query w/ "no tracking" does not add to cache', function () {
+        expect(3);
+        var em = newNorthwindEm();
+        EntityQuery.from('Employees')
+          .noTracking(true)
+          .top(1)
+          .expand('Orders')
+          .using(em).execute()
+          .then(success).fail(handleFail).fin(start);
+
+        function success(data) {
+          var emps = data.results, len = emps.length;
+          equal(1, len, 'Expected one "Employee" and got ' + len);
+          var cachedEmps = em.getEntities('Employee');
+          len = cachedEmps.length;
+          equal(0, len, 'Expected ZERO cached "Employees" and got ' + len);
+          var cachedOrders = em.getEntities('Order');
+          len = cachedOrders.length;
+          equal(0, len, 'Expected ZERO cached "Orders" and got ' + len);
+        }
+      });
+
+    /*********************************************************
+    * object query (e.g., lookups) w/ "no tracking" does not add to cache
+    * See http://stackoverflow.com/questions/28907969/breeze-js-not-honoring-the-notracking-option-when-end-point-returns-multiple-r
+    *********************************************************/
+      asyncTest('object query (e.g., lookups) w/ "no tracking" does not add to cache', function () {
+        expect(4);
+        var em = newNorthwindEm();
+        EntityQuery.from('Lookups')
+          .noTracking(true)
+          .using(em).execute()
+          .then(success).fail(handleFail).fin(start);
+
+        function success(data) {
+          var lookups = data.results[0];
+          var hasLookups = lookups &&
+                           lookups.categories && lookups.regions && lookups.territories;
+          ok(hasLookups, 'Expected a lookups object w/ categories, regions and territories');
+
+          var cachedCats = em.getEntities('Category');
+          var len = cachedCats.length;
+          equal(0, len, 'Expected ZERO cached "Regions" and got ' + len);
+          var cachedRegs = em.getEntities('Region');
+          len = cachedRegs.length;
+          equal(0, len, 'Expected ZERO cached "Regions" and got ' + len);
+          var cachedTerrs = em.getEntities('Territory');
+          len = cachedTerrs.length;
+          equal(0, len, 'Expected ZERO cached "Territories" and got ' + len);
+        }
+      });
+    //#endregion
 
     //#region Foo queries
 
