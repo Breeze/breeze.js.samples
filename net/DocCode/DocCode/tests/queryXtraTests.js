@@ -83,7 +83,7 @@
     * See http://stackoverflow.com/questions/28907969/breeze-js-not-honoring-the-notracking-option-when-end-point-returns-multiple-r
     *********************************************************/
       asyncTest('object query (e.g., lookups) w/ "no tracking" does not add to cache', function () {
-        expect(4);
+        expect(2);
         var em = newNorthwindEm();
         EntityQuery.from('Lookups')
           .noTracking(true)
@@ -96,15 +96,9 @@
                            lookups.categories && lookups.regions && lookups.territories;
           ok(hasLookups, 'Expected a lookups object w/ categories, regions and territories');
 
-          var cachedCats = em.getEntities('Category');
-          var len = cachedCats.length;
-          equal(0, len, 'Expected ZERO cached "Regions" and got ' + len);
-          var cachedRegs = em.getEntities('Region');
-          len = cachedRegs.length;
-          equal(0, len, 'Expected ZERO cached "Regions" and got ' + len);
-          var cachedTerrs = em.getEntities('Territory');
-          len = cachedTerrs.length;
-          equal(0, len, 'Expected ZERO cached "Territories" and got ' + len);
+          var cached = em.getEntities();
+          var len = cached.length;
+          equal(0, len, 'Expected ZERO cached entities of any kind and got ' + len);
         }
       });
     //#endregion
