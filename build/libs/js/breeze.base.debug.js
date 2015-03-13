@@ -757,7 +757,7 @@ var Param = (function () {
     return addContext(this, {
       fn: isTypeOf,
       typeName: typeName,
-      msg: __formatString("must be a '%1'", typeName)
+       msg: "must be a '" + typeName + "'"
     });
   };
 
@@ -773,7 +773,7 @@ var Param = (function () {
       fn: isInstanceOf,
       type: type,
       typeName: typeName,
-      msg: __formatString("must be an instance of '%1'", typeName)
+      msg: "must be an instance of '" + typeName + "'"
     });
   };
 
@@ -786,7 +786,7 @@ var Param = (function () {
     return addContext(this, {
       fn: hasProperty,
       propertyName: propertyName,
-      msg: __formatString("must have a '%1' property ", propertyName)
+      msg: "must have a '" + propertyName + "' property"
     });
   };
 
@@ -799,7 +799,7 @@ var Param = (function () {
     return addContext(this, {
       fn: isEnumOf,
       enumType: enumType,
-      msg: __formatString("must be an instance of the '%1' enumeration", enumType.name)
+      msg: "must be an instance of the '" + enumType.name + "' enumeration"
     });
   };
 
@@ -12457,8 +12457,6 @@ breeze.MergeStrategy = MergeStrategy;
 
 var EntityGroup = (function () {
 
-  var __changedFilter = getFilter([EntityState.Added, EntityState.Modified, EntityState.Deleted]);
-
   var ctor = function EntityGroup(entityManager, entityType) {
     this.entityManager = entityManager;
     this.entityType = entityType;
@@ -12543,7 +12541,28 @@ var EntityGroup = (function () {
   };
 
   proto.hasChanges = function () {
-    return this._entities.some(__changedFilter);
+    var entities = this._entities;
+    var unchanged = EntityState.Unchanged;
+    for (var i = 0, len = entities.length; i < len; i++){
+      var e = entities[i];
+      if (e && e.entityAspect.entityState !== unchanged){
+        return true;
+      }
+    }
+    return false;
+  };
+
+  proto.getChanges = function () {
+    var entities = this._entities;
+    var unchanged = EntityState.Unchanged;
+    var changes = [];
+    for (var i = 0, len = entities.length; i < len; i++){
+      var e = entities[i];
+      if (e && e.entityAspect.entityState !== unchanged){
+        changes.push(e);
+      }
+    }
+    return changes;
   };
 
   proto.getEntities = function (entityStates) {
@@ -12613,15 +12632,11 @@ var EntityGroup = (function () {
     } else if (entityStates.length === 1) {
       var entityState = entityStates[0];
       return function (e) {
-        if (!e) return false;
-        return e.entityAspect.entityState === entityState;
+        return !!e && e.entityAspect.entityState === entityState;
       };
     } else {
       return function (e) {
-        if (!e) return false;
-        return entityStates.some(function (es) {
-          return e.entityAspect.entityState === es;
-        });
+        return !!e && -1 !== entityStates.indexOf(e.entityAspect.entityState);
       };
     }
   }
@@ -13469,16 +13484,20 @@ var EntityManager = (function () {
   @return  {Array of Entity}  Array of entities from cache that satisfy the query
   **/
   proto.executeQueryLocally = function (query) {
+    return executeQueryLocallyCore(this, query).results;
+  }
+
+  function executeQueryLocallyCore(em, query) {
     assertParam(query, "query").isInstanceOf(EntityQuery).check();
 
-    var metadataStore = this.metadataStore;
+    var metadataStore = em.metadataStore;
     var entityType = query._getFromEntityType(metadataStore, true);
     // there may be multiple groups is this is a base entity type.
-    var groups = findOrCreateEntityGroups(this, entityType);
+    var groups = findOrCreateEntityGroups(em, entityType);
     // filter then order then skip then take
     var filterFunc = query.wherePredicate && query.wherePredicate.toFunction({ entityType: entityType});
 
-    var queryOptions = QueryOptions.resolve([ query.queryOptions, this.queryOptions, QueryOptions.defaultInstance]);
+    var queryOptions = QueryOptions.resolve([ query.queryOptions, em.queryOptions, QueryOptions.defaultInstance]);
     var includeDeleted = queryOptions.includeDeleted === true;
 
     var newFilterFunc = function (entity) {
@@ -13495,6 +13514,11 @@ var EntityManager = (function () {
     if (orderByComparer) {
       result.sort(orderByComparer);
     }
+
+    if (query.inlineCountEnabled) {
+      var inlineCount = result.length;
+    }
+
     var skipCount = query.skipCount;
     if (skipCount) {
       result = result.slice(skipCount);
@@ -13509,7 +13533,7 @@ var EntityManager = (function () {
       var selectFn = selectClause.toFunction();
       result = result.map(selectFn);
     }
-    return result;
+    return {results: result, inlineCount: inlineCount};
   };
 
   /**
@@ -13955,13 +13979,13 @@ var EntityManager = (function () {
   need to be automatically replaced with 'real' key values once these entities are saved.
 
   The EntityManager.keyGeneratorCtor property is used internally by this method to actually generate
-  the keys - See the  {{#crossLink "~keyGenerator-interface"}}{{/crossLink}} interface description to see
+  the keys - See the  {{#crossLink "_keyGenerator_interface"}}{{/crossLink}} interface description to see
   how a custom key generator can be plugged in.
   @example
       // assume em1 is an EntityManager containing a number of preexisting entities.
       var custType = em1.metadataStore.getEntityType("Customer");
-      var custumer = custType.createEntity();
-      var customerId = em.generateTempKeyValue(custumer);
+      var customer = custType.createEntity();
+      var customerId = em.generateTempKeyValue(customer);
       // The 'customer' entity 'CustomerID' property is now set to a newly generated unique id value
       // This property will change again after a successful save of the 'customer' entity.
 
@@ -14077,8 +14101,7 @@ var EntityManager = (function () {
   **/
   proto.getChanges = function (entityTypes) {
     entityTypes = checkEntityTypes(this, entityTypes);
-    var entityStates = [EntityState.Added, EntityState.Modified, EntityState.Deleted];
-    return getEntitiesCore(this, entityTypes, entityStates);
+    return getChangesCore(this, entityTypes);
   };
 
   /**
@@ -14094,8 +14117,7 @@ var EntityManager = (function () {
   **/
   proto.rejectChanges = function () {
     if (!this._hasChanges) return [];
-    var entityStates = [EntityState.Added, EntityState.Modified, EntityState.Deleted];
-    var changes = getEntitiesCore(this, null, entityStates);
+    var changes = getChangesCore(this, null);
     // next line stops individual reject changes from each calling _hasChangesCore
     var aspects = changes.map(function(e) {
       return e.entityAspect._checkOperation("rejectChanges");
@@ -14323,6 +14345,24 @@ var EntityManager = (function () {
       });
     }
     return entityTypes;
+  }
+
+  function getChangesCore(em, entityTypes) {
+    var entityGroups = getEntityGroups(em, entityTypes);
+
+    // TODO: think about writing a core.mapMany method if we see more of these.
+    var selected;
+    entityGroups.forEach(function (eg) {
+      // eg may be undefined or null
+      if (!eg) return;
+      var entities = eg.getChanges();
+      if (selected) {
+        selected.push.apply(selected, entities);
+      } else {
+        selected = entities;
+      }
+    });
+    return selected || [];
   }
 
   function getEntitiesCore(em, entityTypes, entityStates) {
@@ -14701,8 +14741,8 @@ var EntityManager = (function () {
 
       if (queryOptions.fetchStrategy === FetchStrategy.FromLocalCache) {
         try {
-          results = em.executeQueryLocally(query);
-          return Q.resolve({ results: results, query: query });
+          var qr = executeQueryLocallyCore(em, query);
+          return Q.resolve({ results: qr.results, entityManager: em, inlineCount: qr.inlineCount, query: query });
         } catch (e) {
           return Q.reject(e);
         }
@@ -15615,7 +15655,7 @@ breeze.SaveOptions = SaveOptions;
   };
 
   proto.executeQuery = function (mappingContext) {
-
+    var adapter = mappingContext.adapter = this;
     var deferred = Q.defer();
     var url = mappingContext.getUrl();
 
@@ -15715,7 +15755,7 @@ breeze.SaveOptions = SaveOptions;
             return request;
         };
         this.done = function (requests) {
-            // alter the array of requests representing the entire change-set 
+            // alter the array of requests representing the entire change-set
             // based on the saveContext and saveBundle
         };
     }
@@ -15764,7 +15804,7 @@ breeze.SaveOptions = SaveOptions;
      Returned value is ignored.
      @example
      this.done = function (requests) {
-            // alter the array of requests representing the entire change-set 
+            // alter the array of requests representing the entire change-set
             // based on the saveContext and saveBundle
         };
      @method done
@@ -15776,12 +15816,13 @@ breeze.SaveOptions = SaveOptions;
 
   proto._createChangeRequestInterceptor = function (saveContext, saveBundle) {
     var adapter = saveContext.adapter;
+    var cri = adapter.changeRequestInterceptor;
     var isFn = __isFunction;
-    var CRI = adapter.changeRequestInterceptor;
-    var pre = adapter.name + " DataServiceAdapter's ChangeRequestInterceptor";
-    var post = " is missing or not a function.";
-    if (isFn(CRI)) {
-      var interceptor = new CRI(saveContext, saveBundle);
+
+    if (isFn(cri)) {
+      var pre = adapter.name + " DataServiceAdapter's ChangeRequestInterceptor";
+      var post = " is missing or not a function.";
+      var interceptor = new cri(saveContext, saveBundle);
       if (!isFn(interceptor.getRequest)) {
         throw new Error(pre + '.getRequest' + post);
       }

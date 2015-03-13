@@ -1681,6 +1681,47 @@
         .fin(start);
     });
 
+  /*********************************************************
+  * can page queried customers in cache with inline count (F#2267)
+  *********************************************************/
+    asyncTest("can page queried customers in cache with inline count", function () {
+      expect(2);
+
+      var em = newEm();
+
+      // query for customer starting with 'A', sorted by name
+      // will be used BOTH on server AND on client.
+      var query = getQueryForCustomerA();
+
+      EntityQuery.from('Customers')
+        .using(em).execute()
+        .then(cacheLoaded)
+        .then(localQuerySucceeded)
+        .catch(handleFail).finally(start);
+
+      function cacheLoaded(data) {
+        var query = EntityQuery.from('Customers')
+          .where('CompanyName', 'startsWith', 'A')
+          .orderBy('CompanyName')
+          .skip(2).take(2)
+          .inlineCount()
+          .using(breeze.FetchStrategy.FromLocalCache);
+
+        return em.executeQuery(query);
+      }
+
+      function localQuerySucceeded(data) {
+        var custs = data.results;
+        var count = custs.length;
+        equal(count, 2,
+            "have full page of cached 'A' customers now; count = " + count);
+
+        var inlineCount = data.inlineCount;
+        ok(inlineCount && inlineCount > 2,
+          'have inlineCount=' + inlineCount + ' which is greater than page size');
+      }
+    });
+
     /*********************************************************
     * Local query does NOT return deleted entities (by default)
     *********************************************************/
