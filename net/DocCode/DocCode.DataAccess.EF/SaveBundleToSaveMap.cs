@@ -16,7 +16,7 @@ namespace DocCode.DataAccess
     /// It is NOT a functioning ContextProvider!
     /// There are no examples of usage yet.
     /// </remarks>
-    public class SaveBundleToSaveMap : ContextProvider 
+    public class SaveBundleToSaveMap : ContextProvider
     {
         // Never create a public instance
         private SaveBundleToSaveMap(){}
@@ -24,13 +24,26 @@ namespace DocCode.DataAccess
         /// <summary>
         /// Convert a saveBundle into a SaveMap
         /// </summary>
-        public static Dictionary<Type, List<EntityInfo>> Convert(JObject saveBundle)
+        /// <param name="saveBundle">JSON object from client describing batch save</param>
+        /// <param name="beforeSaveEntity">
+        ///   optional function to evaluate each entity individually before it is saved.
+        /// </param>
+        /// <param name="beforeSaveEntities">
+        ///   optional function to evaluate the entire collection of entities before they are saved.
+        /// </param>
+        public static Dictionary<Type, List<EntityInfo>> Convert(
+          JObject saveBundle,
+          Func<EntityInfo, bool> beforeSaveEntity = null,
+          Func<Dictionary<Type, List<EntityInfo>>, Dictionary<Type, List<EntityInfo>>> beforeSaveEntities = null)
         {
-            var dynSaveBundle = (dynamic) saveBundle;
-            var entitiesArray = (JArray) dynSaveBundle.entities;
-            var provider = new SaveBundleToSaveMap();
-            var saveWorkState = new SaveWorkState(provider, entitiesArray);
-            return saveWorkState.SaveMap;
+          var provider = new SaveBundleToSaveMap
+          {
+            BeforeSaveEntityDelegate   = beforeSaveEntity,
+            BeforeSaveEntitiesDelegate = beforeSaveEntities
+          };
+          provider.InitializeSaveState(saveBundle);
+          provider.SaveWorkState.BeforeSave();
+          return provider.SaveWorkState.SaveMap;
         }
 
         #region required overrides DO NOT USE ANY OF THEM
