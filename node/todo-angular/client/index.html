@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/>
+
+    <title>Breeze Todos with AngularJs</title>
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/toastr.css" />
+    <link rel="stylesheet" href="css/todo.css" />
+</head>
+<body>
+    <!-- App appears here -->
+    <div id="applicationHost" data-ng-app="app" data-ng-include="'app/view.html'"></div>
+
+    <!-- 3rd party libraries -->
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/breeze-client/breeze.debug.js"></script>
+    <script src="bower_components/breeze-client/build/adapters/breeze.bridge.angular.js"></script>
+
+    <!-- Add toastr which needs jQuery (Breeze does not need jQuery) -->
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/toastr/toastr.js"></script>
+
+    <!-- Add breeze.savequeuing -->
+    <script src="bower_components/breeze-client-labs/breeze.savequeuing.js"></script>
+
+    <!-- App libraries -->
+    <script src="app/main.js"></script>
+    <script src="app/logger.js"></script>
+    <script src="app/dataservice.js"></script>
+    <script src="app/controller.js"></script>
+
+</body>
+</html>
