@@ -18,7 +18,7 @@
 var express        = require('express')
     , app          = express()
     , bodyParser   = require('body-parser')
-    , breezeRoutes = require('./breeze-routes')
+    , breezeRoutes = require('./routes')
     , compress     = require('compression')
     , errorHandler = require('./errorHandler')
     , isDev        = app.get('env') === 'development'
