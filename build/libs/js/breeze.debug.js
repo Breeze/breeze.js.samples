@@ -2921,7 +2921,10 @@ var Validator = (function () {
   }
 
   function intRangeValidatorCtor(validatorName, minValue, maxValue, context) {
-    var templateExists = (context && context.messageTemplate) || ctor.messageTemplates[validatorName];
+    context = context || {};
+    if (minValue !== undefined) { context.min = minValue; }
+    if (maxValue !== undefined) { context.max = maxValue; }
+    var templateExists = context.messageTemplate || ctor.messageTemplates[validatorName];
     if (!templateExists) {
       ctor.messageTemplates[validatorName] = __formatString("'%displayName%' must be an integer between the values of %1 and %2",
           minValue, maxValue);
@@ -5206,9 +5209,9 @@ function setDpValueSimple(context, rawAccessorFn) {
 
       if (fkNames.length === 0) return;
       var npValue = parent.getProperty(np.name);
+      if (!npValue) return;
       var fkName = fkNames[propertyIx];
       if (np.isScalar) {
-        if (!npValue) return;
         npValue.setProperty(fkName, newValue);
       } else {
         npValue.forEach(function (iv) {
@@ -5487,6 +5490,13 @@ var DataType = (function () {
     return (source == null) ? source : source.toString();
   };
 
+  var coerceToGuid = function (source, sourceTypeName) {
+    if (sourceTypeName === "string") {
+      return source.trim().toLowerCase();
+    }
+    return source;
+  };
+
   var coerceToInt = function (source, sourceTypeName) {
     if (sourceTypeName === "string") {
       var src = source.trim();
@@ -5742,6 +5752,7 @@ var DataType = (function () {
   **/
   DataType.Guid = DataType.addSymbol({
   defaultValue: "00000000-0000-0000-0000-000000000000",
+  parse: coerceToGuid,
   fmtOData: fmtGuid,
   getNext: getNextGuid
   });
@@ -5842,11 +5853,18 @@ var DataType = (function () {
     if (typeof source === 'string') {
       // convert to UTC string if no time zone specifier.
       var isLocalTime = _localTimeRegex.test(source);
+      // var isLocalTime = !hasTimeZone(source);
       source = isLocalTime ? source + 'Z' : source;
     }
     source = new Date(Date.parse(source));
     return source;
   };
+
+  //function hasTimeZone(source) {
+  //  var ix = source.indexOf("T");
+  //  var timePart = source.substring(ix+1);
+  //  return  timePart.indexOf("-") >= 0 || timePart.indexOf("+") >= 0 || timePart.indexOf("Z");
+  //}
 
   // NOT YET NEEDED --------------------------------------------------
   // var _utcOffsetMs = (new Date()).getTimezoneOffset() * 60000;
@@ -5876,6 +5894,8 @@ var DataType = (function () {
       }
     } else if (dataType === DataType.Time) {
       val = DataType.parseTimeFromServer(val);
+    } else if (val && dataType === DataType.Guid) {
+      val = val.toLowerCase();
     }
     return val;
   }
@@ -6292,6 +6312,14 @@ var MetadataStore = (function () {
   proto._$typeName = "MetadataStore";
   Event.bubbleEvent(proto, null);
   ctor.ANONTYPE_PREFIX = "_IB_";
+
+
+  // needs to be made avail to breeze.dataService.xxx files
+  ctor.normalizeTypeName = __memoize(function (rawTypeName) {
+    return rawTypeName && parseTypeName(rawTypeName).typeName;
+  });
+  // for debugging use the line below instead.
+  //ctor.normalizeTypeName = function (rawTypeName) { return parseTypeName(rawTypeName).typeName; };
 
   /**
   An {{#crossLink "Event"}}{{/crossLink}} that fires after a MetadataStore has completed fetching metadata from a remote service.
@@ -6966,7 +6994,7 @@ var CsdlMetadataParser = (function () {
       if (schema.entityContainer) {
         __toArray(schema.entityContainer).forEach(function (container) {
           __toArray(container.entitySet).forEach(function (entitySet) {
-            var entityTypeName = parseTypeName(entitySet.entityType, schema).typeName;
+            var entityTypeName = parseTypeNameWithSchema(entitySet.entityType, schema).typeName;
             metadataStore.setEntityTypeForResourceName(entitySet.name, entityTypeName);
             metadataStore._entityTypeResourceMap[entityTypeName] = entitySet.name;
           });
@@ -7009,7 +7037,7 @@ var CsdlMetadataParser = (function () {
       isAbstract: csdlEntityType.abstract && csdlEntityType.abstract === 'true'
     });
     if (csdlEntityType.baseType) {
-      var baseTypeName = parseTypeName(csdlEntityType.baseType, schema).typeName;
+      var baseTypeName = parseTypeNameWithSchema(csdlEntityType.baseType, schema).typeName;
       entityType.baseTypeName = baseTypeName;
       var baseEntityType = metadataStore._getEntityType(baseTypeName, true);
       if (baseEntityType) {
@@ -7136,7 +7164,7 @@ var CsdlMetadataParser = (function () {
     // Complex properties are never nullable ( per EF specs)
     // var isNullable = csdlProperty.nullable === 'true' || csdlProperty.nullable == null;
     // var complexTypeName = csdlProperty.type.split("Edm.")[1];
-    var complexTypeName = parseTypeName(csdlProperty.type, schema).typeName;
+    var complexTypeName = parseTypeNameWithSchema(csdlProperty.type, schema).typeName;
     // can't set the name until we go thru namingConventions and these need the dp.
     var dp = new DataProperty({
       nameOnServer: csdlProperty.name,
@@ -7154,7 +7182,7 @@ var CsdlMetadataParser = (function () {
     });
 
     var isScalar = toEnd.multiplicity !== "*";
-    var dataType = parseTypeName(toEnd.type, schema).typeName;
+    var dataType = parseTypeNameWithSchema(toEnd.type, schema).typeName;
 
     var constraint = association.referentialConstraint;
     if (!constraint) {
@@ -7281,7 +7309,7 @@ var CsdlMetadataParser = (function () {
   //      -> association
 
   function getAssociation(csdlNavProperty, schema) {
-    var assocName = parseTypeName(csdlNavProperty.relationship, schema).shortTypeName;
+    var assocName = parseTypeNameWithSchema(csdlNavProperty.relationship, schema).shortTypeName;
     var assocs = schema.association;
     if (!assocs) return null;
     if (!Array.isArray(assocs)) {
@@ -7294,46 +7322,15 @@ var CsdlMetadataParser = (function () {
   }
 
   // schema is only needed for navProperty type name
-  function parseTypeName(entityTypeName, schema) {
-    if (!entityTypeName) {
-      return null;
-    }
-
-    if (__stringStartsWith(entityTypeName, MetadataStore.ANONTYPE_PREFIX)) {
-      return {
-        shortTypeName: entityTypeName,
-        namespace: "",
-        typeName: entityTypeName,
-        isAnonymous: true
-      };
-    }
-    var entityTypeNameNoAssembly = entityTypeName.split(",")[0];
-    var nameParts = entityTypeNameNoAssembly.split(".");
-    if (nameParts.length > 1) {
-
-      var shortName = nameParts[nameParts.length - 1];
-
-      var ns = null;
-      if (schema) {
-        ns = getNamespaceFor(shortName, schema);
+  function parseTypeNameWithSchema(entityTypeName, schema) {
+    var result = parseTypeName(entityTypeName);
+    if (schema) {
+      var ns = getNamespaceFor(result.shortTypeName, schema);
+      if (ns) {
+        result = makeTypeHash(result.shortTypeName, ns);
       }
-
-      if (!ns) {
-        var namespaceParts = nameParts.slice(0, nameParts.length - 1);
-        ns = namespaceParts.join(".");
-      }
-      return {
-        shortTypeName: shortName,
-        namespace: ns,
-        typeName: qualifyTypeName(shortName, ns)
-      };
-    } else {
-      return {
-        shortTypeName: entityTypeName,
-        namespace: "",
-        typeName: entityTypeName
-      };
     }
+    return result;
   }
 
   function getNamespaceFor(shortName, schema) {
@@ -7352,16 +7349,8 @@ var CsdlMetadataParser = (function () {
     return null;
   }
 
-  var normalizeTypeName = __memoize(function (rawTypeName) {
-    return rawTypeName && parseTypeName(rawTypeName).typeName;
-  });
-
-  // for debugging use the line below instead.
-  //ctor.normalizeTypeName = function (rawTypeName) { return parseTypeName(rawTypeName).typeName; };
-
   return {
-    parse: parse,
-    normalizeTypeName: normalizeTypeName
+    parse: parse
   };
 
 })();
@@ -7704,6 +7693,13 @@ var EntityType = (function () {
     if (ms && !(property.name && property.nameOnServer)) {
       updateClientServerNames(ms.namingConvention, property, "name");
     }
+    // props can be added after entity prototype has already been wrapped.
+    if (ms && this._extra) {
+      if (this._extra.alreadyWrappedProps) {
+        var proto = this._ctor.prototype;
+        __modelLibraryDef.getDefaultInstance().initializeEntityPrototype(proto);
+      }
+    }
     return this;
   };
 
@@ -7860,7 +7856,6 @@ var EntityType = (function () {
     // defaultPropertyInterceptor is a 'global' (but internal to breeze) function;
     instanceProto._$interceptor = interceptor || defaultPropertyInterceptor;
     __modelLibraryDef.getDefaultInstance().initializeEntityPrototype(instanceProto);
-
     this._ctor = aCtor;
   };
 
@@ -9277,12 +9272,51 @@ var AutoGeneratedKeyType = (function () {
 
 // functions shared between classes related to Metadata
 
+function parseTypeName(entityTypeName) {
+  if (!entityTypeName) {
+    return null;
+  }
+
+  var typeParts = entityTypeName.split(":#");
+  if (typeParts.length > 1) {
+    return makeTypeHash(typeParts[0], typeParts[1]);
+  }
+
+  if (__stringStartsWith(entityTypeName, MetadataStore.ANONTYPE_PREFIX)) {
+    var typeHash = makeTypeHash(entityTypeName);
+    typeHash.isAnonymous = true
+    return typeHash;
+  }
+  var entityTypeNameNoAssembly = entityTypeName.split(",")[0];
+  var typeParts = entityTypeNameNoAssembly.split(".");
+  if (typeParts.length > 1) {
+    var shortName = typeParts[typeParts.length - 1];
+    var namespaceParts = typeParts.slice(0, typeParts.length - 1);
+    var ns = namespaceParts.join(".");
+    return makeTypeHash(shortName, ns);
+  } else {
+    return makeTypeHash(entityTypeName);
+  }
+}
+
+function makeTypeHash(shortName, namespace) {
+  return {
+    shortTypeName: shortName,
+    namespace: namespace,
+    typeName: qualifyTypeName(shortName, namespace)
+  };
+}
+
 function isQualifiedTypeName(entityTypeName) {
   return entityTypeName.indexOf(":#") >= 0;
 }
 
 function qualifyTypeName(shortName, namespace) {
-  return shortName + ":#" + namespace;
+  if (namespace && namespace.length > 0) {
+    return shortName + ":#" + namespace;
+  } else {
+    return shortName;
+  }
 }
 
 // Used by both ComplexType and EntityType
@@ -9312,8 +9346,6 @@ breeze.DataProperty = DataProperty;
 breeze.NavigationProperty = NavigationProperty;
 breeze.AutoGeneratedKeyType = AutoGeneratedKeyType;
 
-// needs to be made avail to breeze.dataService.xxx files and we don't want to expose CsdlMetadataParser just for this.
-MetadataStore.normalizeTypeName = CsdlMetadataParser.normalizeTypeName;
 
 
 ;/**
@@ -14248,26 +14280,22 @@ var EntityManager = (function () {
             }
           } else {
             // unidirectional
-            if (np.parentType === entity.entityType) {
-
-              parentToChildNp = np;
-              if (parentToChildNp.isScalar) {
-                // 1 -> 1 eg parent: Order child: InternationalOrder
-                entity.setProperty(parentToChildNp.name, unattachedChildren[0]);
-              } else {
-                // 1 -> n  eg: parent: Region child: Terr
-                var currentChildren = entity.getProperty(parentToChildNp.name);
-                unattachedChildren.forEach(function (child) {
-                  // we know if can't already be there.
-                  currentChildren._push(child);
-                });
-              }
-            } else {
-              // n -> 1  eg: parent: child: OrderDetail parent: Product
+            // if (np.isScalar || np.parentType !== entity.entityType) {
+            if (np.isScalar) {
+              // n -> 1  eg: child: OrderDetail parent: Product
+              // 1 -> 1 eg child: Employee parent: Employee ( only Manager, no DirectReports property)
               childToParentNp = np;
-
               unattachedChildren.forEach(function (child) {
                 child.setProperty(childToParentNp.name, entity);
+              });
+            } else {
+              // 1 -> n  eg: parent: Region child: Terr
+              // TODO: need to remove unattached children from the map after this; only a perf issue.
+              parentToChildNp = np;
+              var currentChildren = entity.getProperty(parentToChildNp.name);
+              unattachedChildren.forEach(function (child) {
+                // we know if can't already be there.
+                currentChildren._push(child);
               });
             }
           }
