@@ -162,6 +162,7 @@
     <Content Include="Scripts\_references.js" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="tests\complexTypeTests.js" />
     <Content Include="tests\dtoTests.js" />
     <Content Include="tests\helpers\ccjs.model.metadata.js" />
     <Content Include="tests\jQueryAjaxAdapterTests.js" />
