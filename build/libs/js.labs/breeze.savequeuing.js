@@ -323,8 +323,8 @@
     Event.enable('hasChangesChanged', manager, false);
 
     return function restorePublishing() {
-      Event.enable('entityChanged', manager, false);
-      Event.enable('hasChangesChanged', manager, false);
+      Event.enable('entityChanged', manager, true);
+      Event.enable('hasChangesChanged', manager, true);
     }
   }
 
