@@ -778,7 +778,6 @@
         verifyQuery(newEm, query, "orders query");
     });
 
-
     function getOrderedIn1996Predicate() {
 
         var pred = breeze.Predicate
@@ -826,6 +825,60 @@
         */
     }
 
+    /*********************************************************
+    * can create predicate from array of predicates
+    *********************************************************/
+    asyncTest("can create predicate from array of predicates", function () {
+      expect(1);
+      var begDate = new Date(Date.UTC(1998, 3, 1)); // month counts from zero!
+      var endDate = new Date(Date.UTC(1999, 3, 1)); // month counts from zero!
+
+      var baseQuery = EntityQuery.from("Orders");
+      var p1 = new Predicate("Freight", ">", 100);
+      var p2 = new Predicate("OrderDate", ">", begDate);
+      var p3 = new Predicate("OrderDate", "<", endDate);
+      var preds = [p1, p2, p3];
+      var finalPred = Predicate.and(preds);
+
+      var em = newEm();
+      var query = new EntityQuery("Orders").where(finalPred);
+
+      query.using(em).execute()
+        .then(success).catch(handleFail).finally(start);
+
+      function success(data) {
+        var count = data.results.length;
+        ok(count > 0, "Should have some 1998 orders w/ freight > 100; count was " + count);
+      }
+    });
+
+    /*********************************************************
+    * can AND one predicate with an array of predicates
+    * Fails per issue https://github.com/Breeze/breeze.js/issues/86
+    *********************************************************/
+    asyncTest("can AND one predicate with an array of predicates", function () {
+      expect(1);
+      var begDate = new Date(Date.UTC(1998, 3, 1)); // month counts from zero!
+      var endDate = new Date(Date.UTC(1999, 3, 1)); // month counts from zero!
+
+      var baseQuery = EntityQuery.from("Orders");
+      var p1 = new Predicate("Freight", ">", 100);
+      var p2 = new Predicate("OrderDate", ">", begDate);
+      var p3 = new Predicate("OrderDate", "<", endDate);
+      var preds = [p2, p3];
+      var finalPred = p1.and(preds);
+
+      var em = newEm();
+      var query = new EntityQuery("Orders").where(finalPred);
+
+      query.using(em).execute()
+        .then(success).catch(handleFail).finally(start);
+
+      function success(data) {
+        var count = data.results.length;
+        ok(count > 0, "Should have some 1998 orders w/ freight > 100; count was " + count);
+      }
+    });
     /***  RELATED PROPERTY / NESTED QUERY ***/
 
     module("queryTests (related property conditions)", testFns.getModuleOptions(newEm));
