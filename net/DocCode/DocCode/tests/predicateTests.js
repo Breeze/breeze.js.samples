@@ -67,29 +67,15 @@
     // But we can test them anyway.
     // Ex3
     var p3 = new Predicate('orders', 'any', a, b, c);
-
     // Ex4
     var p4 = new Predicate('orders', 'all', a, b, c);
-
-    // These next variations fail in v.1.5.3 (D#2674)
-    // According to the documentation
-    // http://www.breezejs.com/sites/all/apidocs/classes/Predicate.html#method_create
-    // the trailing args can be predicates (either in an array or individually).
-    /*
-     * create ( property  operator  value  predicates ) ...
-     *
-     * predicates Multiple Predicates | Array of Predicate
-     *    Any null or undefined values passed in will be automatically
-     *    filtered out before constructing the composite predicate.
-     */
-    // Perhaps the API doc is wrong because it was written before "any/all".
-    // Perhaps we shouldn't offer the "predicates" signature.
-
     // Ex5
-    var p5 = Predicate.create(a, b, c, [p1, null, p2]);
-
+    var p5 = Predicate.create("orders", "any", a, b, c);
     // Ex6
-    var p6 = Predicate.create(a, b, c, p1, undefined, p2);
+    var p6 = Predicate.create("orders", "any",  [a, b, c]);
+    // Ex7
+    var p7 = Predicate.create("orders", "any", p1);
+
   });
 
   test('not - class method', function () {
