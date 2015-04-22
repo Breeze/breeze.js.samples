@@ -1,0 +1,13 @@
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="todo.model">
+  <class name="TodoItem" table="`TodoItem`" dynamic-update="true">
+    <id name="id" column="`id`" type="int">
+      <generator class="native" />
+    </id>
+    <property name="description" type="string" length="30" not-null="true" />
+    <property name="createdAt" type="timestamp" />
+    <property name="isDone" type="boolean" not-null="true" />
+    <property name="isArchived" type="boolean" not-null="true" />
+  </class>
+</hibernate-mapping>

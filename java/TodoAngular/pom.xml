@@ -1,0 +1,73 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.breezejs</groupId>
+  <artifactId>TodoAngular</artifactId>
+  <packaging>war</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>TodoAngular Maven Webapp</name>
+  <url>http://maven.apache.org</url>
+
+  <dependencies>
+	<dependency>
+		<groupId>javax.servlet</groupId>
+		<artifactId>javax.servlet-api</artifactId>
+		<scope>provided</scope>
+		<version>3.0.1</version>
+	</dependency>	
+	<dependency>
+		<groupId>com.breeze</groupId>
+		<artifactId>breeze-hibernate</artifactId>
+		<version>0.1a</version>
+	</dependency>
+	<dependency>
+		<groupId>com.breeze</groupId>
+		<artifactId>breeze-webserver</artifactId>
+		<version>0.1a</version>
+	</dependency>
+	<dependency>
+		<groupId>org.hibernate</groupId>
+		<artifactId>hibernate-core</artifactId>
+		<version>4.3.0.Final</version>
+	</dependency>
+	<dependency>
+		<groupId>org.glassfish.jersey.core</groupId>
+		<artifactId>jersey-client</artifactId>
+		<version>2.6</version>
+	</dependency>
+	<dependency>
+		<groupId>org.glassfish.jersey.containers</groupId>
+		<!-- if your container implements Servlet API older than 3.0, use "jersey-container-servlet-core"  -->
+		<artifactId>jersey-container-servlet</artifactId>
+		<version>2.6</version>
+	</dependency>
+	<dependency>
+		<groupId>com.google.guava</groupId>
+		<artifactId>guava</artifactId>
+		<version>14.0.1</version>
+	</dependency>
+
+  </dependencies>
+  <build>
+    <finalName>TodoAngular</finalName>
+
+    <plugins>
+      <plugin>
+      	<!-- `mvn assembly:single` to include dependencies in the target -->
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <descriptorRefs>
+          	<!-- a massive jar with all dependencies -->
+            <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
+          </descriptorRefs>
+          <descriptors>
+            <!-- a directory containing all the dependent jars -->
+            <descriptor>src/main/assembly/lib.xml</descriptor>
+          </descriptors>
+        </configuration>
+       </plugin>
+     </plugins>
+
+  </build>
+</project>
