@@ -4,7 +4,7 @@
     "use strict";
 
     /*********************************************************
-    * Breeze configuration and module setup 
+    * Breeze configuration and module setup
     *********************************************************/
     // Classes we'll need from the breeze namespaces
     var EntityQuery = breeze.EntityQuery;
@@ -17,7 +17,7 @@
     /*********************************************************
     * Todo Saves
     *********************************************************/
-    
+
     // Target the Todos service
     var todosServiceName = testFns.todosServiceName;
     var newTodosEm = testFns.newEmFactory(todosServiceName);
@@ -41,7 +41,7 @@
         stop(); // going async ... tell the testrunner to wait
 
         em.saveChanges() // save and wait ...
-        
+
         .fail(handleSaveFailed)
         .then(function (saveResult) { // back from save
 
@@ -79,7 +79,7 @@
         stop(); // going async ... tell the testrunner to wait
 
         em1.saveChanges() // save and wait ...
-        
+
         .fail(handleSaveFailed)
         .then(function (saveResult) { // back from save
 
@@ -209,7 +209,7 @@
     *********************************************************/
     test("hasChangesChanged event raised after saveChanges", function () {
         expect(4);
-        var em = newTodosEm();    
+        var em = newTodosEm();
         var hasChangesChangedRaised = [];
         em.hasChangesChanged.subscribe(
             function(eventArgs) {
@@ -241,7 +241,7 @@
     *********************************************************/
     asyncTest("propertyChanged raised when merged save result changes a property", function () {
         expect(3);
-        var em = newTodosEm(); 
+        var em = newTodosEm();
         var todo = em.createEntity('TodoItem', {Description: "Saved description" });
 
         em.saveChanges().then(saveSucceeded).catch(handleFail).finally(start);
@@ -303,7 +303,7 @@
         // Breeze identified the properties as "unmapped"
         ok(fooProp.isUnmapped,"'foo' should an unmapped property");
         ok(barProp.isUnmapped, "'bar' should an unmapped property");
-        
+
         // EntityManager using the extended metadata
         var em = new breeze.EntityManager({
             serviceName: todosServiceName,
@@ -313,10 +313,10 @@
         var todo = em.createEntity('TodoItem', {Description:"Save 'foo'"});
 
         equal(todo.foo(), "Foo", "unmapped 'foo' property returns expected value");
-        
+
         stop();
         em.saveChanges().then(saveSuccess).fail(saveError).fin(start);
-        
+
         function saveSuccess(saveResult) {
             ok(true, "saved TodoItem which has an unmapped 'foo' property.");
         }
@@ -325,6 +325,30 @@
             ok(false, "Save failed: " + message);
         }
 
+    });
+
+
+    /*********************************************************
+    * can cherry-pick entity to save w/ array arg
+    *********************************************************/
+    asyncTest("can cherry-pick entity to save w/ array arg", function () {
+      expect(2);
+
+      var em = newTodosEm();
+
+      var description = "Save single todo in Breeze";
+      var newTodo = em.createEntity('TodoItem', { Description: description });
+      var newTodo2 = em.createEntity('TodoItem', { Description: 'not saved' });
+
+      em.saveChanges([newTodo])
+        .then(success).fail(handleFail).fin(start);
+
+      function success(saveResult) {
+        var id = newTodo.Id(); // permanent id is now known
+        var id2 = newTodo2.Id();
+        ok(id > 0, 'should save new todo with perm id. Id is ' + id);
+        ok(id2 < 0, 'should not have saved 2nd new todo with temp id. Id is ' + id2);
+      }
     });
 
     // Test Helpers

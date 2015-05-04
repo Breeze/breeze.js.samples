@@ -650,7 +650,70 @@
             "should have no errors after remove: \"{0}\"".format(errmsgs));
     });
 
-    
+  /*********************************************************
+   * Validation message tests
+   *********************************************************/
+    test("int32 validator default message reports 'Value' out of range in English", function () {
+      var validator = breeze.Validator.int32();
+      var result = validator.validate(21474836470); // 10x larger than int32
+      var emsg = result.errorMessage;
+      ok(/must be an integer between the values of -2147483648 and 2147483647/.test(emsg),
+        'message was: ' + emsg);
+    });
+
+    test("int32 validator default message reports out of range w/ specified display name", function () {
+      var validator = breeze.Validator.int32();
+      var result = validator.validate(21474836470, {displayName: 'Foo'}); // 10x larger than int32
+      var emsg = result.errorMessage;
+      ok(/'Foo' must be an integer between the values of -2147483648 and 2147483647/.test(emsg),
+        'message was: ' + emsg);
+    });
+
+    test("int32 validator has min/max value in context object", function () {
+      var validator = breeze.Validator.int32();
+      var result = validator.validate(21474836470); // 10x larger than int32
+      var ctx = result.context;
+      equal(ctx.min, -2147483648, "should have context.min of " + -2147483648);
+      equal(ctx.max, 2147483647, "should have context.max of " + 2147483647);
+    });
+
+    test("int32 validator message is registered in messageTemplates", function () {
+      // import metadata triggered registration of message template for 'int32'
+      var msgTempl = breeze.Validator.messageTemplates['int32'];
+      ok(msgTempl, 'should have message template; is ' + msgTempl);
+    });
+
+    test("int32 validator message in messageTemplates can be changed", function () {
+      // import metadata triggered registration of message template for 'int32'
+      var origTemplate = breeze.Validator.messageTemplates['int32'];
+      try {
+        // redefine default template (should do BEFORE anything else, especially metadata import
+        breeze.Validator.messageTemplates['int32'] =
+            "'%displayName%' value, %value%, is not an int32 between %min% and %max%.";
+
+        var validator = breeze.Validator.int32(); // create using new template
+        var result = validator.validate(21474836470, { displayName: 'Bar' }); // 10x larger than int32
+        var emsg = result.errorMessage;
+        ok(/'Bar' value, 21474836470, is not an int32/.test(emsg),
+          'message was: ' + emsg);
+      } finally {
+        // restore original template
+        breeze.Validator.messageTemplates['int32'] = origTemplate;
+      }
+    });
+
+    test("int32 validator instance message can be changed", function () {
+      var validator = breeze.Validator.int32();
+
+      // redefine the validator instance's message
+      validator.context.messageTemplate =
+          "'%displayName%' value, %value%, is not an int32 between %min% and %max%.";
+
+      var result = validator.validate(21474836470, { displayName: 'Baz' }); // 10x larger than int32
+      var emsg = result.errorMessage;
+      ok(/'Baz' value, 21474836470, is not an int32/.test(emsg),
+        'message was: ' + emsg);
+    });
     /*********************************************************
     * TEST HELPERS
     *********************************************************/

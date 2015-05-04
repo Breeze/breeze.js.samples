@@ -162,6 +162,43 @@
   });
 
   /*********************************************************
+    * entityChanged and hasChangesChanged re-enabled after save processing
+    * Fixes issue: https://github.com/Breeze/breeze.js.labs/pull/23
+    * Test based on "can save modified value during save of ADDED entity"
+    *********************************************************/
+  asyncTest("entityChanged and hasChangesChanged re-enabled after save processing", function () {
+    expect(5);
+
+    // Demo enabling/disabling events
+    var Event = breeze.core.Event;
+    ok(Event.isEnabled('entityChanged', em), '"entityChanged" is enabled by default');
+
+    Event.enable('entityChanged', em, false);
+    ok(!Event.isEnabled('entityChanged', em), '"entityChanged" can be disabled');
+
+    Event.enable('entityChanged', em, true);
+    ok(Event.isEnabled('entityChanged', em), '"entityChanged" is reenabled');
+
+    // And now we test saveQueuing's effect on the 'entityChanged' and 'hasChangesChanged' events
+
+    var todo = em.createEntity('TodoItem', { Description: 'Test' });
+    em.saveChanges().catch(handleFail);
+
+    // make change while save is in progress
+    todo.setProperty('Description', 'Todo mod');
+
+    // save immediately, before first save response
+    return em.saveChanges()
+      .then(success).catch(handleFail).finally(start);
+
+    // After second save
+    function success(data) {
+      ok(Event.isEnabled('entityChanged', em), '"entityChanged" is enabled after saveQueuing');
+      ok(Event.isEnabled('hasChangesChanged', em), '"hasChangesChanged" is enabled after saveQueuing');
+    }
+  });
+
+  /*********************************************************
     * saves same value in modified entity that is changed while save in progress
     * then saved again before first save returns.
     * This test would fail in the 2nd assert in saveQueuing v.1; works in v.2
