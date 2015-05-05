@@ -5,7 +5,7 @@
  * conditions of the IdeaBlade Breeze license, available at http://www.breezejs.com/license
  *
  * Author: Ward Bell
- * Version: 2.0.4
+ * Version: 2.0.5
  * --------------------------------------------------------------------------------
  * Adds "Save Queuing" capability to new EntityManagers
  *

@@ -2392,8 +2392,8 @@ var Validator = (function () {
           return (core.stringStartsWith(v, "US"));
       };
       var countryValidator = new Validator("countryIsUS", valFn, { displayName: "Country" });
-      Validator.messageTemplates["countryIsUS", "'%displayName%' must start with 'US'");
-      This will have a similar effect to this
+      Validator.messageTemplates.countryIsUS = "'%displayName%' must start with 'US'";
+      // This will have a similar effect to this
       var countryValidator = new Validator("countryIsUS", valFn, {
           displayName: "Country", 
           messageTemplate: "'%displayName%' must start with 'US'" 
@@ -8035,32 +8035,47 @@ var EntityType = (function () {
         if (dp.isScalar) {
           dataType._updateTargetFromRaw(oldVal, rawVal, rawValueFn);
         } else {
-          // clear the old array and push new complex objects into it.
-          oldVal.length = 0;
           if (Array.isArray(rawVal)) {
-            rawVal.forEach(function (rawCo) {
+            var newVal = rawVal.map(function (rawCo) {
               var newCo = dataType._createInstanceCore(target, dp);
               dataType._updateTargetFromRaw(newCo, rawCo, rawValueFn);
               dataType._initializeInstance(newCo);
-              oldVal.push(newCo);
+              return newCo;
             });
+            if (!__arrayEquals(oldVal, newVal, coEquals)) {
+              // clear the old array and push new objects into it.
+              oldVal.length = 0;
+              newVal.forEach(function (nv) {
+                oldVal.push(nv);
+              });
+            }
+          } else {
+            oldVal.length = 0;
           }
         }
       } else {
         var val;
         if (dp.isScalar) {
-          val = parseRawValue(rawVal, dataType);
-          target.setProperty(dp.name, val);
+          var newVal = parseRawValue(rawVal, dataType);
+          target.setProperty(dp.name, newVal);
         } else {
           oldVal = target.getProperty(dp.name);
-          // clear the old array and push new complex objects into it.
-          oldVal.length = 0;
           if (Array.isArray(rawVal)) {
-            rawVal.forEach(function (rv) {
-              val = parseRawValue(rv, dataType);
-              oldVal.push(val);
+            // need to compare values
+            var newVal = rawVal.map(function (rv) {
+              return parseRawValue(rv, dataType);
             });
+            if (!__arrayEquals(oldVal, newVal)) {
+              // clear the old array and push new objects into it.
+              oldVal.length = 0;
+              newVal.forEach(function (nv) {
+                oldVal.push(nv);
+              });
+            }
+          } else {
+            oldVal.length = 0;
           }
+
         }
       }
     });
@@ -8076,6 +8091,22 @@ var EntityType = (function () {
         targetAspect.extraMetadata = rawAspect.extraMetadata;
       }
     }
+  }
+
+  function coEquals(co1, co2) {
+    var dataProps = co1.complexAspect.parentProperty.dataType.dataProperties;
+    var areEqual = dataProps.every(function (dp) {
+      if (!dp.isSettable) return true;
+      var v1 = co1.getProperty(dp.name);
+      var v2 = co2.getProperty(dp.name);
+      if (dp.isComplexProperty) {
+        return coEquals(v1, v2);
+      } else {
+        var dataType = dp.dataType; // this will be a complexType when dp is a complexProperty
+        return (v1 === v2 || (dataType && dataType.isDate && v1 && v2 && v1.valueOf() === v2.valueOf()));
+      }
+    });
+    return areEqual;
   }
 
   /**
@@ -15245,7 +15276,8 @@ var MappingContext = (function () {
         }
       }
     } else {
-      if (typeof node === 'object' && !__isDate(node)) {
+
+      if ((!meta.passThru) && typeof node === 'object' && !__isDate(node)) {
         node = processAnonType(mc, node);
       }
 
@@ -15298,7 +15330,7 @@ var MappingContext = (function () {
     node = meta.node || node;
 
     if (meta.ignore) return;
-
+    if (meta.passThru) return node;
     if (Array.isArray(node)) {
       nodeContext.nodeType = nodeContext.nodeType + "Item";
       result[key] = node.map(function (v, ix) {

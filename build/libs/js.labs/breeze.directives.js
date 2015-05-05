@@ -1,7 +1,7 @@
 /*
  * Breeze Labs: Breeze Directives for Angular Apps
  *
- *  v.1.3.9
+ *  v.1.3.10
  *
  *  Usage:
  *     Make this module a dependency of your app module:
@@ -105,7 +105,7 @@
             // get validation info for bound element and entity property
             var info = validateInfo.create(
                 scope,
-                attrs.ngModel,
+                attrs.ngModel || attrs.kNgModel, // kNgModel is for KendoUI
                 attrs.zValidate);
 
             if (!info.getValErrs) { return; } // can't do anything w/o this method
