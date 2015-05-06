@@ -2,7 +2,7 @@
  * Query and save remote data with the Breeze EntityManager
  * Also exposes the 'lookups' service which it initializes
  */
-(function(angular) {
+(function() {
     'use strict';
 
     angular.module( "app" ).factory( 'dataservice',
@@ -51,7 +51,6 @@
                     .using(manager).execute()
                     .then(function(data){return data.results;})
                     .catch(queryFailed);
-
         }
 
         function getOrderHeadersForCustomer(customer){
@@ -99,4 +98,4 @@
 
     }
 
-}( this.angular ));
+}());
