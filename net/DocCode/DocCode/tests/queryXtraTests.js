@@ -86,7 +86,7 @@
      * http://stackoverflow.com/questions/30063334/breeze-how-to-preserve-changes-to-fkey-property-when-using-expand
      *********************************************************/
       asyncTest('expand query preserves FK change', function () {
-          expect(7);
+          expect(8);
           var em = newNorthwindEm();
           var empID = 1;    // Nancy
           var newEmpID = 2; // not Nancy
@@ -120,8 +120,15 @@
 
           function gotRequeriedOrder(data) {
               var order = data.results[0];
-              var fk = order && order.getProperty('EmployeeID');
-              ok(order, 're-queried order whose EmployeeID FK is ' + fk);
+              if (!order) {
+                  ok(false, 'no results from re-query');
+                  return;
+              }
+              var fk = order.getProperty('EmployeeID');
+              ok(true, 're-queried order whose EmployeeID FK is ' + fk);
+
+              var estate =  order.entityAspect.entityState.name;
+              equal(estate, 'Modified', 're-queried order should still be in modified state; is ' + estate);
 
               equal(fk, newEmpID,
                   're-queried order\'s changed EmployeeID FK was preserved');
