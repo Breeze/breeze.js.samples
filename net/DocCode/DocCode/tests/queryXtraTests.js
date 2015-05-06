@@ -79,6 +79,70 @@
       });
 
     /*********************************************************
+     * expand query preserves FK change #D2676
+     * If change-but-do-not-save the FK that supports a nav property (e.g, 'Employee')
+     * requery w/ an expand involving that nav property should NOT overwrite
+     * the pending FK change when merge strategy is 'PreserveChanges'
+     * http://stackoverflow.com/questions/30063334/breeze-how-to-preserve-changes-to-fkey-property-when-using-expand
+     *********************************************************/
+      asyncTest('expand query preserves FK change', function () {
+          expect(7);
+          var em = newNorthwindEm();
+          var empID = 1;    // Nancy
+          var newEmpID = 2; // not Nancy
+          var query = EntityQuery.from('Orders')
+            .where('EmployeeID', '==', empID)
+            .expand('Employee')
+            .using(em);
+          
+          query.execute()
+            .then(gotOrder)
+            .then(gotRequeriedOrder)
+            .fail(handleFail).fin(start);
+
+          function gotOrder(data) {
+              var order = data.results[0];
+              var fk = order && order.getProperty('EmployeeID');
+              ok(order, 'got order whose EmployeeID FK is ' + fk);
+
+              // ACT: change the EmployeeID FK but don't save
+              order.setProperty('EmployeeID', newEmpID);
+
+              // re-query after confirming that MergeStrategy will be "PreserveChanges"
+              var mergeStrategy =
+                  (query.queryOptions && query.queryOptions.mergeStrategy) ||
+                  em.queryOptions.mergeStrategy;
+              equal(mergeStrategy.name, 'PreserveChanges',
+                  'the re-query merge strategy should be "PreserveChanges"');
+
+              return query.execute(); // re-execute the query
+          }
+
+          function gotRequeriedOrder(data) {
+              var order = data.results[0];
+              var fk = order && order.getProperty('EmployeeID');
+              ok(order, 're-queried order whose EmployeeID FK is ' + fk);
+
+              equal(fk, newEmpID,
+                  're-queried order\'s changed EmployeeID FK was preserved');
+
+              var emp = order.getProperty('Employee');
+
+              ok(emp == null,
+                  're-queried order\'s Employee should be null because EmployeeID FK is changed');
+
+              // the lone employee in cache is for the original FK
+              var emps = em.getEntities('Employee');
+              equal(emps.length, 1, 'only one employee in cache');
+
+              var emp = emps[0];
+              var emp1Pk = emp && emp.getProperty('EmployeeID');
+
+              equal(emp1Pk, empID, 'that lone cached Employee is for original FK, ' + empID);
+          }
+      })
+
+    /*********************************************************
     * object query (e.g., lookups) w/ "no tracking" does not add to cache
     * See http://stackoverflow.com/questions/28907969/breeze-js-not-honoring-the-notracking-option-when-end-point-returns-multiple-r
     *********************************************************/
