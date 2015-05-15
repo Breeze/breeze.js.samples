@@ -1,4 +1,4 @@
-	#Todo Angular Sequelize
+#Todo Angular Sequelize
 The "Todo Angular Sequelize" sample app is a single page application (SPA) built with Breeze, Angular, Node, Express, Sequelize and MySql. Instructions to install and run follow.
 
 ## Prerequisites
