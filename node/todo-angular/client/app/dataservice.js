@@ -9,37 +9,13 @@
     angular.module('app').factory('dataservice',
     ['$http', '$q', '$timeout', 'breeze', 'logger', dataservice]);
 
-    var jsonResultsAdapter = new breeze.JsonResultsAdapter({
-
-        name: "nodeWebApi_default",
-
-        visitNode: function (node, mappingContext, nodeContext) {
-            if (node == null) return {};
-            var entityTypeName = node.$type;
-            var entityType = entityTypeName && mappingContext.entityManager.metadataStore._getEntityType(entityTypeName, true);
-            var propertyName = nodeContext.propertyName;
-            var ignore = propertyName && propertyName.substr(0, 1) === "$";
-
-            return {
-                entityType: entityType,
-                nodeId: node.$id,
-                nodeRefId: node.$ref,
-                ignore: ignore
-            };
-        }
-
-    });
-
     function dataservice($http, $q, $timeout, breeze, logger) {
 
         //TODO: document this difference
         breeze.core.config.initializeAdapterInstance("uriBuilder", "json");
 
         var serviceName = 'breeze/todos';
-        var dataService = new breeze.DataService({ serviceName: serviceName, jsonResultsAdapter: jsonResultsAdapter });
-        var manager = new breeze.EntityManager( { dataService: dataService });
-        // old code
-        // var manager = new breeze.EntityManager( serviceName );
+        var manager = new breeze.EntityManager( serviceName );
         manager.enableSaveQueuing(true);
 
         var service = {
