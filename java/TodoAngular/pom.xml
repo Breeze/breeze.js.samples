@@ -19,11 +19,15 @@
 		<groupId>com.breeze</groupId>
 		<artifactId>breeze-hibernate</artifactId>
 		<version>0.1a</version>
+		<scope>system</scope>
+		<systemPath>${basedir}/repo/com/breeze/breeze-hibernate/0.1a/breeze-hibernate-0.1a.jar</systemPath>
 	</dependency>
 	<dependency>
 		<groupId>com.breeze</groupId>
 		<artifactId>breeze-webserver</artifactId>
 		<version>0.1a</version>
+		<scope>system</scope>
+		<systemPath>${basedir}/repo/com/breeze/breeze-webserver/0.1a/breeze-webserver-0.1a.jar</systemPath>
 	</dependency>
 	<dependency>
 		<groupId>org.hibernate</groupId>
