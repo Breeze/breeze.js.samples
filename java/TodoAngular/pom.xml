@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.breezejs</groupId>
+  <groupId>com.breeze</groupId>
   <artifactId>TodoAngular</artifactId>
   <packaging>war</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <name>TodoAngular Maven Webapp</name>
-  <url>http://maven.apache.org</url>
+  <url>http://breezejs.com</url>
 
   <dependencies>
 	<dependency>
@@ -19,15 +19,15 @@
 		<groupId>com.breeze</groupId>
 		<artifactId>breeze-hibernate</artifactId>
 		<version>0.1a</version>
-		<scope>system</scope>
-		<systemPath>${basedir}/repo/com/breeze/breeze-hibernate/0.1a/breeze-hibernate-0.1a.jar</systemPath>
+		<!-- <scope>system</scope>
+		<systemPath>${basedir}/repo/com/breeze/breeze-hibernate/0.1a/breeze-hibernate-0.1a.jar</systemPath> -->
 	</dependency>
 	<dependency>
 		<groupId>com.breeze</groupId>
 		<artifactId>breeze-webserver</artifactId>
 		<version>0.1a</version>
-		<scope>system</scope>
-		<systemPath>${basedir}/repo/com/breeze/breeze-webserver/0.1a/breeze-webserver-0.1a.jar</systemPath>
+		<!-- <scope>system</scope>
+		<systemPath>${basedir}/repo/com/breeze/breeze-webserver/0.1a/breeze-webserver-0.1a.jar</systemPath> -->
 	</dependency>
 	<dependency>
 		<groupId>org.hibernate</groupId>
@@ -49,6 +49,11 @@
 		<groupId>com.google.guava</groupId>
 		<artifactId>guava</artifactId>
 		<version>14.0.1</version>
+	</dependency>
+	<dependency>
+		<groupId>com.google.code.gson</groupId>
+		<artifactId>gson</artifactId>
+		<version>2.3.1</version>
 	</dependency>
 
   </dependencies>
