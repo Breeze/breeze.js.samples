@@ -1,7 +1,7 @@
 call setenv.bat
 
 ::copy local breeze packages to maven local repo directory
-xcopy  ..\repo %MAVEN_REPO% /s /e
+xcopy  ..\repo %MAVEN_REPO% /s /e /y
 
 ::initialize error flag to undefined
 set "mvnErr="
