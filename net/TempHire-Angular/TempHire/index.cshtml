@@ -1,0 +1,56 @@
+﻿@using System.Web
+@using System.Web.Optimization
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TempHire</title>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="format-detection" content="telephone=no"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        @Styles.Render("~/Content/css")
+        <script type="text/javascript">
+            if (navigator.userAgent.match(/IEMobile\/10\.0/)) {
+                var msViewportStyle = document.createElement("style");
+                var mq = "@@-ms-viewport{width:auto!important}";
+                msViewportStyle.appendChild(document.createTextNode(mq));
+                document.getElementsByTagName("head")[0].appendChild(msViewportStyle);
+            }
+        </script>
+
+    </head>
+<body ng-app="main" ng-controller="MainController as app">
+    <div ng-viewport></div>
+
+    @Scripts.Render("~/scripts/vendor")
+    @Scripts.Render("~/scripts/angular")
+
+    <script type="text/javascript" src="App/main.js"></script>
+
+    <script type="text/javascript" src="App/model/modelBuilder.js"></script>
+    <script type="text/javascript" src="App/services/utilities.js"></script>
+    <script type="text/javascript" src="App/services/logger.js"></script>
+    <script type="text/javascript" src="App/services/errorhandler.js"></script>
+    <script type="text/javascript" src="App/services/eventaggregator.js"></script>
+    <script type="text/javascript" src="App/services/account.js"></script>
+    <script type="text/javascript" src="App/services/entitymanagerprovider.js"></script>
+    <script type="text/javascript" src="App/services/repository.js"></script>
+    <script type="text/javascript" src="App/services/unitofwork.js"></script>
+    <script type="text/javascript" src="App/services/messagebox.js"></script>
+
+
+    <script type="text/javascript" src="App/components/shell/shell.js"></script>
+    <script type="text/javascript" src="App/components/login/login.js"></script>
+    <script type="text/javascript" src="App/components/home/home.js"></script>
+    <script type="text/javascript" src="App/components/resourcemgt/resourcemgt.js"></script>
+    <script type="text/javascript" src="App/components/details/details.js"></script>
+    <script type="text/javascript" src="App/components/details/nameeditor.js"></script>
+    <script type="text/javascript" src="App/components/contacts/contacts.js"></script>
+    <script type="text/javascript" src="App/components/contacts/optionselector.js"></script>
+
+
+</body>
+</html>

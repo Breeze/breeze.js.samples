@@ -1,0 +1,16 @@
+﻿<nav class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <a class="brand" href="/">
+            <span class="title">TempHire Breeze</span>
+        </a>
+        <div class="btn-group" ng-repeat="nav in shell.navigations">
+            <a class="btn btn-info" ng-class="{ 'active': shell.isActiveRoute(nav.href) }" href="{{nav.href}}">{{nav.title}}</a>
+            <!--<a class="btn btn-info" ng-link="{{nav.link}}">{{nav.title}}</a>-->
+        </div>
+        <div class="loader pull-right" ng-class="{ 'active': shell.$router.navigating }">
+            <div class="progress progress-striped active page-progress-bar">
+                <div class="bar" style="width: 100px;"></div>
+            </div>
+        </div>
+    </div>
+</nav>

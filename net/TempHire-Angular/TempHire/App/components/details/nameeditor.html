@@ -1,0 +1,23 @@
+﻿<div class="messageBox">
+    <div class="modal-body">
+        <section>
+            <div class="formfieldwithlabel">
+                <label for="firstName" class="label">First name:</label>
+                <input type="text" id="firstName" class="right" ng-model="nameeditor.firstName" />
+            </div>
+            <div class="formfieldwithlabel">
+                <label for="middleName" class="label">Middle name:</label>
+                <input type="text" id="middleName" class="right" ng-model="nameeditor.middleName" />
+            </div>
+            <div class="formfieldwithlabel">
+                <label for="lastName" class="label">Last name:</label>
+                <input type="text" id="lastName" class="right" ng-model="nameeditor.lastName" />
+            </div>
+        </section>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" ng-disabled="!nameeditor.canConfirm()" ng-click="nameeditor.confirm()">Ok</button>
+        <button class="btn" ng-click="nameeditor.cancel()">Cancel</button>
+    </div>
+</div>
+
