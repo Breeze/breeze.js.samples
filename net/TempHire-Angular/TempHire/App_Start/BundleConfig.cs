@@ -40,6 +40,29 @@ namespace TempHire
                 .Include("~/Content/toastr.css")
                 .Include("~/Content/app.css")
               );
+
+            bundles.Add(
+                new ScriptBundle("~/scripts/app")
+                    .Include("~/App/main.js")
+                    .Include("~/App/model/modelBuilder.js")
+                    .Include("~/App/services/utilities.js")
+                    .Include("~/App/services/logger.js")
+                    .Include("~/App/services/errorhandler.js")
+                    .Include("~/App/services/eventaggregator.js")
+                    .Include("~/App/services/account.js")
+                    .Include("~/App/services/entitymanagerprovider.js")
+                    .Include("~/App/services/repository.js")
+                    .Include("~/App/services/unitofwork.js")
+                    .Include("~/App/services/messagebox.js")
+                    .Include("~/App/components/shell/shell.js")
+                    .Include("~/App/components/login/login.js")
+                    .Include("~/App/components/home/home.js")
+                    .Include("~/App/components/resourcemgt/resourcemgt.js")
+                    .Include("~/App/components/details/details.js")
+                    .Include("~/App/components/details/nameeditor.js")
+                    .Include("~/App/components/contacts/contacts.js")
+                    .Include("~/App/components/contacts/optionselector.js")
+            );
         }
 
         public static void AddDefaultIgnorePatterns(IgnoreList ignoreList)
