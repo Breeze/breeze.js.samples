@@ -1,16 +1,13 @@
 ﻿(function(angular) {
     'use strict';
 
-    var moduleId = 'viewmodel.details';
-
-    angular.module(moduleId, [])
+    angular.module('viewmodel.details', [])
         .controller('DetailsController', ['$q', '$router', '$routeParams', '$modal', 'eventaggregator', 'unitofwork', 'errorhandler', 'messagebox', controller]);
 
     function controller($q, $router, $routeParams, $modal, eventaggregator, unitOfWorkManager, errorhandler, messagebox) {
-        this.moduleId = moduleId;
-
         this.$q = $q;
         this.$modal = $modal;
+        this.initialized = false;
         this.staffingResourceId = $routeParams.id;
         this.staffingResource = null;
         this.unitOfWorkManager = unitOfWorkManager;
@@ -65,9 +62,12 @@
             self.canSave = self.unitOfWork.hasChanges();
         });
 
+        if (this.initialized) { return; }
+
         this.unitOfWork.staffingResources.withId(this.staffingResourceId)
             .then(function(data) {
                 self.staffingResource = data;
+                self.initialized = true;
             })
             .catch(self.handleError);
     }

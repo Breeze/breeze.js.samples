@@ -1,8 +1,7 @@
 ﻿(function(angular) {
     'use strict';
 
-    var moduleId = 'services';
-    angular.module(moduleId)
+    angular.module('services')
         .factory('messagebox', ['$modal', factory])
         .controller('MessageBoxController', ['$modalInstance', 'args', controller]);
 

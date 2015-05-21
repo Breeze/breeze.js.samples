@@ -1,11 +1,9 @@
 ﻿(function(angular) {
     'use strict';
 
-    var moduleId = 'viewmodel.contacts';
-    angular.module(moduleId).controller('OptionSelectorController', ['$modalInstance', 'args', controller]);
+    angular.module('viewmodel.contacts').controller('OptionSelectorController', ['$modalInstance', 'args', controller]);
 
     function controller($modalInstance, args) {
-        this.moduleId = moduleId + '.optionselector';
         this.$modalInstance = $modalInstance;
         this.label = args.label;
         this.options = args.options;

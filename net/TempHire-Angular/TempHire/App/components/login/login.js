@@ -1,13 +1,10 @@
 ﻿(function(angular) {
     'use strict';
 
-    var moduleId = 'viewmodel.login';
-
-    angular.module(moduleId, [])
+    angular.module('viewmodel.login', [])
         .controller('LoginController', ['$location', '$q', 'errorhandler', 'account', controller]);
 
     function controller($location, $q, errorhandler, account) {
-        this.moduleId = moduleId;
         this.$location = $location;
         this.$q = $q;
         this.account = account;

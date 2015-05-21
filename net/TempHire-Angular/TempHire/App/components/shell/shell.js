@@ -1,15 +1,12 @@
 ﻿(function(angular) {
     'use strict';
 
-    var moduleId = 'viewmodel.shell';
-
-    angular.module(moduleId, [])
+    angular.module('viewmodel.shell', [])
         .controller('ShellController', ['$location', '$router', 'errorhandler', 'entitymanagerprovider', 'modelBuilder', controller]);
 
     function controller($location, $router, errorhandler, entitymanagerprovider, modelBuilder) {
         entitymanagerprovider.modelBuilder = modelBuilder.extendMetadata;
 
-        this.moduleId = moduleId;
         this.$location = $location;
         this.$router = $router;
         this.entitymanagerprovider = entitymanagerprovider;

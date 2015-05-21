@@ -1,12 +1,9 @@
 ﻿(function(angular) {
     'use strict';
 
-    var moduleId = 'viewmodel.details';
-
-    angular.module(moduleId).controller('NameEditorController', ['$modalInstance', 'unitofwork', 'errorhandler', 'id', controller]);
+    angular.module('viewmodel.details').controller('NameEditorController', ['$modalInstance', 'unitofwork', 'errorhandler', 'id', controller]);
 
     function controller($modalInstance, unitofwork, errorhandler, id) {
-        this.moduleId = moduleId + '.nameeditor';
         this.staffingResourceId = id;
         this.firstName = null;
         this.middleName = null;

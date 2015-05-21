@@ -1,12 +1,9 @@
 ﻿(function(angular) {
     'use strict';
 
-    var moduleId = 'viewmodel.home';
-
-    angular.module(moduleId, []).controller('HomeController', ['logger', controller]);
+    angular.module('viewmodel.home', []).controller('HomeController', ['logger', controller]);
 
     function controller(logger) {
-        this.moduleId = moduleId;
         this.logger = logger;
         this.title = 'Home View';
     }

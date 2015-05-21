@@ -1,17 +1,14 @@
 ﻿(function(angular) {
     'use strict';
 
-    var moduleId = 'viewmodel.contacts';
-
-    angular.module(moduleId, [])
+    angular.module('viewmodel.contacts', [])
         .controller('ContactsController', ['$q', '$routeParams', '$modal', 'breeze', 'unitofwork', 'logger', 'errorhandler', controller]);
 
     function controller($q, $routeParams, $modal, breeze, unitOfWorkManager, logger, errorhandler) {
-        this.moduleId = moduleId;
-
         this.$q = $q;
         this.$modal = $modal;
         this.breeze = breeze;
+        this.initialized = false;
         this.staffingResourceId = $routeParams.id;
         this.staffingResource = null;
         this.states = [];
@@ -34,6 +31,8 @@
     function activate() {
         var self = this;
 
+        if (this.initialized) { return; }
+
         var root = this.unitOfWork.staffingResources.withId(this.staffingResourceId)
             .then(function(data) {
                 self.staffingResource = data;
@@ -52,7 +51,9 @@
         // Load phone numbers
         var phoneNumbers = this.unitOfWork.phoneNumbers.find(predicate);
 
-        this.$q.all([root, states, addresses, phoneNumbers]).catch(self.handleError);
+        this.$q.all([root, states, addresses, phoneNumbers]).then(function() {
+            self.initialized = true;
+        }).catch(self.handleError);
     }
 
     function addPhoneNumber() {

@@ -1,14 +1,10 @@
 ﻿(function(angular) {
     'use strict';
 
-    var moduleId = 'viewmodel.resourcemgt';
-
-    angular.module(moduleId, [])
+    angular.module('viewmodel.resourcemgt', [])
         .controller('ResourcemgtController', ['$router', 'errorhandler', 'eventaggregator', 'unitofwork', controller]);
 
     function controller($router, errorhandler, eventaggregator, unitofwork) {
-        this.moduleId = moduleId;
-
         $router.config([
             {
                 path: '/:id',
