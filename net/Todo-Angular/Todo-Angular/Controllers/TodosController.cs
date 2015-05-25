@@ -12,12 +12,12 @@ namespace Todo.Controllers
 {
     [BreezeController]
     public class TodosController : ApiController {
-
+        #region stuff
         static readonly TimeSpan RefreshRate = TimeSpan.FromMinutes(60);
         private static readonly object Locker = new object();
         static DateTime _lastRefresh = DateTime.Now; // will first clear db at Now + "RefreshRate" 
         // static DateTime lastRefresh = DateTime.MinValue; // will clear when server starts
-
+        #endregion
         readonly EFContextProvider<TodosContext> _contextProvider =
             new EFContextProvider<TodosContext>();
 
@@ -26,14 +26,14 @@ namespace Todo.Controllers
             PeriodicReset();
         }
 
-        // ~/breeze/todos/Metadata 
+        // ~/breeze/todos/Metadata
         [HttpGet]
         public string Metadata() {
             return _contextProvider.Metadata();
         }
 
         // ~/breeze/todos/Todos
-        // ~/breeze/todos/Todos?$filter=IsArchived eq false&$orderby=CreatedAt 
+        // ~/breeze/todos/Todos?$filter=IsArchived eq false&$orderby=CreatedAt
         [HttpGet]
         public IQueryable<TodoItem> Todos() {
             return _contextProvider.Context.Todos;
