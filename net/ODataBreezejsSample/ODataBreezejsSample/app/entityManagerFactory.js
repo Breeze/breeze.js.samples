@@ -35,7 +35,5 @@
             var mgr = new breeze.EntityManager(serviceName);
             return mgr;
         }
-
-
     }
 })();
