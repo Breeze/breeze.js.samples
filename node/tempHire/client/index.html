@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>TempHire</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="css/ie10mobile.css" />
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <link rel="stylesheet" href="css/bootstrap-responsive.css" />
+    <link rel="stylesheet" href="css/durandal.css" />
+    <link rel="stylesheet" href="css/toastr.css" />
+    <link rel="stylesheet" href="css/app.css" />
+
+    <script type="text/javascript">
+        if (navigator.userAgent.match(/IEMobile\/10\.0/)) {
+            var msViewportStyle = document.createElement("style");
+            var mq = "@@-ms-viewport{width:auto!important}";
+            msViewportStyle.appendChild(document.createTextNode(mq));
+            document.getElementsByTagName("head")[0].appendChild(msViewportStyle);
+        }
+    </script>
+</head>
+<body>
+
+    <div id="applicationHost"></div>
+
+    <script src ="scripts/jquery-2.0.3.js"></script>
+    <script src ="scripts/knockout-2.3.0.debug.js"></script>
+    <script src ="scripts/toastr.js"></script>
+    <script src ="scripts/q.js"></script>
+    <script src ="scripts/breeze.debug.js"></script>
+    <script src ="scripts/bootstrap.js"></script>
+    <script src ="scripts/moment.js"></script>
+
+    <script type="text/javascript" src="scripts/require.js" data-main="/app/main"></script>
+
+</body>
+</html>
