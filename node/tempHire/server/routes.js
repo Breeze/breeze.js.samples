@@ -32,7 +32,7 @@
     exports.init = init;
 
     function init(app) {
-        app.get('/breeze/Metadata', function (req, res, next) {
+        app.get('/breeze/Metadata', ensureAuthenticated, function (req, res, next) {
             try {
                 var metadata = readMetadata();
                 res.send(metadata);
@@ -41,7 +41,7 @@
             }
         });
 
-        app.get('/breeze/resourcemgt/Lookups', function(req, res, next){
+        app.get('/breeze/resourcemgt/Lookups', ensureAuthenticated, function(req, res, next){
             var entityQueries = ['AddressTypes', 'PhoneNumberTypes', 'RateTypes', 'States'].map(function(resourceName){
                 return EntityQuery.fromUrl(req.url, resourceName);
             });
@@ -54,7 +54,7 @@
             executeEntityQueries(entityQueries, flattenLookupsArrayFn, res, next);
         });
 
-        app.get('/breeze/resourcemgt/StaffingResourceListItems', function(req, res, next) {
+        app.get('/breeze/resourcemgt/StaffingResourceListItems', ensureAuthenticated, function(req, res, next) {
             var entityQuery = EntityQuery.fromUrl(req.url, 'StaffingResources').expand('Addresses.State, PhoneNumbers');
             var projectResultsFn = function(staffingResources, res) {
                 var projections = staffingResources.map(function(staffingResource) {
@@ -87,13 +87,13 @@
             executeEntityQuery(entityQuery, projectResultsFn, res, next);
         });
 
-        app.get('/breeze/resourcemgt/:entity', function (req, res, next) {
+        app.get('/breeze/resourcemgt/:entity', ensureAuthenticated, function (req, res, next) {
             var resourceName = req.params.entity;
             var entityQuery = EntityQuery.fromUrl(req.url, resourceName);
             executeEntityQuery(entityQuery, null, res, next);
         });
 
-        app.post('/breeze/resourcemgt/SaveChanges', function (req, res, next) {
+        app.post('/breeze/resourcemgt/SaveChanges', ensureAuthenticated, function (req, res, next) {
             var saveHandler = new SequelizeSaveHandler(_sequelizeManager, req);
             saveHandler.save().then(function(r) {
                 returnResults(r, res);
@@ -101,6 +101,11 @@
                 next(e);
             });
         });
+
+        function ensureAuthenticated(req, res, next) {
+            if(req.isAuthenticated()) { return next(); }
+            res.status(401).end();
+        }
     }
 
     function seed() {

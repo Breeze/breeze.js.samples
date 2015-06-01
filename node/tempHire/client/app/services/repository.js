@@ -17,13 +17,6 @@
                 if (!entityTypeName)
                     throw new Error("Repository must be created with an entity type specified");
 
-                //var predicate = breeze.Predicate.create('id', '==', key);
-                //return this.find(predicate).then(function(data){
-                //    if (!data)
-                //        throw new Error("Entity not found!");
-                //    return data[0];
-                //});
-
                 return manager().fetchEntityByKey(entityTypeName, key, true)
                     .then(function(data) {
                         if (!data.entity)

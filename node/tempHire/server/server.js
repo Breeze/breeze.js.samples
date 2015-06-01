@@ -17,6 +17,7 @@
  */
 var express        = require('express')
     , app          = express()
+    , auth         = require('./auth')
     , bodyParser   = require('body-parser')
     , breezeRoutes = require('./routes')
     , compress     = require('compression')
@@ -30,6 +31,7 @@ app.use(compress());
 app.use(bodyParser()); // both json & urlencoded
 app.use(express.static(__dirname + '/../client'));
 
+auth.configureAuthentication(app);  //configure app authentication
 breezeRoutes.init(app); // Configure breeze-specific routes for REST API
 
 // a test POST endpoint ... for the demo

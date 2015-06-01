@@ -9,6 +9,7 @@
     "breeze-sequelize": "0.0.14",
     "compression": "~1.0.1",
     "express": "^4.0.0",
+    "express-session": "^1.11.2",
     "morgan": "~1.0.0",
     "mysql": "^2.5.5",
     "node-uuid": "^1.4.3",
