@@ -23,11 +23,11 @@
 
     var _sequelizeManager = createSequelizeManager();
 
-    //_sequelizeManager.sync(true)
-    //    .then(seed)
-    //    .then(function() {
-    //        console.log('db init successful');
-    //    });
+    _sequelizeManager.sync(true)
+       .then(seed)
+       .then(function() {
+           console.log('db init successful');
+       });
 
     exports.init = init;
 
