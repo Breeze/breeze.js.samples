@@ -1,5 +1,13 @@
-define(['durandal/system'],
-    function (system) {
+(function(angular) {
+    'use strict';
+
+    angular.module('services').factory('logger', ['$log', factory]);
+
+    function factory($log) {
+
+        toastr.options.positionClass = 'toast-bottom-right';
+        toastr.options.backgroundpositionClass = 'toast-bottom-right';
+
         var logger = {
             log: log,
             logError: logError
@@ -18,9 +26,9 @@ define(['durandal/system'],
         function logIt(message, data, source, showToast, toastType) {
             source = source ? '[' + source + '] ' : '';
             if (data) {
-                system.log(source, message, data);
+                $log.log(source, message, data);
             } else {
-                system.log(source, message);
+                $log.log(source, message);
             }
             if (showToast) {
                 if (toastType === 'error') {
@@ -32,4 +40,6 @@ define(['durandal/system'],
             }
 
         }
-    });
+    }
+
+})(window.angular);

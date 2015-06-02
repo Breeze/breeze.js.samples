@@ -1,5 +1,10 @@
-﻿define(['services/entitymanagerprovider', 'services/repository', 'durandal/app'],
-    function (entityManagerProvider, repository, app) {
+﻿(function(angular) {
+    'use strict';
+
+    angular.module('services')
+        .factory('unitofwork', ['eventaggregator', 'entitymanagerprovider', 'repository', factory]);
+
+    function factory (eventaggregator, entityManagerProvider, repository) {
 
         var refs = {};
 
@@ -17,7 +22,7 @@
 
                     return provider.manager().saveChanges(null, saveOptions)
                         .then(function(saveResult) {
-                            app.trigger('saved', saveResult.entities);
+                            eventaggregator.publish('saved', saveResult.entities);
                         });
                 };
 
@@ -96,4 +101,6 @@
                 }
             }
         }
-    });
+    }
+
+})(window.angular);

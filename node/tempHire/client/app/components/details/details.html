@@ -1,0 +1,13 @@
+﻿<section style="margin-top: 20px">
+    <div class="btn-group">
+        <button class="btn" ng-disabled="!details.canSave" ng-click="details.save()">Save</button>
+        <button class="btn" ng-disabled="!details.canSave" ng-click="details.cancel()">Cancel</button>
+    </div>
+
+    <div>
+        <a><h2 class="name-link" ng-click="details.editName()">{{details.staffingResource.fullName}}</h2></a>
+        <textarea class="summary" rows="5" ng-model="details.staffingResource.summary"></textarea>
+    </div>
+
+    <!--<div ng-viewport></div>-->
+</section>

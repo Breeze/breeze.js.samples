@@ -1,0 +1,57 @@
+﻿<section>
+    <div class="addresses">
+        <h3>Addresses:</h3>
+        <button class="btn btn-mini" ng-click="contacts.addAddress()"><span style="font-weight:bolder">+</span></button>
+        <div ng-repeat="address in contacts.staffingResource.addresses">
+            <div style="display: inline-block">
+                <div class="address">
+                    <section>
+                        <label class="label">{{address.addressType.displayName}}</label>
+                    </section>
+                    <div class="formfieldwithlabel">
+                        <label class="label">Address 1: </label>
+                        <input class="right" type="text" ng-model="address.address1" />
+                    </div>
+                    <div class="formfieldwithlabel">
+                        <label class="label">Address 2:</label>
+                        <input class="right" type="text" ng-model="address.address2" />
+                    </div>
+                    <div class="formfieldwithlabel">
+                        <label class="label">City:</label>
+                        <input class="right" type="text" ng-model="address.city" />
+                    </div>
+                    <div class="formfieldwithlabel">
+                        <label class="label">State:</label>
+                        <select class="right" ng-options="state.id as state.name for state in contacts.states | orderBy: 'name' " ng-model="address.stateId"></select>
+                    </div>
+                    <div class="formfieldwithlabel">
+                        <label class="label">Zipcode:</label>
+                        <input class="right" type="text" ng-model="address.zipcode" />
+                    </div>
+                </div>
+                <div class="btn-group-vertical" style="margin-top:30px">
+                    <button class="btn btn-mini" ng-disabled="address.primary" ng-click="contacts.setPrimaryAddress(address)">Set Primary</button>
+                    <button class="btn btn-mini" style="margin-top:10px" ng-disabled="address.primary || contacts.staffingResource.addresses.length === 1" ng-click="contacts.deleteAddress(address)">Delete</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="phonenumbers">
+        <h3>Phone Numbers:</h3>
+        <button class="btn btn-mini" ng-click="contacts.addPhoneNumber()"><span style="font-weight:bolder">+</span></button>
+        <div ng-repeat="phoneNumber in contacts.staffingResource.phoneNumbers">
+            <div class="phonenumber">
+                <section>
+                    <label class="label">{{phoneNumber.phoneNumberType.name}} Phone:</label>
+                </section>
+                <div class="btn-group right" style="margin-left: 10px;margin-top: 3px">
+                    <button class="btn btn-mini" ng-disabled="phoneNumber.primary" ng-click="contacts.setPrimaryPhoneNumber(phoneNumber)">Set Primary</button>
+                    <button class="btn btn-mini" style="margin-left: 5px" ng-disabled="phoneNumber.primary || contacts.staffingResource.phoneNumbers.length === 1" ng-click="contacts.deletePhoneNumber(phoneNumber)">Delete</button>
+                </div>
+                <input type="text" class="right" ng-model="phoneNumber.number" style="width: 100px" />
+                <input type="text" class="right" ng-model="phoneNumber.areaCode" style="width: 30px" />
+            </div>
+        </div>
+    </div>
+</section>

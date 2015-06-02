@@ -1,8 +1,12 @@
-﻿define([],
-    function() {
+﻿(function(angular) {
+    'use strict';
 
+    var model = angular.module('model', []);
+    model.factory('modelBuilder', [factory]);
+
+    function factory() {
         var self = {
-          extendMetadata: extendMetadata  
+            extendMetadata: extendMetadata
         };
 
         return self;
@@ -15,15 +19,15 @@
 
         function extendStaffingResource(metadataStore) {
             var staffingResourceCtor = function () {
-                this.id = ko.observable(breeze.core.getUuid());
+                this.id = breeze.core.getUuid();
             };
 
             staffingResourceCtor.prototype.addAddress = function (typeId) {
-                return this.entityAspect.entityManager.createEntity('Address', { addressTypeId: typeId, staffingResourceId: this.id() });
+                return this.entityAspect.entityManager.createEntity('Address', { addressTypeId: typeId, staffingResourceId: this.id });
             };
 
             staffingResourceCtor.prototype.addPhoneNumber = function (typeId) {
-                return this.entityAspect.entityManager.createEntity('PhoneNumber', { phoneNumberTypeId: typeId, staffingResourceId: this.id() });
+                return this.entityAspect.entityManager.createEntity('PhoneNumber', { phoneNumberTypeId: typeId, staffingResourceId: this.id });
             };
 
             staffingResourceCtor.prototype.deletePhoneNumber = function (phoneNumber) {
@@ -37,11 +41,11 @@
                 ensureEntityType(phoneNumber, 'PhoneNumber');
                 this.throwIfNotOwnerOf(phoneNumber);
 
-                ko.utils.arrayForEach(this.phoneNumbers(), function (x) {
-                    x.primary(false);
+                this.phoneNumbers.forEach(function (x) {
+                    x.primary = false;
                 });
 
-                phoneNumber.primary(true);
+                phoneNumber.primary = true;
             };
 
             staffingResourceCtor.prototype.deleteAddress = function (address) {
@@ -55,26 +59,30 @@
                 ensureEntityType(address, 'Address');
                 this.throwIfNotOwnerOf(address);
 
-                ko.utils.arrayForEach(this.addresses(), function (x) {
-                    x.primary(false);
+                this.addresses.forEach(function (x) {
+                    x.primary = false;
                 });
 
-                address.primary(true);
+                address.primary = true;
             };
 
             staffingResourceCtor.prototype.throwIfNotOwnerOf = function (obj) {
-                if (!obj.staffingResourceId || obj.staffingResourceId() !== this.id()) {
+                if (!obj.staffingResourceId || obj.staffingResourceId !== this.id) {
                     throw new Error('Object is not associated with current StaffingResource');
                 }
             };
 
             var staffingResourceInitializer = function (staffingResource) {
-                staffingResource.fullName = ko.computed(function () {
-                    if (staffingResource.middleName()) {
-                        return staffingResource.firstName() + ' ' + staffingResource.middleName() + ' ' + staffingResource.lastName();
-                    }
+                Object.defineProperty(staffingResourceCtor.prototype, 'fullName', {
+                    enumerable: true,
+                    configurable: true,
+                    get: function() {
+                        if (this.middleName) {
+                            return this.firstName + ' ' + this.middleName + ' ' + this.lastName;
+                        }
+                        return this.firstName + ' ' + this.lastName;
 
-                    return staffingResource.firstName() + ' ' + staffingResource.lastName();
+                    }
                 });
             };
 
@@ -83,7 +91,7 @@
 
         function extendAddress(metadataStore) {
             var addressCtor = function () {
-                this.id = ko.observable(breeze.core.getUuid());
+                this.id = breeze.core.getUuid();
             };
 
             metadataStore.registerEntityTypeCtor('Address', addressCtor);
@@ -91,7 +99,7 @@
 
         function extendPhoneNumber(metadataStore) {
             var phoneNumberCtor = function () {
-                this.id = ko.observable(breeze.core.getUuid());
+                this.id = breeze.core.getUuid();
             };
 
             metadataStore.registerEntityTypeCtor('PhoneNumber', phoneNumberCtor);
@@ -102,4 +110,6 @@
                 throw new Error('Object must be an entity of type ' + entityTypeName);
             }
         }
-    });
+    }
+
+})(window.angular);

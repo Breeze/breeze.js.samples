@@ -1,0 +1,26 @@
+{
+  "name": "client",
+  "version": "0.0.0",
+  "homepage": "https://github.com/Breeze/breeze.js.samples",
+  "authors": [
+    "dkoswara <denisk@ideablade.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "knockout": "~3.3.0",
+    "toastr": "~2.1.1",
+    "q": "1.0.1",
+    "moment": "~2.10.3",
+    "breeze-client": "~1.5.4",
+    "bootstrap": "2.2.2"
+  }
+}

@@ -1,56 +1,51 @@
-﻿require.config({
-    baseUrl: '/app',
-    paths: {
-        'text': '../scripts/text',
-        'durandal': '../scripts/durandal',
-        'plugins': '../scripts/durandal/plugins',
-        'transitions': '../scripts/durandal/transitions'
+﻿(function(angular) {
+    'use strict';
+
+    var mainApp = angular.module('main', ['ngNewRouter', 'ui.bootstrap', 'breeze.angular', 'model', 'services', 'viewmodel.shell', 'viewmodel.login', 'viewmodel.home', 'viewmodel.resourcemgt', 'viewmodel.details', 'viewmodel.contacts']);
+
+    mainApp.config(['$componentLoaderProvider', configureComponentLoader]);
+
+    mainApp.config(['$pipelineProvider', configurePipelineSteps]);
+
+    mainApp.factory('setCtrlModuleId', setCtrlModuleIdFactory);
+
+    mainApp.controller('MainController', ['$router', controller]);
+
+    function setCtrlModuleIdFactory() {
+        return function routeStep(instruction) {
+            instruction.router.traverseInstruction(instruction, function (instr) {
+                var ctrl = instr.controller;
+                return ctrl.moduleId = instr.component;
+            });
+        };
     }
-});
 
-define('jquery', function () { return jQuery; });
-define('knockout', ko);
-
-define(['durandal/app', 'durandal/viewLocator', 'durandal/system', 'plugins/router', 'services/logger'],
-    function(app, viewLocator, system, router, logger) {
-
-        // Enable debug message to show in the console 
-        system.debug(true);
-
-        app.title = 'TempHire';
-        
-        // Specify which plugins to install und their configuation
-        app.configurePlugins({
-            router: true,
-            dialog: true
+    function configureComponentLoader($componentLoaderProvider) {
+        //configure the default template mapping function to look under 'App' folder for template urls
+        var origFn = $componentLoaderProvider.$get().template;
+        $componentLoaderProvider.setTemplateMapping(function (name) {
+            return 'App/' + origFn(name);
         });
+    }
 
-        app.start().then(function() {
+    function configurePipelineSteps($pipelineProvider) {
+        var steps = $pipelineProvider.steps;
+        //Insert after $initControllersStep
+        steps.splice(3, 0, 'setCtrlModuleId');
+        $pipelineProvider.config(steps);
+    }
+    
+    function controller($router) {
 
-            // Q shim
-            system.defer = function(action) {
-                var deferred = Q.defer();
-                action.call(deferred, deferred);
-                var promise = deferred.promise;
-                deferred.promise = function() {
-                    return promise;
-                };
+        $router.config([
+            //{ path: '/', redirectTo: '/main' },
+            { path: '/', component: 'shell' },
+            //{ path: '/shell', component: 'shell' },
+            //{ path: '/shell', components: { shellComp: 'shell' } },
+            //{ path: '/home', components: { homeComponent: 'home' } }
+            //{ path: '/home', component: 'home' },
+            //{ path: '/resourcemgt', component: 'resourcemgt' }
+        ]);
+    }   
 
-                return deferred;
-            };
-
-            toastr.options.positionClass = 'toast-bottom-right';
-            toastr.options.backgroundpositionClass = 'toast-bottom-right';
-
-            //router.handleInvalidRoute = function(route, params) {
-            //    logger.logError('No Route Found', route, 'main', true);
-            //};
-
-            // When finding a viewmodel module, replace the viewmodel string 
-            // with view to find it partner view.
-            viewLocator.useConvention();
-
-            //Show the app by setting the root view model for our application.
-            app.setRoot('viewmodels/shell', 'entrance');
-        });
-    });
+})(window.angular);

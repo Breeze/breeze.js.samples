@@ -1,5 +1,10 @@
-﻿define([],
-    function() {
+﻿(function(angular) {
+    'use strict';
+
+    angular.module('services')
+        .factory('account', ['$http', factory]);
+
+    function factory($http) {
 
         var self = {
             loginUser: loginUser
@@ -13,17 +18,14 @@
                 password: password
             };
 
-            return Q.when($.ajax({
-                url: '/breeze/account/login',
-                type: 'POST',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify(data)
-            })).fail(handleError);
+            return $http.post('/breeze/account/login', data).error(handleError);
         }
 
-        function handleError(response) {
-            var error = JSON.parse(response.responseText);
-            throw new Error(error.ExceptionMessage);
+        function handleError(data, status) {
+            var error = JSON.parse(data);
+            throw new Error(error);
         }
-    });
+    };
+
+})(window.angular);
+    

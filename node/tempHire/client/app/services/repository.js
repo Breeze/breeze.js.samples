@@ -1,80 +1,86 @@
-﻿define(function() {
+﻿(function(angular) {
+    'use strict';
 
-    var Repository = (function () {
-        
-        var repository = function (entityManagerProvider, entityTypeName, resourceName, fetchStrategy) {
-            
-            // Ensure resourceName is registered
-            var entityType;
-            if (entityTypeName) {
-                entityType = getMetastore().getEntityType(entityTypeName);
-                entityType.setProperties({ defaultResourceName: resourceName });
+    angular.module('services').factory('repository', ['breeze', factory]);
 
-                getMetastore().setEntityTypeForResourceName(resourceName, entityTypeName);
-            }
+    function factory(breeze) {
+        var Repository = (function () {
 
-            this.withId = function (key) {
-                if (!entityTypeName)
-                    throw new Error("Repository must be created with an entity type specified");
+            var repository = function (entityManagerProvider, entityTypeName, resourceName, fetchStrategy) {
 
-                return manager().fetchEntityByKey(entityTypeName, key, true)
-                    .then(function(data) {
-                        if (!data.entity)
-                            throw new Error("Entity not found!");
-                        return data.entity;
-                    });
+                // Ensure resourceName is registered
+                var entityType;
+                if (entityTypeName) {
+                    entityType = getMetastore().getEntityType(entityTypeName);
+                    entityType.setProperties({ defaultResourceName: resourceName });
+
+                    getMetastore().setEntityTypeForResourceName(resourceName, entityTypeName);
+                }
+
+                this.withId = function (key) {
+                    if (!entityTypeName)
+                        throw new Error("Repository must be created with an entity type specified");
+
+                    return manager().fetchEntityByKey(entityTypeName, key, true)
+                        .then(function (data) {
+                            if (!data.entity)
+                                throw new Error("Entity not found!");
+                            return data.entity;
+                        });
+                };
+
+                this.find = function (predicate) {
+                    var query = breeze.EntityQuery
+                        .from(resourceName)
+                        .where(predicate);
+
+                    return executeQuery(query);
+                };
+
+                this.findInCache = function (predicate) {
+                    var query = breeze.EntityQuery
+                        .from(resourceName)
+                        .where(predicate);
+
+                    return executeCacheQuery(query);
+                };
+
+                this.all = function () {
+                    var query = breeze.EntityQuery
+                        .from(resourceName);
+
+                    return executeQuery(query);
+                };
+
+                function executeQuery(query) {
+                    return entityManagerProvider.manager()
+                        .executeQuery(query.using(fetchStrategy || breeze.FetchStrategy.FromServer))
+                        .then(function (data) { return data.results; });
+                }
+
+                function executeCacheQuery(query) {
+                    return entityManagerProvider.manager().executeQueryLocally(query);
+                }
+
+                function getMetastore() {
+                    return manager().metadataStore;
+                }
+
+                function manager() {
+                    return entityManagerProvider.manager();
+                }
             };
-            
-            this.find = function (predicate) {
-                var query = breeze.EntityQuery
-                    .from(resourceName)
-                    .where(predicate);
 
-                return executeQuery(query);
-            };
+            return repository;
+        })();
 
-            this.findInCache = function(predicate) {
-                var query = breeze.EntityQuery
-                    .from(resourceName)
-                    .where(predicate);
-
-                return executeCacheQuery(query);
-            };
-
-            this.all = function () {
-                var query = breeze.EntityQuery
-                    .from(resourceName);
-
-                return executeQuery(query);
-            };
-
-            function executeQuery(query) {
-                return entityManagerProvider.manager()
-                    .executeQuery(query.using(fetchStrategy || breeze.FetchStrategy.FromServer))
-                    .then(function(data) { return data.results; });
-            }
-            
-            function executeCacheQuery(query) {
-                return entityManagerProvider.manager().executeQueryLocally(query);
-            }
-            
-            function getMetastore() {
-                return manager().metadataStore;
-            }
-            
-            function manager() {
-                return entityManagerProvider.manager();
-            }
+        return {
+            create: create
         };
 
-        return repository;
-    })();
-
-    return {
-        create: create
-    };
-    
-    function create(entityManagerProvider, entityTypeName, resourceName, fetchStrategy) {
-        return new Repository(entityManagerProvider, entityTypeName, resourceName, fetchStrategy);
+        function create(entityManagerProvider, entityTypeName, resourceName, fetchStrategy) {
+            return new Repository(entityManagerProvider, entityTypeName, resourceName, fetchStrategy);
+        }
     }
-});
+
+})(window.angular);

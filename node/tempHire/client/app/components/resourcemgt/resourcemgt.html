@@ -1,0 +1,32 @@
+﻿<section>
+    <table class="list">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Address 1</th>
+                <th>Address 2</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Zipcode</th>
+                <th>Phone</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="selectable-row" ng-repeat="sr in resourcemgt.staffingResources">
+                <!--<td><a ng-link="details({id: sr.id})">{{sr.id}}</a></td>-->
+                <td><a href="/#/resourcemgt/{{sr.id}}">{{sr.fullName}}</a></td>
+                <!--<td>{{sr.fullName}}</td>-->
+                <td>{{sr.address1}}</td>
+                <td>{{sr.address2}}</td>
+                <td>{{sr.city}}</td>
+                <td>{{sr.state}}</td>
+                <td>{{sr.zipcode}}</td>
+                <td>{{sr.phoneNumber}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!--<div ng-viewport></div>--> 
+    <div ng-viewport="details"></div>
+    <div ng-viewport="contacts"></div>
+</section>

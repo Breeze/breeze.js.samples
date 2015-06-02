@@ -1,0 +1,14 @@
+﻿<div class="messageBox">
+    <div class="modal-body">
+        <section>
+            <label for="options" class="label">{{optionselector.label}}</label>
+            <select id="options" class="right" ng-options="{{optionselector.optionExpressions}}" ng-model="optionselector.selectedValue"></select>
+        </section>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" ng-click="optionselector.confirm()">Ok</button>
+        <button class="btn" ng-click="optionselector.cancel()">Cancel</button>
+    </div>
+</div>
+
+

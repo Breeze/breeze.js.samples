@@ -26,19 +26,39 @@
         }
     </script>
 </head>
-<body>
+<body ng-app="main" ng-controller="MainController as app">
+    <div ng-viewport></div>
 
-    <div id="applicationHost"></div>
+   <script src="scripts/jquery-2.0.3.js"></script>
+   <script src="scripts/toastr.js"></script>
+   <script src="scripts/breeze.debug.js"></script>
+   <script src="scripts/bootstrap.js"></script>
+   <script src="scripts/moment.js"></script>
 
-    <script src ="scripts/jquery-2.0.3.js"></script>
-    <script src ="scripts/knockout-2.3.0.debug.js"></script>
-    <script src ="scripts/toastr.js"></script>
-    <script src ="scripts/q.js"></script>
-    <script src ="scripts/breeze.debug.js"></script>
-    <script src ="scripts/bootstrap.js"></script>
-    <script src ="scripts/moment.js"></script>
+   <script src="scripts/angular/angular.js"></script>
+   <script src="scripts/angular-ui/ui-bootstrap-tpls.js"></script>
+   <script src="scripts/angular/router.es5.js"></script>
+   <script src="scripts/breeze.bridge.angular.js"></script>
 
-    <script type="text/javascript" src="scripts/require.js" data-main="/app/main"></script>
 
+   <script src="app/main.js"></script>
+   <script src="app/model/modelBuilder.js"></script>
+   <script src="app/services/utilities.js"></script>
+   <script src="app/services/logger.js"></script>
+   <script src="app/services/errorhandler.js"></script>
+   <script src="app/services/eventaggregator.js"></script>
+   <script src="app/services/account.js"></script>
+   <script src="app/services/entitymanagerprovider.js"></script>
+   <script src="app/services/repository.js"></script>
+   <script src="app/services/unitofwork.js"></script>
+   <script src="app/services/messagebox.js"></script>
+   <script src="app/components/shell/shell.js"></script>
+   <script src="app/components/login/login.js"></script>
+   <script src="app/components/home/home.js"></script>
+   <script src="app/components/resourcemgt/resourcemgt.js"></script>
+   <script src="app/components/details/details.js"></script>
+   <script src="app/components/details/nameeditor.js"></script>
+   <script src="app/components/contacts/contacts.js"></script>
+   <script src="app/components/contacts/optionselector.js"></script>
 </body>
 </html>
