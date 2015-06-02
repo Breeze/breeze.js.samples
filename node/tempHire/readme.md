@@ -1,5 +1,5 @@
 #TempHire Sequelize
-The "TempHire Sequelize" sample app is a single page application (SPA) built with Breeze, Durandal, Node, Express, Sequelize and MySql. Instructions to install and run follow.
+The "TempHire Sequelize" sample app is a single page application (SPA) built with Breeze, Angular, Node, Express, Sequelize and MySql. Instructions to install and run follow.
 
 ## Prerequisites
 * Node.js >=0.10
