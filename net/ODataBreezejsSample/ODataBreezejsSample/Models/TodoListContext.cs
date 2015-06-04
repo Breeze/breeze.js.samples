@@ -19,21 +19,40 @@ namespace ODataBreezejsSample.Models
         {
             protected override void Seed(TodoListContext context)
             {
-                int maxElements = 5;
                 DateTime created = DateTime.UtcNow;
-                IList<TodoList> todoLists = Enumerable.Range(0, maxElements).Select(i => new TodoList
+                var todoLists = new List<TodoList> ();
+                string[] listTitles = { "Work", "Band", "Home", "Wedding", "Other" };
+                string[][] items = {
+                    new string[] {"Organise 1st 1000 unread emails", "Organise performance review", "Ignore performance review", "Fix coffee machine again"},  
+                    new string[] {"Buy new drums", "Sack bass player", "Record album", "Release album", "Dominate world"}, 
+                    new string[] {"Fix shower", "Paint decking", "Defrost ice box yet again"}, 
+                    new string[] {"Go on stag", "Avoid monumental hangover on stag", "Buy suit", "Buy ring", "Avoid losing ring", "Write invites"},
+                    new string[] {"Pick up laundry", "Fix car yet again"}
+                };
+
+                for (int i = 0; i < listTitles.Length; i++)
+                {
+                    var myList = new TodoList()
                     {
                         Id = i,
-                        Title = "Title " + i,
+                        Title = listTitles[i],
                         Created = created,
-                        TodoItems = Enumerable.Range(0, i).Select(j => new TodoItem
+                        TodoItems = new List<TodoItem>()
+                    };
+                    for (int j = 0; j < items[i].Length; j++)
+			        {
+                        myList.TodoItems.Add(new TodoItem()
                         {
-                            Id = i * maxElements + j,
-                            Description = "Description for item " + i * maxElements + j,
-                            IsDone = j % 3 == 0,
+                            Id = i * listTitles.Length + j,
+                            Description = items[i][j],
+                            IsDone = j % 5 == 0,
                             TodoListId = i
-                        }).ToList()
-                    }).ToList();
+                        });
+			        }
+
+                    todoLists.Add(myList);
+                }
+
                 context.TodoLists.AddRange(todoLists);
             }
         }
