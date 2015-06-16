@@ -1,6 +1,6 @@
 {
-  "name": "Todo-Node-Sequelize-MySql",
-  "description": "A demonstration of Breeze, Sequelize-MySql, Express, Angular, and Node.js (BSMEAN)",
+  "name": "Todo-Node-Sequelize",
+  "description": "A demonstration of Breeze, Sequelize, Express, Angular, and Node.js (BSMEAN)",
   "version": "0.0.0",
   "private": true,
   "dependencies": {
@@ -9,7 +9,9 @@
     "compression": "~1.0.1",
     "express": "^4.0.0",
     "morgan": "~1.0.0",
-    "mysql": "^2.5.5",
+    "mysql": "2.5.5",
+    "pg": "4.4.0",
+    "pg-hstore": "2.3.2",
     "sequelize": "2.0.0-rc2"
   },
   "devDependencies": {

@@ -1,0 +1,1 @@
+CREATE ROLE demo PASSWORD 'password' CREATEDB LOGIN;

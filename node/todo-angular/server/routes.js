@@ -11,7 +11,6 @@
     var breeze = breezeSequelize.breeze;
     var EntityQuery = breeze.EntityQuery;
 
-    //TODO: how to make this user agnostic
     //this assumes user 'demo' exists and has db privileges
     var dbConfig = {
         host: "localhost",
@@ -20,11 +19,15 @@
         dbName: 'todos'
     };
 
-    var _sequelizeManager = createSequelizeManager();
+    //if this flag is set to false, we're using 'mysql' which is the default
+    var usePostgres = false;
+    var _sequelizeManager = createSequelizeManager(usePostgres);
 
-    _sequelizeManager.sync(true).then(seed).then(function(){
-        console.log('db init successful');
-    });
+    if(!usePostgres) {
+        _sequelizeManager.sync(true).then(seed).then(function () {
+            console.log('db init successful');
+        });
+    }
 
     exports.init = init;
 
@@ -108,9 +111,10 @@
         return Todos.destroy(options);
     }
 
-    function createSequelizeManager() {
+    function createSequelizeManager(usePostgres) {
         var metadata = readMetadata();
-        var sm = new SequelizeManager(dbConfig);
+        var sequelizeOptions = usePostgres ? {dialect: 'postgres', port: 5432} : null;
+        var sm = new SequelizeManager(dbConfig, sequelizeOptions);
         sm.importMetadata(metadata);
 
         return sm;
