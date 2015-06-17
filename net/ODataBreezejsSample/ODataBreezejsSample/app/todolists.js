@@ -101,7 +101,7 @@
             var changeCount = datacontext.getChangesCount();
             if (changeCount) {
                 // Todo: show modal dialog and offer to cancel
-                alert('Uh oh, you\'re about to loose changes: ' + changeCount);
+                alert('Uh oh, you\'re about to lose changes: ' + changeCount);
             }
 
             vm.todolists = [];
