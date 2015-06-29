@@ -34,11 +34,13 @@ Switch the current connection to the new `todos` database by creating a new conn
 
 Run the *~/node/todo-angular/db-script/postgres/#3 - init-todos-table.sql* script
 
+##Instructing Breeze to use PostgreSQL
+
+By default, the server will connect to a MySql db instance. If you want  the server to connect to a Postgres instance, you can toggle the flag located at [routes.js](https://github.com/Breeze/breeze.js.samples/blob/feature/todo-angular-node-postgres/node/todo-angular/server/routes.js#L23)
+
 ##Install dependencies and launch app server
 
 Navigate to the server folder, *~/node/todo-angular/server*
-
->By default, the server will connect to a MySql db instance. If you want  the server to connect to a Postgres instance, you can toggle the flag located at [routes.js](https://github.com/Breeze/breeze.js.samples/blob/feature/todo-angular-node-postgres/node/todo-angular/server/routes.js#L23)
 
 Install dependencies and launch the app server: `npm start`
 
