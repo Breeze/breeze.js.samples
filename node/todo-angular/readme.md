@@ -26,7 +26,13 @@ Run the *~/node/todo-angular/db-script/postgres/#1 - create-demo-user.sql* scrip
 
 Run the *~/node/todo-angular/db-script/postgres/#2 - create-todos-database.sql* script
 
-Switch the current connection to the new `todos` database and run the *~/node/todo-angular/db-script/postgres/#3 - init-todos-table.sql* script
+Switch the current connection to the new `todos` database by creating a new connection as shown below.
+
+![](images/switch_connection_01.png?raw=true)
+
+![](images/switch_connection_02.png?raw=true)
+
+Run the *~/node/todo-angular/db-script/postgres/#3 - init-todos-table.sql* script
 
 ##Install dependencies and launch app server
 
