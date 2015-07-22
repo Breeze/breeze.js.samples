@@ -3,7 +3,7 @@
 
 This sample illustrates a BreezeJS client working with a Ruby on Rails backend. 
 
-The [Breeze CCJS-Ruby sample documentation](http://www.breezejs.com/samples/intro-spa-ruby) has more information about this sample.
+The [Breeze CCJS-Ruby sample documentation](http://breeze.github.io/doc-samples/intro-to-spa-ruby.html) has more information about this sample.
 
 There are two main directories, "client" and "rails".
 

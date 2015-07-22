@@ -1,4 +1,4 @@
-<img src="http://www.getbreezenow.com/sites/default/files/samples/edmunds-app-logo_0.png" alt="Edmunds" style="float:left; height:70px; margin-right: 8px;"/><h1>The Edmunds "Not My Server" Sample</h1>
+<img src="http://breeze.github.io/images/samples/edmunds-app-logo.png" alt="Edmunds" style="float:left; height:70px; margin-right: 8px;"/><h1>The Edmunds "Not My Server" Sample</h1>
 
 This sample application reads the "Make" and "Model" data from the Edmunds.com Vehicle Information service and translates those data into Breeze entities.
 
@@ -11,7 +11,7 @@ This sample application reads the "Make" and "Model" data from the Edmunds.com V
 
 Just some HTML and JavaScript on the client talking to a public 3rd party API that is completely out of our control.
 
-[Learn the full story on our web site](http://www.breezejs.com/samples/edmunds).
+[Learn the full story on our web site](http://breeze.github.io/doc-samples/edmunds.html).
 
 Here's what you need to know to get it going.
 

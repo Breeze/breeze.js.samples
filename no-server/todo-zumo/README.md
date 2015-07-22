@@ -1,4 +1,4 @@
-<img src="http://www.getbreezenow.com/sites/default/files/samples/BreezeZumo.png" alt="Todo App with Azure" style="float:left; height:70px; margin-right: 8px;"/><h1>The Breeze/Angular Todo-Zumo App</h1>
+<img src="http://breeze.github.io/images/samples/BreezeZumo.png" alt="Todo App with Azure" style="float:left; height:70px; margin-right: 8px;"/><h1>The Breeze/Angular Todo-Zumo App</h1>
 
 "**todo-zumo**" is a simple **one-screen Angular Todo app**  that demonstrates features of a Breeze + Angular.
 
@@ -64,7 +64,7 @@ The application should appear in the browser. **You may have to wait a minute fo
 
 When the data are loaded. You can start adding, modifying and deleting TodoItems. It might look like this:
 
-![Todo App with Azure](http://www.breezejs.com/sites/default/files/images/Todo-Zumo.png)
+![Todo App with Azure](http://breeze.github.io/images/samples/Todo-Zumo.png)
 
 Notice that
 
@@ -118,7 +118,7 @@ Now we'll reconfigure the application to target the Web API
 
 It should look something like this:
 
-![Todo App with WebAPI](http://www.breezejs.com/sites/default/files/images//Todo-WebAPI.png)
+![Todo App with WebAPI](http://breeze.github.io/images/samples/Todo-WebAPI.png)
 
 Unlike the Azure version, the Web API version expects the server to generate the Breeze metadata (from the Entity Framework model). If you inspect the network traffic, you'll see that the app made a metadata request: `http://localhost:58066/breeze/todos/Metadata`.
 
