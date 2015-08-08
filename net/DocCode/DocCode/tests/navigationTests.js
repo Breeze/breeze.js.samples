@@ -413,6 +413,52 @@
              "order is modified after deletion of parent customer");
     });
 
+    /*****************************
+     * Deleting parent in 1-to-1 relationship modifies the child
+     * because child has a FK property pointing to the parent which must be reset
+     *****************************/
+    test("Deleting parent in 1-to-1 relationship modifies the child", function () {
+        var em = createEmForOneToOneTests();
+
+        // add fake Parent and Child entities 
+        var p1 = em.createEntity('Parent', { id: 1, name: 'P1' });
+        var c1 = em.createEntity('Child', { id: 2, name: 'C1', parent: p1 });
+        // as if queried from database
+        em.acceptChanges();
+
+        ok(!em.hasChanges(), 'should not have pending changes');
+
+        p1.entityAspect.setDeleted() // Delete p1
+        equal(p1.entityAspect.entityState.name, 'Deleted', 'parent marked deleted');
+        equal(c1.entityAspect.entityState.name, 'Modified', 'child changed after parent deleted');
+        equal(c1.getProperty('parentId'), null, 'child.parentId set to null');
+    });
+
+    /*****************************
+     * Deleting child in 1-to-1 relationship does not modify the parent
+     * because parent has no FK property pointing to the child
+     * Defect: see https://github.com/Breeze/breeze.js/issues/104
+     *****************************/
+    test("Deleting child in 1-to-1 relationship does not modify the parent", function () {
+        var em = createEmForOneToOneTests();
+
+        // add fake Parent and Child entities 
+        var p1 = em.createEntity('Parent', { id: 1, name: 'P1' });
+        var c1 = em.createEntity('Child', { id: 2, name: 'C1', parent: p1 });
+        // as if queried from database
+        em.acceptChanges();
+
+        ok(!em.hasChanges(), 'should not have pending changes');
+
+        c1.entityAspect.setDeleted() // Delete c1
+        equal(c1.entityAspect.entityState.name, 'Deleted', 'child marked deleted');
+        equal(p1.entityAspect.entityState.name, 'Unchanged', 'parent unchanged after child deleted');
+
+        var originalValues = p1.entityAspect.originalValues;
+        equal(Object.keys(originalValues).length, 0,
+            'parent\'s originalValues should be empty');
+    });
+
     /*********************************************************
     * setting child's parent entity null removes it from old parent
     *********************************************************/
@@ -828,7 +874,7 @@
     });
 
     /******* PECULIAR CASES ***********/
-    
+
     /*********************************************************
     * can set child' parent navigation when both child and parent are detached
     * Use case: NONE ... don't do this. It may work but that is accidental
@@ -859,6 +905,58 @@
     /*********************************************************
     * helpers
     *********************************************************/
+    // There is not one-to-one relationship in any sample model so we make one
+    // Be sure to give this function an empty metadataStore or a clone!
+    function AddOneToOneTypes(metadataStore) {
+        var DT = breeze.DataType;
+
+        metadataStore.addEntityType(new breeze.EntityType({
+            shortName: "Parent",
+            dataProperties: {
+                id: { dataType: DT.Int32, isPartOfKey: true, isNullable: false },
+                name: {}
+            },
+            navigationProperties: {
+                child: {
+                    entityTypeName: "Child",
+                    associationName: "Parent_Child"
+                }
+            }
+        }));
+
+        metadataStore.addEntityType(new breeze.EntityType({
+            shortName: "Child",
+            dataProperties: {
+                id: { dataType: DT.Int32, isPartOfKey: true, isNullable: false },
+                name: {},
+                parentId: { dataType: DT.Int32 }
+            },
+            navigationProperties: {
+                parent: {
+                    entityTypeName: "Parent",
+                    associationName: "Parent_Child",
+                    foreignKeyNames: ["parentId"] 
+                }
+            }
+        }));
+    }
+
+    function createEmForOneToOneTests() {
+        // create metadatastore w/ 1-to-1 relationship
+        var metadataStore = new breeze.MetadataStore;
+        AddOneToOneTypes(metadataStore);
+        // create fake dataservice and create EM for that service
+        var dataService = new breeze.DataService({
+            serviceName: 'dummy',
+            hasServerMetadata: false
+        });
+        metadataStore.addDataService(dataService);
+        var manager = new breeze.EntityManager({
+            dataService: dataService,
+            metadataStore: metadataStore
+        });
+        return manager;
+    }
 
     function getCustomerType() {
         return newEm.options.metadataStore.getEntityType("Customer");
