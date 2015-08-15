@@ -8,13 +8,21 @@
   <name>TodoAngular Maven Webapp</name>
   <url>http://breezejs.com</url>
 
+  <repositories>
+    <repository>
+        <id>maven-breeze</id>
+        <name>Breeze Repository</name>
+        <url>https://raw.githubusercontent.com/Breeze/breeze.server.java/master/maven-repo/</url>
+    </repository>
+  </repositories>
+
   <dependencies>
 	<dependency>
 		<groupId>javax.servlet</groupId>
 		<artifactId>javax.servlet-api</artifactId>
 		<scope>provided</scope>
 		<version>3.0.1</version>
-	</dependency>	
+	</dependency>
 	<dependency>
 		<groupId>com.breeze</groupId>
 		<artifactId>breeze-hibernate</artifactId>

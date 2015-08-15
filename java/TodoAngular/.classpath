@@ -17,6 +17,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/jboss/jandex/1.1.0.Final/jandex-1.1.0.Final.jar"/>
 	<classpathentry kind="var" path="M2_REPO/com/google/code/gson/gson/2.3.1/gson-2.3.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar"/>
-	<classpathentry kind="lib" path="repo/com/breeze/breeze-hibernate/0.1a/breeze-hibernate-0.1a.jar"/>
-	<classpathentry kind="lib" path="repo/com/breeze/breeze-webserver/0.1a/breeze-webserver-0.1a.jar"/>
+    <classpathentry kind="var" path="M2_REPO/com/breeze/breeze-hibernate/0.1a/breeze-hibernate-0.1a.jar"/>
+    <classpathentry kind="var" path="M2_REPO/com/breeze/breeze-webserver/0.1a/breeze-webserver-0.1a.jar"/>
 </classpath>
