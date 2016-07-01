@@ -1,0 +1,22 @@
+{{#if baseClass}}
+import { {{baseClass}} } from './{{baseClass}}';
+{{/if}}
+{{#imports}}import { {{path}} } from './{{path}}';
+{{/imports}}
+
+/// <code-import> Place custom imports between <code-import> tags
+{{{codeimport}}}
+/// </code-import>
+
+export class {{shortName}} {{#baseClass}}extends {{.}} {{/baseClass}}{
+
+   /// <code> Place custom code between <code> tags
+   {{{code}}}
+   /// </code>
+
+   // Generated code. Do not place code below this line.
+   {{#properties}}
+   {{name}}: {{dataType}};
+   {{/properties}}
+}
+
