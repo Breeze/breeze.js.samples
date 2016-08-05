@@ -687,8 +687,8 @@
 
         stop();
 
-        // all should return exactly 15 orders
-        runQuery(em, query, "AND orders query", 15)
+        // all should return exactly 16 orders
+        runQuery(em, query, "AND orders query", 16)
         .fail(handleFail)
         .fin(start);
     });
@@ -724,8 +724,8 @@
 
         stop();
 
-        // all should return exactly 256 orders
-        runQuery(em, query, "OR orders query", 256)
+        // all should return exactly 259 orders
+        runQuery(em, query, "OR orders query", 259)
         .fail(handleFail)
         .fin(start);
     });
