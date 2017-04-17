@@ -66,7 +66,7 @@ to the command as in:
 
 Web Storm is a nice IDE for development and debugging. You can run the tests inside Web Storm with Karma or as a Node application.
 
-####Run with Karma
+#### Run with Karma
 
 1. Create a Web Storm configuration for "karma" (one time setup)
 

@@ -1,5 +1,5 @@
 
-#CCJS - Ruby on Rails
+# CCJS - Ruby on Rails
 
 This sample illustrates a BreezeJS client working with a Ruby on Rails backend. 
 
@@ -7,15 +7,15 @@ The [Breeze CCJS-Ruby sample documentation](http://breeze.github.io/doc-samples/
 
 There are two main directories, "client" and "rails".
 
-###client
+### client
 The client app (CCJS) is derived from the published source code for John Papa's "Code Camper Jumpstart". Learn about CCJS in his justly famous PluralSight course, ["Single Page Apps JumpStart"](http://pluralsight.com/training/Courses/TableOfContents/single-page-apps-jumpstart)
 
 It has been modified in small but important ways to interact with a Rails backend instead of the ASP.NET Web API backend in the original. In all other respects (except the ruby re-coloring), it is the same as the original. John's course is the best guide to it's behavior and implementation.
 
-###rails
+### rails
 This "rails" directory holds the Ruby on Rails code and database data for the CCJS-Ruby sample.
 
-###prerequisites
+### prerequisites
 We assume you are familiar with Ruby and have Rails, MySql, and some kind of web server installed in your environment. 
 
 There are four principle steps to running the application.
@@ -25,7 +25,7 @@ There are four principle steps to running the application.
 3. Start client app server
 4. Launch app in a browser
 
-#Setup 
+# Setup 
 
 You only perform this step once.
 
@@ -53,7 +53,7 @@ f.  Import Data as follows, replacing [user] with your MySQL user (e.g., admin);
 
 >if mysql is not in your path, specify the full executable path, e.g. *C:/Program Files/MySQL/MySQL Server 5.5/bin/mysql*
 
-#Start the rails server
+# Start the rails server
 
 **Make sure nothing else is running on port 3000!**
 
@@ -63,7 +63,7 @@ Go to the *~/ccjs_ruby/rails* directory if you're not already there. In a termin
 
 The rails **server** is running on port **3000**
 
-#Start the client application server
+# Start the client application server
 
 Most of the client application assets - html, css, JavaScript - are in the *~/ccjs_ruby/client* directory.
 
@@ -87,6 +87,6 @@ Here is an example running in Python.
 
 The **client** application server is now running on port **8000**
 
-#Launch the app in your browser
+# Launch the app in your browser
 
 Open a browser to **http://localhost:8000/**

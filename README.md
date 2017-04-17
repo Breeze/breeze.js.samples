@@ -1,4 +1,4 @@
-#About the Breeze JS Samples
+# About the Breeze JS Samples
 
 The *Breeze JavaScript client samples* demonstrate BreezeJS in action in different technology environments. They are (almost) all maintained by the Breeze core team.
 

@@ -1,4 +1,4 @@
-#Todo Angular Hibernate
+# Todo Angular Hibernate
 The "Todo Angular Hibernate" sample app is a single page application (SPA) built with Breeze, Angular, and Hibernate. Instructions to install and run follow.
 
 ## Prerequisites
@@ -7,7 +7,7 @@ The "Todo Angular Hibernate" sample app is a single page application (SPA) built
 * [Apache Tomcat](http://tomcat.apache.org/)
 * [MySql](http://www.mysql.com)
 
-##Download samples
+## Download samples
 
 Download [ALL of the Breeze JavaScript samples from github](https://github.com/Breeze/breeze.js.samples "breeze.js.samples on github")
 as [a zip file](https://github.com/Breeze/breeze.js.samples/archive/master.zip "breeze.js.samples zip file").
@@ -15,13 +15,13 @@ as [a zip file](https://github.com/Breeze/breeze.js.samples/archive/master.zip "
 In this case we're interested in the "TodoAngular" sample, located in the *java/TodoAngular* directory.
 These instructions assume this will be your current working directory.
 
-##Install MySql and run database scripts
+## Install MySql and run database scripts
 
 Run the *~/java/TodoAngular/db\_script/init\_todos.sql* script to create the 'todos' database.
 
 Run the *~/java/TodoAngular/db\_script/create\_demo\_user.sql* script to create the 'demo' user and grant it permission to the 'todos' database.
 
-##Build and deploy
+## Build and deploy
 
 We'll be building the project with Maven and deploying it with Apache Tomcat. We have provided build scripts to make the build and deployment process easier.
 
@@ -30,6 +30,6 @@ We'll be building the project with Maven and deploying it with Apache Tomcat. We
 3. Modify the two path variables, MAVEN\_REPO and CATALINA\_HOME accordingly
 4. Run the *build.bat* script
 
-##Launch Todo-Angular in a browser
+## Launch Todo-Angular in a browser
 
 Start your browser with address [**http://localhost:8080/TodoAngular**](http://localhost:8080/TodoAngular)
