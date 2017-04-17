@@ -1,4 +1,4 @@
-#Zza Node Mongo
+# Zza Node Mongo
 The "Zza Node Mongo" sample app is a single page application (SPA) built with Breeze, Angular, Node, and MongoDB. Instructions to install and run follow.
 
 ## Prerequisites
@@ -6,7 +6,7 @@ The "Zza Node Mongo" sample app is a single page application (SPA) built with Br
 * <a href="http://blog.mongodb.org/post/82092813806/mongodb-2-6-our-biggest-release-ever"
   target="_blank" title="MongoDb release 2.6 announcement">MongoDb >= v.2.6</a>
 
-##Download samples
+## Download samples
 
 Download [ALL of the Breeze JavaScript samples from github](https://github.com/Breeze/breeze.js.samples "breeze.js.samples on github")
 as [a zip file](https://github.com/Breeze/breeze.js.samples/archive/master.zip "breeze.js.samples zip file").
@@ -14,7 +14,7 @@ as [a zip file](https://github.com/Breeze/breeze.js.samples/archive/master.zip "
 In this case we're interested in the "Zza" sample, located in the *node/zza-node-mongo* directory.
 These instructions assume this will be your current working directory.
 
-##Install MongoDb database and run MongoDb server
+## Install MongoDb database and run MongoDb server
 
 Unzip *~/database/zza-mongo-database.zip* into the *database* directory.
 
@@ -28,7 +28,7 @@ Start mongodb server while pointing to this database directory. On my windows ma
 
 Console output should indicate that MongoDb server started successfully and is listening on port 27017 (or adjust the `mongodbUrl` in `~\server\database.js` to the appropriate port).
 
-##Install dependencies and launch app server
+## Install dependencies and launch app server
 
 Open a second command / terminal window
 
@@ -46,7 +46,7 @@ Launch the app server: `node server.js`
 
 Console output should indicate that app server started successfully and is **listening on port 3000**.
 
-##Launch Zza in a browser
+## Launch Zza in a browser
 
 Start your browser with address [**http://localhost:3000**](http://localhost:3000)
 

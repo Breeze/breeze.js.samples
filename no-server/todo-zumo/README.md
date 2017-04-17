@@ -30,7 +30,7 @@ The **Breeze** features of particular interest are:
 
 * Defining Breeze metadata on the client instead (both servers).
 
-#Installation
+# Installation
 
 The breeze scripts are not included directly in this sample. You must copy them into the sample before you run it.
 
@@ -47,7 +47,7 @@ Not a Windows user? It's pretty simple.
 
 >If you want to run the *Web API server* variation, continue with the Web API server installation instructions [below](#WebAPI).
 
-#Run
+# Run
 
 You'll need to launch a web application server to host the client-side assets (HTML, CSS, JavaScript).
 
@@ -79,11 +79,11 @@ Notice that
 * <span style="color:red;">Red error messages</span> (not shown) appear below the blue WIP messages when something goes wrong ... such as trying to save a TodoItem that has no description.
 
 <a name="WebAPI"></a>
-#The Web API Option
+# The Web API Option
 
 If you're on a Windows .NET 4.5 machine you can reconfigure the app to talk to a local ASP.NET Web API service.
 
-##Install the Web API server
+## Install the Web API server
 
 You'll have to build ASP.NET Web API server first before re-targeting the application to that server. Here's how:
 
@@ -91,7 +91,7 @@ You'll have to build ASP.NET Web API server first before re-targeting the applic
 2. Launch the *todo.sln* in Visual Studio
 3. Build it (ctrl-shift-B); it should download the requisite nuget packages during the build process.
 
-##Run with a Web API server
+## Run with a Web API server
 You can run this server in Visual Studio, either with or without debug. But you don't have to. Once built, you can close Visual Studio and you needn't open it again. Instead, do as follows:
 
 1. Open the *launchers* folder.

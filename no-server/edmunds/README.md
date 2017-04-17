@@ -15,7 +15,7 @@ Just some HTML and JavaScript on the client talking to a public 3rd party API th
 
 Here's what you need to know to get it going.
 
-##Prep It
+## Prep It
 
 The breeze scripts are not included directly in this sample. You must copy them into the sample before you run it.
 
@@ -27,7 +27,7 @@ Not a Windows user? It's really simple.
 * Notice that it copies a small number of source files, starting from  <em>..\..\build\libs\</em>,  into the  *scripts*  folder.
 * Do the same manually.
 
-##Run it
+## Run it
 
 Locate the index.html file. Double-click it. The app loads in your default browser.
 
