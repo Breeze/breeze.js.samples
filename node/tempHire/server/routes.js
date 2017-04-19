@@ -411,7 +411,7 @@
                 promises.push(model.bulkCreate(context[k]));
             });
 
-            return promises;
+            return Promise.all(promises);
 
             function newStaffingResource(first, middle, last, summary) {
                 return {
